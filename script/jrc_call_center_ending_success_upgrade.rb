@@ -74,6 +74,7 @@ class JrcContactCenter::SyntheticEndingExecutionUpgrade
   def verify_schema_stage!(installed:)
     raise 'Committed success upgrade baseline required' if ApplicationRecord.connection.transaction_open?
     raise 'Unexpected success installation stage' unless ApplicationRecord.connection.table_exists?(TABLE) == installed
+
     tables = %i[jrc_contact_center_ending_action_readinesses jrc_contact_center_ending_action_origins]
     raise 'Native M18 readiness and origin schemas required' unless tables.all? { |table| ApplicationRecord.connection.table_exists?(table) }
   end

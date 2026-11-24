@@ -29,15 +29,14 @@ class JrcContactCenter::EndingActions::ExecuteProjectTask
     # authority. Closed/deleted targets are history, not a reason to recreate.
     JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: member).authorize_reference!(parameters)
     scope = JrcContactCenter::EndingActionExecution.where(account: @account, origin: origin, rule_code: @rule_code,
-                                                         destination_kind: 'project_task')
+                                                          destination_kind: 'project_task')
     previous = scope.first
     previous || create_effect!(scope, member, readiness, parameters, trigger!(origin, rule))
   end
 
   def trigger!(origin, rule)
-    unless rule.fetch('execution_mode') == 'automatic'
-      raise JrcContactCenter::OperationError, 'ending_action_requires_agent_confirmation'
-    end
+    raise JrcContactCenter::OperationError, 'ending_action_requires_agent_confirmation' unless rule.fetch('execution_mode') == 'automatic'
+
     trigger = JrcContactCenter::EndingActions::NativeTrigger.new(origin: origin).call(rule)
     raise JrcContactCenter::OperationError, 'ending_action_trigger_pending' unless trigger
 

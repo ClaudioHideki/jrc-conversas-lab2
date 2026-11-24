@@ -190,7 +190,7 @@
     {
       "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
       "state": "implementado_na_candidata_sem_validacao_nativa",
-      "current_sha256": "0e17c411a9dce7b9d6b98c33e661d8c834b625e98dd296d4c941d34944c9210c"
+      "current_sha256": "df19d36560c9e2c5abae23e0b27c71642d950e4329cb4122c0d22c5b3ffa7519"
     }
   ],
   "planned_not_present": [],
@@ -3032,21 +3032,23 @@
     "status": "implemented_internal_projects_executor_awaiting_native_validation",
     "source_sha256": {
       "script/jrc_call_center_ending_execution_schema_probe.rb": "ead30e7314384240aa84870d17e6b04eac49eca0ba976ff4920d7128b4c7c458",
-      "script/jrc_call_center_ending_success_upgrade.rb": "b981304d74c281f850593ba63d052f061a1698324ea8f16323b821c28bbdbbfc",
+      "script/jrc_call_center_ending_success_upgrade.rb": "c64a0702bd74aa0d0089032dc2667b24f4ab3353c096b187cd4107ae892e5911",
       "script/validate_cc_access_migration.mjs": "0d46b0c1e0ad1640296300b07f470a134118cb7e7fa087ef019291bdb8d4fcd3",
       "script/validate_cc_ending_execution_admission.test.mjs": "335736f3f72bd10218545f68556c941357fbb4e9212ec0ee00b3fc7941706b86",
-      "script/validate_cc_ending_execution_migration.mjs": "ee930638b2085b50961e88bc26b22dff99cdf739de22ec3471c3628b7d9f4b43",
+      "script/validate_cc_ending_execution_migration.mjs": "ab560f660a75b1b48b88e5c6deb348de72fbfa1211f97b6f09cc19e29252e826",
       "script/validate_cc_ending_execution_migration.test.mjs": "897904cd3a6a96c8a568cd73d2149cd56362ee9969621ff87185d71894c44bb3",
       "app/models/jrc_contact_center/ending_action_execution.rb": "01fa3de550844bca8675eefb406b66db9b771f62b7abaa2e7ce9a404fe5791a4",
-      "app/services/jrc_contact_center/ending_actions/execute_project_task.rb": "0e17c411a9dce7b9d6b98c33e661d8c834b625e98dd296d4c941d34944c9210c",
+      "app/services/jrc_contact_center/ending_actions/execute_project_task.rb": "df19d36560c9e2c5abae23e0b27c71642d950e4329cb4122c0d22c5b3ffa7519",
       "db/functions/20261124000000_contact_center_ending_executions.sql": "18f93d4daf3cd6210ca57a914787baf164867edb41f186c35169f167981bf675",
-      "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb": "9caa7bfad60f9da1afee9a57c32a8d0f0c84f644c051401772d986d083499585",
+      "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb": "062490f3b3f1e9485b0594c9d68980c84a2dd5a2cc580bb9537e02375d24937e",
       "lib/jrc_contact_center/ending_action_execution_schema_receipt.rb": "28ffc5a421d7060f0aa0c1d916e97f4e4f0d7f09eed000ddbd2142727d4d8e16",
-      "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": "258fa4c2c8954bab9ba786f0a0268a85a876bcfb1f03d6a706061a6cef422065",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": "93a0ec38a5123a7a52e8a63a0ac7318abaa07c56850895d9e31dca2e78128d6d",
       "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": "a11681713da8ecd04300b458fc765693fee52eff47489a269fb98cb0c90168af",
       "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": "40ba73172522654661f2e8da5e8a5a153b6572f61d10c037b194387fc37cbba9",
-      ".github/workflows/call-center-administration.yml": "706f0c6d93e0fb623cfdc2d77be66495bce09953f92e848d6f3659e86f04ed09",
-      "spec/support/contact_center_ending_origin_schema_dependencies.rb": "7e3502b546af98b2c00f7056fc80215bce0af81e1789ff17ae7f8d698c688781"
+      ".github/workflows/call-center-administration.yml": "b6c5fbdde64707321e2d37d7d56dc48b01c5ea86d537b386513aa2a5c3171047",
+      "spec/support/contact_center_ending_origin_schema_dependencies.rb": "7e3502b546af98b2c00f7056fc80215bce0af81e1789ff17ae7f8d698c688781",
+      "script/jrc_call_center_ending_automation_seed.rb": "301ed75008fb7465fc8c56b0b98a7d61a1fd5f8653d4cb83b8eb2bfab8853c85",
+      "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "3600a5fefb5058d814bc28b3167f378b8807a30c285685a2a0a30eb4b2729a39"
     },
     "native_cases_prepared": {
       "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": 17,
@@ -3074,11 +3076,12 @@
       "classification": "private_static_ci_draft_not_published_or_executed",
       "parent_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
       "parent_workflow_sha256": "f950f4bbf35a9a3696640ae5e7e1b6a31d92d36e85a089f9f750264ffa8936ae",
-      "candidate_workflow_sha256": "706f0c6d93e0fb623cfdc2d77be66495bce09953f92e848d6f3659e86f04ed09",
+      "candidate_workflow_sha256": "b6c5fbdde64707321e2d37d7d56dc48b01c5ea86d537b386513aa2a5c3171047",
       "additive_patches": 12,
       "every_old_gate_restored_exactly": true,
       "native_cases_prepared": 23,
-      "native_cases_executed": 0
+      "native_cases_executed": 0,
+      "additional_assertions": "Two strict native assignee assertions in the same four real editor flows; no old assertions removed."
     },
     "remaining": [
       "Native execution and concurrency acceptance of this candidate",
@@ -3093,6 +3096,267 @@
     "no_automatic_grants": true,
     "automatic_dispatch_enabled": false,
     "whole_figure10_accepted": false,
-    "whole_part1_complete": false
+    "whole_part1_complete": false,
+    "last_failed_checkpoint": "e3ef9512342ca87a55e1784e531e6bf65391b9ef",
+    "lint_correction": {
+      "failed_sha": "e3ef9512342ca87a55e1784e531e6bf65391b9ef",
+      "failed_run": 45323043739,
+      "early_artifact": 14888502520,
+      "early_artifact_sha256": "251502e0d3441e8f9efdbd8baa9a7f5b0087d5e16bc7a07ad452c8e0b7841c0d",
+      "offenses": [
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+          "cop": "Layout/ArgumentAlignment",
+          "line": 32
+        },
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+          "cop": "Layout/HashAlignment",
+          "line": 32
+        },
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+          "cop": "Style/IfUnlessModifier",
+          "line": 38
+        },
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+          "cop": "Layout/EmptyLineAfterGuardClause",
+          "line": 40
+        },
+        {
+          "path": "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb",
+          "cop": "Rails/CreateTableWithTimestamps",
+          "line": 43
+        },
+        {
+          "path": "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb",
+          "cop": "Layout/LineLength",
+          "line": 61
+        },
+        {
+          "path": "script/jrc_call_center_ending_success_upgrade.rb",
+          "cop": "Layout/EmptyLineAfterGuardClause",
+          "line": 76
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "RSpec/ScatteredSetup",
+          "line": 9
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "RSpec/ScatteredSetup",
+          "line": 18
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "Layout/ArgumentAlignment",
+          "line": 24
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "Layout/HashAlignment",
+          "line": 24
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "Layout/ArgumentAlignment",
+          "line": 25
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "Layout/HashAlignment",
+          "line": 25
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "Layout/ArgumentAlignment",
+          "line": 111
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "Layout/HashAlignment",
+          "line": 111
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "Layout/LineLength",
+          "line": 259
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+          "cop": "Performance/TimesMap",
+          "line": 280
+        }
+      ],
+      "native_scenarios_ran": 0,
+      "native_cases_still_pending": 23,
+      "fixes": [
+        "Exact argument/hash alignment; modifier guard and guard spacing.",
+        "Express created_at in its own datetime call, preserving the exact immutable16-column schema without updated_at.",
+        "Run the environment guard in around before shared per-example fixture writes; retain explicit activation before each example.",
+        "Split only long statements and use Array.new(2) without reducing the two real workers/results."
+      ],
+      "uninstalled_m19_migration_before": "9caa7bfad60f9da1afee9a57c32a8d0f0c84f644c051401772d986d083499585",
+      "uninstalled_m19_migration_after": "062490f3b3f1e9485b0594c9d68980c84a2dd5a2cc580bb9537e02375d24937e",
+      "historical_m1_m18_and_m19_SQL_and_receipt_unchanged": true,
+      "tests_or_lint_configuration_changed": false,
+      "native_acceptance": false,
+      "final_artifact": 14889226971,
+      "final_artifact_sha256": "89f3540eba2ec1d9cd3c59787f0f14dcd6bd61f8e880d1e2e9d3785b2f35797c",
+      "same_17_offenses_confirmed_in_incremental_gate": true,
+      "native_examples_run": 0,
+      "all_17_native_scenario_descriptions_preserved": true,
+      "source_gate_cases_rechecked": 73,
+      "separate_assignee_browser_checks": "Same four real browser flows now select and reload the authorized native project owner; no task/effect or new grant is created."
+    },
+    "dedicated_native_assignee_browser_candidate": {
+      "parent": "e3ef9512342ca87a55e1784e531e6bf65391b9ef",
+      "classification": "private_browser_candidate_not_published_or_executed",
+      "parent_sources": {
+        "script/jrc_call_center_ending_automation_seed.rb": "abf16da52886070401f71fc9d2e76112113c6562ac831a3e625c4b81161603a4",
+        "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "fa2cef6b0b128dec38548015a00ef509bd1ff6a71b36c03a1844a43a6039f61b"
+      },
+      "candidate_sources": {
+        "script/jrc_call_center_ending_automation_seed.rb": "301ed75008fb7465fc8c56b0b98a7d61a1fd5f8653d4cb83b8eb2bfab8853c85",
+        "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "3600a5fefb5058d814bc28b3167f378b8807a30c285685a2a0a30eb4b2729a39"
+      },
+      "actual_browser_cases_run": 0,
+      "reuses_native_project_members_and_permission": true,
+      "no_new_grants_or_production_data": true,
+      "existing_editor_flow_count_unchanged": 4,
+      "native_execution_not_claimed": true
+    }
+  },
+  "native_projects_success_lint_followup": {
+    "failed_sha": "e3ef9512342ca87a55e1784e531e6bf65391b9ef",
+    "failed_run": 45323043739,
+    "early_artifact": 14888502520,
+    "early_artifact_sha256": "251502e0d3441e8f9efdbd8baa9a7f5b0087d5e16bc7a07ad452c8e0b7841c0d",
+    "offenses": [
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 32
+      },
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 32
+      },
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+        "cop": "Style/IfUnlessModifier",
+        "line": 38
+      },
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+        "cop": "Layout/EmptyLineAfterGuardClause",
+        "line": 40
+      },
+      {
+        "path": "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb",
+        "cop": "Rails/CreateTableWithTimestamps",
+        "line": 43
+      },
+      {
+        "path": "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb",
+        "cop": "Layout/LineLength",
+        "line": 61
+      },
+      {
+        "path": "script/jrc_call_center_ending_success_upgrade.rb",
+        "cop": "Layout/EmptyLineAfterGuardClause",
+        "line": 76
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "RSpec/ScatteredSetup",
+        "line": 9
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "RSpec/ScatteredSetup",
+        "line": 18
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 24
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 24
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 25
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 25
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 111
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 111
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "Layout/LineLength",
+        "line": 259
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+        "cop": "Performance/TimesMap",
+        "line": 280
+      }
+    ],
+    "native_scenarios_ran": 0,
+    "native_cases_still_pending": 23,
+    "fixes": [
+      "Exact argument/hash alignment; modifier guard and guard spacing.",
+      "Express created_at in its own datetime call, preserving the exact immutable16-column schema without updated_at.",
+      "Run the environment guard in around before shared per-example fixture writes; retain explicit activation before each example.",
+      "Split only long statements and use Array.new(2) without reducing the two real workers/results."
+    ],
+    "uninstalled_m19_migration_before": "9caa7bfad60f9da1afee9a57c32a8d0f0c84f644c051401772d986d083499585",
+    "uninstalled_m19_migration_after": "062490f3b3f1e9485b0594c9d68980c84a2dd5a2cc580bb9537e02375d24937e",
+    "historical_m1_m18_and_m19_SQL_and_receipt_unchanged": true,
+    "tests_or_lint_configuration_changed": false,
+    "native_acceptance": false,
+    "final_artifact": 14889226971,
+    "final_artifact_sha256": "89f3540eba2ec1d9cd3c59787f0f14dcd6bd61f8e880d1e2e9d3785b2f35797c",
+    "same_17_offenses_confirmed_in_incremental_gate": true,
+    "native_examples_run": 0,
+    "all_17_native_scenario_descriptions_preserved": true,
+    "source_gate_cases_rechecked": 73,
+    "separate_assignee_browser_checks": "Same four real browser flows now select and reload the authorized native project owner; no task/effect or new grant is created."
+  },
+  "dedicated_native_project_assignee_browser_pending": {
+    "parent": "e3ef9512342ca87a55e1784e531e6bf65391b9ef",
+    "classification": "private_browser_candidate_not_published_or_executed",
+    "parent_sources": {
+      "script/jrc_call_center_ending_automation_seed.rb": "abf16da52886070401f71fc9d2e76112113c6562ac831a3e625c4b81161603a4",
+      "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "fa2cef6b0b128dec38548015a00ef509bd1ff6a71b36c03a1844a43a6039f61b"
+    },
+    "candidate_sources": {
+      "script/jrc_call_center_ending_automation_seed.rb": "301ed75008fb7465fc8c56b0b98a7d61a1fd5f8653d4cb83b8eb2bfab8853c85",
+      "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "3600a5fefb5058d814bc28b3167f378b8807a30c285685a2a0a30eb4b2729a39"
+    },
+    "actual_browser_cases_run": 0,
+    "reuses_native_project_members_and_permission": true,
+    "no_new_grants_or_production_data": true,
+    "existing_editor_flow_count_unchanged": 4,
+    "native_execution_not_claimed": true
   }
 }

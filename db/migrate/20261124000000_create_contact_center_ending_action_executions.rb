@@ -45,7 +45,8 @@ class CreateContactCenterEndingActionExecutions < ActiveRecord::Migration[7.1]
       table.string :rule_code, null: false, limit: 100
       table.string :destination_kind, :trigger_kind, null: false, limit: 50
       table.uuid :request_key, null: false
-      table.datetime :triggered_at, :created_at, null: false
+      table.datetime :triggered_at, null: false
+      table.datetime :created_at, null: false
       table.string :integrity_sha256, null: false, limit: 64
     end
     add_index TABLE, [:account_id, :origin_id, :rule_code, :destination_kind], unique: true, name: 'cc_ending_success_once'
@@ -58,7 +59,8 @@ class CreateContactCenterEndingActionExecutions < ActiveRecord::Migration[7.1]
     add_foreign_key TABLE, :jrc_contact_center_ending_action_origins,
                     column: [:origin_id, :account_id], primary_key: [:id, :account_id], deferrable: :deferred, name: 'cc_ending_success_origin_fk'
     add_foreign_key TABLE, :jrc_contact_center_ending_action_readinesses,
-                    column: [:readiness_id, :account_id], primary_key: [:id, :account_id], deferrable: :deferred, name: 'cc_ending_success_readiness_fk'
+                    column: [:readiness_id, :account_id], primary_key: [:id, :account_id],
+                    deferrable: :deferred, name: 'cc_ending_success_readiness_fk'
   end
 
   def create_constraints

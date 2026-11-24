@@ -33,6 +33,7 @@ class JrcContactCenter::SyntheticEndingAutomationSeed
     project = JrcProjects::Projects::Create.call(account: @account, actor: @admin.user,
                                                  attributes: { name: 'SYNTHETIC ending automation project' }, idempotency_key: SecureRandom.uuid)
     { automation_project_id: project.id.to_s, automation_project_name: project.name,
-      automation_column_id: project.board_columns.find_by!(status_key: 'backlog').id.to_s, automation_reason: reason.fetch(:code) }
+      automation_column_id: project.board_columns.find_by!(status_key: 'backlog').id.to_s,
+      automation_assignee_id: @admin.user_id.to_s, automation_reason: reason.fetch(:code) }
   end
 end

@@ -104,6 +104,9 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
     .selectOption(target.automation_column_id);
   await task.locator('[data-ending-task-priority]').selectOption('medium');
   await task.locator('[data-ending-task-due]').fill('0');
+  await task
+    .locator('[data-ending-task-assignee]')
+    .selectOption(target.automation_assignee_id);
   await task.locator('[data-ending-project]').scrollIntoViewIfNeeded();
   const parametersImage = `.codex/call-center-native-e2e/${info.project.name}-ending-automation-project.png`;
   await page.screenshot({ path: parametersImage });
@@ -165,6 +168,19 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   expect(original.status()).toBe(200);
   const { items, revision } = await original.json();
   const current = items[0];
+  expect(current.actions[0].parameters.attributes.assignee_id).toBe(
+    target.automation_assignee_id
+  );
+  await editor
+    .locator('[data-ending-configure-destination="project_task"]')
+    .click();
+  await expect(
+    editor.locator('[data-ending-task-assignee]')
+  ).toHaveValue(target.automation_assignee_id);
+  await editor
+    .locator('[data-ending-project-configuration]')
+    .getByRole('button', { name: 'Voltar', exact: true })
+    .click();
   const { scope, ...input } = current;
   const concurrent = await page.request.post(endpoint, {
     headers: target.administrator,
@@ -252,6 +268,8 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
       account_id: String(target.account_id),
       initial_save: 200,
       persisted_mode: 'agent_confirmation',
+      native_project_assignee_selected_and_reloaded: true,
+      native_project_assignee_id: target.automation_assignee_id,
       stale_status: 409,
       reviewed_save: 200,
       denied_status: operator.status(),

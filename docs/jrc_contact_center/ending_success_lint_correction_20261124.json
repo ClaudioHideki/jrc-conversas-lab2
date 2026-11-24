@@ -1,0 +1,113 @@
+{
+  "failed_sha": "e3ef9512342ca87a55e1784e531e6bf65391b9ef",
+  "failed_run": 45323043739,
+  "early_artifact": 14888502520,
+  "early_artifact_sha256": "251502e0d3441e8f9efdbd8baa9a7f5b0087d5e16bc7a07ad452c8e0b7841c0d",
+  "offenses": [
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+      "cop": "Layout/ArgumentAlignment",
+      "line": 32
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 32
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+      "cop": "Style/IfUnlessModifier",
+      "line": 38
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+      "cop": "Layout/EmptyLineAfterGuardClause",
+      "line": 40
+    },
+    {
+      "path": "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb",
+      "cop": "Rails/CreateTableWithTimestamps",
+      "line": 43
+    },
+    {
+      "path": "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb",
+      "cop": "Layout/LineLength",
+      "line": 61
+    },
+    {
+      "path": "script/jrc_call_center_ending_success_upgrade.rb",
+      "cop": "Layout/EmptyLineAfterGuardClause",
+      "line": 76
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "RSpec/ScatteredSetup",
+      "line": 9
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "RSpec/ScatteredSetup",
+      "line": 18
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "Layout/ArgumentAlignment",
+      "line": 24
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 24
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "Layout/ArgumentAlignment",
+      "line": 25
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 25
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "Layout/ArgumentAlignment",
+      "line": 111
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 111
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "Layout/LineLength",
+      "line": 259
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "cop": "Performance/TimesMap",
+      "line": 280
+    }
+  ],
+  "native_scenarios_ran": 0,
+  "native_cases_still_pending": 23,
+  "fixes": [
+    "Exact argument/hash alignment; modifier guard and guard spacing.",
+    "Express created_at in its own datetime call, preserving the exact immutable16-column schema without updated_at.",
+    "Run the environment guard in around before shared per-example fixture writes; retain explicit activation before each example.",
+    "Split only long statements and use Array.new(2) without reducing the two real workers/results."
+  ],
+  "uninstalled_m19_migration_before": "9caa7bfad60f9da1afee9a57c32a8d0f0c84f644c051401772d986d083499585",
+  "uninstalled_m19_migration_after": "062490f3b3f1e9485b0594c9d68980c84a2dd5a2cc580bb9537e02375d24937e",
+  "historical_m1_m18_and_m19_SQL_and_receipt_unchanged": true,
+  "tests_or_lint_configuration_changed": false,
+  "native_acceptance": false,
+  "final_artifact": 14889226971,
+  "final_artifact_sha256": "89f3540eba2ec1d9cd3c59787f0f14dcd6bd61f8e880d1e2e9d3785b2f35797c",
+  "same_17_offenses_confirmed_in_incremental_gate": true,
+  "native_examples_run": 0,
+  "all_17_native_scenario_descriptions_preserved": true,
+  "source_gate_cases_rechecked": 73,
+  "separate_assignee_browser_checks": "Same four real browser flows now select and reload the authorized native project owner; no task/effect or new grant is created."
+}

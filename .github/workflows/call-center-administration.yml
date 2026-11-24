@@ -509,6 +509,8 @@ jobs:
               assert flow['sha'] == os.environ['GITHUB_SHA'] and flow['synthetic'] is True
               assert flow['initial_save'] == flow['reviewed_save'] == 200 and flow['stale_status'] == 409
               assert flow['persisted_mode'] == 'agent_confirmation' and flow['configuration_only'] is True and flow['effects_executed'] is False
+              assert flow['native_project_assignee_selected_and_reloaded'] is True
+              assert str(flow['native_project_assignee_id']).isdigit() and int(flow['native_project_assignee_id']) > 0
               assert flow['denied_status'] in [401, 403] and flow['scoped_status'] in [401, 403] and flow['foreign_status'] in [401, 403, 404]
               assert flow['theme_asserted_in_browser'] and flow['actual_dark_theme'] == flow['project'].endswith('dark')
               assert flow['contrast']['ratio'] >= 4.5 and len(flow['screenshots']) == 1 and Path(flow['screenshots'][0]).is_file()

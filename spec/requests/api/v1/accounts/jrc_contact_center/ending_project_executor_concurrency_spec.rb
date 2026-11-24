@@ -6,11 +6,13 @@ require 'stringio'
 RSpec.describe 'Native ending Projects destination effects and immutable receipts' do
   self.use_transactional_tests = false
 
-  before do
+  around do |example|
     owned = Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
             ApplicationRecord.connection.current_database == 'corporate_gratuity_disposable'
     raise 'Owned disposable ending executor database required' unless owned
     raise 'Committed ending executor fixtures required' if ApplicationRecord.connection.transaction_open?
+
+    example.run
   end
 
   include_context 'with native ending execution original evidence'
@@ -21,8 +23,8 @@ RSpec.describe 'Native ending Projects destination effects and immutable receipt
 
   def activate_execution_rule
     JrcContactCenter::EndingActions::ActivateRule.new(account: account, member: member, rule_code: 'SYNTHETIC_ORIGIN_RULE',
-                                                       request_key: SecureRandom.uuid,
-                                                       expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
+                                                      request_key: SecureRandom.uuid,
+                                                      expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
   end
 
   def revise_execution_rule(changes)
@@ -108,7 +110,7 @@ RSpec.describe 'Native ending Projects destination effects and immutable receipt
     receipt = execute_native_project
     expect(destination_effects).to eq([1, 1, 1])
     expect(receipt).to have_attributes(origin_id: origin.id, version_id: origin.version_id, actor_account_user_id: member.id,
-                                      actor_user_id: actor.id, destination_kind: 'project_task', trigger_kind: 'ending_action_completion')
+                                       actor_user_id: actor.id, destination_kind: 'project_task', trigger_kind: 'ending_action_completion')
     task = JrcProjects::Task.where(account: account).sole
     expect(receipt.target_id).to eq(task.id)
     expect(task).to have_attributes(created_by_id: actor.id, title: 'SYNTHETIC unarmed original evidence')
@@ -256,7 +258,10 @@ RSpec.describe 'Native ending Projects destination effects and immutable receipt
   it 'rolls back a real task and audit when PostgreSQL rejects its receipt, then safely retries' do
     complete_origin_qualification
     connection = ApplicationRecord.connection
-    connection.execute("ALTER TABLE jrc_contact_center_ending_action_executions ADD CONSTRAINT cc_synthetic_receipt_failure CHECK (account_id <> #{account.id})")
+    connection.execute(<<~SQL.squish)
+      ALTER TABLE jrc_contact_center_ending_action_executions ADD CONSTRAINT cc_synthetic_receipt_failure
+        CHECK (account_id <> #{account.id})
+    SQL
     begin
       expect { execute_native_project }.to raise_error(ActiveRecord::StatementInvalid, /cc_synthetic_receipt_failure/)
       expect(destination_effects).to eq([0, 0, 0])
@@ -277,7 +282,7 @@ RSpec.describe 'Native ending Projects destination effects and immutable receipt
         wait_for_executor_lock(state)
       end
     end
-    results = 2.times.map { Timeout.timeout(20) { state[:result].pop } }
+    results = Array.new(2) { Timeout.timeout(20) { state[:result].pop } }
     expect(results).to all(be_a(JrcContactCenter::EndingActionExecution))
     expect(results.map(&:id).uniq.length).to eq(1)
     expect(destination_effects).to eq([1, 1, 1])
