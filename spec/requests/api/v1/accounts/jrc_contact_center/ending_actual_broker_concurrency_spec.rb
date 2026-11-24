@@ -48,6 +48,11 @@ RSpec.describe 'Actual owned Sidekiq ending execution and native authority' do
     ids = queue.map(&:jid)
     raise 'Actual Redis delivery required before worker starts' if ids.empty?
 
+    spawn_owned_worker
+    wait_for_real_worker(ids)
+  end
+
+  def spawn_owned_worker
     broker_state[:log] = File.open("/tmp/jrc-cc-worker-#{broker_nonce}.private", 'wx')
     options = { chdir: Rails.root.to_s, out: broker_state[:log], err: [:child, :out], pgroup: true }
     environment = { 'RAILS_ENV' => 'test', 'JRC_CC_BROKER_NONCE' => broker_nonce,
@@ -55,26 +60,28 @@ RSpec.describe 'Actual owned Sidekiq ending execution and native authority' do
     broker_state[:pid] = Process.spawn(environment, 'bundle', 'exec', 'ruby',
                                        'spec/integration/jrc_contact_center/owned_ending_worker_boot.rb',
                                        '-e', 'test', '-q', broker_state.fetch(:queue), '-c', '2', **options)
-    wait_for_real_worker(ids)
   end
 
   def wait_for_real_worker(ids)
     client = Redis.new(url: ENV.fetch('REDIS_URL'))
     Timeout.timeout(90) do
       loop do
-        if Process.waitpid(broker_state.fetch(:pid), Process::WNOHANG)
-          broker_state[:pid] = nil
-          raise 'Owned worker exited before receipts'
-        end
+        require_owned_worker_alive!
         raise 'Unexpected retry in owned worker' if Sidekiq::RetrySet.new.any? { |row| row.queue == broker_state.fetch(:queue) }
 
         rows = client.hgetall("jrc_cc_broker:#{broker_nonce}:acks")
-        if rows.keys.sort == ids.sort
-          return rows.values.map { |raw| JSON.parse(raw) }
-        end
+        return rows.values.map { |raw| JSON.parse(raw) } if rows.keys.sort == ids.sort
+
         sleep 0.1
       end
     end
+  end
+
+  def require_owned_worker_alive!
+    return unless Process.waitpid(broker_state.fetch(:pid), Process::WNOHANG)
+
+    broker_state[:pid] = nil
+    raise 'Owned worker exited before receipts'
   end
 
   def stop_owned_worker
@@ -101,11 +108,12 @@ RSpec.describe 'Actual owned Sidekiq ending execution and native authority' do
 
   def verify_worker_receipts(rows, source)
     boot = Rails.root.join('spec/integration/jrc_contact_center/owned_ending_worker_boot.rb')
-    rows.each do |row|
-      expect(row).to include('account_id' => account.id, 'qualification_id' => source.source_qualification_id,
-                            'worker_pid' => broker_state.fetch(:pid), 'source_sha' => ENV.fetch('GITHUB_SHA'),
-                            'witness_sha256' => Digest::SHA256.file(boot).hexdigest)
-    end
+    expected = {
+      'account_id' => account.id, 'qualification_id' => source.source_qualification_id,
+      'worker_pid' => broker_state.fetch(:pid), 'source_sha' => ENV.fetch('GITHUB_SHA'),
+      'witness_sha256' => Digest::SHA256.file(boot).hexdigest
+    }
+    expect(rows).to all(include(expected))
   end
 
   def preserve_broker_proof(rows, source, mode)
@@ -119,7 +127,8 @@ RSpec.describe 'Actual owned Sidekiq ending execution and native authority' do
     raise 'Unexpected producer Redis database' unless redis_database == 15
 
     proof = broker_identity(rows, source, mode).merge(broker_business_observations)
-    proof.merge!(actual_database: ApplicationRecord.connection.current_database, actual_redis_database: redis_database)
+    proof[:actual_database] = ApplicationRecord.connection.current_database
+    proof[:actual_redis_database] = redis_database
     File.write("/tmp/call-center-ending-broker-#{broker_nonce}.json", JSON.pretty_generate(proof))
   end
 

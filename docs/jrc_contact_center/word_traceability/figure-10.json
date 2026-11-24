@@ -6058,5 +6058,13 @@
     "new_native_cases_prepared_not_executed": 3,
     "real_broker_accepted": false,
     "whole_figure10_or_Part1_accepted": false
+  },
+  "actual_owned_broker_lint_correction": {
+    "parent": "fe5042bf6415a632be0525f76c3a45aadbc2ab23",
+    "failed_run": 45506197668,
+    "new_offenses_identified": 15,
+    "document": "docs/jrc_contact_center/ending_actual_broker_lint_correction_20261124.json",
+    "document_sha256": "b655bb967777af04e6f3e415b3117cbc1cb6e23a6baf10c351f1f88aede0d9f9",
+    "native_broker_accepted": false
   }
 }

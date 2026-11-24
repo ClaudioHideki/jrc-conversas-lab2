@@ -3,8 +3,8 @@
   "status": "actual_broker_verification_prepared_not_executed",
   "accepted_history_acceptance_sha256": "b3d3db4244f0f0141eb2bddf377f9a4fad4222a24199b7dfa8b47a218edc5586",
   "source_sha256": {
-    "spec/integration/jrc_contact_center/owned_ending_worker_boot.rb": "52fba99436d72e2ee90da231503faf7af01912932a836dba9cb65a15dee970a8",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb": "14814d27118b68ef0dace664b9c0b5fe5e551c4c6efc64f77d32cccbd9dfca2f",
+    "spec/integration/jrc_contact_center/owned_ending_worker_boot.rb": "346add63c54a1b657807a0547f7d0a8e3df3600f430953e18929e3844a1e2201",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb": "f67bc3bf10e0dcb2b21c57fee8f61e2807ad4bc65482c58323dd0a28e7f992e6",
     ".github/workflows/call-center-administration.yml": "3de3cda6067f077b8078e53fef0113ba3e32337141a8a4560e6f98e0533edca8",
     "script/jrc_call_center_ending_broker_check.py": "9873de41183339136bd75a1bed5ded32d08a804ff60dab20f6c35b358ed94f53"
   },
@@ -28,5 +28,30 @@
   },
   "no_Windows_process_or_protected_environment_operation": true,
   "whole_figure10_accepted": false,
-  "whole_part1_accepted": false
+  "whole_part1_accepted": false,
+  "lint_correction_after_first_native_attempt": {
+    "parent": "fe5042bf6415a632be0525f76c3a45aadbc2ab23",
+    "failed_run": 45506197668,
+    "failed_job": 138841928028,
+    "diagnostic_artifact": 14975322113,
+    "artifact_sha256": "f6d53b573ea7832203e0b39b8d3aa3b86c04f0294a5664adb214b2cb998d1dc1",
+    "new_offenses_identified": 15,
+    "source_sha256": {
+      "spec/integration/jrc_contact_center/owned_ending_worker_boot.rb": {
+        "before_sha256": "52fba99436d72e2ee90da231503faf7af01912932a836dba9cb65a15dee970a8",
+        "after_sha256": "346add63c54a1b657807a0547f7d0a8e3df3600f430953e18929e3844a1e2201"
+      },
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb": {
+        "before_sha256": "14814d27118b68ef0dace664b9c0b5fe5e551c4c6efc64f77d32cccbd9dfca2f",
+        "after_sha256": "f67bc3bf10e0dcb2b21c57fee8f61e2807ad4bc65482c58323dd0a28e7f992e6"
+      }
+    },
+    "correction_scope": "Extract test process setup and argument validation; preserve all3native examples, typed arguments, ownership, timeouts, exact receipts and egress restrictions.",
+    "all_three_example_bodies_byte_identical": true,
+    "all_worker_startup_guards_byte_identical_except_style": true,
+    "patch_sha256": "c5e7fec951f6caaed113c9a29bcf82f9f4557369f5b6a6c2748edd3a497207aa",
+    "application_model_policy_migration_or_workflow_changed": false,
+    "new_lint_or_native_execution_confirmed": false,
+    "whole_figure10_or_Part1_accepted": false
+  }
 }

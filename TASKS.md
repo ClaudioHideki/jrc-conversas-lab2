@@ -1027,3 +1027,5 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - M22/5040861f/CI45493347951: histórico operacional somente leitura validado; 3217Rails distintos,1854Vue,272Chrome e632PNG verificados. Manual/retry,CRM/ServiceDesk,broker real eParte1 permanecem abertos.
 
 - ApósM22/5040861f aceito: preparadoM23 com3cenários reais deRedis/Sidekiq/PostgreSQL emrecursos próprios do runner; ainda não executados. Sem mudança funcional,grants oumigrations. Broker,PABX,CRM/ServiceDesk eParte1 ainda sem aceite integral.
+
+- M23:CI45506197668 bloqueada por15infrações novas em2arquivos de teste do worker; preparada correção por extração de métodos/alinhamento, mantendo3exemplos e todasas proteções. Novo lint/broker nativo ainda não aprovado. HistóricoM22 preservado; Parte1aberta.

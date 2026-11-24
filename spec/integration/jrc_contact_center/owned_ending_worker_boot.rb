@@ -23,12 +23,27 @@ class SyntheticEndingWorkerWitness
   def call(_worker, job, queue)
     raise 'Unexpected queue in owned worker' unless queue == ENV.fetch('JRC_CC_BROKER_QUEUE')
 
-    arguments = job.dig('args', 0, 'arguments')
-    valid = job.dig('args', 0, 'job_class') == 'JrcContactCenter::EndingActionsJob' && arguments.is_a?(Array) &&
-            arguments.length == 2 && arguments.all? { |id| id.is_a?(Integer) && id.positive? }
-    raise 'Unexpected job in owned worker' unless valid && arguments.first.to_s == ENV.fetch('JRC_CC_BROKER_ACCOUNT_ID')
-
+    arguments = arguments_for!(job)
     yield
+    write_worker_receipt(job, arguments)
+  end
+
+  private
+
+  def arguments_for!(job)
+    arguments = job.dig('args', 0, 'arguments')
+    valid = expected_job?(job, arguments) && arguments.first.to_s == ENV.fetch('JRC_CC_BROKER_ACCOUNT_ID')
+    raise 'Unexpected job in owned worker' unless valid
+
+    arguments
+  end
+
+  def expected_job?(job, arguments)
+    job.dig('args', 0, 'job_class') == 'JrcContactCenter::EndingActionsJob' && arguments.is_a?(Array) &&
+      arguments.length == 2 && arguments.all? { |id| id.is_a?(Integer) && id.positive? }
+  end
+
+  def write_worker_receipt(job, arguments)
     data = { jid: job.fetch('jid'), account_id: arguments.first, qualification_id: arguments.last,
              worker_pid: Process.pid, source_sha: ENV.fetch('GITHUB_SHA'),
              witness_sha256: Digest::SHA256.file(__FILE__).hexdigest }
@@ -43,10 +58,11 @@ Sidekiq.configure_server do |config|
     raise 'Unexpected worker database' unless Rails.env.test? && database.configuration_hash[:host] == '127.0.0.1' &&
                                               ApplicationRecord.connection.current_database == 'corporate_gratuity_disposable'
     raise 'Unexpected worker queue' unless config.queues.uniq == [ENV.fetch('JRC_CC_BROKER_QUEUE')]
+
     workspace = File.realpath(ENV.fetch('GITHUB_WORKSPACE'))
     raise 'Unexpected worker source directory' unless Rails.root.realpath.to_s == workspace
 
-    head = IO.popen(['git', 'rev-parse', 'HEAD'], &:read).strip
+    head = IO.popen(%w[git rev-parse HEAD], &:read).strip
     raise 'Unexpected worker source revision' unless head == ENV.fetch('GITHUB_SHA') && head.match?(/\A[0-9a-f]{40}\z/)
 
     marker = Account.find(ENV.fetch('JRC_CC_BROKER_ACCOUNT_ID')).custom_attributes['jrc_cc_owned_broker_nonce']
