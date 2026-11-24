@@ -7,7 +7,7 @@
     "app/controllers/api/v1/accounts/jrc_contact_center/ending_attempts_controller.rb": "505cca727e3aeb5f31922a11897230592a3852223090048b2e6a3987355108bd",
     "app/javascript/dashboard/api/jrcContactCenter.js": "946b4e40644e1d8a3ca20590b9ebde0eabe9434dfcbca1cef323381db9e5e6df",
     "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "a9b20f1eaf8e887890918eb63c49a6535ea49a894248b00b9c64701428847466",
-    "app/javascript/dashboard/routes/dashboard/inbox/EndingAttemptHistory.vue": "9dc940c3af12138cdd390a07fc32cd7270254af2ad6370911e8529a6a1847dec",
+    "app/javascript/dashboard/routes/dashboard/inbox/EndingAttemptHistory.vue": "4a9c52a24a0da664bb225800bf8111202343a863d998567846ac42686da40d59",
     "app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue": "7db525b9e2f1065223669b6d88a8a15d2a0fe01b91fafbce46e5221b3823f894",
     "app/javascript/dashboard/routes/dashboard/inbox/QualificationHistory.vue": "245abe9e3896593966bbbc9923b1338985b5916358ab5d2f7d5c8aae39a3e0e9",
     "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.js": "fdca74bc2af5fa96210cc3e37db4d8d38dad2c6fead77289d912c78b4fb959b7",
@@ -22,7 +22,7 @@
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb": "5d18f43f6a2625d64d9060c5a5638f30aad6806366797194bfe6630f17284a76",
     "tests/playwright/call-center-native.config.ts": "c5922f3ce27fab6f2fa6c42d16ae05b7b7dc047c5f43d19148f374648c27ee97",
     "tests/playwright/fixtures/call-center-native/main.js": "9404629cf4ff878c35fffad97b1bee97d6f0bd70aa53a4a2952a648336962a3b",
-    "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.mjs": "826ea4b67dfbd2458eb4edd0e87bd90ecd20d5d355ede7936a00ea3aa2813ffb",
+    "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.mjs": "5286752553cd08a86233f9047e751d3a1cb28378a5bdc0ae3384c2b40ee8c2eb",
     "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts": "4d3bc40e367d44908b6609f8f530f8779d64bb1582e99cc3fe735c6ba7f5a2de",
     "script/jrc_call_center_chrome_counter_test.py": "d4aa44cfbd8622ed7d631f5841fc83254fcf9cabb3f45eaa7585a6263dc76ed4"
   },
@@ -111,5 +111,6 @@
     "product_function_permissions_migrations_SQL_or_test_criteria_changed": false,
     "native_or_Chrome_acceptance": false
   },
-  "frontend_lint_correction": "docs/jrc_contact_center/ending_history_frontend_lint_correction_20261124.json"
+  "frontend_lint_correction": "docs/jrc_contact_center/ending_history_frontend_lint_correction_20261124.json",
+  "light_contrast_correction": "docs/jrc_contact_center/ending_history_light_contrast_correction_20261124.json"
 }

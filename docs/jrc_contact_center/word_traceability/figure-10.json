@@ -360,7 +360,7 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/inbox/EndingAttemptHistory.vue",
       "state": "implementado_pendente_validacao_nativa_historico",
-      "current_sha256": "9dc940c3af12138cdd390a07fc32cd7270254af2ad6370911e8529a6a1847dec"
+      "current_sha256": "4a9c52a24a0da664bb225800bf8111202343a863d998567846ac42686da40d59"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue",
@@ -5591,6 +5591,13 @@
     "native_error_count": 1,
     "rule": "no-plusplus",
     "reference": "docs/jrc_contact_center/ending_history_frontend_lint_correction_20261124.json",
+    "native_or_Chrome_acceptance": false
+  },
+  "history_light_contrast_correction_awaiting_revalidation": {
+    "failed_sha": "a90ab9d41056fa2b44c7a678cda7889072e3b263",
+    "reference": "docs/jrc_contact_center/ending_history_light_contrast_correction_20261124.json",
+    "failed_Chrome": 2,
+    "threshold_unchanged": 4.5,
     "native_or_Chrome_acceptance": false
   }
 }

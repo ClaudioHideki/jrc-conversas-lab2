@@ -1021,3 +1021,5 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - M22/95e10e8d:4infrações nativas de alinhamento corrigidas em3linhas de um spec; tokens/asserções/17cenários preservados. Acrescentado diagnóstico inicial de histórico; 19Rails/23Vue/272Chrome continuam exigidos. Sem aceite nativo ou visual deste incremento.
 
 - M22/de57c426: Rails3217distintos,Vue1854 e recarga252 passaram; lintRuby618arquivos semnovasinfrações. Únicoerrofrontend no-plusplus corrigido por +=1 seguido dacaptura. O novoSHA exigiráCI e272cenáriosChrome completos; histórico ainda semaceite.
+
+- M22/a90ab9d4:3217Rails e1854Vue passaram;270Chrome passaram e2falharam no contraste claro do estado bloqueado. Correção limitada ao texto amber12 no claro, preservando amber11 noescuro e4,5:1 nos testes. Captura de falha passa a ocorrer antes de fechar a página; todos os gates permanecem obrigatórios.

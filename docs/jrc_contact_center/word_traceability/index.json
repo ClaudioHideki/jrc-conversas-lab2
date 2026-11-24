@@ -3584,5 +3584,12 @@
     "rule": "no-plusplus",
     "reference": "docs/jrc_contact_center/ending_history_frontend_lint_correction_20261124.json",
     "native_or_Chrome_acceptance": false
+  },
+  "history_light_contrast_correction_awaiting_revalidation": {
+    "failed_sha": "a90ab9d41056fa2b44c7a678cda7889072e3b263",
+    "reference": "docs/jrc_contact_center/ending_history_light_contrast_correction_20261124.json",
+    "failed_Chrome": 2,
+    "threshold_unchanged": 4.5,
+    "native_or_Chrome_acceptance": false
   }
 }

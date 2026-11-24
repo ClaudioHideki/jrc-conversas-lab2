@@ -69,7 +69,7 @@ const stateClasses = {
   pending: 'bg-n-blue-2 text-n-blue-11',
   succeeded: 'bg-n-teal-2 text-n-teal-11',
   failed: 'bg-n-ruby-2 text-n-ruby-11',
-  blocked: 'bg-n-amber-2 text-n-amber-11',
+  blocked: 'bg-n-amber-2 text-n-amber-12 dark:text-n-amber-11',
 };
 const taskRoute = row => ({
   name: 'jrc_projects_detail',

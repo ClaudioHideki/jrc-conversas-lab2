@@ -1,0 +1,28 @@
+{
+  "failed_parent": "a90ab9d41056fa2b44c7a678cda7889072e3b263",
+  "run": 45479333665,
+  "job": 138747935995,
+  "artifact": 14966212289,
+  "artifact_sha256": "ce6c35ca9e80b0b04f81f2f7127f72cfb92c8bc715aa3fe880935a4b96926ddb",
+  "failures": [
+    "desktop-light history state contrast",
+    "mobile-light history state contrast"
+  ],
+  "old_blocked_badge_token_ratio_from_exact_source": 4.432952188282118,
+  "new_blocked_badge_token_ratio_from_exact_source": 10.932555437451596,
+  "change": "Only blocked label uses amber12 in light; explicit dark amber11 retains existing dark appearance.",
+  "global_palette_backend_permission_SQL_or_workflow_changed": false,
+  "source_before_sha256": "9dc940c3af12138cdd390a07fc32cd7270254af2ad6370911e8529a6a1847dec",
+  "source_after_sha256": "4a9c52a24a0da664bb225800bf8111202343a863d998567846ac42686da40d59",
+  "browser_before_sha256": "826ea4b67dfbd2458eb4edd0e87bd90ecd20d5d355ede7936a00ea3aa2813ffb",
+  "browser_after_sha256": "5286752553cd08a86233f9047e751d3a1cb28378a5bdc0ae3384c2b40ee8c2eb",
+  "failure_diagnostics": "Keep full measured contrast in assertion error and capture the actual page before finally closes it; rethrow original error.",
+  "threshold_4_5_or_coverage_reduced": false,
+  "original_failed_PNGs_opened": 2,
+  "original_failed_PNGs_blank_not_visual_acceptance": true,
+  "previous_Rails_passed_distinct": 3217,
+  "previous_Vue_passed": 1854,
+  "previous_Chrome_passed": 270,
+  "new_SHA_requires_same_full_native_and_272_Chrome_gates": true,
+  "new_candidate_native_or_visual_acceptance": false
+}

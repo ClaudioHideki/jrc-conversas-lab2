@@ -105,7 +105,10 @@ export async function verifyEndingAttemptHistory(parent, info, target) {
       stateContrast.push(...await state.evaluate(measureTextContrast));
     }
     expect(stateContrast).toHaveLength(4);
-    expect(stateContrast.every(row => row.ratio >= 4.5)).toBe(true);
+    expect(
+      stateContrast.every(row => row.ratio >= 4.5),
+      `Actual native history state contrast: ${JSON.stringify(stateContrast)}`
+    ).toBe(true);
     await expect(panel.locator('[data-ending-attempt-target]')).toHaveCount(1);
     await capture('independent-outcomes');
     panel = await showHistory();
@@ -143,6 +146,11 @@ export async function verifyEndingAttemptHistory(parent, info, target) {
         screenshots, whole_figure10_or_Part1_accepted: false,
       }, null, 2)
     );
+  } catch (error) {
+    await page.screenshot({
+      path: `.codex/call-center-native-e2e/${info.project.name}-ending-history-failure-before-close.png`,
+    }).catch(() => null);
+    throw error;
   } finally {
     await page.close();
   }
