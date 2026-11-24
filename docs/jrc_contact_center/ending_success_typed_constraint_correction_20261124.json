@@ -1,0 +1,36 @@
+{
+  "failed_sha": "9d8d1eaed1e865f5a94b9638c3f780c534b21515",
+  "run": 45327908650,
+  "job": 138221833764,
+  "early_artifact": 14889684527,
+  "early_artifact_sha256": "bc6c3c167507ece7a2840db42bd489a92161d699f120c375b89bb591a5982ca6",
+  "confirmed_root_cause": "PostgreSQL deparse/reparse changes the implicit varchar-array-to-text-array coercion of trigger_kind IN (...). The exact receipt correctly detects the different expression tree.",
+  "exact_changed_constraints": [
+    {
+      "name": "cc_ending_success_trigger",
+      "fresh": "CHECK (trigger_kind::text = ANY (ARRAY['ending_reason_confirmation'::character varying, 'ending_action_completion'::character varying]::text[]))",
+      "reload": "CHECK (trigger_kind::text = ANY (ARRAY['ending_reason_confirmation'::character varying::text, 'ending_action_completion'::character varying::text]))"
+    }
+  ],
+  "other_components_byte_hashes_unchanged": true,
+  "correction": "Use an explicitly typed text lhs and ARRAY of text elements. Preserve the same two allowed trigger values and mandatory null rejection; no receipt normalization or restamping.",
+  "unpublished_m19_migration_before": "062490f3b3f1e9485b0594c9d68980c84a2dd5a2cc580bb9537e02375d24937e",
+  "unpublished_m19_migration_after": "55e3105f3c29c29e8b88a14ce179a8edca3084493f63e3a088e075a68a4acd9e",
+  "m1_m18_SQL_function_and_receipt_sources_unchanged": true,
+  "native_regressions_prepared": [
+    "Actual PostgreSQL insertion accepts both permitted values and rejects null/empty/unknown/case/whitespace variants using the actual installed constraint in a rollbackable owned temp table.",
+    "Actual PostgreSQL deparse/reparse retains the exact constraint text; migration reexecution leaves the existing receipt unchanged."
+  ],
+  "schema_cases_prepared": 7,
+  "all_candidate_native_cases_prepared": 25,
+  "all_candidate_native_cases_passed": false,
+  "global_schema_dumper_changed": false,
+  "gates_weakened": false,
+  "production_or_existing_data_changed": false,
+  "final_diagnostic_artifact": 14890863824,
+  "final_diagnostic_artifact_sha256": "ac19e111fa0865fb89d105e193fe89aeb5c5185b94d4d083e08208dc70382dee",
+  "final_sanitized_log_sha256": "7f4e38c831f088ab86c4e76f3ea1542d1d81b5c09b79144290da2ab02ecc6552",
+  "all_new_lint_offenses_on_diagnostic_sha": 0,
+  "source_gate_static_cases_rechecked": 73,
+  "collector_static_cases_rechecked": 9
+}

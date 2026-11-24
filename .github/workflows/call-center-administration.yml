@@ -309,7 +309,7 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-ending-success-preflight.json').read_text())
-          assert report['summary']['example_count'] == len(report['examples']) == 5
+          assert report['summary']['example_count'] == len(report['examples']) == 7
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert all(row['status'] == 'passed' for row in report['examples'])
           PY
@@ -572,7 +572,7 @@ jobs:
                   assert hashlib.sha256(encoded).hexdigest() == receipt['component_hashes'][component]
           for stage in ['preflight', 'reload']:
               report = json.loads(Path('/tmp', f'call-center-ending-success-{stage}.json').read_text())
-              assert report['summary']['example_count'] == len(report['examples']) == 5
+              assert report['summary']['example_count'] == len(report['examples']) == 7
               assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
               assert all(row['status'] == 'passed' for row in report['examples'])
           success_upgrade = json.loads(Path('/tmp/call-center-ending-success-upgrade.json').read_text())

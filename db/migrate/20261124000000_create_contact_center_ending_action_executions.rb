@@ -68,6 +68,7 @@ class CreateContactCenterEndingActionExecutions < ActiveRecord::Migration[7.1]
     add_check_constraint TABLE, names.map { |name| "#{name} > 0" }.join(' AND '), name: 'cc_ending_success_identity'
     add_check_constraint TABLE, "integrity_sha256 ~ '^[0-9a-f]{64}$'", name: 'cc_ending_success_digest'
     add_check_constraint TABLE, "destination_kind = 'project_task' AND btrim(rule_code) <> ''", name: 'cc_ending_success_destination'
-    add_check_constraint TABLE, "trigger_kind IN ('ending_reason_confirmation', 'ending_action_completion')", name: 'cc_ending_success_trigger'
+    kinds = "ARRAY['ending_reason_confirmation'::text, 'ending_action_completion'::text]"
+    add_check_constraint TABLE, "trigger_kind::text = ANY (#{kinds})", name: 'cc_ending_success_trigger'
   end
 end
