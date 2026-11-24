@@ -1,0 +1,28 @@
+{
+  "failed_parent": "de57c426f8e3acbe14b53d24765a5fe8eca41269",
+  "run": 45468124054,
+  "job": 138708419195,
+  "artifact": 14960632453,
+  "artifact_sha256": "926104fa8f0eb68e43ed54a9f031fa8355348a5c841ff007257afac50766f356",
+  "raw_log_sha256": "7f54342b4f10ea2fbc3032ba58851f0d0279328293da3c1c8756ff047899f7e8",
+  "sanitized_log_sha256": "38b0f692958438e61ced14a6c1160c4db398b5eab158cad60565e07249598678",
+  "path": "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.js",
+  "line": 101,
+  "rule": "no-plusplus",
+  "native_frontend_errors": 1,
+  "native_frontend_warnings_observed_not_suppressed": 276,
+  "before_sha256": "bb718b7ef9f73d0a735d783fdc395f7174e1cd498291e7208d3bd234c8dd20a4",
+  "after_sha256": "fdca74bc2af5fa96210cc3e37db4d8d38dad2c6fead77289d912c78b4fb959b7",
+  "correction": "Increment generation with +=1, then capture its value. Guards, asynchronous identity and request-generation comparisons are unchanged.",
+  "all_other_product_code_tests_database_workflow_and_permissions_unchanged": true,
+  "previous_native_results_same_failed_parent_not_new_candidate_acceptance": {
+    "Rails_distinct": 3217,
+    "Vue": 1854,
+    "history_native_cases": 19,
+    "zero_failures_pending_or_outside_errors": true,
+    "schema_reload_separate_examples": 252,
+    "new_Ruby_offenses": 0
+  },
+  "new_candidate_native_or_visual_acceptance": false,
+  "all_existing_gates_and_browser_coverage_remain_required": true
+}

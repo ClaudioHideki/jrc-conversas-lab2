@@ -10,7 +10,7 @@
     "app/javascript/dashboard/routes/dashboard/inbox/EndingAttemptHistory.vue": "9dc940c3af12138cdd390a07fc32cd7270254af2ad6370911e8529a6a1847dec",
     "app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue": "7db525b9e2f1065223669b6d88a8a15d2a0fe01b91fafbce46e5221b3823f894",
     "app/javascript/dashboard/routes/dashboard/inbox/QualificationHistory.vue": "245abe9e3896593966bbbc9923b1338985b5916358ab5d2f7d5c8aae39a3e0e9",
-    "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.js": "bb718b7ef9f73d0a735d783fdc395f7174e1cd498291e7208d3bd234c8dd20a4",
+    "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.js": "fdca74bc2af5fa96210cc3e37db4d8d38dad2c6fead77289d912c78b4fb959b7",
     "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js": "0b5b6417b508bc380a3537d870eafb38bbd5a9a6f26c9e65a0a28cb968db43ae",
     "app/services/jrc_contact_center/ending_actions/attempt_history.rb": "2cfd00a0ec579ee4aebfeb8f3b78f83ec278743e1a76f09a3e6c9abb8948342e",
     "app/services/jrc_contact_center/ending_actions/attempt_projection.rb": "d94a34bd68da9775871253a4410661d3571a3cc224af66bfd40f6c37fef493e6",
@@ -110,5 +110,6 @@
     "diagnostic_change": "Additionally preserve /tmp/call-center-ending-history-*.json in the early artifact, retaining all old paths.",
     "product_function_permissions_migrations_SQL_or_test_criteria_changed": false,
     "native_or_Chrome_acceptance": false
-  }
+  },
+  "frontend_lint_correction": "docs/jrc_contact_center/ending_history_frontend_lint_correction_20261124.json"
 }

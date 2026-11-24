@@ -98,7 +98,8 @@ export const useEndingAttemptHistory = ({
   };
   const load = async (page = 1) => {
     if (!opened.value || loading.value || disposed) return;
-    const current = ++generation;
+    generation += 1;
+    const current = generation;
     const scope = identity();
     items.value = [];
     callSessionId.value = null;

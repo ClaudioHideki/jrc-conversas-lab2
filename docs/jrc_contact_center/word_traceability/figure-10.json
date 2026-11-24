@@ -375,7 +375,7 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.js",
       "state": "implementado_pendente_validacao_nativa_historico",
-      "current_sha256": "bb718b7ef9f73d0a735d783fdc395f7174e1cd498291e7208d3bd234c8dd20a4"
+      "current_sha256": "fdca74bc2af5fa96210cc3e37db4d8d38dad2c6fead77289d912c78b4fb959b7"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js",
@@ -5584,6 +5584,13 @@
     "new_offenses": 4,
     "reference": "docs/jrc_contact_center/ending_history_lint_correction_20261124.json",
     "code_permissions_or_test_criteria_changed": false,
+    "native_or_Chrome_acceptance": false
+  },
+  "history_frontend_lint_correction_awaiting_revalidation": {
+    "failed_sha": "de57c426f8e3acbe14b53d24765a5fe8eca41269",
+    "native_error_count": 1,
+    "rule": "no-plusplus",
+    "reference": "docs/jrc_contact_center/ending_history_frontend_lint_correction_20261124.json",
     "native_or_Chrome_acceptance": false
   }
 }
