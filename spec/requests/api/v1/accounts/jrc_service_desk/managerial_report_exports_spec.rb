@@ -43,6 +43,9 @@ RSpec.describe 'Service Desk managerial indicators and exports', type: :request 
         document = Nokogiri::HTML(response.body)
         data = JSON.parse(document.at_css('#report-data').text)
         expect(data.fetch('rows').pluck('id', 'title')).to eq([[ticket.id.to_s, title]])
+        expect(data.fetch('observed_day')).to eq(export.observed_at.in_time_zone('America/Sao_Paulo').to_date.iso8601)
+        expect(data.dig('labels', 'closing_time')).to eq('Tempo médio de fechamento')
+        expect(document.at_css('#backlog-body')).to be_present
         expect(document.css('script[src]')).to be_empty
         expect(document.at_css('b')).to be_nil
       elsif format == 'xlsx'

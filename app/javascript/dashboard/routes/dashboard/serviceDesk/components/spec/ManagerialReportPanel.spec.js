@@ -79,7 +79,8 @@ describe('managerial report filters', () => {
         .findAll('option')
         .map(option => option.element.value)
     ).toEqual(['10']);
-    await select('Origem').setValue('native');
+    expect(select('Origem').element.value).toBe('native');
+    await select('Origem').setValue('all');
     await wrapper.get('form').trigger('submit');
     await flushPromises();
     expect(mocks.report).toHaveBeenCalledWith(
@@ -89,7 +90,7 @@ describe('managerial report filters', () => {
         from: '2026-01-01',
         date_field: 'opened_at',
         group_by: 'month',
-        origin: 'native',
+        origin: 'all',
         page: 1,
       },
       expect.any(AbortSignal)
@@ -101,7 +102,7 @@ describe('managerial report filters', () => {
       .find(button => button.text() === 'Limpar filtros')
       .trigger('click');
     expect(wrapper.text()).not.toContain('Chamado sintético');
-    expect(select('Origem').element.value).toBe('all');
+    expect(select('Origem').element.value).toBe('native');
   });
 
   it('avoids requests without managerial access and drops results when access is revoked', async () => {

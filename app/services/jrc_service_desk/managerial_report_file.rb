@@ -30,7 +30,8 @@ class JrcServiceDesk::ManagerialReportFile
     path = Rails.root.join('app/views/jrc_service_desk/managerial_report_offline.html')
     payload = { labels: @labels, columns: @dataset.columns, rows: @dataset.each_row.to_a,
                 locale: @dataset.locale.to_s.tr('_', '-'), criteria: @dataset.criteria,
-                indicators: @dataset.metrics.present?, date_field: @dataset.query.date_field, group_by: @dataset.query.group_by }
+                indicators: @dataset.metrics.present?, date_field: @dataset.query.date_field, group_by: @dataset.query.group_by,
+                observed_day: @dataset.observed_at.in_time_zone(@dataset.query.timezone).to_date.iso8601 }
     File.read(path, encoding: 'UTF-8').sub('__MANAGERIAL_REPORT_DATA__') { ERB::Util.json_escape(payload.to_json) }
   end
 

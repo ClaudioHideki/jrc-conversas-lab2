@@ -41,6 +41,15 @@ td:nth-child(2){min-width:14rem;max-width:24rem;overflow-wrap:anywhere}p{margin:
     <div id="sla" class="tablebox"></div>
   </section>
   <section>
+    <h2 id="backlog-title"></h2>
+    <p id="backlog-order"></p>
+    <p id="backlog-empty" hidden></p>
+    <div id="backlog-table" class="tablebox"><table><thead id="backlog-head"></thead><tbody id="backlog-body"></tbody></table></div>
+    <div id="backlog-pagination" class="toolbar" hidden>
+      <button id="backlog-previous" type="button"></button><span id="backlog-page" aria-live="polite"></span><button id="backlog-next" type="button"></button>
+    </div>
+  </section>
+  <section>
     <div class="toolbar"><h2 id="tickets-title"></h2><button id="csv" type="button"></button></div>
     <p id="count" aria-live="polite"></p>
     <div class="tablebox"><table><thead id="table-head"></thead><tbody id="table-body"></tbody></table></div>
@@ -51,7 +60,7 @@ td:nth-child(2){min-width:14rem;max-width:24rem;overflow-wrap:anywhere}p{margin:
 <script>
 'use strict';
 const byId = id => document.getElementById(id);
-const { labels: l, rows, columns, locale, criteria, indicators, date_field, group_by } = JSON.parse(byId('report-data').textContent);
+const { labels: l, rows, columns, locale, criteria, indicators, date_field, group_by, observed_day } = JSON.parse(byId('report-data').textContent);
 const node = (tag, value) => {
   const item = document.createElement(tag);
   if (value !== undefined && value !== null) item.textContent = value;
@@ -62,10 +71,15 @@ document.title = l.title;
 const captions = {
   title: l.title, theme: l.theme, 'criteria-title': l.criteria, 'filters-title': l.criteria, 'summary-title': l.summary,
   definition: l.close_policy, 'volume-title': l.volume, 'tickets-title': l.tickets, csv: l.export_csv, previous: l.previous, next: l.next,
+  'backlog-title': l.backlog, 'backlog-order': l.backlog_order, 'backlog-empty': l.empty,
+  'backlog-previous': l.previous, 'backlog-next': l.next,
 };
 Object.entries(captions).forEach(([id, title]) => { byId(id).textContent = title; });
 criteria.forEach(([name, value]) => byId('criteria').append(node('dt', name), node('dd', value)));
 const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+const days = new Intl.NumberFormat(locale, { style: 'unit', unit: 'day', unitDisplay: 'long' });
+const observed = Date.parse(observed_day + 'T00:00:00Z');
+const age = stamp => stamp ? Math.max(0, (observed - Date.parse(stamp.slice(0, 10) + 'T00:00:00Z')) / 86400000) : null;
 const dims = ['status','phase','priority','assignee','team','queue','company','establishment','unit','service','category','origin'];
 const headings = Object.entries(columns);
 const dates = ['opened_at', 'created_at', 'updated_at'];
@@ -73,6 +87,8 @@ const fieldViews = {};
 const size = 50;
 let page = 0;
 let filtered = [];
+let backlogPage = 0;
+let backlog = [];
 function labelOf(row, key) {
   if (key === 'origin') return l.origins[row.origin];
   if (key === 'phase') return l.phases[row.phase];
@@ -133,6 +149,14 @@ function matches(row) {
 function average(values) {
   return values.length ? number.format(values.reduce((sum, current) => sum + current, 0) / values.length) : l.missing;
 }
+function closingTime(rowsWithClosure) {
+  if (!rowsWithClosure.length) return l.missing;
+  const seconds = rowsWithClosure.reduce((sum, row) => sum + row.closure_seconds, 0) / rowsWithClosure.length;
+  const minutes = Math.floor(seconds / 60);
+  if (!minutes) return seconds ? l.under_one_minute : '0 min';
+  return [[Math.floor(minutes / 1440), 'd'], [Math.floor(minutes / 60) % 24, 'h'], [minutes % 60, 'min']]
+    .filter(([value]) => value).map(([value, unit]) => number.format(value) + ' ' + unit).join(' ');
+}
 function countsBy(key) {
   const groups = new Map();
   filtered.forEach(row => { const keyValue = key(row); groups.set(keyValue, (groups.get(keyValue) || 0) + 1); });
@@ -172,7 +196,7 @@ function drawIndicators() {
   if (!indicators) return;
   const counts = Object.fromEntries(countsBy(row => row.phase));
   const newCount = filtered.filter(row => row.phase === 'open' && row.initial).length;
-  const closed = filtered.filter(row => Number.isFinite(row.closure_seconds));
+  const closed = filtered.filter(row => row.phase === 'closed' && Number.isFinite(row.closure_seconds) && row.closure_seconds >= 0);
   tiles([
     [l.total, number.format(filtered.length)],
     ...Object.entries(l.phases).map(([phase, name]) => [name, number.format(counts[phase] || 0)]),
@@ -181,7 +205,7 @@ function drawIndicators() {
     [l.open_or_waiting, number.format((counts.open || 0) + (counts.waiting || 0))],
     [l.closure_rate, filtered.length ? number.format((counts.closed || 0) * 100 / filtered.length) : l.missing],
     [l.closure_measured, number.format(closed.length)],
-    [l.closure_mean, average(closed.map(row => row.closure_seconds))],
+    [l.closing_time, closingTime(closed)],
   ]);
   bars('volume', countsBy(bucket).sort(([a], [b]) => a.localeCompare(b)).slice(-24));
   const selected = distribution.value;
@@ -220,11 +244,35 @@ function drawTable() {
   byId('previous').disabled = page <= 0;
   byId('next').disabled = (page + 1) * size >= filtered.length;
 }
+function drawBacklog() {
+  const body = document.createDocumentFragment();
+  for (const row of backlog.slice(backlogPage * size, (backlogPage + 1) * size)) {
+    const line = node('tr');
+    const fields = ['id', 'title', 'company', 'assignee', 'priority', 'status'];
+    fields.forEach(key => line.append(node('td', labelOf(row, key) ?? l.missing)));
+    for (const stamp of [row.opened_at, row.updated_at]) {
+      const value = age(stamp);
+      line.append(node('td', Number.isFinite(value) ? days.format(value) : l.missing));
+    }
+    body.append(line);
+  }
+  byId('backlog-body').replaceChildren(body);
+  byId('backlog-empty').hidden = backlog.length > 0;
+  byId('backlog-table').hidden = backlog.length === 0;
+  byId('backlog-pagination').hidden = backlog.length <= size;
+  byId('backlog-page').textContent = (backlogPage + 1) + ' / ' + Math.ceil(backlog.length / size);
+  byId('backlog-previous').disabled = backlogPage <= 0;
+  byId('backlog-next').disabled = (backlogPage + 1) * size >= backlog.length;
+}
 function refresh() {
   filtered = rows.filter(matches);
   page = 0;
+  backlogPage = 0;
+  backlog = filtered.filter(row => row.phase === 'open' || row.phase === 'waiting')
+    .sort((a, b) => age(a.opened_at) - age(b.opened_at) || Number(a.id) - Number(b.id));
   drawIndicators();
   drawTable();
+  drawBacklog();
 }
 function csvCell(value) {
   let text = String(value ?? '').replace(/\0/g, '');
@@ -249,11 +297,17 @@ dark(matchMedia('(prefers-color-scheme: dark)').matches);
 byId('theme').addEventListener('click', () => dark(!document.documentElement.classList.contains('dark')));
 byId('previous').addEventListener('click', () => { page -= 1; drawTable(); });
 byId('next').addEventListener('click', () => { page += 1; drawTable(); });
+byId('backlog-previous').addEventListener('click', () => { backlogPage -= 1; drawBacklog(); });
+byId('backlog-next').addEventListener('click', () => { backlogPage += 1; drawBacklog(); });
 byId('filters').addEventListener('change', refresh);
 distribution.addEventListener('change', drawIndicators);
 const headingsRow = node('tr');
 headings.forEach(([, heading]) => headingsRow.append(node('th', heading)));
 byId('table-head').append(headingsRow);
+const backlogHead = node('tr');
+[columns.id, columns.title, columns.company, columns.assignee, columns.priority, columns.status, l.age, l.since_update]
+  .forEach(label => backlogHead.append(node('th', label)));
+byId('backlog-head').append(backlogHead);
 byId('indicators').hidden = !indicators;
 refresh();
 </script>

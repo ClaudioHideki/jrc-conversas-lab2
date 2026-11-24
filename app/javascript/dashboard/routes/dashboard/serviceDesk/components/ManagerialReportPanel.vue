@@ -22,7 +22,7 @@ const defaults = () => ({
   to: '',
   date_field: 'opened_at',
   group_by: 'month',
-  origin: 'all',
+  origin: 'native',
   phase: '',
 });
 const filters = reactive(defaults());

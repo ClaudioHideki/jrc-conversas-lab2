@@ -52,6 +52,8 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 
 ## Concluído (Done)
 
+- Relatório gerencial do Service Desk inicia com os chamados nativos do JRC e abertura original a partir de 2026. O HTML exportado mostra a média com eventos reais de fechamento e ordena os chamados pendentes pela idade crescente na data da extração.
+
 - Manual de Cultura com visual azul-claro, arte do Grupo JRC e leitura paginada do PDF protegido. Em Projetos e Tarefas, o upload preserva a gravação do Active Storage após o commit. A visualização e o download verificam o acesso ao projeto e mostram uma mensagem quando o objeto está ausente. Os arquivos já ausentes no projeto 181 exigem os originais ou uma cópia.
 
 - Indicadores, gráficos e exportações gerenciais do Service Desk, com recorte pela abertura original a partir de 2026. Passaram 55 exemplos Rails e 25 testes Vue. O Chrome validou o fluxo autenticado, os quatro downloads e o painel móvel em tema escuro. Chrome e Edge abriram o HTML offline com filtros. [Decisão](docs/adr/0013-indicadores-e-exportacoes-gerenciais-service-desk.md).
