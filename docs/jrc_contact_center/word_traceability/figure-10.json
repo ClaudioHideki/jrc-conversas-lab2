@@ -3488,5 +3488,11 @@
     "failed_Chrome": 4,
     "cause_document": "docs/jrc_contact_center/ending_assignee_alias_correction_20261124.json",
     "full_acceptance": false
+  },
+  "native_assignee_alias_lint_pending": {
+    "parent": "56c29c3c5df234b8d7e8472ae0580569c9a251e1",
+    "document": "docs/jrc_contact_center/ending_assignee_alias_lint_followup_20261124.json",
+    "native_cases_executed": 0,
+    "full_acceptance": false
   }
 }

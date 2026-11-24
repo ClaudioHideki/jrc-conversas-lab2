@@ -1,8 +1,8 @@
 require 'rails_helper'
 
-# Real native CustomRole/individual/project intersections. All capabilities and
+# Real native CustomRole, individual and project intersections. All capabilities and
 # records below belong only to the explicitly synthetic fixture account.
-RSpec.describe 'Native ending task assignee authorization aliases' do
+RSpec.describe JrcContactCenter::EndingActions::ProjectTaskParameters do
   include_context 'with native ending execution original evidence'
 
   let(:parameters) do
@@ -28,7 +28,7 @@ RSpec.describe 'Native ending task assignee authorization aliases' do
     allowed = JrcProjects::Authorization.allowed?(account_user: member, capability: 'projects.task.assign', project: project)
     expect(allowed).to be(false)
     expect do
-      JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: member).call(parameters)
+      described_class.new(member: member).call(parameters)
     end.to raise_error(Pundit::NotAuthorizedError)
     expect(JrcProjects::Task.where(account: account)).to be_empty
   end

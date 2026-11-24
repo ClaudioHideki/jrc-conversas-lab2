@@ -1,0 +1,24 @@
+{
+  "parent": "56c29c3c5df234b8d7e8472ae0580569c9a251e1",
+  "failed_run": 45345327177,
+  "early_artifact": 14897907007,
+  "early_artifact_sha256": "7a79c89bb04b6b0e51299dc85da6e230f749a5cc685c2ae9e8a3a725f4428418",
+  "confirmed_offense": "RSpec/DescribeClass: service spec described a string rather than its real native class.",
+  "correction": "Describe ProjectTaskParameters, use described_class, and align its task-owned filename with the native class/path convention.",
+  "old_spec": "spec/services/jrc_contact_center/ending_actions/project_assignee_native_permissions_spec.rb",
+  "new_spec": "spec/services/jrc_contact_center/ending_actions/project_task_parameters_assignee_spec.rb",
+  "old_sha256": "0fee0df45142130e9f6de084819e87554a41a9a2dc393d8636298d3609ff9012",
+  "new_sha256": "db9d183a3529da0788afdd396014dc74076830e491b800d7ad39e6c832d527f8",
+  "all_two_examples_and_every_assertion_preserved": true,
+  "test_or_lint_rule_exclusions_added": false,
+  "product_permission_or_real_user_grants_changed": false,
+  "new_native_examples_executed": 0,
+  "whole_figure10_or_Part1_accepted": false,
+  "final_failure_evidence": {
+    "artifact": 14899380263,
+    "artifact_sha256": "1b6b2a57d83a9a19a5b9f088ca11dcdb6ac12a7051956fb41451ac0104d8ae2e",
+    "sanitized_log_sha256": "7d28055c3be931b44d1e0c5df3f16cf31889c2193aa6f9be96a9306c514bc952",
+    "same_single_cop_confirmed_in_focused_and_incremental_lint": true,
+    "native_regressions_skipped_not_approved": true
+  }
+}
