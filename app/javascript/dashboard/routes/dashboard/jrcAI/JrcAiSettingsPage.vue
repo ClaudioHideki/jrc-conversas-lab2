@@ -393,11 +393,6 @@ onMounted(load);
           >
             <div>
               <h2 class="font-bold text-n-slate-12">Provedores configurados</h2>
-              <p class="text-xs text-n-slate-11">
-                OpenAI e APIs compat&iacute;veis podem alimentar o Copiloto
-                nesta vers&atilde;o. Outros provedores ficam cadastrados para
-                adaptadores futuros.
-              </p>
             </div>
             <button
               class="inline-flex items-center gap-2 rounded-xl bg-n-brand hover:enabled:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand px-4 py-2.5 text-sm font-semibold text-white"

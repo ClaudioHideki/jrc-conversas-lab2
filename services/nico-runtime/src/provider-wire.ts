@@ -2,6 +2,20 @@ import { NicoError } from './errors.ts';
 
 export type ProviderType = 'openai' | 'custom' | 'anthropic' | 'google_gemini';
 
+// Claude accepts structural JSON Schema; numerical bounds remain enforced by the caller's validator.
+function anthropicSchema(schema: any): any {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return schema;
+  const result = { ...schema };
+  const constraints = ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf', 'minLength', 'maxLength', 'maxItems', 'uniqueItems'];
+  const notes = constraints.filter(key => key in result).map(key => { const value = result[key]; delete result[key]; return key + '=' + JSON.stringify(value); });
+  if (typeof result.minItems === 'number' && result.minItems > 1) { notes.push('minItems=' + result.minItems); delete result.minItems; }
+  if (notes.length) result.description = [result.description, 'Required constraints: ' + notes.join(', ')].filter(Boolean).join(' ');
+  for (const key of ['properties', '$defs', 'definitions']) if (result[key]) result[key] = Object.fromEntries(Object.entries(result[key]).map(([name, child]) => [name, anthropicSchema(child)]));
+  for (const key of ['items', 'additionalProperties']) if (typeof result[key] === 'object') result[key] = anthropicSchema(result[key]);
+  for (const key of ['anyOf', 'allOf']) if (Array.isArray(result[key])) result[key] = result[key].map(anthropicSchema);
+  return result;
+}
+
 // One internal structured contract; credentials use each provider's native protocol.
 export function providerRequest(url: string, apiKey: string, body: Record<string, any>, type: ProviderType = 'openai', workspaceId?: string): { url: string; headers: Record<string, string>; body: Record<string, any> } {
   const base = url.replace(/\/chat\/completions$/, '');
@@ -11,7 +25,7 @@ export function providerRequest(url: string, apiKey: string, body: Record<string
   if (type === 'anthropic') return {
     url: `${base}/messages`, headers: { Authorization: `Bearer ${apiKey}`, 'anthropic-version': '2026-10-21', ...(workspaceId ? { 'anthropic-workspace-id': workspaceId } : {}) },
     body: { model: body.model, max_tokens: body.max_completion_tokens, system, messages,
-      output_config: { format: { type: 'json_schema', schema } } },
+      output_config: { format: { type: 'json_schema', schema: anthropicSchema(schema) } } },
   };
   if (type === 'google_gemini') return {
     url: `${base}/models/${encodeURIComponent(body.model)}:generateContent`, headers: { 'x-goog-api-key': apiKey },

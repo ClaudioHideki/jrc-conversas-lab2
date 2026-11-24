@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { structuredResponse } from '../src/provider.ts';
+import { providerRequest } from '../src/provider-wire.ts';
+import { validateSentimentReport } from '../src/sentiment.ts';
 import { requestProvider } from '../src/provider-config.ts';
 
 const body = { model: 'test-model', max_completion_tokens: 2000,
@@ -59,4 +61,18 @@ test('native credentials are rejected before transport when protocol and host di
     if (previous === undefined) delete process.env.NICO_PROVIDER_ALLOWED_HOSTS;
     else process.env.NICO_PROVIDER_ALLOWED_HOSTS = previous;
   }
+});
+
+test('Anthropic receives supported schema constraints while the original sentiment score remains validated locally',()=>{
+  const schema={type:'object',additionalProperties:false,required:['quality_score'],properties:{quality_score:{type:['integer','null'],minimum:0,maximum:100}}};
+  const original=JSON.stringify(schema);
+  const wire=providerRequest('https://api.anthropic.com/v1/chat/completions','isolated-test-key',{...body,response_format:{json_schema:{schema}}},'anthropic');
+  const score=wire.body.output_config.format.schema.properties.quality_score;
+  assert.equal(score.minimum,undefined);assert.equal(score.maximum,undefined);assert.match(score.description,/100/);assert.equal(JSON.stringify(schema),original);
+  const input={request_id:'a56905c4-9a03-4c21-a886-b5d18a3e4c57',account_id:1,conversation_id:1,channel:'test',messages:[{id:1,role:'operator',content:'Synthetic'}]};
+  const report={summary:'Synthetic',customer_sentiment:'insufficient_data',agent_sentiment:'neutral',quality_score:50,risks:[],recommendations:[],evidence:[{message_id:1,observation:'Synthetic'}],limitations:''};
+  assert.deepEqual(validateSentimentReport(report,input),report);
+  assert.throws(()=>validateSentimentReport({...report,quality_score:101},input));
+  const compatible=providerRequest('https://api.openai.com/v1/chat/completions','isolated-test-key',{...body,response_format:{json_schema:{schema}}});
+  assert.equal(compatible.body.response_format.json_schema.schema.properties.quality_score.maximum,100);
 });
