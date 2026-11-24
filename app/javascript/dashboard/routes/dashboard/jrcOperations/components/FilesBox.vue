@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useProjects } from '../../jrcProjects/useProjects';
 import { request, errorMessage, formatDate } from '../api';
 
@@ -15,6 +15,7 @@ const busy = ref(false);
 const loading = ref(false);
 const selected = ref([]);
 const upload = ref(null);
+const opening = ref(null);
 const query = ref('');
 const category = ref('all');
 const sort = ref('newest');
@@ -106,6 +107,9 @@ watch([query, category, sort], () => {
   page.value = 1;
 });
 let generation = 0;
+onBeforeUnmount(() => {
+  generation += 1;
+});
 async function load() {
   generation += 1;
   const n = generation;
@@ -171,6 +175,61 @@ async function submit() {
     error.value = errorMessage(err);
   } finally {
     busy.value = false;
+  }
+}
+async function openFile(file, preview = false) {
+  if (opening.value !== null) return;
+  opening.value = file.id;
+  error.value = '';
+  const requested = generation;
+  const tab = preview ? window.open('about:blank', '_blank') : null;
+  if (tab) tab.opener = null;
+  try {
+    const blob = await request(
+      accountId.value,
+      `${props.endpoint}/${file.id}`,
+      {
+        params: preview ? undefined : { disposition: 'attachment' },
+        responseType: 'blob',
+      }
+    );
+    if (requested !== generation) {
+      tab?.close();
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    if (
+      tab &&
+      /^(application\/pdf|text\/plain|image\/(png|jpeg|gif|webp|avif))$/.test(
+        blob.type
+      )
+    ) {
+      tab.location.replace(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+      return;
+    }
+    tab?.close();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.name;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (failure) {
+    tab?.close();
+    if (requested === generation) {
+      error.value =
+        failure.response?.status === 410
+          ? projectText(
+              'FILE_UNAVAILABLE',
+              'O arquivo está indisponível no armazenamento. Se você tiver o original, anexe-o novamente.'
+            )
+          : projectText(
+              'FILE_ACCESS_ERROR',
+              'Não foi possível abrir o arquivo. Confira o acesso ao projeto e tente novamente.'
+            );
+    }
+  } finally {
+    opening.value = null;
   }
 }
 async function remove(file) {
@@ -372,13 +431,14 @@ async function remove(file) {
                       aria-hidden="true"
                   /></span>
                   <div class="min-w-0">
-                    <a
-                      class="block truncate font-medium text-n-slate-12 hover:text-n-blue-11"
-                      :href="file.url"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      class="block max-w-full truncate text-left font-medium text-n-slate-12 hover:text-n-blue-11"
+                      :disabled="opening !== null"
                       :title="file.name"
-                      >{{ file.name }}</a
+                      @click="openFile(file, true)"
+                    >
+                      {{ file.name }}</button
                     ><span class="text-xs uppercase text-n-slate-10">{{
                       extension(file)
                     }}</span>
@@ -402,22 +462,30 @@ async function remove(file) {
               </td>
               <td class="px-4 py-4">
                 <div class="flex items-center justify-end gap-2">
-                  <a
+                  <button
+                    type="button"
                     class="flex size-8 items-center justify-center rounded-lg text-n-slate-11 hover:bg-n-blue-2 hover:text-n-blue-11"
-                    :href="file.url"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    :disabled="opening !== null"
                     :aria-label="`${projectText('VIEW_FILE', 'Visualizar')}: ${file.name}`"
                     :title="projectText('VIEW_FILE', 'Visualizar')"
-                    ><span class="i-lucide-eye size-4" /></a
-                  ><a
+                    @click="openFile(file, true)"
+                  >
+                    <span class="i-lucide-eye size-4" /></button
+                  ><button
+                    type="button"
                     class="flex size-8 items-center justify-center rounded-lg text-n-slate-11 hover:bg-n-blue-2 hover:text-n-blue-11"
-                    :href="file.download_url || file.url"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    :disabled="opening !== null"
                     :aria-label="`${projectText('DOWNLOAD', 'Baixar')}: ${file.name}`"
                     :title="projectText('DOWNLOAD', 'Baixar')"
-                    ><span class="i-lucide-download size-4" /></a
+                    @click="openFile(file)"
+                  >
+                    <span
+                      :class="
+                        opening === file.id
+                          ? 'i-lucide-loader-circle size-4 animate-spin'
+                          : 'i-lucide-download size-4'
+                      "
+                    /></button
                   ><button
                     v-if="canEdit"
                     class="flex size-8 items-center justify-center rounded-lg text-n-ruby-11 hover:bg-n-ruby-2 disabled:opacity-50"

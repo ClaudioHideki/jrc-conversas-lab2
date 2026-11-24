@@ -78,8 +78,10 @@ onMounted(load);
 
 <template>
   <div :class="{ dark }" class="font-default min-h-screen">
-    <div class="min-h-screen bg-n-solid-2 text-n-slate-12">
-      <header class="border-b border-n-weak bg-n-solid-1">
+    <div
+      class="min-h-screen bg-gradient-to-br from-[#dcecff] via-[#edf5ff] to-[#e3efff] text-n-slate-12 dark:from-n-solid-2 dark:via-n-solid-2 dark:to-n-solid-3"
+    >
+      <header class="border-b border-n-weak bg-[#f1f7ff] dark:bg-n-solid-1">
         <div
           class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6"
         >

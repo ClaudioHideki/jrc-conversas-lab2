@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { filePath, formatDate, request } from './client';
+import ManualDocument from './ManualDocument.vue';
+import groupBrand from './jrc-culture-group.jpg';
 
 const props = defineProps({
   base: { type: String, required: true },
@@ -54,63 +56,109 @@ async function confirm() {
 </script>
 
 <template>
-  <section v-if="selected" class="grid gap-4" :aria-label="t('read_title')">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <button :class="button" @click="selected = null">{{ t('back') }}</button>
-      <a :class="button" :href="`${url(selected, 'pdf')}?download=1`">{{
-        t('pdf')
-      }}</a>
-    </div>
-    <div class="rounded-xl border border-n-weak bg-n-solid-1 p-4 sm:p-6">
-      <h2 class="text-xl font-semibold">{{ selected.title }}</h2>
-      <p class="mt-1 text-n-slate-11">
-        {{ t('published', { number: selected.number }) }} · {{ selected.unit }}
-      </p>
-      <p
-        v-if="selected.description"
-        class="mt-2 whitespace-pre-wrap break-words"
-      >
-        {{ selected.description }}
-      </p>
-      <div class="mt-4 flex flex-wrap items-center gap-3">
-        <button
-          v-if="selected.current && !selected.confirmed_at"
-          class="rounded-lg bg-blue-700 px-4 py-2.5 font-semibold text-white disabled:opacity-50"
-          :disabled="busy"
-          @click="confirm"
+  <section
+    v-if="selected"
+    class="grid min-w-0 gap-4"
+    :aria-label="t('read_title')"
+  >
+    <button :class="button" class="justify-self-start" @click="selected = null">
+      {{ t('back') }}
+    </button>
+    <header
+      class="grid overflow-hidden rounded-2xl border border-[#a8c8ee] bg-gradient-to-br from-[#cfe4ff] to-[#eaf4ff] sm:grid-cols-[minmax(0,1fr)_clamp(10rem,25%,16rem)] dark:border-n-weak dark:from-n-solid-2 dark:to-n-solid-3"
+    >
+      <div class="min-w-0 self-center p-5 sm:p-8">
+        <h2 class="break-words text-2xl font-bold tracking-tight sm:text-4xl">
+          {{ selected.title }}
+        </h2>
+        <p class="mt-2 text-sm text-n-slate-11">
+          {{ t('published', { number: selected.number }) }} ·
+          {{ selected.unit }}
+        </p>
+        <p
+          v-if="selected.description"
+          class="mt-2 whitespace-pre-wrap break-words"
         >
-          {{ t(busy ? 'busy' : 'confirm') }}
-        </button>
-        <span v-if="selected.confirmed_at" class="font-semibold text-n-teal-11">
-          {{ t('confirmed') }} · {{ formatDate(selected.confirmed_at) }}
-        </span>
-        <a
-          :class="button"
-          :href="url(selected, 'pdf')"
-          target="_blank"
-          rel="noopener noreferrer"
-          >{{ t('view_file') }}</a
-        >
-        <a
-          v-if="selected.files.some(file => file.kind === 'pptx')"
-          :class="button"
-          :href="url(selected, 'pptx')"
-        >
-          {{ t('pptx') }}
-        </a>
+          {{ selected.description }}
+        </p>
       </div>
-      <p v-if="outcome" class="mt-3 text-n-teal-11" role="status">
-        {{ t(outcome) }}
-      </p>
-      <p v-if="error" class="mt-3 text-n-ruby-11" role="alert">
-        {{ t(error) }}
-      </p>
+      <div
+        class="relative order-first h-36 overflow-hidden bg-[#0b225a] sm:order-last sm:aspect-[760/618] sm:h-auto"
+      >
+        <img
+          :src="groupBrand"
+          alt="Grupo JRC"
+          class="absolute -left-[23.16%] top-0 h-full w-[123.16%] max-w-none object-cover object-[left_64%] [clip-path:inset(0_0_0_18.8%)] sm:object-[left_48%]"
+        />
+      </div>
+    </header>
+    <div
+      class="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]"
+    >
+      <article
+        class="min-w-0 overflow-hidden rounded-xl border border-[#bfd6ef] bg-[#f3f8ff] dark:border-n-weak dark:bg-n-solid-1"
+      >
+        <header
+          class="flex flex-wrap items-center justify-between gap-2 border-b border-[#bfd6ef] bg-[#e2efff] px-4 py-3 dark:border-n-weak dark:bg-n-solid-3"
+        >
+          <h3 class="font-semibold">{{ t('reading') }}</h3>
+          <div
+            class="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-n-blue-11"
+          >
+            <a :href="`${url(selected, 'pdf')}?download=1`">{{ t('pdf') }}</a>
+            <a
+              :href="url(selected, 'pdf')"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ t('view_file') }}
+            </a>
+            <a
+              v-if="selected.files.some(file => file.kind === 'pptx')"
+              :href="url(selected, 'pptx')"
+            >
+              {{ t('pptx') }}
+            </a>
+          </div>
+        </header>
+        <ManualDocument
+          :key="selected.id"
+          :src="url(selected, 'pdf')"
+          @expired="emit('expired')"
+        />
+      </article>
+      <aside
+        class="rounded-xl border border-[#abc9ed] bg-[#f3f8ff] p-4 lg:sticky lg:top-4 dark:border-n-weak dark:bg-n-solid-1"
+      >
+        <h3 class="font-semibold">{{ t('history') }}</h3>
+        <p v-if="selected.confirmed_at" class="mt-3 font-medium text-n-teal-11">
+          {{ t('confirmed') }} · {{ formatDate(selected.confirmed_at) }}
+        </p>
+        <template v-else-if="selected.current">
+          <p
+            class="mt-3 inline-block rounded-md bg-n-amber-3 px-2 py-1 text-sm font-medium text-n-amber-11"
+          >
+            {{ t('reading_pending') }}
+          </p>
+          <p class="mt-3 text-sm text-n-slate-11">
+            {{ t('reading_confirm_hint') }}
+          </p>
+          <button
+            class="mt-4 min-h-11 w-full rounded-lg bg-blue-700 px-3 py-2.5 font-semibold text-white disabled:opacity-50"
+            :disabled="busy"
+            @click="confirm"
+          >
+            {{ t(busy ? 'busy' : 'confirm') }}
+          </button>
+        </template>
+        <p v-if="outcome" class="mt-3 text-sm text-n-teal-11" role="status">
+          {{ t(outcome) }}
+        </p>
+        <p v-if="error" class="mt-3 text-sm text-n-ruby-11" role="alert">
+          {{ t(error) }}
+        </p>
+      </aside>
     </div>
-    <iframe
-      :src="url(selected, 'pdf')"
-      :title="t('read_title')"
-      class="block h-[64vh] w-full rounded-xl border border-n-weak bg-n-solid-1"
-    />
   </section>
   <section v-else class="grid gap-4">
     <div class="flex items-center gap-3">

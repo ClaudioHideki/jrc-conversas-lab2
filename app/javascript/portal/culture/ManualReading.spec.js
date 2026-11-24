@@ -2,6 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ManualReading from './ManualReading.vue';
+import ManualDocument from './ManualDocument.vue';
 import messages from './pt_BR.json';
 
 const base = '/portal/manual-de-cultura/api/accounts/7';
@@ -31,6 +32,7 @@ const render = props =>
   mount(ManualReading, {
     props: { base, entries: [current, previous], ...props },
     global: {
+      stubs: { ManualDocument: true },
       plugins: [
         createI18n({
           legacy: false,
@@ -55,8 +57,14 @@ describe('Manual de Cultura reader', () => {
     vi.stubGlobal('fetch', fetcher);
     const wrapper = render();
     await button(wrapper, 'Ler o manual').trigger('click');
-    expect(wrapper.find('iframe').attributes('src')).toBe(
+    expect(wrapper.getComponent(ManualDocument).props('src')).toBe(
       `${base}/versions/19/files/pdf`
+    );
+    expect(wrapper.get('a[href$="?download=1"]').attributes('href')).toBe(
+      `${base}/versions/19/files/pdf?download=1`
+    );
+    expect(wrapper.get('img[alt="Grupo JRC"]').attributes('src')).toContain(
+      'jrc-culture-group.jpg'
     );
     const confirm = button(wrapper, 'Li e estou ciente');
     await confirm.trigger('click');
@@ -88,7 +96,7 @@ describe('Manual de Cultura reader', () => {
     const wrapper = render({ history: true });
     expect(wrapper.text()).toContain('Manual anterior');
     await wrapper.findAll('button').at(-1).trigger('click');
-    expect(wrapper.find('iframe').attributes('src')).toBe(
+    expect(wrapper.getComponent(ManualDocument).props('src')).toBe(
       `${base}/versions/18/files/pdf`
     );
     expect(button(wrapper, 'Li e estou ciente')).toBeUndefined();
@@ -109,6 +117,8 @@ describe('Manual de Cultura reader', () => {
     await flushPromises();
     expect(wrapper.find('[role="alert"]').text()).toContain('substituída');
     expect(wrapper.emitted('changed')).toBeUndefined();
-    expect(wrapper.find('iframe').attributes('src')).toContain('/versions/19/');
+    expect(wrapper.getComponent(ManualDocument).props('src')).toContain(
+      '/versions/19/'
+    );
   });
 });

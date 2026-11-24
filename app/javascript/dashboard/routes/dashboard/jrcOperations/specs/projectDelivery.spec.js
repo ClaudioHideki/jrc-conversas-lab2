@@ -164,4 +164,31 @@ describe('Project delivery integration', () => {
     expect(request.mock.calls.every(call => call.length === 2)).toBe(true);
     wrapper.unmount();
   });
+
+  it('keeps the attachment list visible when the storage object is missing', async () => {
+    request
+      .mockResolvedValueOnce({
+        data: [{ id: 12, name: 'Projeto.pdf', byte_size: 120 }],
+      })
+      .mockRejectedValueOnce({ response: { status: 410 } });
+    const wrapper = mount(FilesBox, {
+      props: { endpoint: 'projects/projects/7/files', canEdit: false },
+    });
+    await flushPromises();
+    await wrapper
+      .get('button[aria-label="Baixar: Projeto.pdf"]')
+      .trigger('click');
+    await flushPromises();
+    expect(request).toHaveBeenLastCalledWith(
+      1,
+      'projects/projects/7/files/12',
+      {
+        params: { disposition: 'attachment' },
+        responseType: 'blob',
+      }
+    );
+    expect(wrapper.get('[role="alert"]').text()).toContain('indisponível');
+    expect(wrapper.text()).toContain('Projeto.pdf');
+    wrapper.unmount();
+  });
 });

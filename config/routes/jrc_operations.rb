@@ -25,9 +25,9 @@ scope '/api/v1/accounts/:account_id', defaults: { format: 'json' } do
           member { get 'images/:image_id', action: :image }
         end
         resources :checklist_items, only: %i[create update destroy]
-        resources :files, only: %i[index create destroy]
+        resources :files, only: %i[index show create destroy]
       end
-      resources :files, only: %i[index create destroy]
+      resources :files, only: %i[index show create destroy]
       resource :budget, only: %i[show update]
       resources :time_entries, only: %i[index create update destroy]
       get 'reports/export', to: 'reports#export'

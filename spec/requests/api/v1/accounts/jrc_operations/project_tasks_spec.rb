@@ -292,7 +292,10 @@ RSpec.describe 'JRC Projects tasks and Kanban checkpoint 3B', type: :request do
     attachment = task.reload.attachments.attachments.first!
     expect(response.parsed_body.fetch('data')).to include(hash_including('id' => attachment.id, 'name' => 'jrc_projects_task.txt'))
     get "#{task_url}/files", headers: headers
-    expect(response.parsed_body.dig('data', 0, 'url')).to be_present
+    expect(response.parsed_body.dig('data', 0, 'url')).to eq("#{task_url}/files/#{attachment.id}")
+    get response.parsed_body.dig('data', 0, 'download_url'), headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to eq(File.binread(fixture_path))
     delete "#{task_url}/files/#{attachment.id}", headers: headers
     expect(response).to have_http_status(:no_content)
     expect(ActiveStorage::Attachment.exists?(attachment.id)).to be(false)

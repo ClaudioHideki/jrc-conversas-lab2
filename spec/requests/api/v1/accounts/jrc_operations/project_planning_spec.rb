@@ -126,8 +126,13 @@ RSpec.describe 'JRC Projects planning checkpoint 3C', type: :request do
     expect(response).to have_http_status(:ok)
     file = response.parsed_body.fetch('data').find { |row| row['id'] == attachment.id }
     expect(file.fetch('uploaded_by')).to include('id' => admin.id, 'name' => admin.name)
-    expect(file.fetch('url')).to be_present
+    expect(file.fetch('url')).to eq("#{base}/files/#{attachment.id}")
     expect(file.fetch('download_url')).to include('disposition=attachment')
+    get file.fetch('download_url'), headers: member_headers
+    expect(response).to have_http_status(:ok)
+    expect(response.headers.fetch('Content-Disposition')).to start_with('attachment')
+    expect(response.headers.fetch('Cache-Control')).to include('no-store')
+    expect(response.body).to eq(File.binread(Rails.root.join('spec/fixtures/files/jrc_projects_task.txt')))
     delete "#{base}/files/#{attachment.id}", headers: headers
     expect(response).to have_http_status(:no_content)
     expect(ActiveStorage::Attachment.exists?(attachment.id)).to be(false)
@@ -142,8 +147,23 @@ RSpec.describe 'JRC Projects planning checkpoint 3C', type: :request do
     expect(response.parsed_body.dig('data', 0, 'uploaded_by')).to be_nil
     other_project.attachments.attach(io: StringIO.new('Foreign evidence'), filename: 'foreign.txt', content_type: 'text/plain')
     attachment = other_project.attachments.attachments.first!
+    get "#{base}/files/#{attachment.id}", headers: headers
+    expect(response).to have_http_status(:not_found)
+    get "/api/v1/accounts/#{account.id}/projects/projects/#{other_project.id}/files/#{attachment.id}", headers: member_headers
+    expect(response).to have_http_status(:not_found)
     delete "#{base}/files/#{attachment.id}", headers: headers
     expect(response).to have_http_status(:not_found)
+    expect(ActiveStorage::Attachment.exists?(attachment.id)).to be(true)
+  end
+
+  it 'reports a missing object through the project API and retains the attachment record' do
+    project.attachments.attach(io: StringIO.new('Missing object'), filename: 'missing.txt', content_type: 'text/plain')
+    attachment = project.attachments.attachments.first!
+    attachment.blob.service.delete(attachment.blob.key)
+
+    get "#{base}/files/#{attachment.id}", params: { disposition: 'attachment' }, headers: member_headers
+    expect(response).to have_http_status(:gone)
+    expect(response.parsed_body.dig('error', 'code')).to eq('FILE_UNAVAILABLE')
     expect(ActiveStorage::Attachment.exists?(attachment.id)).to be(true)
   end
 
