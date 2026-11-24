@@ -1009,3 +1009,7 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - CI45379976587/102e368b: diagnóstico Ruby completo confirma48→1infração; preparada correção final deuma linha para manteryield direto eencaminhamento explícito dobloco. Regras,esquemas,permissões e testes preservados; revalidação nativa permanece pendente.
 
 - CI45384095210/b2b568e6: relatório final confirma somente duas ocorrências de Naming/BlockForwarding; corrigidos os dois pontos com encaminhamento anônimo, preservando o caminho padrão, a autorização original, todas as asserções e os vinte esquemas históricos. Revalidação nativa do M20 continua obrigatória; os testes ignorados nesta execução não foram aprovados.
+
+- M20/c79883dd/CI45407961337:3174Rails distintos,1813Vue,264Chrome e608PNG verificados; tentativas/resultados imutáveis, eventos nativos após commit e concorrência PostgreSQL aceitos no escopo interno Projetos. Ativação operacional,manual,CRM/ServiceDesk,broker real eParte1 continuam abertos. Ver ending_attempt_native_acceptance_20261124.json.
+
+- ApósM20/c79883dd aceito: preparadoM21 com ativação explícita e consulta autenticada da revisão operacional;24novosRails/18novosVue/4novosChrome preparados, ainda sem aceite nativo. Mantidos os264Chrome anteriores;Figura10,manual,CRM/ServiceDesk ebroker real continuam abertos. Ver ending_activation_candidate_20261124.json.

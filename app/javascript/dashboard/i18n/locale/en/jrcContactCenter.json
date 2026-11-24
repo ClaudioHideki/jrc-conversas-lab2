@@ -2951,7 +2951,7 @@
     "ENDING_AUTOMATIONS": {
       "SEPARATOR": "·",
       "TITLE": "Configurar automações e integrações",
-      "CONFIGURATION_ONLY": "Configuração versionada interna. O executor operacional ainda está pendente; salvar esta regra não cria registros nem envia comandos ao PABX.",
+      "CONFIGURATION_ONLY": "Salvar só altera a configuração. A execução de tarefas em Projetos exige habilitação explícita para novas chamadas; os demais destinos continuam pendentes. Nenhum comando é publicado no PABX.",
       "LOADING": "Carregando configuração autorizada…",
       "LOAD_FAILED": "Não foi possível carregar uma configuração consistente. Recarregue antes de editar.",
       "DENIED": "O acesso atual não permite esta configuração. Os dados privados foram retirados da tela.",
@@ -3030,6 +3030,22 @@
       "UNASSIGNED": "Sem atribuição explícita",
       "EXISTING_PARAMETERS": "Conferir todos os parâmetros preservados",
       "APPLY": "Aplicar ao rascunho"
+    },
+    "ENDING_ACTIVATION": {
+      "TITLE": "Habilitação operacional da regra",
+      "HINT": "Habilite somente após revisar a regra salva, a fila, a unidade e o destino. Isso vale para novas chamadas compatíveis; não reprocessa chamadas anteriores. Cada execução continuará exigindo as permissões atuais do agente original.",
+      "REVIEW": "Revisei a configuração salva e autorizo sua habilitação para novas chamadas.",
+      "CONFIRM": "Habilitar para novas chamadas",
+      "WAIT": "Confirmando habilitação…",
+      "RECORDED": "Revisão prospectiva aplicável, versão",
+      "HISTORICAL": "Revisão histórica preservada, sem habilitação atual. Versão",
+      "LOADING": "Conferindo a revisão persistida e as permissões atuais…",
+      "LOAD_FAILED": "Não foi possível verificar a revisão persistida. Recarregue o estado antes de habilitar.",
+      "RETRY_STATUS": "Conferir estado novamente",
+      "MANUAL_PENDING": "A confirmação individual por regra ainda está pendente de implementação. Esta configuração permanece preservada e não será executada automaticamente.",
+      "FAILED": "Não foi possível confirmar o resultado. Confira a conexão e tente novamente explicitamente; a mesma solicitação será preservada para evitar duplicidade.",
+      "STALE": "A configuração mudou desde a revisão. Volte à lista, recarregue e revise a regra antes de habilitar.",
+      "RELOAD": "Voltar à lista e recarregar"
     }
   }
 }

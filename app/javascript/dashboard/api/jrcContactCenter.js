@@ -331,6 +331,16 @@ export default {
     axios.get(`${base(accountId)}/acw_policy/ending_rules/source_context`, {
       params: { queue_id: recordIdentity(queueId) },
     }),
+  activateEndingRule: (accountId, ruleCode, expectedRevision, requestKey) =>
+    axios.post(`${base(accountId)}/acw_policy/ending_rules/activate`, {
+      rule_code: ruleCode,
+      expected_revision: expectedRevision,
+      request_key: requestKey,
+    }),
+  endingRuleReadiness: (accountId, ruleCode, expectedRevision) =>
+    axios.get(`${base(accountId)}/acw_policy/ending_rules/readiness`, {
+      params: { rule_code: ruleCode, expected_revision: expectedRevision },
+    }),
   saveEndingRule: (accountId, rule, expectedRevision) =>
     axios.post(`${base(accountId)}/acw_policy/ending_rules`, {
       private_rule: rule,

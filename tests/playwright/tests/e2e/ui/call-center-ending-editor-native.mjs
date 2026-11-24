@@ -64,7 +64,7 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   let editor = page.locator('[data-ending-automation-editor]');
   await expect(
     editor.locator('[data-ending-configuration-only]')
-  ).toContainText('executor operacional ainda está pendente');
+  ).toContainText('Salvar só altera a configuração');
   await editor.locator('[data-ending-rule-new]').click();
   await expect(editor.locator('[data-ending-rule-save]')).toBeDisabled();
   await editor
@@ -147,6 +147,9 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   await editor.locator('[data-ending-rule-save]').click();
   expect((await savedResponse).status()).toBe(200);
   await expect(editor.locator('[data-ending-rule-saved]')).toBeVisible();
+  await expect(
+    editor.locator('[data-ending-manual-activation-pending]')
+  ).toBeVisible();
   expect(writes).toHaveLength(1);
   expect(writes[0].private_rule).toMatchObject({
     execution_mode: 'agent_confirmation',

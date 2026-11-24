@@ -120,6 +120,52 @@ beforeEach(() => {
 });
 
 describe('authorized operational ending-rule editor', () => {
+  it('pins activation to the actual displayed saved rule when a background list refresh sees a newer definition', async () => {
+    const { editor } = mountEditor();
+    await flushPromises();
+    await editor.edit(editor.items.value[0]);
+    const newer = {
+      ...stored(),
+      name: 'SYNTHETIC newer unreviewed definition',
+    };
+    API.acwPolicy.mockResolvedValueOnce(policy('1', refreshed));
+    API.endingRules.mockResolvedValueOnce(listed([newer], '1', refreshed));
+    await editor.load();
+    expect(editor.items.value[0].name).toBe(newer.name);
+    expect(editor.draft.value.name).toBe('SYNTHETIC private rule');
+    expect(editor.activationRevision.value).toBe(original);
+    expect(API.saveEndingRule).not.toHaveBeenCalled();
+  });
+
+  it('keeps activation on the displayed snapshot through conflict review and advances it only after a reviewed save', async () => {
+    const { editor } = mountEditor();
+    await flushPromises();
+    await editor.edit(editor.items.value[0]);
+    editor.revision.handleError({
+      response: { data: { error: 'stale_configuration_revision' } },
+    });
+    API.endingRules.mockResolvedValueOnce(listed([stored()], '1', refreshed));
+    await editor.revision.reload();
+    expect(editor.revision.state.expected).toBe(refreshed);
+    expect(editor.activationRevision.value).toBe(original);
+    editor.draft.value.name = 'SYNTHETIC explicitly chosen definition';
+    await flushPromises();
+    editor.reviewConflict(true);
+    editor.reviewed.value = true;
+    const savedRevision = 'c'.repeat(64);
+    API.saveEndingRule.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        revision: savedRevision,
+        item: { ...stored(), name: editor.draft.value.name },
+      },
+    });
+    await editor.save();
+    expect(API.saveEndingRule).toHaveBeenCalledTimes(1);
+    expect(API.saveEndingRule.mock.calls[0][2]).toBe(refreshed);
+    expect(editor.activationRevision.value).toBe(savedRevision);
+  });
+
   it('permits a reviewed inactive draft without a destination while keeping an active empty rule blocked', async () => {
     const { editor } = mountEditor();
     await flushPromises();

@@ -34,6 +34,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
   const draft = ref(null);
   const baseline = ref('');
   const persisted = ref(false);
+  const activationRevision = ref('');
   const source = ref(null);
   const loading = ref(false);
   const saving = ref(false);
@@ -58,6 +59,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
     draft.value = null;
     source.value = null;
     policy.value = null;
+    activationRevision.value = '';
     baseline.value = '';
     reviewed.value = false;
     sourceLoading.value = false;
@@ -188,6 +190,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
   const edit = async row => {
     if (loading.value || saving.value || dirty.value || !policy.value) return;
     draft.value = row ? editable(row) : blank();
+    activationRevision.value = row ? policy.value.revision : '';
     if (row) delete draft.value.scope;
     persisted.value = Boolean(row);
     baseline.value = JSON.stringify(draft.value);
@@ -260,6 +263,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
       )
         throw new Error('Invalid saved rule');
       policy.value.revision = response.data.revision;
+      activationRevision.value = response.data.revision;
       draft.value = editable(response.data.item);
       delete draft.value.scope;
       baseline.value = JSON.stringify(draft.value);
@@ -292,6 +296,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
   };
   const discard = async () => {
     if (saving.value) return;
+    activationRevision.value = '';
     draft.value = null;
     source.value = null;
     sourceGeneration += 1;
@@ -343,6 +348,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
     dirty,
     canSave,
     revision,
+    activationRevision,
     load,
     edit,
     selectQueue,

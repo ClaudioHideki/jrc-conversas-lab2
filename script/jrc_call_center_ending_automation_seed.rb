@@ -2,7 +2,7 @@
 
 # Called only by SyntheticPauseSeed after its exclusive disposable-runner guard.
 class JrcContactCenter::SyntheticEndingAutomationSeed
-  PROJECT_PERMISSIONS = %w[jrc_projects_project_view jrc_projects_project_create jrc_projects_task_create
+  PROJECT_PERMISSIONS = %w[jrc_projects_project_view jrc_projects_project_create jrc_projects_task_create jrc_projects_task_view
                            jrc_projects_task_assign jrc_projects_task_update jrc_projects_member_view].freeze
 
   def self.call(account:, admin:, queue:)

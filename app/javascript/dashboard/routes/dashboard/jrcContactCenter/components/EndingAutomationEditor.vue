@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import AcwRuleTarget from './AcwRuleTarget.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import EndingProjectTaskConfiguration from './EndingProjectTaskConfiguration.vue';
+import EndingRuleActivation from './EndingRuleActivation.vue';
 import { useEndingAutomationEditor } from '../composables/useEndingAutomationEditor';
 
 const props = defineProps({
@@ -35,7 +36,9 @@ const {
   dirty,
   canSave,
   revision,
+  activationRevision,
 } = editor;
+const activationBusy = ref(false);
 const taskConfiguration = ref(false);
 const discard = ref('');
 const conditions = computed({
@@ -51,7 +54,8 @@ const task = computed(() =>
   draft.value?.actions.find(action => action.kind === 'project_task')
 );
 const locked = computed(
-  () => loading.value || saving.value || sourceLoading.value
+  () =>
+    loading.value || saving.value || sourceLoading.value || activationBusy.value
 );
 const requestClose = () => {
   if (locked.value) return;
@@ -315,6 +319,35 @@ const destinations = [
           data-ending-rule-saved
         >
           {{ text('SAVED') }}
+        </p>
+        <EndingRuleActivation
+          v-if="
+            persisted &&
+            !dirty &&
+            draft.active &&
+            draft.execution_mode === 'automatic'
+          "
+          :account-id="accountId"
+          :rule="draft"
+          :revision="activationRevision"
+          :disabled="
+            loading || saving || sourceLoading || revision.state.conflict
+          "
+          @busy="activationBusy = $event"
+          @denied="editor.deny"
+          @reload="editor.discard"
+        />
+        <p
+          v-if="
+            persisted &&
+            !dirty &&
+            draft.active &&
+            draft.execution_mode === 'agent_confirmation'
+          "
+          class="rounded-lg border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
+          data-ending-manual-activation-pending
+        >
+          {{ t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.MANUAL_PENDING') }}
         </p>
         <div class="flex flex-wrap gap-3">
           <button

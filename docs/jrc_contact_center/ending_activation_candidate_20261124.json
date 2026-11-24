@@ -1,0 +1,99 @@
+{
+  "parent": "c79883dd0af99d50937ed05aed31064863eaeb80",
+  "status": "implemented_explicit_activation_awaiting_native_validation",
+  "accepted_attempt_acceptance_sha256": "f4f014c25d0dba705c59317dc834b9f0d252d2c7a4cd63f2ccb7030fd5b12090",
+  "source_sha256": {
+    ".github/workflows/call-center-administration.yml": "9cb8a3a88078ecf6e29240edd03f735be08cb4c4934a0028687bbd0339c6a4f2",
+    "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb": "a134ad68d3d9a9520da99fb69faa2eccfdbfe0b25eff00399cf4f25f8c5694f8",
+    "app/javascript/dashboard/api/jrcContactCenter.js": "21f515a962f18a3c81ff3907ff7f97745fc7d8d7727376f3a998869d5072d35a",
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "7cb993ed29a8ce405d653cb465066250ed383fed7dd93cfc76fcb62ec0d8b213",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue": "eacc4be1de835a7273bd001bc728d94bdf72cb110b57fd0b6baef40cafcf6736",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingRuleActivation.vue": "08f6ed7546a9b1052304fd7926e4f9152bf2119806bd5ed606eca6ced06fd43e",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js": "de4aab3beee2955a5845b66c39c9a643d1cef055ab1ae5c16e19210fca624f0d",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": "091a14f9295c6bc539e0d38d3cad1df7ffaa73cd09ff815cacfb0e637a7a5293",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingRuleActivation.js": "f9b81a7a9c3203ab221feaa34bb6a220b55fa0fefd7c43b91bd8a688f1115b3e",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingRuleActivation.spec.js": "7a8e52f480367571d62a219cf6efae4204139c7b4d973c7f66bb7eb4ea2e8e52",
+    "app/services/jrc_contact_center/ending_actions/readiness_status.rb": "87f11d0866b1034b1f34150733a00cc04734793820227eeefb8ecf330a2da801",
+    "config/routes/jrc_contact_center_acw.rb": "331577f7d6540ceeb2dfe5339a0fa9182e3fb8b41e19fc61c2285a38d0b8b2f5",
+    "script/jrc_call_center_ending_automation_seed.rb": "6f7918ef04ae38d2fd7b631d637e970fc8ae53c0acef83ceb0db8fa0c01ce666",
+    "script/jrc_call_center_pause_seed.rb": "310298d2c62f5da6e718449fdafd727c9a0be13635d747c6f6a22ecfd1cdf4bb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb": "e927656f66a982e9838efecb83c773cc432fef44a4fd318fba94d3ee39a8326d",
+    "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb": "51b8a3d1bb756aa37ec7faeb139afd364e907e143155ecab7c8b5f2971864f5e",
+    "tests/playwright/call-center-native.config.ts": "ada02e4713601ead6f582926b1c2ffb0d4ce31c83000e8263ded8e9abe928518",
+    "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.mjs": "a16ef13827912a9a2162c8c9ad53a6a6c5e005b7e35b0642e5c60e93aba00d88",
+    "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts": "807f6dc21573164011c3c46fc139af6a944779ff422b10231afcb80641a3f61c",
+    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "3e4b28b021cb0fa80598979d82f659506f70dc3f0cd9575f401901caae5abf51"
+  },
+  "parent_sources": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb": "06a2e3e1d6f0b32c28bf95f20aab697215e2214a4474c9b8b4de2f280eeaac33",
+    "config/routes/jrc_contact_center_acw.rb": "f456b1e348adf6ec18474b6d76d1be4c98dc7fb47476fa4fd492af0313c9675e",
+    "app/javascript/dashboard/api/jrcContactCenter.js": "cefcce950eab3a4a22b2a60339fbfe7b16d971a910ce25f95642e8c3fc60bc97",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue": "5b47ca46047961504b0fa102b26c5df043d9958976f3dcdc3ce2be7b97da7539",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js": "383ab5c43c50ad9c4d63f5082df8cafa04c401c1fb71cc9ad8a52817cad76d4e",
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "9e703039172736d19dfd61fe09ab68a31971b0afcf6398b2ea894a746fd597d7",
+    "script/jrc_call_center_ending_automation_seed.rb": "37ae32235238752784c45b5744361dff3385a03dc2537ebba01206d7b696f2a2",
+    "script/jrc_call_center_pause_seed.rb": "2198e930d6a7fd7e1c5632af526a62fbf257c2dcf2ed82d37812d2d85941d53e",
+    "tests/playwright/call-center-native.config.ts": "b3155f12640ac7e21316e25ca9ac8d5c8947a80b17cfbfc1b04ef4fc41b49018",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": "172fcb97ed004d956ce703a07e97173365f9eaf3d94e9aa4e875faa4345cc2d5",
+    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "ae250a62250824d5425e3ddc73a91cffd01d7f5c9daa1726bab18649588cc61f",
+    ".github/workflows/call-center-administration.yml": "0743ec33f6b6c5fede4f8073733a8adadbac44c0edc803ad40f932e04b874c42"
+  },
+  "new_native_cases_prepared": 24,
+  "new_vue_cases_prepared": 18,
+  "native_cases_prepared": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb": 13,
+    "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb": 11
+  },
+  "vue_cases_prepared": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": 19,
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingRuleActivation.spec.js": 16
+  },
+  "chrome_total_required": 268,
+  "new_chrome_cases": 4,
+  "new_screenshots_required": 12,
+  "native_cases_executed": 0,
+  "implemented": [
+    "Authenticated native activation/readback using current configuration and destination authority, without grants or replaying previous calls.",
+    "Explicit review and click; immutable displayed revision; no background list/conflict refresh silently changes the reviewed snapshot.",
+    "Same request key retained after uncertain acknowledgement; no implicit retry; stale revisions require reloading the actual rule.",
+    "Exact persisted readiness/history, with private PostgreSQL definition digests and intervening disable/change barriers.",
+    "Four additional real Chromium cases prepared in isolated per-project synthetic accounts, retaining all264 prior cases."
+  ],
+  "native_proofs_prepared_not_run": {
+    "prior_workflow_exactly_recoverable": true,
+    "new_native_preflight_examples": 24,
+    "total_chrome_required": 268,
+    "old_chrome_cases_retained": 264,
+    "new_native_activation_browser_proofs": 4,
+    "new_screenshots": 12,
+    "embedded_python_blocks_syntax_passed": 14,
+    "native_actionlint_or_workflow_execution": false,
+    "published": false
+  },
+  "remaining": [
+    "Native Rails/Vue/lint and all268 Chromium cases, independent artifact hashes and actual visual review at this SHA.",
+    "Per-rule manual confirmation and authorized execution history/retry UI.",
+    "Native CRM and Service Desk adapters with legitimate immutable business context and independent receipts.",
+    "Actual broker dequeue, scale/account lifecycle and external PABX/provider homologation."
+  ],
+  "new_grants_or_business_parameters": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false,
+  "source_admission": {
+    "all_twenty_native_schemas_receipts_and_SQL_unchanged": true,
+    "checkpoint_writer_unchanged": true,
+    "python_blocks_syntax": 14,
+    "light_Node_syntax": [
+      "app/javascript/dashboard/api/jrcContactCenter.js",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingRuleActivation.js",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingRuleActivation.spec.js",
+      "tests/playwright/call-center-native.config.ts",
+      "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.mjs",
+      "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts",
+      "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+    ],
+    "native_or_browser_acceptance": false
+  }
+}

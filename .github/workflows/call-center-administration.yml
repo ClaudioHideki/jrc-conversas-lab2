@@ -366,6 +366,30 @@ jobs:
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert all(row['status'] == 'passed' for row in report['examples'])
           PY
+      - name: Explicit activation and current native readiness authorization
+        id: ending_activation_preflight
+        run: |
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb app/services/jrc_contact_center/ending_actions/readiness_status.rb config/routes/jrc_contact_center_acw.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb --format json --out /tmp/call-center-ending-activation-lint.json
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb --format progress --format json --out /tmp/call-center-ending-activation-preflight.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('/tmp/call-center-ending-activation-preflight.json').read_text())
+          assert data['summary']['example_count'] == len(data['examples']) == 24
+          assert all(data['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          expected = {'spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb': 13,
+                      'spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb': 11}
+          actual = {}
+          identities = set()
+          for row in data['examples']:
+              assert row['status'] == 'passed'
+              path = row['file_path'].removeprefix('./')
+              identity = (path, row['line_number'], row['full_description'])
+              assert identity not in identities
+              identities.add(identity)
+              actual[path] = actual.get(path, 0) + 1
+          assert actual == expected
+          PY
       - name: Rails authorization, persistence and affected regressions
         id: native_core
         run: |
@@ -387,7 +411,7 @@ jobs:
             --exclude-pattern '**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
-        if: failure() && (steps.native_schema.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure')
+        if: failure() && (steps.native_schema.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
@@ -403,6 +427,7 @@ jobs:
             /tmp/call-center-ending-readiness-*.json
             /tmp/call-center-ending-success-*.json
             /tmp/call-center-ending-attempt-*.json
+            /tmp/call-center-ending-activation-*.json
             /tmp/call-center-ending-assignee-*.json
             /tmp/call-center-ending-version-schema-*.json
             /tmp/call-center-ivr-schema-reload-rspec.json
@@ -531,7 +556,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 264
+          assert stats['expected'] == 268
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')
@@ -692,6 +717,27 @@ jobs:
           assert assignee['summary']['example_count'] == len(assignee['examples']) == 2
           assert all(assignee['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert all(row['status'] == 'passed' for row in assignee['examples'])
+          activation = json.loads(Path('/tmp/call-center-ending-activation-preflight.json').read_text())
+          assert activation['summary']['example_count'] == len(activation['examples']) == 24
+          assert all(activation['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in activation['examples'])
+          activation_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-activation-native.json')]
+          assert len(activation_flows) == 4 and {row['project'] for row in activation_flows} == expected_projects
+          assert len({row['account_id'] for row in activation_flows}) == 4
+          for flow in activation_flows:
+              assert flow['sha'] == os.environ['GITHUB_SHA'] and flow['synthetic'] is True
+              assert flow['activation_status'] == 200 and flow['stale_status'] == 409 and flow['denied_status'] in [401, 403]
+              assert all(flow[key] is True for key in ['persisted_reload_verified', 'explicit_same_key_replay_verified', 'no_implicit_UI_post'])
+              assert flow['UI_post_count'] == 2
+              assert type(flow['native_task_count_before']) is int and flow['native_task_count_before'] >= 0
+              assert flow['native_task_count_after'] == flow['native_task_count_before']
+              assert flow['actual_dark_theme'] is flow['project'].endswith('dark')
+              assert flow['contrast']['ratio'] >= 4.5
+              assert not flow['errors'] and not flow['prohibited_provider_or_destination_writes']
+              assert flow['call_or_broker_operations_claimed'] is False
+              expected_images = {f".codex/call-center-native-e2e/{flow['project']}-ending-activation-{stage}.png" for stage in ['review', 'recorded', 'stale']}
+              assert len(flow['screenshots']) == 3 and set(flow['screenshots']) == expected_images
+              assert all(Path(path).is_file() for path in expected_images)
           vue = json.loads(Path('/tmp/call-center-vitest.json').read_text())
           assert vue['numPassedTests'] == vue['numTotalTests'] > 0
           assert vue['numFailedTests'] == vue['numPendingTests'] == 0

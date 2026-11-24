@@ -1,6 +1,6 @@
 {
   "parent": "2c3525735edf4ce6a798c3a5e24a1b414d5fafed",
-  "status": "implemented_native_attempts_and_dispatch_awaiting_native_validation",
+  "status": "native_internal_attempts_and_committed_projects_dispatch_validated",
   "source_sha256": {
     ".github/workflows/call-center-administration.yml": "0743ec33f6b6c5fede4f8073733a8adadbac44c0edc803ad40f932e04b874c42",
     "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.spec.js": "2fd4722175623b48a1335baf1fb1e2087cd6b370a78bf6621aae6b6735db41b9",
@@ -48,7 +48,7 @@
     "spec/services/jrc_contact_center/synthetic_ending_attempt_upgrade_spec.rb": 1
   },
   "new_native_cases_prepared": 57,
-  "native_cases_executed": 0,
+  "native_cases_executed": 57,
   "visual_correction_prepared": {
     "observed_gap": "The automation editor kept the outer reason-catalogue heading and description.",
     "existing_translation_reused": true,
@@ -526,5 +526,7 @@
     "native_services_migrations_SQL_receipts_permissions_and_every_test_unchanged": true,
     "new_SHA_full_native_and_Chrome_revalidation_required": true,
     "whole_figure10_or_Part1_accepted": false
-  }
+  },
+  "native_acceptance": "docs/jrc_contact_center/ending_attempt_native_acceptance_20261124.json",
+  "native_verified_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
 }

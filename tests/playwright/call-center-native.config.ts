@@ -4,7 +4,10 @@ import path from 'node:path';
 const evidence = path.resolve('.codex/call-center-native-e2e');
 export default defineConfig({
   testDir: './tests/e2e/ui',
-  testMatch: 'call-center-native.spec.ts',
+  testMatch: [
+    'call-center-native.spec.ts',
+    'call-center-ending-activation-native.spec.ts',
+  ],
   workers: 1,
   retries: 0,
   timeout: 90000,

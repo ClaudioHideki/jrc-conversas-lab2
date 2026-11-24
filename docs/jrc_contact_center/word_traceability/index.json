@@ -2985,5 +2985,225 @@
       "complete_diagnostic_artifact_sha256": "a21ea62148fa0d9fadcdac0b09f19e4ede1a95b11c52c8d7d9d878e73c50e155",
       "complete_new_offense_count": 2
     }
+  },
+  "native_internal_attempts_and_dispatch_acceptance": {
+    "sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+    "run": 45407961337,
+    "artifact": 14934285952,
+    "artifact_sha256": "c2d57b6855b68c4cee24381e2841f761722e8e1fc9e407f9725bca5fc65e704f",
+    "accepted_scope": "Internal native Projects attempt/outcome history, confirmed-ending/ACW after-commit hooks, ActiveJob execution and bounded recovery, with original current authority and atomic native effects.",
+    "native_distinct_examples": 3174,
+    "new_native_cases_including_separate_upgrade": 57,
+    "preflight_and_core": {
+      "summary": {
+        "example_count": 13,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb": 6,
+        "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": 7
+      }
+    },
+    "actual_attempt_concurrency": {
+      "summary": {
+        "example_count": 22,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": 22
+      }
+    },
+    "actual_committed_event_dispatch": {
+      "summary": {
+        "example_count": 15,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": 15
+      }
+    },
+    "native_executor_wrapper": {
+      "summary": {
+        "example_count": 23,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": 23
+      }
+    },
+    "schema_metadata": [
+      {
+        "stage": "reload",
+        "product_sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+        "stored": {
+          "jrc_contact_center_ending_action_attempts": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+          "jrc_contact_center_ending_action_attempt_outcomes": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479"
+        },
+        "calculated": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+        "component_hashes": {
+          "structure": "f896655982a9271239d72c6758a154bba7e748eb426596feced88281576502e9",
+          "constraints": "7a688b109779867c5276def5066f3c7cc5bb47799d971b724fbdf2512a2e1573",
+          "functions": "862c308b694c2a06cd770b72aacec398596baae99eab81bbf518b477e46605a9",
+          "triggers": "5cf3b951a9edbac8ffb96ac905b51f688a2f017d25cee500d9a78ea745a133d8"
+        },
+        "attempt_count": 0,
+        "outcome_count": 0,
+        "path": "tmp/call-center-ending-attempt-schema-reload.json",
+        "sha256": "139b27ac44ef0e9ad7e108a122df50d60d02400ada38b3377a52eacea3aca4b4"
+      },
+      {
+        "stage": "populated",
+        "product_sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+        "stored": {
+          "jrc_contact_center_ending_action_attempts": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+          "jrc_contact_center_ending_action_attempt_outcomes": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479"
+        },
+        "calculated": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+        "component_hashes": {
+          "structure": "f896655982a9271239d72c6758a154bba7e748eb426596feced88281576502e9",
+          "constraints": "7a688b109779867c5276def5066f3c7cc5bb47799d971b724fbdf2512a2e1573",
+          "functions": "862c308b694c2a06cd770b72aacec398596baae99eab81bbf518b477e46605a9",
+          "triggers": "5cf3b951a9edbac8ffb96ac905b51f688a2f017d25cee500d9a78ea745a133d8"
+        },
+        "attempt_count": 0,
+        "outcome_count": 0,
+        "path": "tmp/call-center-ending-attempt-schema-populated.json",
+        "sha256": "c8d01ef7e889777106c6076f389a6a4388527e5eaaafb5340b6da73cc1370612"
+      },
+      {
+        "stage": "fresh",
+        "product_sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+        "stored": {
+          "jrc_contact_center_ending_action_attempts": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+          "jrc_contact_center_ending_action_attempt_outcomes": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479"
+        },
+        "calculated": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+        "component_hashes": {
+          "structure": "f896655982a9271239d72c6758a154bba7e748eb426596feced88281576502e9",
+          "constraints": "7a688b109779867c5276def5066f3c7cc5bb47799d971b724fbdf2512a2e1573",
+          "functions": "862c308b694c2a06cd770b72aacec398596baae99eab81bbf518b477e46605a9",
+          "triggers": "5cf3b951a9edbac8ffb96ac905b51f688a2f017d25cee500d9a78ea745a133d8"
+        },
+        "attempt_count": 0,
+        "outcome_count": 0,
+        "path": "tmp/call-center-ending-attempt-schema-fresh.json",
+        "sha256": "91b9ed832b51678f71cd21ac958af1eada67782fce72fd35195af24bfee9448f"
+      }
+    ],
+    "populated_upgrade": {
+      "sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+      "synthetic": true,
+      "exact_old_columns_and_values_preserved": true,
+      "rerun_idempotent": true,
+      "existing_tasks_preserved": 2,
+      "successful_receipts_preserved": 1,
+      "queued_attempts": 0,
+      "terminal_outcomes": 0,
+      "operational_effects_delta": 0,
+      "path": "tmp/call-center-ending-attempt-upgrade.json",
+      "sha256": "d8446d2a1c64ad85de3b0da63ecd71f8e4d70685fdc490dbc02256bc720fd4e8"
+    },
+    "old_native_M19_receipts_and_history_preserved": true,
+    "vue": {
+      "examples": 1813,
+      "failures": 0,
+      "pending": 0
+    },
+    "chrome": {
+      "examples": 264,
+      "failures": 0,
+      "pending": 0,
+      "flaky": 0
+    },
+    "screenshot_hashes_verified": 608,
+    "actual_visual_review": {
+      "source_sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+      "run": 45407961337,
+      "at": "2026-11-24T15:09:18.698618+00:00",
+      "original_files_actually_opened": 10,
+      "original_PNG_hashes_verified": true,
+      "observations": [
+        "Desktop1440 andmobile390 inboth actualthemes: teamfilters stack correctly; cards wrap long names; buttons and pagination do not overlap.",
+        "Automationpopup has its own correct Portuguese title; responsive single/two-column destination cards, confirmation and saved-state footer remain legible.",
+        "Images capture scrolled viewports intentionally; native long-input text clipping does not cause body overflow.",
+        "Unimplemented CRM, ServiceDesk, notifications andNICO destinations remain explicitly pending/disabled; no fake operational results."
+      ],
+      "remaining_divergences": [
+        "Operational activation/readback UI and authorized per-attempt history still require their own increments.",
+        "Manual execution, selected retry, native CRM/ServiceDesk, actual broker and externalprovider homologation remain open."
+      ],
+      "whole_figure10_or_Part1_accepted": false,
+      "images": [
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\desktop-dark-authority-card.png",
+          "sha256": "7bbf773af41584d6b477125947754d67b29c37756cbd22f2b9777bde84e679b5"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\desktop-light-authority-card.png",
+          "sha256": "f04239a3bcd407efac5c123f7eae13cba3fd7e85e02628ab3bc612d21f8c8974"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\mobile-dark-authority-card.png",
+          "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\mobile-light-authority-card.png",
+          "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\mobile-dark-authority-filters-closed.png",
+          "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\mobile-light-authority-filters-closed.png",
+          "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-c79883dd\\desktop-dark-ending-automation-editor.png",
+          "sha256": "71af9509f9b999c7bfb67035a4588597eb83035081a4d9fc789499ba67a2e693"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-c79883dd\\desktop-light-ending-automation-editor.png",
+          "sha256": "4ff04174eea5ba4e6f880c7ee1e819e47409cdfe17cfcf4e97db72a074a64dbf"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-c79883dd\\mobile-dark-ending-automation-editor.png",
+          "sha256": "e17c65ee45e057182262afacdfdfa328428babfd3d3c8f84d4a8511695fb54b6"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-c79883dd\\mobile-light-ending-automation-editor.png",
+          "sha256": "fabbf6f9b12796a42112f2d1daa82a5cf9d8921328e42dcf9b6714cbe110213f"
+        }
+      ]
+    },
+    "actual_child_page_failure_capture_prepared_without_changing_verdicts": true,
+    "no_installation_time_activation_backfill_or_effects": true,
+    "test_execution_boundary": "Actual PostgreSQL/transactions/threads and native ActiveJob execution. Broker failure is explicitly injected; production Sidekiq dequeue and external providers are not homologated.",
+    "real_broker_or_external_provider_homologated": false,
+    "remaining": [
+      "Native operational activation/readback UI/API candidate and four added browser contexts",
+      "Per-rule manual confirmation and authorized execution history/retry interface",
+      "Native CRM and Service Desk adapters with legitimate immutable business context and independent receipts",
+      "Recovery UI/scheduling and original-event recovery when its history database itself was unavailable",
+      "Representative scale, full account lifecycle, real Sidekiq dequeue and external PABX/provider homologation"
+    ],
+    "whole_figure10_accepted": false,
+    "whole_part1_accepted": false
+  },
+  "operational_activation_candidate": {
+    "parent": "c79883dd0af99d50937ed05aed31064863eaeb80",
+    "document": "docs/jrc_contact_center/ending_activation_candidate_20261124.json",
+    "new_native_cases_prepared_not_executed": 24,
+    "new_vue_cases_prepared_not_executed": 18,
+    "total_chrome_required": 268,
+    "whole_figure_accepted": false
   }
 }

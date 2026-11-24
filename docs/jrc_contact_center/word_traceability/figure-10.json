@@ -13,8 +13,9 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
       "git_blob_at_validated_base": "14b20edf713f80c5a3772c6092987d1eebbd1032",
-      "state": "implementado_pendente_revalidacao_Chrome_novo_SHA",
-      "current_sha256": "87abf3a68dece4066afc36702973e938dbd95d6f2060ad09e66ababd7cb39216"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "87abf3a68dece4066afc36702973e938dbd95d6f2060ad09e66ababd7cb39216",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/configure_rule.rb",
@@ -49,14 +50,14 @@
     {
       "path": "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
       "git_blob_at_validated_base": "c60a1f991e2aab8f0a1ad1ed5bdb4d7e6cb2cde8",
-      "state": "presente_na_base_validada",
-      "current_sha256": "06a2e3e1d6f0b32c28bf95f20aab697215e2214a4474c9b8b4de2f280eeaac33"
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "a134ad68d3d9a9520da99fb69faa2eccfdbfe0b25eff00399cf4f25f8c5694f8"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
       "git_blob_at_validated_base": "d8323a2b1276ec658b609e62c9ab5f48de64a5b6",
-      "state": "presente_na_base_validada",
-      "current_sha256": "5b47ca46047961504b0fa102b26c5df043d9958976f3dcdc3ce2be7b97da7539"
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "eacc4be1de835a7273bd001bc728d94bdf72cb110b57fd0b6baef40cafcf6736"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
@@ -67,8 +68,8 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js",
       "git_blob_at_validated_base": "fc5f647dcb1a83f0d0fdefcb5a6d2bd2869966d6",
-      "state": "presente_na_base_validada",
-      "current_sha256": "383ab5c43c50ad9c4d63f5082df8cafa04c401c1fb71cc9ad8a52817cad76d4e"
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "de4aab3beee2955a5845b66c39c9a643d1cef055ab1ae5c16e19210fca624f0d"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/source_context.rb",
@@ -109,8 +110,9 @@
     {
       "path": "app/models/jrc_contact_center/qualification.rb",
       "git_blob_at_validated_base": "efb235d14b9966f8ea69e936d933f84f6d217de2",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "2dc94a11ed306c733105ab7818c57caeb564e7e7d08fdbc143d10a61f150dd66"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "2dc94a11ed306c733105ab7818c57caeb564e7e7d08fdbc143d10a61f150dd66",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/source_authority.rb",
@@ -190,84 +192,139 @@
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
       "current_sha256": "5efd6a5c65c8fb2a9f73972aa0332ed68f2d5a494cc65d5bc3404d1cc39e1d3f",
-      "evidence_sha": "2c3525735edf4ce6a798c3a5e24a1b414d5fafed"
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.spec.js",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "2fd4722175623b48a1335baf1fb1e2087cd6b370a78bf6621aae6b6735db41b9"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "2fd4722175623b48a1335baf1fb1e2087cd6b370a78bf6621aae6b6735db41b9",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/jobs/jrc_contact_center/ending_actions_job.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "7d53a7d946c0d463b0fb15fad45825e9b4be08eb807c07feb67b42c3527b44a1"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "7d53a7d946c0d463b0fb15fad45825e9b4be08eb807c07feb67b42c3527b44a1",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/jobs/jrc_contact_center/ending_attempt_reconcile_job.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "6594b22bfa384c323ce4a29b03c811c69331a82af9b18fd649e4e0f443101815"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "6594b22bfa384c323ce4a29b03c811c69331a82af9b18fd649e4e0f443101815",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/models/jrc_contact_center/ending_action_attempt.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "3929639119ee77ddfd38f9e7bc30032dd10a8c6d02bc628cefef98ce4a0665cb"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "3929639119ee77ddfd38f9e7bc30032dd10a8c6d02bc628cefef98ce4a0665cb",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/models/jrc_contact_center/ending_action_attempt_outcome.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "e898a92f6b0185bb860f6c740962ad7c2d40ed9ac2ccf6f659c1ecb6f3fb986e"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "e898a92f6b0185bb860f6c740962ad7c2d40ed9ac2ccf6f659c1ecb6f3fb986e",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/models/jrc_contact_center/ending_reason_confirmation.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "dcc7cedb56077d8908c0eb1c73038b192dc464363d1f54a6e4755bfe391db288"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "dcc7cedb56077d8908c0eb1c73038b192dc464363d1f54a6e4755bfe391db288",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/attempt_failure.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "94fe9c0c1f05b91edb601ac9f66b4cf401faf97d9bcf8994f2a32cce346cac4a"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "94fe9c0c1f05b91edb601ac9f66b4cf401faf97d9bcf8994f2a32cce346cac4a",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "6e0148d28d098680ce9f350142cfab0f5660e02e9f81db4f8045722001d5f0c7"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "6e0148d28d098680ce9f350142cfab0f5660e02e9f81db4f8045722001d5f0c7",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/execute_attempt.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "510a4786a30d2f05fb751c54e0fdd57e410b521c60f7ad6224cebda5eef21334"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "510a4786a30d2f05fb751c54e0fdd57e410b521c60f7ad6224cebda5eef21334",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/initial_project_attempts.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "043bbe6cb67bc050352a969e32869995fb5c1e06dfb72745f6af06bd847d58f5"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "043bbe6cb67bc050352a969e32869995fb5c1e06dfb72745f6af06bd847d58f5",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/queue_project_attempt.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "e383e32c2eb5d8ad8d3f89fc4bae3d690da7ed7a50387f9c401f043d6fd05374"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "e383e32c2eb5d8ad8d3f89fc4bae3d690da7ed7a50387f9c401f043d6fd05374",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/record_attempt.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "7f58fb74057f090d9f53e37352f81910c67f416446891a465e9f929552b46449"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "7f58fb74057f090d9f53e37352f81910c67f416446891a465e9f929552b46449",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "db/functions/20261124001000_contact_center_ending_attempts.sql",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "7c317f8dde21ef093a5c6ebe12b09f5b84fc65d253f61d5a01256e3e88e1f29f"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "7c317f8dde21ef093a5c6ebe12b09f5b84fc65d253f61d5a01256e3e88e1f29f",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "db/migrate/20261124001000_create_contact_center_ending_action_attempts.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "a4e1893ac89f24823fa7779dc4bc7d625134677bcfddfd0f8eb1ca8a15aa0dc8"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "a4e1893ac89f24823fa7779dc4bc7d625134677bcfddfd0f8eb1ca8a15aa0dc8",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
     },
     {
       "path": "lib/jrc_contact_center/ending_action_attempt_schema_receipt.rb",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "d143e6d8b95c4af20047af63fb68fb8694492d6063f0a3ff2c14eb53ed0fdb6f"
+      "state": "implementado_validado_tentativas_dispatch_interno_projetos",
+      "current_sha256": "d143e6d8b95c4af20047af63fb68fb8694492d6063f0a3ff2c14eb53ed0fdb6f",
+      "evidence_sha": "c79883dd0af99d50937ed05aed31064863eaeb80"
+    },
+    {
+      "path": "app/javascript/dashboard/api/jrcContactCenter.js",
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "21f515a962f18a3c81ff3907ff7f97745fc7d8d7727376f3a998869d5072d35a"
+    },
+    {
+      "path": "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "7cb993ed29a8ce405d653cb465066250ed383fed7dd93cfc76fcb62ec0d8b213"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingRuleActivation.vue",
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "08f6ed7546a9b1052304fd7926e4f9152bf2119806bd5ed606eca6ced06fd43e"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "091a14f9295c6bc539e0d38d3cad1df7ffaa73cd09ff815cacfb0e637a7a5293"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingRuleActivation.js",
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "f9b81a7a9c3203ab221feaa34bb6a220b55fa0fefd7c43b91bd8a688f1115b3e"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingRuleActivation.spec.js",
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "7a8e52f480367571d62a219cf6efae4204139c7b4d973c7f66bb7eb4ea2e8e52"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/readiness_status.rb",
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "87f11d0866b1034b1f34150733a00cc04734793820227eeefb8ecf330a2da801"
+    },
+    {
+      "path": "config/routes/jrc_contact_center_acw.rb",
+      "state": "implementado_pendente_validacao_nativa_ativacao_explicita",
+      "current_sha256": "331577f7d6540ceeb2dfe5339a0fa9182e3fb8b41e19fc61c2285a38d0b8b2f5"
     }
   ],
   "planned_not_present": [],
@@ -589,6 +646,16 @@
     {
       "path": "spec/services/jrc_contact_center/synthetic_ending_attempt_upgrade_spec.rb",
       "candidate_prepared_examples": 1,
+      "candidate_native_accepted": false
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb",
+      "candidate_prepared_examples": 13,
+      "candidate_native_accepted": false
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb",
+      "candidate_prepared_examples": 11,
       "candidate_native_accepted": false
     }
   ],
@@ -4171,5 +4238,225 @@
     "native_services_migrations_SQL_receipts_permissions_and_every_test_unchanged": true,
     "new_SHA_full_native_and_Chrome_revalidation_required": true,
     "whole_figure10_or_Part1_accepted": false
+  },
+  "native_internal_attempts_and_dispatch_acceptance": {
+    "sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+    "run": 45407961337,
+    "artifact": 14934285952,
+    "artifact_sha256": "c2d57b6855b68c4cee24381e2841f761722e8e1fc9e407f9725bca5fc65e704f",
+    "accepted_scope": "Internal native Projects attempt/outcome history, confirmed-ending/ACW after-commit hooks, ActiveJob execution and bounded recovery, with original current authority and atomic native effects.",
+    "native_distinct_examples": 3174,
+    "new_native_cases_including_separate_upgrade": 57,
+    "preflight_and_core": {
+      "summary": {
+        "example_count": 13,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb": 6,
+        "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": 7
+      }
+    },
+    "actual_attempt_concurrency": {
+      "summary": {
+        "example_count": 22,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": 22
+      }
+    },
+    "actual_committed_event_dispatch": {
+      "summary": {
+        "example_count": 15,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": 15
+      }
+    },
+    "native_executor_wrapper": {
+      "summary": {
+        "example_count": 23,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": 23
+      }
+    },
+    "schema_metadata": [
+      {
+        "stage": "reload",
+        "product_sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+        "stored": {
+          "jrc_contact_center_ending_action_attempts": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+          "jrc_contact_center_ending_action_attempt_outcomes": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479"
+        },
+        "calculated": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+        "component_hashes": {
+          "structure": "f896655982a9271239d72c6758a154bba7e748eb426596feced88281576502e9",
+          "constraints": "7a688b109779867c5276def5066f3c7cc5bb47799d971b724fbdf2512a2e1573",
+          "functions": "862c308b694c2a06cd770b72aacec398596baae99eab81bbf518b477e46605a9",
+          "triggers": "5cf3b951a9edbac8ffb96ac905b51f688a2f017d25cee500d9a78ea745a133d8"
+        },
+        "attempt_count": 0,
+        "outcome_count": 0,
+        "path": "tmp/call-center-ending-attempt-schema-reload.json",
+        "sha256": "139b27ac44ef0e9ad7e108a122df50d60d02400ada38b3377a52eacea3aca4b4"
+      },
+      {
+        "stage": "populated",
+        "product_sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+        "stored": {
+          "jrc_contact_center_ending_action_attempts": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+          "jrc_contact_center_ending_action_attempt_outcomes": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479"
+        },
+        "calculated": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+        "component_hashes": {
+          "structure": "f896655982a9271239d72c6758a154bba7e748eb426596feced88281576502e9",
+          "constraints": "7a688b109779867c5276def5066f3c7cc5bb47799d971b724fbdf2512a2e1573",
+          "functions": "862c308b694c2a06cd770b72aacec398596baae99eab81bbf518b477e46605a9",
+          "triggers": "5cf3b951a9edbac8ffb96ac905b51f688a2f017d25cee500d9a78ea745a133d8"
+        },
+        "attempt_count": 0,
+        "outcome_count": 0,
+        "path": "tmp/call-center-ending-attempt-schema-populated.json",
+        "sha256": "c8d01ef7e889777106c6076f389a6a4388527e5eaaafb5340b6da73cc1370612"
+      },
+      {
+        "stage": "fresh",
+        "product_sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+        "stored": {
+          "jrc_contact_center_ending_action_attempts": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+          "jrc_contact_center_ending_action_attempt_outcomes": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479"
+        },
+        "calculated": "jrc_cc_ending_attempt_history_v1:ce8a3a5822ea95137809126a71d82552f71ef9b1544cce03ba6d7ec138cae479",
+        "component_hashes": {
+          "structure": "f896655982a9271239d72c6758a154bba7e748eb426596feced88281576502e9",
+          "constraints": "7a688b109779867c5276def5066f3c7cc5bb47799d971b724fbdf2512a2e1573",
+          "functions": "862c308b694c2a06cd770b72aacec398596baae99eab81bbf518b477e46605a9",
+          "triggers": "5cf3b951a9edbac8ffb96ac905b51f688a2f017d25cee500d9a78ea745a133d8"
+        },
+        "attempt_count": 0,
+        "outcome_count": 0,
+        "path": "tmp/call-center-ending-attempt-schema-fresh.json",
+        "sha256": "91b9ed832b51678f71cd21ac958af1eada67782fce72fd35195af24bfee9448f"
+      }
+    ],
+    "populated_upgrade": {
+      "sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+      "synthetic": true,
+      "exact_old_columns_and_values_preserved": true,
+      "rerun_idempotent": true,
+      "existing_tasks_preserved": 2,
+      "successful_receipts_preserved": 1,
+      "queued_attempts": 0,
+      "terminal_outcomes": 0,
+      "operational_effects_delta": 0,
+      "path": "tmp/call-center-ending-attempt-upgrade.json",
+      "sha256": "d8446d2a1c64ad85de3b0da63ecd71f8e4d70685fdc490dbc02256bc720fd4e8"
+    },
+    "old_native_M19_receipts_and_history_preserved": true,
+    "vue": {
+      "examples": 1813,
+      "failures": 0,
+      "pending": 0
+    },
+    "chrome": {
+      "examples": 264,
+      "failures": 0,
+      "pending": 0,
+      "flaky": 0
+    },
+    "screenshot_hashes_verified": 608,
+    "actual_visual_review": {
+      "source_sha": "c79883dd0af99d50937ed05aed31064863eaeb80",
+      "run": 45407961337,
+      "at": "2026-11-24T15:09:18.698618+00:00",
+      "original_files_actually_opened": 10,
+      "original_PNG_hashes_verified": true,
+      "observations": [
+        "Desktop1440 andmobile390 inboth actualthemes: teamfilters stack correctly; cards wrap long names; buttons and pagination do not overlap.",
+        "Automationpopup has its own correct Portuguese title; responsive single/two-column destination cards, confirmation and saved-state footer remain legible.",
+        "Images capture scrolled viewports intentionally; native long-input text clipping does not cause body overflow.",
+        "Unimplemented CRM, ServiceDesk, notifications andNICO destinations remain explicitly pending/disabled; no fake operational results."
+      ],
+      "remaining_divergences": [
+        "Operational activation/readback UI and authorized per-attempt history still require their own increments.",
+        "Manual execution, selected retry, native CRM/ServiceDesk, actual broker and externalprovider homologation remain open."
+      ],
+      "whole_figure10_or_Part1_accepted": false,
+      "images": [
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\desktop-dark-authority-card.png",
+          "sha256": "7bbf773af41584d6b477125947754d67b29c37756cbd22f2b9777bde84e679b5"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\desktop-light-authority-card.png",
+          "sha256": "f04239a3bcd407efac5c123f7eae13cba3fd7e85e02628ab3bc612d21f8c8974"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\mobile-dark-authority-card.png",
+          "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\mobile-light-authority-card.png",
+          "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\mobile-dark-authority-filters-closed.png",
+          "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-c79883dd\\mobile-light-authority-filters-closed.png",
+          "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-c79883dd\\desktop-dark-ending-automation-editor.png",
+          "sha256": "71af9509f9b999c7bfb67035a4588597eb83035081a4d9fc789499ba67a2e693"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-c79883dd\\desktop-light-ending-automation-editor.png",
+          "sha256": "4ff04174eea5ba4e6f880c7ee1e819e47409cdfe17cfcf4e97db72a074a64dbf"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-c79883dd\\mobile-dark-ending-automation-editor.png",
+          "sha256": "e17c65ee45e057182262afacdfdfa328428babfd3d3c8f84d4a8511695fb54b6"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-c79883dd\\mobile-light-ending-automation-editor.png",
+          "sha256": "fabbf6f9b12796a42112f2d1daa82a5cf9d8921328e42dcf9b6714cbe110213f"
+        }
+      ]
+    },
+    "actual_child_page_failure_capture_prepared_without_changing_verdicts": true,
+    "no_installation_time_activation_backfill_or_effects": true,
+    "test_execution_boundary": "Actual PostgreSQL/transactions/threads and native ActiveJob execution. Broker failure is explicitly injected; production Sidekiq dequeue and external providers are not homologated.",
+    "real_broker_or_external_provider_homologated": false,
+    "remaining": [
+      "Native operational activation/readback UI/API candidate and four added browser contexts",
+      "Per-rule manual confirmation and authorized execution history/retry interface",
+      "Native CRM and Service Desk adapters with legitimate immutable business context and independent receipts",
+      "Recovery UI/scheduling and original-event recovery when its history database itself was unavailable",
+      "Representative scale, full account lifecycle, real Sidekiq dequeue and external PABX/provider homologation"
+    ],
+    "whole_figure10_accepted": false,
+    "whole_part1_accepted": false
+  },
+  "operational_activation_candidate": {
+    "parent": "c79883dd0af99d50937ed05aed31064863eaeb80",
+    "document": "docs/jrc_contact_center/ending_activation_candidate_20261124.json",
+    "new_native_cases_prepared_not_executed": 24,
+    "new_vue_cases_prepared_not_executed": 18,
+    "total_chrome_required": 268,
+    "whole_figure_accepted": false
   }
 }
