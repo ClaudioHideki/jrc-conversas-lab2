@@ -144,8 +144,8 @@ jobs:
         run: |
           test "$RAILS_ENV:$POSTGRES_HOST:$POSTGRES_DATABASE" = test:127.0.0.1:jrc_culture_test
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
-          bundle exec rails db:migrate:down VERSION=20261123160000
-          bundle exec rails db:migrate:up VERSION=20261123160000
+          bundle exec rails db:migrate:down VERSION=20261124120000
+          bundle exec rails db:migrate:up VERSION=20261124120000
           bundle exec rspec spec/requests/jrc_culture --format progress --format json --out /tmp/jrc-culture-rspec.json
           ruby -rjson -e 's=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Manual de Cultura gate failed" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero?' /tmp/jrc-culture-rspec.json
       - name: Exigir exemplos executados e nenhuma falha ou pendencia nos quatro bancos

@@ -26,7 +26,8 @@ class JrcCulture::ManualsController < JrcCulture::BaseController
   private
 
   def participation_data(row)
-    version_data(row.version).merge(grant_id: row.grant_id, unit: row.grant.unit.name, current: row.version.state == 'published',
+    label = row.grant.unit&.name || JrcCulture::Access::ACCOUNT_SCOPE_LABEL
+    version_data(row.version).merge(grant_id: row.grant_id, unit: label, current: row.version.state == 'published',
                                     confirmed_at: row.confirmed_at)
   end
 end

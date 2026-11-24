@@ -3,24 +3,28 @@
 namespace :jrc_culture do
   desc 'Grant or revoke the Manual de Cultura administrator role for an existing scoped account membership'
   task administrator: :environment do
-    values = %w[ACCOUNT_ID ACTOR_ID MEMBER_ID UNIT_ID].to_h { |key| [key, Integer(ENV.fetch("JRC_CULTURE_#{key}"), 10)] }
+    values = %w[ACCOUNT_ID ACTOR_ID MEMBER_ID].to_h { |key| [key, Integer(ENV.fetch("JRC_CULTURE_#{key}"), 10)] }
+    unit_key = ENV.fetch('JRC_CULTURE_UNIT_ID')
     action = ENV.fetch('JRC_CULTURE_ACTION')
     abort 'Use JRC_CULTURE_ACTION=grant or revoke' unless %w[grant revoke].include?(action)
 
     account = Account.find(values.fetch('ACCOUNT_ID'))
     actor = account.account_users.administrator.find_by!(user_id: values.fetch('ACTOR_ID')).user
     member = account.account_users.find(values.fetch('MEMBER_ID'))
-    unit = account.jrc_crm_business_units.active.find(values.fetch('UNIT_ID'))
-    unless account.active? && actor.active_for_authentication? &&
-           JrcCrm::CorporateCoverage.new(account: account, user: actor).unit_allowed?(unit.id)
-      abort 'Actor must be an active native administrator with coverage for this unit'
-    end
-    if action == 'grant' && !(member.user.active_for_authentication? &&
-                              JrcCrm::CorporateCoverage.new(account: account, user: member.user).unit_allowed?(unit.id))
-      abort 'Target must be an active account member with coverage for this unit'
-    end
+    abort 'Actor must be an active native administrator of this account' unless account.active? && actor.active_for_authentication?
 
     account.with_lock('FOR NO KEY UPDATE') do
+      unit = account.jrc_crm_business_units.active.find(Integer(unit_key, 10)) unless unit_key == JrcCulture::Access::ACCOUNT_SCOPE
+      if unit
+        abort 'Actor must have coverage for this unit' unless JrcCrm::CorporateCoverage.new(account: account, user: actor).unit_allowed?(unit.id)
+        if action == 'grant' && !JrcCrm::CorporateCoverage.new(account: account, user: member.user).unit_allowed?(unit.id)
+          abort 'Target must have coverage for this unit'
+        end
+      elsif action == 'grant' && !JrcCulture::Grant.account_level_accounts.exists?(id: account.id)
+        abort 'This account has CRM units linked to companies; specify an authorized unit ID'
+      end
+      abort 'Target must be an active account member' if action == 'grant' && !member.user.active_for_authentication?
+
       grants = JrcCulture::Grant.where(account: account, unit: unit, member_key: member.id, role: 'administrator')
       grant = action == 'grant' ? grants.first_or_initialize : grants.first!
       grant.account_user = member if grant.new_record?

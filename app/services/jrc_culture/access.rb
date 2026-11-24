@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class JrcCulture::Access
+  ACCOUNT_SCOPE = 'account'
+  ACCOUNT_SCOPE_LABEL = 'Conta inteira'.freeze
+
   attr_reader :account, :user, :member
 
   def self.accounts(user)
@@ -26,11 +29,31 @@ class JrcCulture::Access
   end
 
   def admin_units
-    JrcCrm::BusinessUnit.where(account: account, id: grants.where(role: 'administrator').select(:unit_id))
+    JrcCrm::BusinessUnit.where(account: account, id: admin_grants.select(:unit_id))
+  end
+
+  def admin_grants
+    grants.where(role: 'administrator')
+  end
+
+  def admin_unit_ids
+    admin_grants.distinct.pluck(:unit_id)
+  end
+
+  def admin_scope_id!(value)
+    unit_id = value == ACCOUNT_SCOPE ? nil : Integer(value.to_s, 10)
+    authorize_admin_scope!(unit_id)
+    unit_id
+  rescue ArgumentError, TypeError
+    raise ActiveRecord::RecordNotFound
+  end
+
+  def authorize_admin_scope!(unit_id)
+    deny! unless admin_grants.exists?(unit_id: unit_id)
   end
 
   def admin!
-    deny! unless admin_units.exists?
+    deny! unless admin_grants.exists?
   end
 
   def version_scope
@@ -48,20 +71,24 @@ class JrcCulture::Access
 
   def admin_versions
     admin!
-    version_scope.where(id: JrcCulture::Audience.where(unit_id: admin_units.select(:id)).select(:version_id))
+    version_scope.where(id: JrcCulture::Audience.where(unit_id: admin_unit_ids).select(:version_id))
   end
 
   def manage_version!(version)
     admin_versions.find(version.id)
-    deny! if version.audiences.where.not(unit_id: admin_units.select(:id)).exists?
+    deny! unless version.audiences.pluck(:unit_id).difference(admin_unit_ids).empty?
   end
 
-  def employee_directory(unit)
-    account.account_users.joins(:user).includes(:user).where(id: eligible_members(unit)).order('users.name', :id)
+  def employee_directory(unit_id)
+    authorize_admin_scope!(unit_id)
+    members = account.account_users.joins(:user).includes(:user).order('users.name', :id)
+    return members if unit_id.nil?
+
+    members.where(id: eligible_members(admin_units.find(unit_id)))
   end
 
-  def eligible_member!(unit, member_id)
-    member = employee_directory(unit).find(member_id)
+  def eligible_member!(unit_id, member_id)
+    member = employee_directory(unit_id).find(member_id)
     deny! unless member.user.active_for_authentication?
     member
   end
@@ -73,7 +100,6 @@ class JrcCulture::Access
   private
 
   def eligible_members(unit)
-    admin_units.find(unit.id)
     scopes = JrcCrm::UserBusinessUnit.active.structure_managed.where(account: account)
     scoped = scopes.where(scope: 'GROUP')
                    .or(scopes.where(scope: 'COMPANY', company_id: unit.company_id))

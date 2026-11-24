@@ -38,6 +38,7 @@ class JrcCulture::ImportsController < JrcCulture::BaseController
   end
 
   def run_data(run)
-    { id: run.id, unit_id: run.unit_id, created_at: run.created_at, applied_at: run.applied_at, result: run.result }
+    { id: run.id, unit_id: run.unit_id || JrcCulture::Access::ACCOUNT_SCOPE,
+      created_at: run.created_at, applied_at: run.applied_at, result: run.result }
   end
 end

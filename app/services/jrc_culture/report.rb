@@ -35,8 +35,8 @@ class JrcCulture::Report
   def base
     versions = @access.admin_versions
     versions = @filters[:version_id].present? ? versions.where(id: @filters[:version_id]) : versions.published
-    grants = JrcCulture::Grant.where(account: @access.account, role: 'employee', unit_id: @access.admin_units.select(:id))
-    grants = grants.where(unit_id: @filters[:unit_id]) if @filters[:unit_id].present?
+    grants = JrcCulture::Grant.where(account: @access.account, role: 'employee', unit_id: @access.admin_unit_ids)
+    grants = grants.where(unit_id: @access.admin_scope_id!(@filters[:unit_id])) if @filters[:unit_id].present?
     if @filters[:company_id].present?
       grants = grants.where(unit_id: @access.admin_units.where(company_id: @filters[:company_id]).select(:id))
     end
@@ -78,14 +78,14 @@ class JrcCulture::Report
   def summary(rows)
     total = rows.count
     confirmed = rows.confirmed.count
-    distribution = rows.joins(grant: { unit: :operating_company })
+    distribution = rows.left_joins(grant: { unit: :operating_company })
                        .group('companies.id', 'companies.name', 'jrc_crm_business_units.id', 'jrc_crm_business_units.name', :department)
                        .pluck(Arel.sql('companies.id, companies.name, jrc_crm_business_units.id, jrc_crm_business_units.name,
                                         jrc_culture_participations.department, COUNT(*), COUNT(jrc_culture_participations.confirmed_at)'))
     {
       total: total, confirmed: confirmed, pending: total - confirmed, percentage: total.zero? ? 0 : (100.0 * confirmed / total).round(1),
       distribution: distribution.map do |company_id, company, unit_id, unit, department, count, done|
-        { company_id: company_id, company: company, unit_id: unit_id, unit: unit, department: department, total: count, confirmed: done }
+        scope_labels(company_id, company, unit_id, unit).merge(department: department, total: count, confirmed: done)
       end
     }
   end
@@ -97,8 +97,14 @@ class JrcCulture::Report
 
   def present(row)
     grant = row.grant
-    { id: row.id, collaborator: grant.account_user&.user&.name, user_id: grant.user_key,
-      company: grant.unit.operating_company.name, unit: grant.unit.name, department: row.department,
-      version: row.version.number, title: row.version.title, confirmed_at: row.confirmed_at }
+    data = { id: row.id, collaborator: grant.account_user&.user&.name, user_id: grant.user_key, department: row.department,
+             version: row.version.number, title: row.version.title, confirmed_at: row.confirmed_at }
+    unit = grant.unit
+    data.merge(scope_labels(unit&.company_id, unit&.operating_company&.name, unit&.id, unit&.name))
+  end
+
+  def scope_labels(company_id, company, unit_id, unit)
+    { company_id: company_id, company: company || @access.account.name,
+      unit_id: unit_id || JrcCulture::Access::ACCOUNT_SCOPE, unit: unit || JrcCulture::Access::ACCOUNT_SCOPE_LABEL }
   end
 end

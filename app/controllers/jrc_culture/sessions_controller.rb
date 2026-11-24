@@ -29,7 +29,7 @@ class JrcCulture::SessionsController < ApplicationController
   def accounts
     JrcCulture::Access.accounts(current_user).order(:name, :id).filter_map do |account|
       access = JrcCulture::Access.new(account: account, user: current_user)
-      { id: account.id, name: account.name, administrator: access.admin_units.exists?, employee: access.employee_grants.exists? }
+      { id: account.id, name: account.name, administrator: access.admin_grants.exists?, employee: access.employee_grants.exists? }
     rescue Pundit::NotAuthorizedError
       nil
     end

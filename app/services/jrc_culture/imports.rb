@@ -9,16 +9,16 @@ class JrcCulture::Imports
 
   def scope
     @access.admin!
-    JrcCulture::Import.where(account: @access.account, unit_id: @access.admin_units.select(:id))
+    JrcCulture::Import.where(account: @access.account, unit_id: @access.admin_unit_ids)
   end
 
   def create!(unit_id:, file:)
-    unit = @access.admin_units.find(unit_id)
+    scope_id = @access.admin_scope_id!(unit_id)
     blob = JrcCulture::Files.upload!(file, kind: 'xlsx')
     JrcCulture::Workbook.rows(JrcCulture::Files.download(blob))
     @access.account.with_lock('FOR NO KEY UPDATE') do
-      @access.admin_units.find(unit.id)
-      run = scope.create!(unit: unit, blob: blob, actor_id: @access.user.id)
+      @access.authorize_admin_scope!(scope_id)
+      run = scope.create!(unit_id: scope_id, blob: blob, actor_id: @access.user.id)
       JrcCulture::Event.record!(@access, 'import_uploaded', run)
       run
     end
@@ -28,11 +28,11 @@ class JrcCulture::Imports
   end
 
   def preview(run)
-    directory = @access.employee_directory(run.unit).select { |member| member.user.active_for_authentication? }
+    directory = @access.employee_directory(run.unit_id).select { |member| member.user.active_for_authentication? }
     by_email = directory.group_by { |member| member.user.email.to_s.downcase }
     by_login = directory.group_by { |member| member.user.email.to_s.downcase.split('@').first }
     rows = JrcCulture::Workbook.rows(JrcCulture::Files.download(run.blob))
-    company = normalized_company(run.unit.operating_company.name)
+    company = normalized_company(run.unit&.operating_company&.name)
     rows = rows.map { |row| match(row, by_email, by_login, company) }
     repeated = rows.filter_map { |row| row[:member_id] }.tally.select { |_id, count| count > 1 }
     rows.each do |row|
@@ -60,9 +60,7 @@ class JrcCulture::Imports
         row = plans[line]
         raise Invalid unless row && row[:status] == 'matched' && row[:member_id] == member_id
 
-        @access.admin_units.find(run.unit_id)
-        member = @access.eligible_member!(run.unit, member_id)
-        JrcCulture::Roster.new(@access).enable!(unit: run.unit, member: member, department: row[:department])
+        JrcCulture::Roster.new(@access).enable!(unit_id: run.unit_id, member_id: member_id, department: row[:department])
       end
       run.update!(applied_at: Time.current, result: { applied: requested.size, skipped: plans.size - requested.size })
       JrcCulture::Event.record!(@access, 'import_applied', run)
@@ -90,7 +88,7 @@ class JrcCulture::Imports
               end
     conflicting = email.present? && by_login.fetch(login, []).any? { |member| matches.exclude?(member) }
     stated_company = normalized_company(row['EMPRESA REGISTRADA'])
-    status = if stated_company.present? && stated_company != company
+    status = if company.present? && stated_company.present? && stated_company != company
                'company_mismatch'
              elsif email.present? && !email.match?(URI::MailTo::EMAIL_REGEXP)
                'invalid_email'

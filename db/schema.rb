@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_23_160000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_24_120000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -3393,9 +3393,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_23_160000) do
 
   create_table "jrc_culture_audiences", force: :cascade do |t|
     t.bigint "version_id", null: false
-    t.bigint "unit_id", null: false
+    t.bigint "unit_id"
     t.index ["unit_id"], name: "index_jrc_culture_audiences_on_unit_id"
     t.index ["version_id", "unit_id"], name: "index_jrc_culture_audiences_on_version_id_and_unit_id", unique: true
+    t.index ["version_id"], name: "idx_culture_account_audience", unique: true, where: "(unit_id IS NULL)"
     t.index ["version_id"], name: "index_jrc_culture_audiences_on_version_id"
   end
 
@@ -3413,7 +3414,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_23_160000) do
   create_table "jrc_culture_grants", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "account_user_id"
-    t.bigint "unit_id", null: false
+    t.bigint "unit_id"
     t.bigint "member_key", null: false
     t.bigint "user_key", null: false
     t.string "role", default: "employee", null: false
@@ -3421,6 +3422,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_23_160000) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id", "member_key", "role"], name: "idx_culture_account_grant", unique: true, where: "(unit_id IS NULL)"
     t.index ["account_id", "member_key", "unit_id", "role"], name: "idx_culture_grant_identity", unique: true
     t.index ["account_id"], name: "index_jrc_culture_grants_on_account_id"
     t.index ["account_user_id"], name: "index_jrc_culture_grants_on_account_user_id"
@@ -3430,7 +3432,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_23_160000) do
 
   create_table "jrc_culture_imports", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.bigint "unit_id", null: false
+    t.bigint "unit_id"
     t.bigint "blob_id", null: false
     t.bigint "actor_id", null: false
     t.datetime "applied_at"

@@ -4,13 +4,20 @@ class JrcCulture::AdministrationController < JrcCulture::BaseController
   before_action :require_admin
 
   def setup
-    units = access.admin_units.includes(:operating_company).order(:name)
+    units = access.admin_units.includes(:operating_company).order(:name).map do |unit|
+      { id: unit.id, name: unit.name, company_id: unit.company_id, company: unit.operating_company.name }
+    end
+    if access.admin_unit_ids.include?(nil)
+      units << { id: JrcCulture::Access::ACCOUNT_SCOPE, name: JrcCulture::Access::ACCOUNT_SCOPE_LABEL,
+                 company_id: nil, company: access.account.name }
+    end
+    scope_keys = units.pluck(:id)
     versions = access.admin_versions.includes(:assets, :audiences).order(id: :desc).limit(200)
     render json: {
-      units: units.map { |unit| { id: unit.id, name: unit.name, company_id: unit.company_id, company: unit.operating_company.name } },
+      units: units,
       versions: versions.map do |version|
-        ids = version.audiences.map(&:unit_id)
-        version_data(version).merge(state: version.state, unit_ids: ids & units.map(&:id), manageable: ids.difference(units.map(&:id)).empty?)
+        ids = version.audiences.map { |audience| audience.unit_id || JrcCulture::Access::ACCOUNT_SCOPE }
+        version_data(version).merge(state: version.state, unit_ids: ids & scope_keys, manageable: ids.difference(scope_keys).empty?)
       end
     }
   end

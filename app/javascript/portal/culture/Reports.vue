@@ -30,7 +30,9 @@ const buttons =
   'rounded-lg border border-n-weak px-3 py-2 text-sm font-medium hover:bg-n-solid-3 disabled:opacity-50';
 const companies = computed(() => [
   ...new Map(
-    props.setup.units.map(unit => [unit.company_id, unit.company])
+    props.setup.units
+      .filter(unit => unit.company_id !== null)
+      .map(unit => [unit.company_id, unit.company])
   ).entries(),
 ]);
 const units = computed(() =>

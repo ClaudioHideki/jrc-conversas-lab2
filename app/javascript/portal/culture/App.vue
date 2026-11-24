@@ -153,18 +153,18 @@ onMounted(load);
         <div v-else class="grid justify-items-start gap-3" role="status">
           <p>{{ t(status) }}</p>
           <button
-            v-if="status === 'forbidden'"
-            class="rounded-lg border border-n-weak px-3 py-2"
-            @click="status = 'login'"
-          >
-            {{ t('login') }}
-          </button>
-          <button
-            v-else-if="status !== 'loading'"
+            v-if="status !== 'loading'"
             class="rounded-lg border border-n-weak px-3 py-2"
             @click="load"
           >
             {{ t('retry') }}
+          </button>
+          <button
+            v-if="status === 'forbidden'"
+            class="rounded-lg border border-n-weak px-3 py-2"
+            @click="status = 'login'"
+          >
+            {{ t('another_account') }}
           </button>
         </div>
       </main>

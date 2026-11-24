@@ -9,17 +9,17 @@ class JrcCulture::Publications
 
   def create!(manual_id:, title:, description:, unit_ids:, pdf:, pptx: nil)
     @access.admin!
-    units = scoped_units!(unit_ids)
+    scoped_unit_ids!(unit_ids)
     manual = find_manual!(manual_id) if manual_id.present?
     blobs = {}
     blobs['pdf'] = JrcCulture::Files.upload!(pdf, kind: 'pdf')
     blobs['pptx'] = JrcCulture::Files.upload!(pptx, kind: 'pptx') if pptx.present?
     @access.account.with_lock('FOR NO KEY UPDATE') do
-      units = scoped_units!(unit_ids)
+      scopes = scoped_unit_ids!(unit_ids)
       manual = find_manual!(manual_id) if manual_id.present?
       manual ||= JrcCulture::Manual.create!(account: @access.account, name: title)
       version = manual.versions.create!(number: manual.versions.maximum(:number).to_i + 1, title: title, description: description)
-      units.each { |unit| version.audiences.create!(unit: unit) }
+      scopes.each { |unit_id| version.audiences.create!(unit_id: unit_id) }
       blobs.each { |kind, blob| version.assets.create!(kind: kind, blob: blob) }
       JrcCulture::Event.record!(@access, 'version_created', version)
       version
@@ -54,15 +54,11 @@ class JrcCulture::Publications
     known.manual
   end
 
-  def scoped_units!(ids)
-    values = Array(ids).map { |id| Integer(id.to_s, 10) }.uniq
+  def scoped_unit_ids!(ids)
+    values = Array(ids).uniq
     raise Invalid if values.empty? || values.size > 100
 
-    units = @access.admin_units.where(id: values).to_a
-    @access.deny! unless units.size == values.size
-    units
-  rescue ArgumentError
-    raise Invalid
+    values.map { |id| @access.admin_scope_id!(id) }.uniq
   end
 
   def publish!(version)

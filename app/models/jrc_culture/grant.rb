@@ -5,17 +5,19 @@ class JrcCulture::Grant < ApplicationRecord
 
   belongs_to :account
   belongs_to :account_user, optional: true
-  belongs_to :unit, class_name: 'JrcCrm::BusinessUnit'
+  belongs_to :unit, class_name: 'JrcCrm::BusinessUnit', optional: true
   has_many :participations, class_name: 'JrcCulture::Participation', dependent: :restrict_with_exception
 
   scope :live, lambda {
-    joins(:account_user, unit: :operating_company)
-      .where(active: true, jrc_crm_business_units: { active: true }, companies: { active: true, relationship_type: 'internal' })
+    joins(:account_user).where(active: true)
       .where('account_users.account_id = jrc_culture_grants.account_id AND account_users.user_id = jrc_culture_grants.user_key')
   }
 
   scope :eligible, lambda {
-    live.where(<<~SQL.squish)
+    base = live.left_joins(unit: :operating_company)
+    account_grants = base.where(unit_id: nil, account_id: account_level_accounts.select(:id))
+    unit_grants = base.where(jrc_crm_business_units: { active: true }, companies: { active: true, relationship_type: 'internal' })
+    unit_grants = unit_grants.where(<<~SQL.squish)
       EXISTS (
         SELECT 1 FROM jrc_crm_user_business_units coverage
         WHERE coverage.account_id = jrc_culture_grants.account_id
@@ -28,7 +30,13 @@ class JrcCulture::Grant < ApplicationRecord
           )
       )
     SQL
+    account_grants.or(unit_grants)
   }
+
+  def self.account_level_accounts
+    linked = JrcCrm::BusinessUnit.where.not(company_id: nil).where.not(account_id: nil)
+    Account.where.not(id: linked.select(:account_id))
+  end
 
   validates :role, inclusion: { in: %w[employee administrator] }
   validates :department, length: { maximum: 120 }
@@ -44,8 +52,13 @@ class JrcCulture::Grant < ApplicationRecord
   end
 
   def same_scope
-    return if account_user&.account_id == account_id && unit&.account_id == account_id && unit&.operating_company&.account_id == account_id &&
-              unit.operating_company.relationship_type == 'internal'
+    valid_unit = if unit_id.nil?
+                   self.class.account_level_accounts.exists?(id: account_id)
+                 else
+                   unit&.account_id == account_id && unit&.operating_company&.account_id == account_id &&
+                     unit.operating_company.relationship_type == 'internal'
+                 end
+    return if account_user&.account_id == account_id && valid_unit
 
     errors.add(:base, :invalid)
   end

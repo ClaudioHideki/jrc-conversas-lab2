@@ -41,7 +41,10 @@ async function submit(revokeId) {
       emit('authenticated', response.accounts);
     }
   } catch (failure) {
-    error.value = failure.status === 403 ? 'forbidden' : 'login_error';
+    error.value =
+      failure.status === 403 && failure.code !== 'login_failed'
+        ? 'forbidden'
+        : 'login_error';
   } finally {
     busy.value = false;
   }
