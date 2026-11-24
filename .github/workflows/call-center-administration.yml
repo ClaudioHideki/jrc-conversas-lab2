@@ -484,7 +484,11 @@ jobs:
         id: frontend_dependencies
         run: pnpm install --frozen-lockfile
       - name: Syntax and migration timestamp protections
-        run: node script/validate_changed_source.mjs a24adc6dd8bb660f955b76cce0172ae1638deee2
+        run: |
+          node script/validate_changed_source.mjs a24adc6dd8bb660f955b76cce0172ae1638deee2
+          node --max-old-space-size=128 --test --test-reporter=tap tests/playwright/tests/e2e/ui/call-center-ending-activation-request.test.mjs > /tmp/call-center-ending-activation-url-tests.txt
+          cat /tmp/call-center-ending-activation-url-tests.txt
+          python3 -B script/jrc_call_center_ending_activation_url_check.py
       - name: Vue administrative workflows and affected telephony integration
         run: |
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter app/javascript/dashboard/routes/dashboard/approvals app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContactDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/components/MasterContactDetails.spec.js \

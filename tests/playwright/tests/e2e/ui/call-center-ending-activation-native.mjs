@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
 import { measureTextContrast } from './call-center-text-contrast.mjs';
+import { endingActivationURL, isEndingActivationRequest } from './call-center-ending-activation-request.mjs';
 
 // Own per-project synthetic account, real Vue/CSS and authenticated native APIs.
 // Activation writes prospective metadata only. No call/provider is simulated as
@@ -19,7 +20,7 @@ export async function verifyEndingActivation(parent, info, target) {
   const screenshots = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => {
-    if (request.url() === `${endpoint}/activate` && request.method() === 'POST')
+    if (isEndingActivationRequest(request, account))
       posts.push(request.postDataJSON());
   });
   await page.route('**/*', route => {
@@ -135,7 +136,7 @@ export async function verifyEndingActivation(parent, info, target) {
   expect(contrast.ratio).toBeGreaterThanOrEqual(4.5);
   await capture('review');
   await panel.locator('[data-ending-activation-reviewed]').check();
-  const acknowledged = page.waitForResponse(response => response.url() === `${endpoint}/activate` && response.request().method() === 'POST');
+  const acknowledged = page.waitForResponse(response => response.url() === endingActivationURL(account) && isEndingActivationRequest(response.request(), account));
   await panel.locator('[data-ending-activation-confirm]').click();
   const response = await acknowledged;
   expect(response.status()).toBe(200);
@@ -167,7 +168,7 @@ export async function verifyEndingActivation(parent, info, target) {
   panel = await open(staleRule.name);
   await save({ ...staleRule, name: 'SYNTHETIC changed after browser review' });
   await panel.locator('[data-ending-activation-reviewed]').check();
-  const rejected = page.waitForResponse(item => item.url() === `${endpoint}/activate` && item.request().method() === 'POST');
+  const rejected = page.waitForResponse(item => item.url() === endingActivationURL(account) && isEndingActivationRequest(item.request(), account));
   await panel.locator('[data-ending-activation-confirm]').click();
   expect((await rejected).status()).toBe(409);
   await expect(panel.locator('[data-ending-activation-confirm]')).toBeDisabled();

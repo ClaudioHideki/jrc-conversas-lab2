@@ -3205,5 +3205,58 @@
     "new_vue_cases_prepared_not_executed": 18,
     "total_chrome_required": 268,
     "whole_figure_accepted": false
+  },
+  "activation_browser_observer_correction_pending_revalidation": {
+    "failed_sha": "9cb4d2f22575e1bac46146a2ac8a8139bc9cdc05",
+    "failed_run": 45428233415,
+    "artifact": 14945486663,
+    "artifact_sha256": "b1fa7cbe1c18361c4e53ff1974735147d5bb8a77f7617193fb63e7aab638059c",
+    "raw_log_sha256": "cbab9cee8dddcd8127abad677daa134023b6b6fbfeeb1d81193eb1e093816aa9",
+    "sanitized_log_sha256": "f3cfa9b08941be404557906f0401a91202cad4187406d48dd90c22fb73ab0d5b",
+    "Chrome": {
+      "passed": 264,
+      "failed": 4,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "independently_verified_native_Rails": 3198,
+    "independently_verified_Vue": 1831,
+    "cause": "Browser Axios uses Vite origin 5386 /api proxy. Response observer incorrectly required direct Rails origin 5387; actual native activation receipt is visible in original failure PNGs.",
+    "correction": "Match the exact isolated browser origin, full account path, method and response URL. Keep direct native API probes and all existing assertions unchanged.",
+    "new_light_URL_unit_tests": {
+      "examples": 8,
+      "failures": 0,
+      "not_native_or_browser_acceptance": true
+    },
+    "first_local_test_process": "Sandbox spawn EPERM before examples; authorized bounded Node test then executed eight real pure-URL assertions.",
+    "collectors_strengthened": [
+      {
+        "path": "preserve_native_evidence_activation_draft_20261124.py",
+        "before": "8e430de6db92f8d977dfc5c392414bea02021797a40e98ff46b14452b905323e",
+        "after": "92fd13f65a0dc776f0a23a10dc79beff2c57e95936eb0bbb7ac6955ab9a4a069",
+        "all_previous_checks_retained": true
+      },
+      {
+        "path": "preserve_native_evidence_history_draft_20261124.py",
+        "before": "4dc75daa5cdf2d24fb9e160760361ae78d6f609590cdf97338acdfbaf72aa4ef",
+        "after": "64d9cbbf20956fe5f08baca7dfd5166d19e9e836f11af136eaa8de3d720d7d5b",
+        "all_previous_checks_retained": true
+      },
+      {
+        "path": "preserve_native_evidence_actual_broker_draft_20261124.py",
+        "before": "48569ca6fc95bb0ce99559c0c40cb13165ef84038945528c1ce3627c90d65721",
+        "after": "8fc6d5b23c61001fe3cb32ecf1e5ee68e9466c9e2c5b75393d66b0f2106a83ad",
+        "all_previous_checks_retained": true
+      },
+      {
+        "path": "preserve_native_evidence_selected_pending_draft_20261124.py",
+        "before": "a5f5fc42dcebeaa92c4b26d9a42fb8f5dd45d93805f8121ebee69f505d65e718",
+        "after": "4c183c7fd3c0040a4ad897b6a8d8eb44f4793bdc451ab624136740160087c73c",
+        "all_previous_checks_retained": true
+      }
+    ],
+    "native_or_Chrome_revalidation_required": true,
+    "all_product_app_models_services_SQL_and_migrations_unchanged": true,
+    "whole_figure10_or_Part1_accepted": false
   }
 }

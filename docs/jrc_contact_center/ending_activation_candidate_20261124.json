@@ -3,7 +3,7 @@
   "status": "implemented_explicit_activation_awaiting_native_validation",
   "accepted_attempt_acceptance_sha256": "f4f014c25d0dba705c59317dc834b9f0d252d2c7a4cd63f2ccb7030fd5b12090",
   "source_sha256": {
-    ".github/workflows/call-center-administration.yml": "9cb8a3a88078ecf6e29240edd03f735be08cb4c4934a0028687bbd0339c6a4f2",
+    ".github/workflows/call-center-administration.yml": "de88544d565ac2839c40a3f96233358b8cf96060db1fcde1e91b027785d4ff02",
     "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb": "a134ad68d3d9a9520da99fb69faa2eccfdbfe0b25eff00399cf4f25f8c5694f8",
     "app/javascript/dashboard/api/jrcContactCenter.js": "21f515a962f18a3c81ff3907ff7f97745fc7d8d7727376f3a998869d5072d35a",
     "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "7cb993ed29a8ce405d653cb465066250ed383fed7dd93cfc76fcb62ec0d8b213",
@@ -20,10 +20,13 @@
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb": "f9dc6b3da99a737d381a7a0885fe299d9d3e3a756034d74983fcebfc8942eddf",
     "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb": "ab43b800a5d79f8ad730294cccb5b7fa251a9dc6515f68e562d75e2c36d28170",
     "tests/playwright/call-center-native.config.ts": "ada02e4713601ead6f582926b1c2ffb0d4ce31c83000e8263ded8e9abe928518",
-    "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.mjs": "a16ef13827912a9a2162c8c9ad53a6a6c5e005b7e35b0642e5c60e93aba00d88",
+    "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.mjs": "473f46c9999e000d7eda05b2595dee932783e8ab34ab1cd65b1f7234c2c7167f",
     "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts": "807f6dc21573164011c3c46fc139af6a944779ff422b10231afcb80641a3f61c",
     "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "3e4b28b021cb0fa80598979d82f659506f70dc3f0cd9575f401901caae5abf51",
-    "script/jrc_call_center_chrome_counter_test.py": "00d3485f258e8cf7f21697e652c42a9b2b493ab7733581dc62a33c3195d055ab"
+    "script/jrc_call_center_chrome_counter_test.py": "00d3485f258e8cf7f21697e652c42a9b2b493ab7733581dc62a33c3195d055ab",
+    "tests/playwright/tests/e2e/ui/call-center-ending-activation-request.mjs": "306b7be6b06709e6ede8fd71f545a5404f6f07fdf01d22c7892a21862ccc1dab",
+    "tests/playwright/tests/e2e/ui/call-center-ending-activation-request.test.mjs": "8bd2f8d1d37d22da2e552545708687b187127c9d7982b6f7b413a1cb47acd23a",
+    "script/jrc_call_center_ending_activation_url_check.py": "9ff06183297856672d4ea84afd511fbb93693212478d6348b34f9b000b65f33f"
   },
   "parent_sources": {
     "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb": "06a2e3e1d6f0b32c28bf95f20aab697215e2214a4474c9b8b4de2f280eeaac33",
@@ -137,5 +140,58 @@
     "sanitized_log_sha256": "c5bdfea31795ea8caead764e637e45ae7b6b2e039df52ecc3862226adf851a77",
     "new_M21_Rails_Vue_Chrome_executed_in_this_attempt": false,
     "legacy_native_preflights_preserved_not_counted_as_new_acceptance": true
+  },
+  "browser_proxy_observer_correction_pending_revalidation": {
+    "failed_sha": "9cb4d2f22575e1bac46146a2ac8a8139bc9cdc05",
+    "failed_run": 45428233415,
+    "artifact": 14945486663,
+    "artifact_sha256": "b1fa7cbe1c18361c4e53ff1974735147d5bb8a77f7617193fb63e7aab638059c",
+    "raw_log_sha256": "cbab9cee8dddcd8127abad677daa134023b6b6fbfeeb1d81193eb1e093816aa9",
+    "sanitized_log_sha256": "f3cfa9b08941be404557906f0401a91202cad4187406d48dd90c22fb73ab0d5b",
+    "Chrome": {
+      "passed": 264,
+      "failed": 4,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "independently_verified_native_Rails": 3198,
+    "independently_verified_Vue": 1831,
+    "cause": "Browser Axios uses Vite origin 5386 /api proxy. Response observer incorrectly required direct Rails origin 5387; actual native activation receipt is visible in original failure PNGs.",
+    "correction": "Match the exact isolated browser origin, full account path, method and response URL. Keep direct native API probes and all existing assertions unchanged.",
+    "new_light_URL_unit_tests": {
+      "examples": 8,
+      "failures": 0,
+      "not_native_or_browser_acceptance": true
+    },
+    "first_local_test_process": "Sandbox spawn EPERM before examples; authorized bounded Node test then executed eight real pure-URL assertions.",
+    "collectors_strengthened": [
+      {
+        "path": "preserve_native_evidence_activation_draft_20261124.py",
+        "before": "8e430de6db92f8d977dfc5c392414bea02021797a40e98ff46b14452b905323e",
+        "after": "92fd13f65a0dc776f0a23a10dc79beff2c57e95936eb0bbb7ac6955ab9a4a069",
+        "all_previous_checks_retained": true
+      },
+      {
+        "path": "preserve_native_evidence_history_draft_20261124.py",
+        "before": "4dc75daa5cdf2d24fb9e160760361ae78d6f609590cdf97338acdfbaf72aa4ef",
+        "after": "64d9cbbf20956fe5f08baca7dfd5166d19e9e836f11af136eaa8de3d720d7d5b",
+        "all_previous_checks_retained": true
+      },
+      {
+        "path": "preserve_native_evidence_actual_broker_draft_20261124.py",
+        "before": "48569ca6fc95bb0ce99559c0c40cb13165ef84038945528c1ce3627c90d65721",
+        "after": "8fc6d5b23c61001fe3cb32ecf1e5ee68e9466c9e2c5b75393d66b0f2106a83ad",
+        "all_previous_checks_retained": true
+      },
+      {
+        "path": "preserve_native_evidence_selected_pending_draft_20261124.py",
+        "before": "a5f5fc42dcebeaa92c4b26d9a42fb8f5dd45d93805f8121ebee69f505d65e718",
+        "after": "4c183c7fd3c0040a4ad897b6a8d8eb44f4793bdc451ab624136740160087c73c",
+        "all_previous_checks_retained": true
+      }
+    ],
+    "native_or_Chrome_revalidation_required": true,
+    "all_product_app_models_services_SQL_and_migrations_unchanged": true,
+    "whole_figure10_or_Part1_accepted": false
   }
 }
