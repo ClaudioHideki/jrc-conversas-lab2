@@ -22,5 +22,4 @@ RSpec.shared_context 'with native ending attempt operators' do
     )
     JrcContactCenter::EndingActionOrigin.find_by!(account: account, source_qualification_id: row.id)
   end
-
 end

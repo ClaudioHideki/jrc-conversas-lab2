@@ -5,10 +5,10 @@
 class JrcContactCenter::EndingActions::AttemptFailure
   def self.call(error)
     case error
-    when Pundit::NotAuthorizedError then ['blocked', 'authorization_denied']
-    when ActiveRecord::RecordNotFound then ['blocked', 'reference_unavailable']
+    when Pundit::NotAuthorizedError then %w[blocked authorization_denied]
+    when ActiveRecord::RecordNotFound then %w[blocked reference_unavailable]
     when JrcContactCenter::OperationError then operation_failure(error)
-    else ['failed', 'destination_failure']
+    else %w[failed destination_failure]
     end
   end
 

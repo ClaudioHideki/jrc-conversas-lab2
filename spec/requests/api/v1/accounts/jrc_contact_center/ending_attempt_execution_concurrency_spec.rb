@@ -25,7 +25,7 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
   before do
     JrcContactCenter::EndingActions::ActivateRule.new(account: account, member: member, rule_code: 'SYNTHETIC_ORIGIN_RULE',
                                                       request_key: SecureRandom.uuid,
-                                                    expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
+                                                      expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
   end
 
   def queue_native_attempt(key = attempt_key, original_id = origin.id)
@@ -48,7 +48,7 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
     project = JrcProjects::Project.where(account: account).sole
     JrcContactCenter::EndingActions::ConfigureRule.new(account: account, member: member,
                                                        input: origin_rule_document(project).merge(changes),
-                                                      expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
+                                                       expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
   end
 
   def native_attempt_worker(row, state)
@@ -58,8 +58,8 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
         state[:ready] << connection.raw_connection.backend_pid
         state[:results] << JrcContactCenter::EndingActions::ExecuteAttempt.new(account: Account.find(ids.first), attempt_id: ids.last).call
       end
-    rescue StandardError => error
-      state[:results] << error
+    rescue StandardError => e
+      state[:results] << e
     end
   end
 
@@ -253,7 +253,7 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
     expect do
       JrcContactCenter::EndingActionAttempt.create!(account: account, origin: origin, readiness: row.readiness,
                                                     rule_code: row.rule_code, destination_kind: 'project_task', request_key: SecureRandom.uuid,
-                                                  actor_user_id: actor.id, version_id: origin.version_id)
+                                                    actor_user_id: actor.id, version_id: origin.version_id)
     end.to raise_error(ActiveRecord::StatementInvalid)
     expect(JrcContactCenter::EndingActionAttempt.where(account: account).count).to eq(1)
     expect(native_attempt_effects).to eq([0, 0, 0, 0])
@@ -279,7 +279,11 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
     complete_origin_qualification
     row = queue_native_attempt
     result = execute_queued_attempt(row)
-    expect { result.update_columns(result_code: 'destination_failure') }.to raise_error(ActiveRecord::StatementInvalid)
+    expect do
+      sql = ['UPDATE jrc_contact_center_ending_action_attempt_outcomes SET result_code=? WHERE account_id=? AND id=?',
+             'destination_failure', account.id, result.id]
+      ApplicationRecord.connection.execute(ApplicationRecord.sanitize_sql_array(sql))
+    end.to raise_error(ActiveRecord::StatementInvalid)
     expect { result.delete }.to raise_error(ActiveRecord::StatementInvalid)
     expect(result.reload.outcome).to eq('succeeded')
     expect(native_attempt_effects).to eq([1, 1, 1, 1])
@@ -288,7 +292,11 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
   it 'keeps the scheduling source immutable even when bypassing ActiveRecord callbacks' do
     complete_origin_qualification
     row = queue_native_attempt
-    expect { row.update_columns(rule_code: 'SYNTHETIC altered rule') }.to raise_error(ActiveRecord::StatementInvalid)
+    expect do
+      sql = ['UPDATE jrc_contact_center_ending_action_attempts SET rule_code=? WHERE account_id=? AND id=?',
+             'SYNTHETIC altered rule', account.id, row.id]
+      ApplicationRecord.connection.execute(ApplicationRecord.sanitize_sql_array(sql))
+    end.to raise_error(ActiveRecord::StatementInvalid)
     expect { row.delete }.to raise_error(ActiveRecord::StatementInvalid)
     expect(row.reload.rule_code).to eq('SYNTHETIC_ORIGIN_RULE')
     expect(native_attempt_effects).to eq([0, 0, 0, 0])
@@ -297,7 +305,7 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
   it 'serializes two actual workers and appends only one success outcome for the same attempt' do
     complete_origin_qualification
     row = queue_native_attempt
-    states = Array.new(2) { { ready: ::Queue.new, results: ::Queue.new } }
+    states = Array.new(2) { { ready: Queue.new, results: Queue.new } }
     workers = []
     begin
       account.with_lock do
@@ -318,7 +326,7 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
   it 'rechecks a feature revoked while the real worker waits on the native account lock' do
     complete_origin_qualification
     row = queue_native_attempt
-    state = { ready: ::Queue.new, results: ::Queue.new }
+    state = { ready: Queue.new, results: Queue.new }
     workers = []
     begin
       account.with_lock do

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# PRIVATE CANDIDATE: no hook, endpoint, job or activation invokes this command.
+# Internal native worker command; no HTTP input can replace its original actor.
 # Each destination must retain its own outer original-actor transaction. A
 # success receipt and the actual native Task/Audit commit in the same savepoint.
 class JrcContactCenter::EndingActions::ExecuteProjectTask
@@ -29,13 +29,13 @@ class JrcContactCenter::EndingActions::ExecuteProjectTask
   # Internal Ruby callback only. No endpoint/job passes user-supplied code.
   # A durable attempt writer can wrap the real effect inside the same original
   # actor transaction; the default call remains unchanged and independent.
-  def observe_execution!(wrapper, origin, readiness)
-    return yield unless wrapper
+  def observe_execution!(wrapper, origin, readiness, &effect)
+    return effect.call unless wrapper
 
     metadata = { account_id: origin.account_id, origin_id: origin.id, version_id: origin.version_id,
                  actor_account_user_id: origin.actor_account_user_id, actor_user_id: origin.actor_user_id,
                  readiness_id: readiness.id, rule_code: @rule_code.dup.freeze, destination_kind: 'project_task' }.freeze
-    wrapper.call(metadata) { yield }
+    wrapper.call(metadata, &effect)
   end
 
   def execute_or_replay!(member, origin, rule, readiness, parameters)

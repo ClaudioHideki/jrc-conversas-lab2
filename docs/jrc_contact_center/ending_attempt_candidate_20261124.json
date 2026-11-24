@@ -6,34 +6,34 @@
     "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.spec.js": "2fd4722175623b48a1335baf1fb1e2087cd6b370a78bf6621aae6b6735db41b9",
     "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue": "8badb823d33ee7ca4c273cb1db90ba88779ea01f6b3dec5027b6c7d9d763b8ca",
     "app/jobs/jrc_contact_center/ending_actions_job.rb": "7d53a7d946c0d463b0fb15fad45825e9b4be08eb807c07feb67b42c3527b44a1",
-    "app/jobs/jrc_contact_center/ending_attempt_reconcile_job.rb": "695f5fe43c5e9fff5148407494f045ada998f2ad3f3e73cbaebc46fe7cd960ee",
-    "app/models/jrc_contact_center/ending_action_attempt.rb": "985c86649b0918132d9d21661aa848debb80498c088ebb062e3dc011634a5f5f",
+    "app/jobs/jrc_contact_center/ending_attempt_reconcile_job.rb": "6594b22bfa384c323ce4a29b03c811c69331a82af9b18fd649e4e0f443101815",
+    "app/models/jrc_contact_center/ending_action_attempt.rb": "3929639119ee77ddfd38f9e7bc30032dd10a8c6d02bc628cefef98ce4a0665cb",
     "app/models/jrc_contact_center/ending_action_attempt_outcome.rb": "e898a92f6b0185bb860f6c740962ad7c2d40ed9ac2ccf6f659c1ecb6f3fb986e",
     "app/models/jrc_contact_center/ending_reason_confirmation.rb": "dcc7cedb56077d8908c0eb1c73038b192dc464363d1f54a6e4755bfe391db288",
     "app/models/jrc_contact_center/qualification.rb": "2dc94a11ed306c733105ab7818c57caeb564e7e7d08fdbc143d10a61f150dd66",
-    "app/services/jrc_contact_center/ending_actions/attempt_failure.rb": "74f1ec0b44978dc31e31365fc6aa4205c4c5c7427030d86c43718043d17155c3",
+    "app/services/jrc_contact_center/ending_actions/attempt_failure.rb": "94fe9c0c1f05b91edb601ac9f66b4cf401faf97d9bcf8994f2a32cce346cac4a",
     "app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb": "6e0148d28d098680ce9f350142cfab0f5660e02e9f81db4f8045722001d5f0c7",
-    "app/services/jrc_contact_center/ending_actions/execute_attempt.rb": "3dfd7315a684294e6987c21c8402eb0a8508cf0276095f4eb20ca40375767b19",
-    "app/services/jrc_contact_center/ending_actions/execute_project_task.rb": "036039257804b7d11446c61ae8a9fb3cc73b6da8e2946058def63cc89e310343",
-    "app/services/jrc_contact_center/ending_actions/initial_project_attempts.rb": "fcfba4f25d48a616ee747f446a063fb4b8486ba4f7cd8738848c765042964d2b",
-    "app/services/jrc_contact_center/ending_actions/queue_project_attempt.rb": "686a06724b30d151cb289e5f611894f831371ac5c35fcc59d6f96e52bafd09be",
+    "app/services/jrc_contact_center/ending_actions/execute_attempt.rb": "510a4786a30d2f05fb751c54e0fdd57e410b521c60f7ad6224cebda5eef21334",
+    "app/services/jrc_contact_center/ending_actions/execute_project_task.rb": "73c1b206980ea0641c4217d4d9787d4a5f15bec43ba8615854cb1dd9189d8359",
+    "app/services/jrc_contact_center/ending_actions/initial_project_attempts.rb": "043bbe6cb67bc050352a969e32869995fb5c1e06dfb72745f6af06bd847d58f5",
+    "app/services/jrc_contact_center/ending_actions/queue_project_attempt.rb": "e383e32c2eb5d8ad8d3f89fc4bae3d690da7ed7a50387f9c401f043d6fd05374",
     "app/services/jrc_contact_center/ending_actions/record_attempt.rb": "7f58fb74057f090d9f53e37352f81910c67f416446891a465e9f929552b46449",
     "db/functions/20261124001000_contact_center_ending_attempts.sql": "7c317f8dde21ef093a5c6ebe12b09f5b84fc65d253f61d5a01256e3e88e1f29f",
     "db/migrate/20261124001000_create_contact_center_ending_action_attempts.rb": "a4e1893ac89f24823fa7779dc4bc7d625134677bcfddfd0f8eb1ca8a15aa0dc8",
     "lib/jrc_contact_center/ending_action_attempt_schema_receipt.rb": "d143e6d8b95c4af20047af63fb68fb8694492d6063f0a3ff2c14eb53ed0fdb6f",
-    "script/jrc_call_center_ending_attempt_schema_probe.rb": "3dd144bad1cf18add663ef8153746ff000b0f85d4477540b960ed6721b2bd098",
-    "script/jrc_call_center_ending_attempt_upgrade.rb": "a676bb430ff4824a1dbe03c74fd6981dc90dc21768f067615dec9f8f9f4f1a0b",
+    "script/jrc_call_center_ending_attempt_schema_probe.rb": "5a2cfea5dd12a79407d420f80f7dea56a3897c736440eb5b107d99dfdd9ea087",
+    "script/jrc_call_center_ending_attempt_upgrade.rb": "c86a3b60287821f3b2abff9694bcc27948b260943baa991f15bdd9b10ba61039",
     "script/validate_cc_access_migration.mjs": "18618ffba6ad6f1edd6821f57db3ee40149469c3a86490e9e6a80433e34f4614",
     "script/validate_cc_ending_attempt_admission.test.mjs": "305bd7b14d82b9a62409cac5439abfaf0f1bde136b3c67a0b8ea2e0308cbe080",
     "script/validate_cc_ending_attempt_migration.mjs": "11872371ac1528a81357f5fbab3d96135987c7816bdbc0c768ffbadb4df02c2d",
     "script/validate_cc_ending_attempt_migration.test.mjs": "b2326cd8d3ee564f4d7054feca0599a0489a8b71740598613bbd65d2e15dc6f3",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": "d88b3da9e5b31555ddb455ad2a20960f5c8ddb630945255f53a9ed83d408dcd3",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": "acdf3581c1cf9ad2b24882523022c20cb7d38590e433bf8eeba0b87c7b3575f9",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": "54a4a4381441b8f972dd9ddbe38ee60506b49b711f34874af04df34edb98c67c",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": "f6b43efea4ce311ac9e21c97bd79cb8aa6412015b5ad1922321dbcf54790c5db",
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": "27d947041911d5bc5c25e65e697ab61dd61b596406e1c934cd19370fee4673f0",
     "spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb": "08d8455db03388ba9907037085fb4c87a23b3805cfa429a76b3c6ae95aaef3f5",
-    "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": "e9e4def3ac0e449a5dd95837578512628319a29b7d192924a05e33f78e869351",
+    "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": "8efb68cf3a3110e10bb2dd97c3cf7ad786839085f7ba4a88c43ba0913e246378",
     "spec/services/jrc_contact_center/synthetic_ending_attempt_upgrade_spec.rb": "04f91e836e901166b14e6b2d14300f524e476e1d8ef7ccb0bc16c57bc75d09d7",
-    "spec/support/contact_center_ending_attempt_operators.rb": "2441c8cbaf4a030f4ed5155ae8a87761281a9b2a3a7190fac5a53e4a35497945",
+    "spec/support/contact_center_ending_attempt_operators.rb": "b0152fd9ede5eeca927a830b18157d8c52c06ea0a3bfcb958f803d19304f3119",
     "spec/support/contact_center_ending_origin_schema_dependencies.rb": "cf424b0eb09113d7109945ff5f2d4735ab683f4e8ab2e23433ccd538dbb34057",
     "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "ae250a62250824d5425e3ddc73a91cffd01d7f5c9daa1726bab18649588cc61f",
     "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "704ada447c9a9338c662b0fad3670d83f7219e03e9923d07455ba14c5ced99f4",
@@ -157,5 +157,147 @@
       }
     ],
     "native_execution_accepted": false
+  },
+  "style_correction_pending_native_validation": {
+    "failed_candidate": "3a05945ace9f2ecaa076d3ce4c9233479c52620e",
+    "run": 45374803728,
+    "artifact": 14911878870,
+    "artifact_sha256": "1639152686603cfa31b299efea7550a5f05c4fba9ce937a88b1c4ba9d35b520d",
+    "reported_new_offenses": 48,
+    "files": {
+      "app/jobs/jrc_contact_center/ending_attempt_reconcile_job.rb": {
+        "before_sha256": "695f5fe43c5e9fff5148407494f045ada998f2ad3f3e73cbaebc46fe7cd960ee",
+        "after_sha256": "6594b22bfa384c323ce4a29b03c811c69331a82af9b18fd649e4e0f443101815",
+        "reported_cops": [
+          "Layout/MultilineMethodCallIndentation"
+        ]
+      },
+      "app/models/jrc_contact_center/ending_action_attempt.rb": {
+        "before_sha256": "985c86649b0918132d9d21661aa848debb80498c088ebb062e3dc011634a5f5f",
+        "after_sha256": "3929639119ee77ddfd38f9e7bc30032dd10a8c6d02bc628cefef98ce4a0665cb",
+        "reported_cops": [
+          "Layout/HashAlignment"
+        ]
+      },
+      "app/services/jrc_contact_center/ending_actions/attempt_failure.rb": {
+        "before_sha256": "74f1ec0b44978dc31e31365fc6aa4205c4c5c7427030d86c43718043d17155c3",
+        "after_sha256": "94fe9c0c1f05b91edb601ac9f66b4cf401faf97d9bcf8994f2a32cce346cac4a",
+        "reported_cops": [
+          "Style/WordArray"
+        ]
+      },
+      "app/services/jrc_contact_center/ending_actions/execute_attempt.rb": {
+        "before_sha256": "3dfd7315a684294e6987c21c8402eb0a8508cf0276095f4eb20ca40375767b19",
+        "after_sha256": "510a4786a30d2f05fb751c54e0fdd57e410b521c60f7ad6224cebda5eef21334",
+        "reported_cops": [
+          "Naming/RescuedExceptionsVariableName"
+        ]
+      },
+      "app/services/jrc_contact_center/ending_actions/execute_project_task.rb": {
+        "before_sha256": "036039257804b7d11446c61ae8a9fb3cc73b6da8e2946058def63cc89e310343",
+        "after_sha256": "73c1b206980ea0641c4217d4d9787d4a5f15bec43ba8615854cb1dd9189d8359",
+        "reported_cops": [
+          "Style/ExplicitBlockArgument"
+        ]
+      },
+      "app/services/jrc_contact_center/ending_actions/initial_project_attempts.rb": {
+        "before_sha256": "fcfba4f25d48a616ee747f446a063fb4b8486ba4f7cd8738848c765042964d2b",
+        "after_sha256": "043bbe6cb67bc050352a969e32869995fb5c1e06dfb72745f6af06bd847d58f5",
+        "reported_cops": [
+          "Layout/ArgumentAlignment",
+          "Layout/HashAlignment",
+          "Metrics/CyclomaticComplexity",
+          "Naming/RescuedExceptionsVariableName"
+        ]
+      },
+      "app/services/jrc_contact_center/ending_actions/queue_project_attempt.rb": {
+        "before_sha256": "686a06724b30d151cb289e5f611894f831371ac5c35fcc59d6f96e52bafd09be",
+        "after_sha256": "e383e32c2eb5d8ad8d3f89fc4bae3d690da7ed7a50387f9c401f043d6fd05374",
+        "reported_cops": [
+          "Layout/EmptyLineAfterGuardClause",
+          "Style/IfUnlessModifier"
+        ]
+      },
+      "script/jrc_call_center_ending_attempt_schema_probe.rb": {
+        "before_sha256": "3dd144bad1cf18add663ef8153746ff000b0f85d4477540b960ed6721b2bd098",
+        "after_sha256": "5a2cfea5dd12a79407d420f80f7dea56a3897c736440eb5b107d99dfdd9ea087",
+        "reported_cops": [
+          "Metrics/AbcSize",
+          "Performance/RedundantEqualityComparisonBlock"
+        ]
+      },
+      "script/jrc_call_center_ending_attempt_upgrade.rb": {
+        "before_sha256": "a676bb430ff4824a1dbe03c74fd6981dc90dc21768f067615dec9f8f9f4f1a0b",
+        "after_sha256": "c86a3b60287821f3b2abff9694bcc27948b260943baa991f15bdd9b10ba61039",
+        "reported_cops": [
+          "Layout/ArgumentAlignment",
+          "Layout/HashAlignment",
+          "Metrics/CyclomaticComplexity",
+          "Metrics/PerceivedComplexity"
+        ]
+      },
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": {
+        "before_sha256": "d88b3da9e5b31555ddb455ad2a20960f5c8ddb630945255f53a9ed83d408dcd3",
+        "after_sha256": "54a4a4381441b8f972dd9ddbe38ee60506b49b711f34874af04df34edb98c67c",
+        "reported_cops": [
+          "Layout/ArgumentAlignment",
+          "Layout/HashAlignment",
+          "Naming/RescuedExceptionsVariableName",
+          "Rails/SkipsModelValidations",
+          "Style/RedundantConstantBase"
+        ]
+      },
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": {
+        "before_sha256": "acdf3581c1cf9ad2b24882523022c20cb7d38590e433bf8eeba0b87c7b3575f9",
+        "after_sha256": "f6b43efea4ce311ac9e21c97bd79cb8aa6412015b5ad1922321dbcf54790c5db",
+        "reported_cops": [
+          "Layout/ArgumentAlignment",
+          "Layout/HashAlignment",
+          "Naming/RescuedExceptionsVariableName",
+          "Style/RedundantConstantBase"
+        ]
+      },
+      "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": {
+        "before_sha256": "e9e4def3ac0e449a5dd95837578512628319a29b7d192924a05e33f78e869351",
+        "after_sha256": "8efb68cf3a3110e10bb2dd97c3cf7ad786839085f7ba4a88c43ba0913e246378",
+        "reported_cops": [
+          "Style/WordArray"
+        ]
+      },
+      "spec/support/contact_center_ending_attempt_operators.rb": {
+        "before_sha256": "2441c8cbaf4a030f4ed5155ae8a87761281a9b2a3a7190fac5a53e4a35497945",
+        "after_sha256": "b0152fd9ede5eeca927a830b18157d8c52c06ea0a3bfcb958f803d19304f3119",
+        "reported_cops": [
+          "Layout/EmptyLinesAroundBlockBody"
+        ]
+      }
+    },
+    "corrections": [
+      "Continuation alignment, rescued-variable names and equivalent static word arrays.",
+      "Extract the same rule predicate and exclusive-resource guards into smaller methods; retain every condition and its order.",
+      "Forward the native effect as an explicit block without changing current original-actor authorization or atomicity.",
+      "Preserve intentional database-bypass immutability tests with parameterized SQL against the real guarded rows; no callback-only substitute."
+    ],
+    "example_titles_and_assertions_retained": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": {
+        "examples_retained": 22,
+        "assertion_count_retained": 59
+      },
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": {
+        "examples_retained": 14,
+        "assertion_count_retained": 34
+      },
+      "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": {
+        "examples_retained": 7,
+        "assertion_count_retained": 7
+      }
+    },
+    "migrations_SQL_schema_receipts_lint_rules_and_permissions_unchanged": true,
+    "raw_and_sanitized_job_log_hashes": [
+      "1fe32c4b2de5740abcb577a2efd51e9624b8f3097d6821162efa0c50b1ecd011",
+      "dc093e96609603537ad648c1d16c0773860f511f2ea9b2990b2e313ea3e3b787"
+    ],
+    "native_lint_or_application_revalidation": false,
+    "whole_figure10_accepted": false
   }
 }

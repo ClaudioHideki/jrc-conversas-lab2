@@ -42,10 +42,7 @@ class JrcContactCenter::SyntheticEndingAttemptUpgrade < JrcContactCenter::Synthe
   private
 
   def guard!(installed:)
-    config = ApplicationRecord.connection_db_config
-    owned = runner_owned? && config.configuration_hash[:host] == '127.0.0.1' && config.database == DATABASE &&
-            ApplicationRecord.connection.current_database == DATABASE && !ApplicationRecord.connection.transaction_open?
-    raise 'Exclusive committed ending attempt upgrade database required' unless owned
+    raise 'Exclusive committed ending attempt upgrade database required' unless owned_upgrade_database?
 
     tables = %i[jrc_contact_center_ending_action_attempts jrc_contact_center_ending_action_attempt_outcomes]
     correct = tables.all? { |table| ApplicationRecord.connection.table_exists?(table) == installed }
@@ -57,12 +54,18 @@ class JrcContactCenter::SyntheticEndingAttemptUpgrade < JrcContactCenter::Synthe
     WebMock.disable_net_connect!(allow_localhost: true)
   end
 
+  def owned_upgrade_database?
+    config = ApplicationRecord.connection_db_config
+    runner_owned? && config.configuration_hash[:host] == '127.0.0.1' && config.database == DATABASE &&
+      ApplicationRecord.connection.current_database == DATABASE && !ApplicationRecord.connection.transaction_open?
+  end
+
   def create_existing_success
     @execution = JrcContactCenter::EndingActions::ExecuteProjectTask.new(account: @account, origin_id: @origin.id,
                                                                          rule_code: 'SYNTHETIC_UPGRADE_RULE').call
     @automated_task = JrcProjects::Task.where(account: @account).find(@execution.target_id)
     @automated_audit = JrcProjects::AuditEvent.where(account: @account, auditable_type: @automated_task.class.name,
-                                                    auditable_id: @automated_task.id, action: 'projects.task.created').sole
+                                                     auditable_id: @automated_task.id, action: 'projects.task.created').sole
   end
 
   def records

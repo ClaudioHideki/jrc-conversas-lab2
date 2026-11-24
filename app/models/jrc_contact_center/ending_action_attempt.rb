@@ -10,6 +10,6 @@ class JrcContactCenter::EndingActionAttempt < JrcContactCenter::ApplicationRecor
   belongs_to :origin, class_name: 'JrcContactCenter::EndingActionOrigin'
   belongs_to :readiness, class_name: 'JrcContactCenter::EndingActionReadiness'
   has_one :outcome, class_name: 'JrcContactCenter::EndingActionAttemptOutcome', foreign_key: :attempt_id,
-          inverse_of: :attempt, dependent: :restrict_with_exception
+                    inverse_of: :attempt, dependent: :restrict_with_exception
   self.filter_attributes += %i[rule_code request_key integrity_sha256]
 end

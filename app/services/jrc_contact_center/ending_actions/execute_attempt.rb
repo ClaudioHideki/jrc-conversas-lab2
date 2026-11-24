@@ -26,10 +26,10 @@ class JrcContactCenter::EndingActions::ExecuteAttempt
       verify_identity!(metadata)
       outcomes.first || outcomes.create!(outcome: 'succeeded', result_code: 'completed', execution: effect.call).reload
     end
-  rescue StandardError => error
+  rescue StandardError => e
     raise unless @attempt
 
-    append_failure!(error)
+    append_failure!(e)
   end
 
   private

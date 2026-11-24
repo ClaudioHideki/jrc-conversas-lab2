@@ -10,11 +10,7 @@ module JrcContactCenter::SyntheticEndingAttemptSchemaProbe
   ).freeze
 
   def self.record(stage)
-    config = ApplicationRecord.connection_db_config
-    owned = JrcContactCenter::SyntheticEndingOriginSchemaProbe.runner_owned? && config.configuration_hash[:host] == '127.0.0.1' &&
-            config.database == DATABASES.fetch(stage) && ApplicationRecord.connection.current_database == config.database
-    raise 'Exclusive ending attempt schema diagnostics required' unless owned
-
+    guard!(stage)
     require Rails.root.join('lib/jrc_contact_center/ending_action_attempt_schema_receipt')
     receipt = JrcContactCenter::EndingActionAttemptSchemaReceipt.new(ApplicationRecord.connection)
     proof = report(stage, receipt)
@@ -23,6 +19,13 @@ module JrcContactCenter::SyntheticEndingAttemptSchemaProbe
     raise 'Installation cannot create pending attempts or outcomes' unless proof[:attempt_count].zero? && proof[:outcome_count].zero?
 
     write_report(stage, proof.merge(verified: true))
+  end
+
+  def self.guard!(stage)
+    config = ApplicationRecord.connection_db_config
+    owned = JrcContactCenter::SyntheticEndingOriginSchemaProbe.runner_owned? && config.configuration_hash[:host] == '127.0.0.1' &&
+            config.database == DATABASES.fetch(stage) && ApplicationRecord.connection.current_database == config.database
+    raise 'Exclusive ending attempt schema diagnostics required' unless owned
   end
 
   def self.write_report(stage, proof)
@@ -37,6 +40,6 @@ module JrcContactCenter::SyntheticEndingAttemptSchemaProbe
       component_hashes: components.transform_values { |value| Digest::SHA256.hexdigest(JSON.generate(value)) },
       attempt_count: JrcContactCenter::EndingActionAttempt.count, outcome_count: JrcContactCenter::EndingActionAttemptOutcome.count,
       verification_checks: { structure: receipt.send(:valid_structure?), references: receipt.send(:valid_references?),
-                             fingerprint: comments.values.all? { |value| value == calculated } } }
+                             fingerprint: comments.values.all?(calculated) } }
   end
 end

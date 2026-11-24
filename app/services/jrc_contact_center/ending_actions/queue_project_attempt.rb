@@ -25,9 +25,8 @@ class JrcContactCenter::EndingActions::QueueProjectAttempt
   private
 
   def validate_destination!(member, origin, rule)
-    unless rule.fetch('execution_mode') == 'automatic'
-      raise JrcContactCenter::OperationError, 'ending_action_requires_agent_confirmation'
-    end
+    raise JrcContactCenter::OperationError, 'ending_action_requires_agent_confirmation' unless rule.fetch('execution_mode') == 'automatic'
+
     trigger = JrcContactCenter::EndingActions::NativeTrigger.new(origin: origin).call(rule)
     raise JrcContactCenter::OperationError, 'ending_action_trigger_pending' unless trigger
 

@@ -36,14 +36,14 @@ RSpec.describe 'Native committed ending events and operational Projects dispatch
   def activate_dispatch_rule
     JrcContactCenter::EndingActions::ActivateRule.new(account: account, member: member, rule_code: 'SYNTHETIC_ORIGIN_RULE',
                                                       request_key: SecureRandom.uuid,
-                                                    expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
+                                                      expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
   end
 
   def revise_dispatch_rule(changes)
     project = JrcProjects::Project.where(account: account).sole
     JrcContactCenter::EndingActions::ConfigureRule.new(account: account, member: member,
                                                        input: origin_rule_document(project).merge(changes),
-                                                      expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
+                                                       expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
   end
 
   def dispatch_effects
@@ -65,8 +65,8 @@ RSpec.describe 'Native committed ending events and operational Projects dispatch
         state[:ready] << connection.raw_connection.backend_pid
         state[:results] << JrcContactCenter::EndingActionsJob.new.perform(*ids)
       end
-    rescue StandardError => error
-      state[:results] << error
+    rescue StandardError => e
+      state[:results] << e
     end
   end
 
@@ -92,7 +92,7 @@ RSpec.describe 'Native committed ending events and operational Projects dispatch
     perform_enqueued_jobs(only: JrcContactCenter::EndingActionsJob) do
       JrcContactCenter::ConfirmEndingReason.new(account: account, member: member).call(
         qualification, attributes: { reason_code: 'SYNTHETIC_ORIGIN_REASON' },
-        expected_revision: JrcContactCenter::QualificationDraftRevision.token(qualification), request_key: SecureRandom.uuid
+                       expected_revision: JrcContactCenter::QualificationDraftRevision.token(qualification), request_key: SecureRandom.uuid
       )
     end
     expect(dispatch_effects).to eq([1, 1, 1, 1, 1])
@@ -214,7 +214,7 @@ RSpec.describe 'Native committed ending events and operational Projects dispatch
 
   it 'serializes two actual event workers without duplicating initial work, destination records or outcomes' do
     complete_origin_qualification
-    states = Array.new(2) { { ready: ::Queue.new, results: ::Queue.new } }
+    states = Array.new(2) { { ready: Queue.new, results: Queue.new } }
     workers = []
     begin
       account.with_lock do
