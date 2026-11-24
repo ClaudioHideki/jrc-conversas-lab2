@@ -1,0 +1,162 @@
+{
+  "sha": "b3117ee4f3caca8b80421d04bf5c27345b7ad9ae",
+  "run": 45446266789,
+  "artifact": 14951293785,
+  "artifact_sha256": "e2356af0dda8dba4eb2ebb44c3da69410f671e367fdfd06a69882f41a3f69e74",
+  "accepted_scope": "Explicit prospective rule activation/readback through native APIs and editor, retaining original current configuration/source/destination authority and all M20 controls.",
+  "previous_native_acceptance": "c79883dd0af99d50937ed05aed31064863eaeb80",
+  "native_distinct_examples": 3198,
+  "new_native_cases": 24,
+  "new_Vue_cases": 18,
+  "native_activation_preflight": {
+    "summary": {
+      "example_count": 24,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb": 13,
+      "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb": 11
+    },
+    "path": "tmp/call-center-ending-activation-preflight.json",
+    "sha256": "b16d6ccbeec0a27503784b866bd79b4e2ac51ef9f4005d40d3aec780bb6e6bb6"
+  },
+  "native_activation_core": {
+    "summary": {
+      "example_count": 24,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb": 11,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb": 13
+    }
+  },
+  "native_activation_vue": {
+    "files": {
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": 19,
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingRuleActivation.spec.js": 16
+    },
+    "old_parent_cases_retained": 17,
+    "new_cases": 18
+  },
+  "native_activation_Chrome": [
+    {
+      "project": "desktop-dark",
+      "account_id": "2918",
+      "receipt_id": "62",
+      "version_id": "477",
+      "screenshots": [
+        ".codex/call-center-native-e2e/desktop-dark-ending-activation-recorded.png",
+        ".codex/call-center-native-e2e/desktop-dark-ending-activation-review.png",
+        ".codex/call-center-native-e2e/desktop-dark-ending-activation-stale.png"
+      ],
+      "native_task_count": 0,
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-ending-activation-native.json",
+      "sha256": "23f43f6b0b45388d53adcc0e755f529e8112c0e1c2f9838586ea9bd033d22c79"
+    },
+    {
+      "project": "desktop-light",
+      "account_id": "2892",
+      "receipt_id": "61",
+      "version_id": "471",
+      "screenshots": [
+        ".codex/call-center-native-e2e/desktop-light-ending-activation-recorded.png",
+        ".codex/call-center-native-e2e/desktop-light-ending-activation-review.png",
+        ".codex/call-center-native-e2e/desktop-light-ending-activation-stale.png"
+      ],
+      "native_task_count": 0,
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-ending-activation-native.json",
+      "sha256": "5b5810961f8ce3a8ea4ba8abe34c8e34c82eef845e68dab1e68e851eab0db150"
+    },
+    {
+      "project": "mobile-dark",
+      "account_id": "2970",
+      "receipt_id": "64",
+      "version_id": "489",
+      "screenshots": [
+        ".codex/call-center-native-e2e/mobile-dark-ending-activation-recorded.png",
+        ".codex/call-center-native-e2e/mobile-dark-ending-activation-review.png",
+        ".codex/call-center-native-e2e/mobile-dark-ending-activation-stale.png"
+      ],
+      "native_task_count": 0,
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-ending-activation-native.json",
+      "sha256": "5d8d347a951fd44df4bb2d0b6bf08e94addb0a12d8f7ac906e475aeb62bd2249"
+    },
+    {
+      "project": "mobile-light",
+      "account_id": "2944",
+      "receipt_id": "63",
+      "version_id": "483",
+      "screenshots": [
+        ".codex/call-center-native-e2e/mobile-light-ending-activation-recorded.png",
+        ".codex/call-center-native-e2e/mobile-light-ending-activation-review.png",
+        ".codex/call-center-native-e2e/mobile-light-ending-activation-stale.png"
+      ],
+      "native_task_count": 0,
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-ending-activation-native.json",
+      "sha256": "78899a22fa64cc52af767dddc2156233907bd1547198e3c301e3b9b483de6147"
+    }
+  ],
+  "Vue": {
+    "examples": 1831,
+    "failures": 0,
+    "pending": 0
+  },
+  "Chrome": {
+    "examples": 268,
+    "failures": 0,
+    "pending": 0,
+    "flaky": 0
+  },
+  "screenshot_hashes_verified": 620,
+  "actual_visual_review": {
+    "source_sha": "b3117ee4f3caca8b80421d04bf5c27345b7ad9ae",
+    "at": "2026-11-24T18:32:51.590032+00:00",
+    "original_files_actually_opened": 22,
+    "files": [
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-b3117ee4\\desktop-dark-authority-card.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-b3117ee4\\desktop-light-authority-card.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-b3117ee4\\mobile-dark-authority-card.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-b3117ee4\\mobile-light-authority-card.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-b3117ee4\\mobile-dark-authority-filters-closed.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-b3117ee4\\mobile-light-authority-filters-closed.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-b3117ee4\\desktop-dark-ending-automation-editor.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-b3117ee4\\desktop-light-ending-automation-editor.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-b3117ee4\\mobile-dark-ending-automation-editor.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-b3117ee4\\mobile-light-ending-automation-editor.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\desktop-dark-ending-activation-recorded.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\desktop-dark-ending-activation-review.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\desktop-dark-ending-activation-stale.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\desktop-light-ending-activation-recorded.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\desktop-light-ending-activation-review.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\desktop-light-ending-activation-stale.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\mobile-dark-ending-activation-recorded.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\mobile-dark-ending-activation-review.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\mobile-dark-ending-activation-stale.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\mobile-light-ending-activation-recorded.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\mobile-light-ending-activation-review.png",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-b3117ee4\\mobile-light-ending-activation-stale.png"
+    ],
+    "observations": [
+      "Desktop1440 and mobile390 originals actually viewed in clear and dark themes. No observed horizontal panel overflow or overlapping mobile authority filters.",
+      "Explicit prospective review, actual native recorded version and stale-configuration denial are visible in all four browser contexts. Readback receipt is distinct from saving the rule.",
+      "Configuration dialogs retain their existing internal vertical scrolling; screenshots intentionally capture a scrolled region, not the entire dialog.",
+      "Divergence to correct in the next increment: the Projects destination card still says operational execution is pending even when the supported automatic mode has a recorded activation. Keep the card explanatory without implying unsupported modes are implemented.",
+      "CRM, ServiceDesk, notifications, NICO, manual-mode execution and complete Figure10/Part1 are not accepted from these images."
+    ],
+    "whole_figure10_accepted": false,
+    "whole_part1_accepted": false
+  },
+  "activation_does_not_execute_replay_or_publish": true,
+  "real_call_broker_or_provider_homologated": false,
+  "remaining": [
+    "Authorized operational history and selected retry/manual execution interface.",
+    "Native CRM/ServiceDesk adapters with immutable legitimate customer context and independent receipts.",
+    "Representative scale, complete account lifecycle, actual Sidekiq dequeue and external PABX/provider homologation."
+  ],
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

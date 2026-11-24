@@ -1013,3 +1013,7 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - M20/c79883dd/CI45407961337:3174Rails distintos,1813Vue,264Chrome e608PNG verificados; tentativas/resultados imutáveis, eventos nativos após commit e concorrência PostgreSQL aceitos no escopo interno Projetos. Ativação operacional,manual,CRM/ServiceDesk,broker real eParte1 continuam abertos. Ver ending_attempt_native_acceptance_20261124.json.
 
 - ApósM20/c79883dd aceito: preparadoM21 com ativação explícita e consulta autenticada da revisão operacional;24novosRails/18novosVue/4novosChrome preparados, ainda sem aceite nativo. Mantidos os264Chrome anteriores;Figura10,manual,CRM/ServiceDesk ebroker real continuam abertos. Ver ending_activation_candidate_20261124.json.
+
+- M21/b3117ee4/CI45446266789: ativação e consulta prospectiva explícitas validadas; 3198Rails distintos,1831Vue,268Chrome e620PNG verificados. Histórico operacional, execução manual, CRM/ServiceDesk, broker e Parte1 continuam abertos.
+
+- ApósM21/b3117ee4 aceito: preparadoM22 com histórico operacional somente leitura,19novosRails/23novosVue/4novosChrome; sem aceite nativo ainda. Preservados os268Chrome anteriores e todos os recibos imutáveis. Execução manual,retry,CRM/ServiceDesk,broker real eParte1 continuam abertos.

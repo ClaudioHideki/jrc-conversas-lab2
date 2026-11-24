@@ -366,6 +366,10 @@ jobs:
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert all(row['status'] == 'passed' for row in report['examples'])
           PY
+      - name: Focused native ending history and current read authority lint
+        id: ending_history_lint
+        run: >-
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/ending_attempts_controller.rb app/services/jrc_contact_center/ending_actions/history_context.rb app/services/jrc_contact_center/ending_actions/attempt_history.rb app/services/jrc_contact_center/ending_actions/attempt_projection.rb script/jrc_call_center_ending_attempt_history_seed.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb --format json --out /tmp/call-center-ending-history-lint.json
       - name: Explicit activation and current native readiness authorization
         id: ending_activation_preflight
         run: |
@@ -408,10 +412,10 @@ jobs:
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb \
             spec/serializers/jrc_approvals/request_serializer_pause_spec.rb \
-            --exclude-pattern '**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
+            --exclude-pattern '**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
-        if: failure() && (steps.native_schema.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure')
+        if: failure() && (steps.native_schema.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure' || steps.ending_history_lint.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
@@ -447,7 +451,7 @@ jobs:
         run: |
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
-          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
+          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
       - name: Preserve failed native concurrency reports before later lint diagnostics
         if: failure() && steps.native_concurrency.outcome == 'failure'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -495,7 +499,7 @@ jobs:
             app/javascript/dashboard/routes/dashboard/webphone app/javascript/dashboard/routes/dashboard/settings/customRoles \
             app/javascript/dashboard/components/widgets/BackButton.spec.js \
             app/javascript/dashboard/api/specs/teams.spec.js app/javascript/dashboard/store/modules/specs/teamMembers app/javascript/dashboard/store/modules/specs/teams \
-            app/javascript/dashboard/routes/dashboard/inbox/useEndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/EndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/PendingQualificationReasons.spec.js app/javascript/dashboard/routes/dashboard/inbox/useAttendanceClosing.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationDraftForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.spec.js app/javascript/dashboard/routes/dashboard/inbox/InboxVoicePanel.spec.js \
+            app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/EndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/PendingQualificationReasons.spec.js app/javascript/dashboard/routes/dashboard/inbox/useAttendanceClosing.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationDraftForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.spec.js app/javascript/dashboard/routes/dashboard/inbox/InboxVoicePanel.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/call-center-vitest.json
       - name: Frontend lint of changed sources
@@ -560,7 +564,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 268
+          assert stats['expected'] == 272
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')
@@ -705,6 +709,14 @@ jobs:
           assert len(attempt_executions) == 22 and all(row['status'] == 'passed' for row in attempt_executions)
           native_dispatch = [row for row in concurrency['examples'] if row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb']
           assert len(native_dispatch) == 15 and all(row['status'] == 'passed' for row in native_dispatch)
+          expected_history = {
+              'spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb': 17,
+              'spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb': 2,
+          }
+          for history_path, required_cases in expected_history.items():
+              history_examples = [row for row in concurrency['examples'] if row['file_path'].removeprefix('./') == history_path]
+              assert len(history_examples) == required_cases and all(row['status'] == 'passed' for row in history_examples)
+              assert len({row['full_description'] for row in history_examples}) == required_cases
           assert editor_surfaces['desktop-light'] != editor_surfaces['desktop-dark']
           assert editor_surfaces['mobile-light'] != editor_surfaces['mobile-dark']
           pause_flows = list(Path('.codex/call-center-native-e2e').glob('*-pause-approval-native.json'))
@@ -745,6 +757,30 @@ jobs:
           vue = json.loads(Path('/tmp/call-center-vitest.json').read_text())
           assert vue['numPassedTests'] == vue['numTotalTests'] > 0
           assert vue['numFailedTests'] == vue['numPendingTests'] == 0
+          history_vue = [row for row in vue['testResults'] if row['name'].replace('\\', '/').endswith('/app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js')]
+          assert len(history_vue) == 1 and history_vue[0]['status'] == 'passed'
+          history_assertions = history_vue[0]['assertionResults']
+          assert len(history_assertions) == len({row['fullName'] for row in history_assertions}) == 23
+          assert all(row['status'] == 'passed' and not row.get('failureMessages') for row in history_assertions)
+          history_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-history-native.json')]
+          assert len(history_flows) == 4 and {row['project'] for row in history_flows} == expected_projects
+          assert len({row['account_id'] for row in history_flows}) == 4
+          for flow in history_flows:
+              assert flow['sha'] == os.environ['GITHUB_SHA'] and flow['synthetic'] is True
+              assert flow['native_immutable_attempts'] == 23 and flow['pending'] == 20
+              assert flow['succeeded'] == flow['blocked'] == flow['failed'] == 1
+              assert flow['synthetic_persistence_fault_injection'] is True
+              assert flow['native_task_total_before'] == flow['native_task_total_after'] == 1
+              assert flow['persisted_after_reload'] and flow['native_task_route_opened']
+              assert flow['ordinary_other_agent_status'] in [401, 403]
+              assert flow['actual_dark'] is flow['project'].endswith('dark')
+              assert flow['contrast_ratio'] >= 4.5
+              assert len(flow['state_contrast_ratios']) == 4 and all(ratio >= 4.5 for ratio in flow['state_contrast_ratios'])
+              assert not flow['page_errors'] and not flow['prohibited_mutations_or_external_calls']
+              images = {f".codex/call-center-native-e2e/{flow['project']}-ending-history-{stage}.png" for stage in ['pending-page', 'independent-outcomes', 'native-task']}
+              assert len(flow['screenshots']) == 3 and set(flow['screenshots']) == images
+              assert all(Path(image).is_file() for image in images)
+              assert flow['whole_figure10_or_Part1_accepted'] is False
           ending_preflight = json.loads(Path('/tmp/call-center-ending-confirmation-preflight.json').read_text())['summary']
           scope_preflight = json.loads(Path('/tmp/call-center-ending-scope-preflight.json').read_text())['summary']
           version_preflight = json.loads(Path('/tmp/call-center-ending-version-preflight.json').read_text())['summary']

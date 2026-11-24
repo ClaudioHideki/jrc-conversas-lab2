@@ -46,6 +46,11 @@ const calendarIdentity = value => {
 };
 
 export default {
+  endingAttemptHistory: (accountId, qualificationId, params = {}) =>
+    axios.get(
+      `${base(accountId)}/qualifications/${recordIdentity(qualificationId)}/ending_attempts`,
+      { params: { page: params.page || 1 } }
+    ),
   queueCalendars: (accountId, unitId, calendarId, params = {}) =>
     axios.get(`${base(accountId)}/queue_calendars`, {
       params: {

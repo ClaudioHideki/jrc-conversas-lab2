@@ -1,6 +1,6 @@
 {
   "parent": "c79883dd0af99d50937ed05aed31064863eaeb80",
-  "status": "implemented_explicit_activation_awaiting_native_validation",
+  "status": "explicit_prospective_activation_API_and_UI_validated",
   "accepted_attempt_acceptance_sha256": "f4f014c25d0dba705c59317dc834b9f0d252d2c7a4cd63f2ccb7030fd5b12090",
   "source_sha256": {
     ".github/workflows/call-center-administration.yml": "de88544d565ac2839c40a3f96233358b8cf96060db1fcde1e91b027785d4ff02",
@@ -56,7 +56,7 @@
   "chrome_total_required": 268,
   "new_chrome_cases": 4,
   "new_screenshots_required": 12,
-  "native_cases_executed": 0,
+  "native_cases_executed": 24,
   "implemented": [
     "Authenticated native activation/readback using current configuration and destination authority, without grants or replaying previous calls.",
     "Explicit review and click; immutable displayed revision; no background list/conflict refresh silently changes the reviewed snapshot.",
@@ -193,5 +193,7 @@
     "native_or_Chrome_revalidation_required": true,
     "all_product_app_models_services_SQL_and_migrations_unchanged": true,
     "whole_figure10_or_Part1_accepted": false
-  }
+  },
+  "native_verified_sha": "b3117ee4f3caca8b80421d04bf5c27345b7ad9ae",
+  "native_acceptance": "docs/jrc_contact_center/ending_activation_native_acceptance_20261124.json"
 }

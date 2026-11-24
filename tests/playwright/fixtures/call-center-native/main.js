@@ -21,6 +21,7 @@ import PendingAcwFixture from './PendingAcwFixture.vue';
 import { routes as approvalRoutes } from 'dashboard/routes/dashboard/approvals/routes';
 import { routes as webphoneRoutes } from 'dashboard/routes/dashboard/webphone/routes';
 import { routes as contactCenterRoutes } from 'dashboard/routes/dashboard/jrcContactCenter/routes';
+import { routes as projectRoutes } from 'dashboard/routes/dashboard/jrcProjects/routes';
 import { validateLoggedInRoutes } from 'dashboard/helper/routeHelpers';
 import '../../../../app/javascript/dashboard/assets/scss/app.scss';
 
@@ -44,6 +45,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     ...approvalRoutes,
+    ...projectRoutes,
     ...teamRoutes.routes.flatMap(parent =>
       parent.children
         .filter(child => child.path)

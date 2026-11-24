@@ -7,6 +7,7 @@ export default defineConfig({
   testMatch: [
     'call-center-native.spec.ts',
     'call-center-ending-activation-native.spec.ts',
+    'call-center-ending-attempt-history-native.spec.ts',
   ],
   workers: 1,
   retries: 0,

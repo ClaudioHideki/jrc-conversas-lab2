@@ -2,7 +2,12 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { acwLabels } from './acwLabels';
-const props = defineProps({ records: { type: Array, default: () => [] } });
+import EndingAttemptHistory from './EndingAttemptHistory.vue';
+const props = defineProps({
+  records: { type: Array, default: () => [] },
+  accountId: { type: [String, Number], default: null },
+  authorityKey: { type: String, default: '' },
+});
 const { t } = useI18n();
 const labels = computed(() => acwLabels(t));
 const completed = computed(() =>
@@ -89,6 +94,13 @@ const seconds = value =>
           <dd class="whitespace-pre-wrap">{{ record.notes }}</dd>
         </div>
       </dl>
+      <EndingAttemptHistory
+        v-if="accountId && record.call_session_id"
+        :key="`${accountId}:${record.id}`"
+        :account-id="accountId"
+        :qualification-id="record.id"
+        :authority-key="authorityKey"
+      />
     </article>
   </section>
 </template>

@@ -1,0 +1,93 @@
+{
+  "parent": "b3117ee4f3caca8b80421d04bf5c27345b7ad9ae",
+  "status": "implemented_read_only_history_awaiting_native_validation",
+  "accepted_activation_acceptance_sha256": "feec99f684cb2925122824095530ad95c9a0cd35572468f61fdb47fd92a78d66",
+  "source_sha256": {
+    ".github/workflows/call-center-administration.yml": "b8ae959cd443691408e8de38eba6b91da7e2fbf9597b6c19c1ccac347561eec0",
+    "app/controllers/api/v1/accounts/jrc_contact_center/ending_attempts_controller.rb": "505cca727e3aeb5f31922a11897230592a3852223090048b2e6a3987355108bd",
+    "app/javascript/dashboard/api/jrcContactCenter.js": "946b4e40644e1d8a3ca20590b9ebde0eabe9434dfcbca1cef323381db9e5e6df",
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "a9b20f1eaf8e887890918eb63c49a6535ea49a894248b00b9c64701428847466",
+    "app/javascript/dashboard/routes/dashboard/inbox/EndingAttemptHistory.vue": "9dc940c3af12138cdd390a07fc32cd7270254af2ad6370911e8529a6a1847dec",
+    "app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue": "7db525b9e2f1065223669b6d88a8a15d2a0fe01b91fafbce46e5221b3823f894",
+    "app/javascript/dashboard/routes/dashboard/inbox/QualificationHistory.vue": "245abe9e3896593966bbbc9923b1338985b5916358ab5d2f7d5c8aae39a3e0e9",
+    "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.js": "bb718b7ef9f73d0a735d783fdc395f7174e1cd498291e7208d3bd234c8dd20a4",
+    "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js": "0b5b6417b508bc380a3537d870eafb38bbd5a9a6f26c9e65a0a28cb968db43ae",
+    "app/services/jrc_contact_center/ending_actions/attempt_history.rb": "2cfd00a0ec579ee4aebfeb8f3b78f83ec278743e1a76f09a3e6c9abb8948342e",
+    "app/services/jrc_contact_center/ending_actions/attempt_projection.rb": "d94a34bd68da9775871253a4410661d3571a3cc224af66bfd40f6c37fef493e6",
+    "app/services/jrc_contact_center/ending_actions/history_context.rb": "3727452dfcc53355be110275ceb734e617f6d36a2adaed5c7c039b51d10f3c95",
+    "config/routes/jrc_contact_center_acw.rb": "faee69ae37a5ac3539fe3ea6ebac7dba79f8146738871fe5dc1380c0a2245e8b",
+    "script/jrc_call_center_ending_attempt_history_seed.rb": "8f3026943f78f9da103bd14e136cdb0c6269e686b8331a736a7113952d106f36",
+    "script/jrc_call_center_pause_seed.rb": "005f668fa909c8b6bc5f5a5293f2b6a66079255e4355000cc9a8f538d6c44335",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb": "9a922c66311ee94e111b5ec55796a8f2153afda29b9f4138792a65bbde232df8",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb": "f2ed33c936210bc2e69de6a8689bab2dae18c2e79a51102c7a14aaf9c2ec5a92",
+    "tests/playwright/call-center-native.config.ts": "c5922f3ce27fab6f2fa6c42d16ae05b7b7dc047c5f43d19148f374648c27ee97",
+    "tests/playwright/fixtures/call-center-native/main.js": "9404629cf4ff878c35fffad97b1bee97d6f0bd70aa53a4a2952a648336962a3b",
+    "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.mjs": "826ea4b67dfbd2458eb4edd0e87bd90ecd20d5d355ede7936a00ea3aa2813ffb",
+    "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts": "4d3bc40e367d44908b6609f8f530f8779d64bb1582e99cc3fe735c6ba7f5a2de",
+    "script/jrc_call_center_chrome_counter_test.py": "d4aa44cfbd8622ed7d631f5841fc83254fcf9cabb3f45eaa7585a6263dc76ed4"
+  },
+  "parent_sources": {
+    "app/javascript/dashboard/routes/dashboard/inbox/QualificationHistory.vue": "341d961ee7fbf211f67e678b8743976cebb6cb2f55e7c27e8d2bfb7d65f6ed04",
+    "app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue": "0ea995d1dc2e3c29fb08d01eb0cb796fd39a47bde86f85afb4008182eebae80c",
+    "tests/playwright/fixtures/call-center-native/main.js": "887eaf72bddfb52399b724b9ec9d274a96b22690c898fb346ed7ae751a80e481",
+    "config/routes/jrc_contact_center_acw.rb": "331577f7d6540ceeb2dfe5339a0fa9182e3fb8b41e19fc61c2285a38d0b8b2f5",
+    "app/javascript/dashboard/api/jrcContactCenter.js": "21f515a962f18a3c81ff3907ff7f97745fc7d8d7727376f3a998869d5072d35a",
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "7cb993ed29a8ce405d653cb465066250ed383fed7dd93cfc76fcb62ec0d8b213",
+    "script/jrc_call_center_pause_seed.rb": "310298d2c62f5da6e718449fdafd727c9a0be13635d747c6f6a22ecfd1cdf4bb",
+    "tests/playwright/call-center-native.config.ts": "ada02e4713601ead6f582926b1c2ffb0d4ce31c83000e8263ded8e9abe928518",
+    ".github/workflows/call-center-administration.yml": "de88544d565ac2839c40a3f96233358b8cf96060db1fcde1e91b027785d4ff02",
+    "script/jrc_call_center_chrome_counter_test.py": "00d3485f258e8cf7f21697e652c42a9b2b493ab7733581dc62a33c3195d055ab"
+  },
+  "new_native_cases_prepared": 19,
+  "new_Vue_cases_prepared": 23,
+  "native_cases_prepared": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb": 2,
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb": 17
+  },
+  "Vue_cases_prepared": {
+    "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js": 23
+  },
+  "native_cases_executed": 0,
+  "Chrome_total_required": 272,
+  "new_Chrome_cases": 4,
+  "Word_traceability": {
+    "figure": 10,
+    "paragraphs": [
+      "D2-P223",
+      "D2-P224",
+      "D2-P225",
+      "D2-P228"
+    ],
+    "prepared": [
+      "Bounded per-attendance history, call/rule/version/request identity, independent pending/failure/blocked/success facts.",
+      "Current native source and explicit audit authority; no administrative fallback for another agent.",
+      "Current Projects read access; no private destination name, template or raw exception.",
+      "Synchronous stale-context clearing and native task deep link; retained existing qualification history."
+    ],
+    "not_implemented_or_not_accepted_here": [
+      "Native CRM and ServiceDesk adapters and partial-destination end-to-end scenario.",
+      "Explicit manual execution and safe selected retry controls.",
+      "Actual Rails/PostgreSQL/Vue/Chrome validation of this private increment."
+    ],
+    "whole_figure10_or_Part1_accepted": false
+  },
+  "no_execution_retry_grants_migrations_or_external_operations": true,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false,
+  "source_admission": {
+    "all_native_schemas_receipts_and_SQL_unchanged": true,
+    "checkpoint_writer_unchanged": true,
+    "M20_M21_M22_source_composition_verified": true,
+    "Python_blocks_syntax": 14,
+    "light_Node_syntax": [
+      "app/javascript/dashboard/api/jrcContactCenter.js",
+      "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.js",
+      "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js",
+      "tests/playwright/call-center-native.config.ts",
+      "tests/playwright/fixtures/call-center-native/main.js",
+      "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.mjs",
+      "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts"
+    ],
+    "native_or_browser_acceptance": false
+  }
+}

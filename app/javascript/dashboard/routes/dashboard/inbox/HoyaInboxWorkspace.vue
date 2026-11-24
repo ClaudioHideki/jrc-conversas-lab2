@@ -36,6 +36,7 @@ import {
 import { useInboxCustomer360 } from './useInboxCustomer360';
 import { useAttendanceClosing } from './useAttendanceClosing';
 import PendingQualificationForm from './PendingQualificationForm.vue';
+import EndingAttemptHistory from './EndingAttemptHistory.vue';
 import QualificationDraftReview from './QualificationDraftReview.vue';
 import QualificationDraftNavigation from './QualificationDraftNavigation.vue';
 import QualificationHistory from './QualificationHistory.vue';
@@ -1267,6 +1268,7 @@ onBeforeUnmount(() => {
                     ).idle
               "
               :aria-pressed="tab === key"
+              :data-workspace-tab="key"
               :aria-label="workspaceLabels[key]"
               :title="workspaceLabels[key]"
               :disabled="
@@ -1577,6 +1579,13 @@ onBeforeUnmount(() => {
                 @save="closing.saveDraft()"
                 @complete="finishClosing"
               />
+              <EndingAttemptHistory
+                v-if="isVoice && closingPending"
+                :key="`${accountId}:${closingPending.id}`"
+                :account-id="accountId"
+                :qualification-id="closingPending.id"
+                :authority-key="closingAuthorityKey"
+              />
             </section>
             <p
               v-else-if="!closingRecords.some(record => record.completed_at)"
@@ -1584,13 +1593,19 @@ onBeforeUnmount(() => {
             >
               {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.AWAITING_TERMINAL') }}
             </p>
-            <QualificationHistory :records="closingRecords" />
+            <QualificationHistory
+              :records="closingRecords"
+              :account-id="accountId"
+              :authority-key="closingAuthorityKey"
+            />
           </div>
         </div>
         <QualificationHistory
           v-if="tab === 'HISTORY' && supportsClosing"
           class="p-4"
           :records="closingRecords"
+          :account-id="accountId"
+          :authority-key="closingAuthorityKey"
         />
         <InboxContextContent
           v-if="

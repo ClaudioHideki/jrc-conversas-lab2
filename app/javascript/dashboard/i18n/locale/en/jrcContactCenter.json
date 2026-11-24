@@ -2988,7 +2988,7 @@
       },
       "CONFIGURE": "Configurar",
       "DESTINATION_PENDING": "Integração operacional pendente; não haverá execução simulada.",
-      "DESTINATION_CONFIGURED": "Modelo configurado. Execução operacional ainda pendente.",
+      "DESTINATION_CONFIGURED": "Parâmetros da tarefa configurados. Confira abaixo o modo e a habilitação operacional da regra.",
       "PREVIEW": "Revisar parâmetros e contexto da regra",
       "REVIEW": "Revisei fila, unidade, motivo, condições, modo de execução e parâmetros privados do destino. Confirmo esta alteração.",
       "SAVED": "Versão salva. Nenhum destino foi executado por esta gravação.",
@@ -3046,6 +3046,39 @@
       "FAILED": "Não foi possível confirmar o resultado. Confira a conexão e tente novamente explicitamente; a mesma solicitação será preservada para evitar duplicidade.",
       "STALE": "A configuração mudou desde a revisão. Volte à lista, recarregue e revise a regra antes de habilitar.",
       "RELOAD": "Voltar à lista e recarregar"
+    },
+    "ENDING_ATTEMPTS": {
+      "OPEN": "Consultar automações deste atendimento",
+      "TITLE": "Automações do atendimento",
+      "CLOSE": "Fechar histórico",
+      "READ_ONLY": "A consulta não executa nem repete ações. O acesso ao destino é verificado novamente.",
+      "LOADING": "Consultando recibos...",
+      "DENIED": "Você não tem acesso atual a estes recibos.",
+      "LOAD_FAILED": "Não foi possível consultar os recibos. Atualize para tentar novamente.",
+      "EMPTY": "Nenhuma tentativa registrada nesta página. Isso não representa uma execução concluída.",
+      "CALL": "Chamada",
+      "VERSION": "Identificação da versão",
+      "REQUEST": "Identificação da solicitação",
+      "QUEUED": "Registrada em",
+      "PENDING": "Pendente",
+      "SUCCEEDED": "Concluída",
+      "FAILED": "Falha",
+      "BLOCKED": "Bloqueada",
+      "OPEN_TASK": "Abrir tarefa",
+      "TARGET_UNAVAILABLE": "O destino não está disponível no seu acesso atual.",
+      "REFRESH": "Atualizar recibos",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "RESULTS": {
+        "completed": "Execução confirmada pelo destino.",
+        "destination_failure": "Falha de integração registrada; a consulta não repete a ação.",
+        "authorization_denied": "Permissão atual insuficiente.",
+        "reference_unavailable": "Referência ou módulo indisponível.",
+        "deactivated": "Pendência bloqueada pela desativação da regra.",
+        "confirmation_required": "Confirmação do agente necessária.",
+        "trigger_pending": "Evento necessário ainda não confirmado.",
+        "operation_unavailable": "Operação indisponível nas condições atuais."
+      }
     }
   }
 }
