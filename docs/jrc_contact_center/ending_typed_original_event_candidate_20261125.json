@@ -7,7 +7,7 @@
       "app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb": "6445524d6f04506980e19f156843e47f533b3f2ae2bd70470455c4af2071b0e8",
       "app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb": "03c3830b21667d00c3753d7b055abce4fbb8bf7536e0204a153246f63df4947a",
       "spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb": "fef317e320f28345026d67f699ca8821829554a8d4cb91304e4f5dd0ffb495b6",
-      ".github/workflows/call-center-administration.yml": "5ffe0f09dadfd41508ba622f873126b0bdc58987821d6262ac91d5a199d5a57d",
+      ".github/workflows/call-center-administration.yml": "5549dbdcc962161dc3b054eda2ededc803e4ba62bfeb1607ef67f62b9a2d1f09",
       "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue": "93f062fec17c43403d81da97ef41dcc62978e1001685d229aebb28ac06960bf9",
       "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.spec.js": "93bcb9fac2fa36ac12ec1a83ffb615a27e1c979c6166af076f9ac80c7e6c1ff2",
       "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "28e21b7a81639af4d06e4a9a9e3a30a2d9465c0eac6177c44a1aa5323a963e45",
@@ -39,5 +39,12 @@
     "only_one_spec_corrected": true,
     "test_bodies_and_assertions_preserved": true,
     "native_cases_executed": 0
+  },
+  "owned_database_order_correction": {
+    "failed_sha": "702adb92a453883aa3ae8aada018119de27732b9",
+    "run": 45717941394,
+    "examples_executed": 0,
+    "outside_errors": 1,
+    "same_ten_cases_required_in_their_guarded_owned_database": true
   }
 }
