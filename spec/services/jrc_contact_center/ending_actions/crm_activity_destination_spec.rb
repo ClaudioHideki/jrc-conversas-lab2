@@ -155,7 +155,8 @@ RSpec.describe JrcContactCenter::EndingActions::CrmActivityDestination do
       ApplicationRecord.transaction(requires_new: true) { command.call(origin: row, parameters: parameters, trigger_at: trigger_at) }
     end.to raise_error(ActiveRecord::StatementInvalid)
     expect(account.jrc_crm_leads.where(contact: contact)).to be_empty
-    expect(account.jrc_crm_activities).to be_empty
+    expect(JrcCrm::Activity.where(account_id: account.id)).to be_empty
+    expect(JrcCrm::AuditEvent.where(account: account, event_type: %w[lead_created activity_created])).to be_empty
   end
 
   it 'does not fabricate a timestamp when the immutable execution trigger is absent' do

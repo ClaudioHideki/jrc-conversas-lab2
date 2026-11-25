@@ -34,6 +34,7 @@ RSpec.describe 'Linked Service Desk update after real original-authority content
         origin: origin, request_key: SecureRandom.uuid,
         parameters: { 'unit_id' => sd_unit.id.to_s, 'service_id' => nil,
                       'attributes' => { 'title' => 'SYNTHETIC initial update target',
+                                        'description' => 'SYNTHETIC committed native update target description',
                                         'status_id' => sd_status.id.to_s, 'priority_id' => sd_priority.id.to_s } }
       )
     end

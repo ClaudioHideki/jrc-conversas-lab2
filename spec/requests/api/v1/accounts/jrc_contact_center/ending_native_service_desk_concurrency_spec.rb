@@ -21,8 +21,9 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
   let(:request_key) { SecureRandom.uuid }
   let(:parameters) do
     { 'unit_id' => sd_unit.id.to_s, 'service_id' => nil,
-      'attributes' => { 'title' => 'SYNTHETIC concurrent native ticket', 'status_id' => sd_status.id.to_s,
-                        'priority_id' => sd_priority.id.to_s } }
+      'attributes' => { 'title' => 'SYNTHETIC concurrent native ticket',
+                        'description' => 'SYNTHETIC concurrent native ticket description',
+                        'status_id' => sd_status.id.to_s, 'priority_id' => sd_priority.id.to_s } }
   end
   let(:reference) do
     call = new_origin_source_call

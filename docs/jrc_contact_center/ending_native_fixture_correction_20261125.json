@@ -1,0 +1,50 @@
+{
+  "parent": "c737e863be7ea8b493cc858174110630c513f276",
+  "diagnostic_run": 45586356987,
+  "diagnostic_artifact": 15009548678,
+  "diagnostic_artifact_sha256": "320934afc83f584a2eb58474bccdce7e53aaa6a9524a896674d0c6514e2d1b2b",
+  "diagnostic_is_early_failure_report_not_final_acceptance": true,
+  "source_sha256": {
+    "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb": "5ec404259d148cce97b0e30ba4c98b6719bccc398386ef2e8e5a039d479f549a",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb": "8e3ee331de4d80ee678b5724179c25b4f0081fcf52518b030e892d1310770f7b",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "4ef0e52a1cae5bfc6b8ca7c771423980e07235f8b2297ea96af6d3acd6e8a746",
+    "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb": "1b5d982969792b20f95369f0d58e42d3511c844dcf992abce65601079ddf06ad",
+    ".github/workflows/call-center-administration.yml": "5b371acf4d24627b510c68462588392810d28375e725b817db58a093f3e3f4dd"
+  },
+  "parent_sources": {
+    "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb": "7d3a88e127711117253b2037b73a5d3be67ee2f85e6f9f590b8a2dc9109856aa",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb": "713882b48390feb60743625f0e10dd989f9d4026a36162b195a47bed87d84048",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "a10af80aa6d1e549b8f9d1bf38cc1bd0f09dd9b7764b62f8db0b311fa8251ecf",
+    "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb": "9c987cffbc930554859ea42add4ccb22e05a53ab731c97a025be0ea1606aa77f",
+    ".github/workflows/call-center-administration.yml": "cb4378847c1ec2aa6363587bc6b16d176d8402ebe4517433092c4041bfc2dceb"
+  },
+  "observed_failed_cases": 13,
+  "changes": [
+    "Provide explicit synthetic descriptions required by native Ticket validation in the setup only.",
+    "Assert no actually persisted Activity after rollback instead of examining a cached unsaved association object.",
+    "Additionally assert that native lead/activity creation audits rolled back."
+  ],
+  "production_defaults_native_validations_or_permissions_modified": false,
+  "all_original_case_names_and_assertions_preserved_or_strengthened": true,
+  "native_tests_or_lint_on_corrected_sources_executed": false,
+  "focused_native_fixture_preflights": {
+    "core": {
+      "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb": 12,
+      "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb": 12
+    },
+    "contention": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": 6,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb": 3
+    },
+    "full_Rails_and_concurrency_regression_commands_unchanged": true,
+    "only_existing_GitHub_owned_databases_reused": true,
+    "no_extra_unique_native_examples_claimed": true,
+    "embedded_Python_blocks_checked": 23,
+    "all_previous_workflow_bytes_recoverable": true
+  },
+  "final_failed_artifact": 15010369315,
+  "final_failed_artifact_sha256": "6dcde02d5f77d3ac1d92498d4e527592aa4d9c4f65089e126ca3fb9b937b05b3",
+  "prior_candidate_native_Ruby_lint_new_offenses": 0,
+  "corrected_candidate_still_requires_native_tests": true,
+  "whole_figure10_or_Part1_accepted": false
+}

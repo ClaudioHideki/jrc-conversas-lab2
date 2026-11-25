@@ -4082,5 +4082,13 @@
     "status": "pending_native_lint_and_Rails_Vue_Chrome_revalidation",
     "all_13_cases_preserved": true,
     "whole_figure10_or_Part1_accepted": false
+  },
+  "native_fixture_correction": {
+    "document": "docs/jrc_contact_center/ending_native_fixture_correction_20261125.json",
+    "document_sha256": "aecfc6fa01016496d4df340a8beaec935382c1e05f8a0e5c16e5dee5b3a6dcb9",
+    "status": "native_fixture_correction_prepared_not_validated",
+    "all_existing_cases_and_production_validations_preserved": true,
+    "additional_unique_native_cases_claimed": 0,
+    "whole_Part1_accepted": false
   }
 }

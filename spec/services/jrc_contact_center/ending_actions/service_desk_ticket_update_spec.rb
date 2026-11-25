@@ -23,6 +23,7 @@ RSpec.describe JrcContactCenter::EndingActions::ServiceDeskTicketUpdate do
       origin: reference, request_key: SecureRandom.uuid,
       parameters: { 'unit_id' => sd_unit.id.to_s, 'service_id' => nil,
                     'attributes' => { 'title' => 'SYNTHETIC original linked ticket',
+                                      'description' => 'SYNTHETIC original linked ticket description',
                                       'status_id' => sd_status.id.to_s, 'priority_id' => sd_priority.id.to_s } }
     )
   end
