@@ -405,7 +405,7 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "native_automation_clause_reconciliation_sha": "28e0f4400bb5723a90a2f47e848b411aff98ea34"
+      "native_automation_clause_reconciliation_sha": "ea09a785d0e9a635d7e1e10fb0895c1153293826"
     },
     {
       "figure": 10,
@@ -444,7 +444,16 @@
         "app/services/jrc_contact_center/ending_actions/run_pending_project_attempt.rb",
         "app/javascript/dashboard/routes/dashboard/inbox/PendingEndingReview.vue",
         "app/services/jrc_contact_center/ending_actions/original_customer_reference.rb",
-        "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb"
+        "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb",
+        "app/services/jrc_contact_center/ending_actions/service_desk_ticket_destination.rb",
+        "app/services/jrc_contact_center/ending_actions/action_definition.rb",
+        "app/services/jrc_nico/helpdesk/event_dispatch.rb",
+        "app/models/jrc_nico/helpdesk/dispatch_intent.rb",
+        "app/services/jrc_contact_center/ending_actions/crm_activity_definition.rb",
+        "app/services/jrc_contact_center/ending_actions/crm_activity_destination.rb",
+        "app/services/jrc_contact_center/ending_actions/service_desk_update_definition.rb",
+        "app/services/jrc_contact_center/ending_actions/service_desk_ticket_update.rb",
+        "app/services/jrc_contact_center/ending_actions/destination_operation_definition.rb"
       ],
       "native_spec_paths": [
         "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
@@ -476,13 +485,25 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb",
         "spec/services/jrc_contact_center/ending_actions/original_customer_reference_spec.rb",
         "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb",
-        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb"
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_destination_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/action_definition_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/crm_activity_definition_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_update_definition_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/rule_definition_explicit_destination_schema_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb"
       ],
       "divergences": [
-        "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Uma pendência selecionada de Projetos pode ser confirmada pelo agente original, sem repetir outra regra ou resultado terminal. A identidade imutável do cliente e o adaptador de Lead CRM possuem provas nativas de autorização atual, inclusive escopo organizacional; o fluxo operacional completo de oportunidade, atividade e resultado ainda não está habilitado.",
+        "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Uma pendência selecionada de Projetos pode ser confirmada pelo agente original, sem repetir outra regra ou resultado terminal. A identidade imutável do cliente e o adaptador de Lead CRM possuem provas nativas de autorização atual, inclusive escopo organizacional; o fluxo operacional completo de oportunidade, atividade e resultado ainda não está habilitado. O adaptador Service Desk, os formatos estritos dos destinos e a entrega NICO prospectiva após commit possuem provas nativas, sem backfill de eventos nem execução operacional CRM/SD liberada. A atividade CRM nativa possui provas de autoria original, auditoria, rollback e disputa PostgreSQL; o adaptador não constitui execução operacional idempotente sem o recibo CC independente. A atualização nativa de chamado vinculado possui provas de cliente original, permissão atual, versão esperada e auditoria; transições e atribuição não podem ser feitas pelo comando comum de edição. Os formatos prospectivos explícitos preservam o contrato antigo; validar os parâmetros não habilita novos destinos, não concede acesso nem substitui os recibos CC independentes.",
         "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
       ],
-      "native_automation_clause_reconciliation_sha": "28e0f4400bb5723a90a2f47e848b411aff98ea34"
+      "native_automation_clause_reconciliation_sha": "ea09a785d0e9a635d7e1e10fb0895c1153293826"
     },
     {
       "figure": 11,
@@ -3452,8 +3473,8 @@
     "whole_part1_accepted": false
   },
   "native_automation_clause_reconciliation": {
-    "sha": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
-    "run": 45558082951,
+    "sha": "ea09a785d0e9a635d7e1e10fb0895c1153293826",
+    "run": 45631075549,
     "requirements_total_preserved": 554,
     "figure_clause_ids": 459,
     "global_clause_ids": 95,
@@ -4127,6 +4148,23 @@
     "status": "native_master_reference_fixture_correction_prepared_not_validated",
     "all_14_native_cases_and_real_Redis_ownership_preserved": true,
     "native_R15_87_and_preserved_contention_2_passed_on_parent": "3447401e22f8178702bf16ea7359586f38b2d40c",
+    "whole_Part1_accepted": false
+  },
+  "native_destinations_bundle_acceptance": {
+    "sha": "ea09a785d0e9a635d7e1e10fb0895c1153293826",
+    "run": 45631075549,
+    "document": "docs/jrc_contact_center/ending_native_destinations_bundle_acceptance_20261125.json",
+    "document_sha256": "a2c29b07130c0f02a76d8ebc0bc19d29f06ac488d8c063f3602bf8d7d7beb721",
+    "native_distinct_examples": 3500,
+    "new_native_cases": 142,
+    "operational_CRM_SD_execution_or_whole_Part1_accepted": false
+  },
+  "typed_independent_destination_candidate": {
+    "document": "docs/jrc_contact_center/ending_typed_destinations_candidate_20261125.json",
+    "document_sha256": "746b2b4a5d72e5d20b226b6a61bd3fa0c589e9a87385715199d74ced1733e0ec",
+    "parent_native_accepted_sha": "ea09a785d0e9a635d7e1e10fb0895c1153293826",
+    "prepared_native_cases_not_executed": 82,
+    "public_editor_API_outbox_or_activation": false,
     "whole_Part1_accepted": false
   }
 }

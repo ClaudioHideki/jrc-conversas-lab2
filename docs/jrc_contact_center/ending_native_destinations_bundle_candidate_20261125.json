@@ -1,6 +1,6 @@
 {
   "parent": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
-  "status": "combined_native_destinations_prepared_not_executed",
+  "status": "native_related_adapters_and_compatibility_validated_together",
   "reviewed_inventory_sha256": "6921933c5521035ef803d397463fcd94f68abca532aa44a0f31c0fc5da3895e0",
   "source_sha256": {
     "app/services/jrc_contact_center/ending_actions/service_desk_destination_definition.rb": "329fe099e56f921fa3f10f8c33870665645006e41c374ef77ed54e5a8b89e2ab",
@@ -155,7 +155,7 @@
   },
   "accepted_A_sha256": "3059c4b7beb53d4bd5c816fe0c81c0f0c6e5d2dbf03c45a55b3fedf0ff8e8af3",
   "new_native_cases_prepared": 142,
-  "native_cases_executed": 0,
+  "native_cases_executed": 142,
   "no_intermediate_native_acceptance_simulated": true,
   "no_new_operational_dispatch_API_editor_grant_or_extra_migration": true,
   "whole_figure10_accepted": false,
@@ -375,5 +375,7 @@
     "source_sha256": "7ca3c482f83a862bdb13c54601400a231174243934e3983211db3baaf6e9d1b7",
     "all_case_names_and_assertions_preserved": true,
     "native_job_setup_not_stubs": true
-  }
+  },
+  "native_verified_sha": "ea09a785d0e9a635d7e1e10fb0895c1153293826",
+  "native_acceptance": "docs/jrc_contact_center/ending_native_destinations_bundle_acceptance_20261125.json"
 }

@@ -22,6 +22,8 @@ class JrcContactCenter::EndingActions::InitialProjectAttempts
   private
 
   def project_rule?(rule, origin)
+    return false if rule.key?('destination_schema_version')
+
     rule.fetch('active') && rule['execution_mode'] == 'automatic' && rule.fetch('queue_id') == origin.queue_id.to_s &&
       rule.fetch('actions').any? { |entry| entry.fetch('kind') == 'project_task' }
   end

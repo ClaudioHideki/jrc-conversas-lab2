@@ -50,6 +50,7 @@ class JrcContactCenter::EndingActions::PendingProjectAction
 
   def validate_rule!(origin)
     rule = JrcContactCenter::EndingActions::PinnedRule.new(account: @account, origin: origin).call(@attempt.rule_code)
+    raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' if rule.key?('destination_schema_version')
     raise JrcContactCenter::OperationError, 'ending_action_requires_agent_confirmation' unless rule.fetch('execution_mode') == 'automatic'
 
     JrcContactCenter::EndingActions::ExecutionReadiness.new(account: @account, origin: origin).call(@attempt.rule_code)

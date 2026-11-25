@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { sourcePins as typedDestinationPins, validateTypedDestinationSources } from './validate_cc_typed_destination_migration.mjs';
 import { validateNewMigrationTimestamps } from './validate_migration_timestamps.mjs';
 import { sourcePins as endingOriginPins, validateEndingOriginSources } from './validate_cc_ending_origin_migration.mjs';
 
@@ -296,10 +297,25 @@ export function verifyNicoDispatchIntentMigrations(changes, readCurrent, schema)
     rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
 }
 
+// M22 is additive. The complete M1-M21 gate still runs on its exact prior
+// sources after this migration and SQL have passed their explicit source pins.
+export function verifyTypedDestinationMigrations(changes, readCurrent, schema) {
+  const additions = [typedDestinationPins.migration.path, typedDestinationPins.sql.path];
+  const rows = changes.trim().split('\n').filter(Boolean);
+  for (const path of additions) {
+    if (rows.filter(row => row === `A\t${path}`).length !== 1)
+      throw new Error(`Missing or duplicate reviewed typed destination source: ${path}`);
+  }
+  const prior = rows.filter(row => !additions.some(path => row === `A\t${path}`));
+  verifyNicoDispatchIntentMigrations(prior.join('\n'), readCurrent, schema);
+  validateTypedDestinationSources(Object.fromEntries(Object.entries(typedDestinationPins).map(([key, pin]) => [key, readCurrent(pin.path)])));
+  return validateNewMigrationTimestamps(schema, rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyNicoDispatchIntentMigrations(changes, readFileSync, schema);
+  const result = verifyTypedDestinationMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
     [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash, [endingActionVersionMigrationPath]: endingActionVersionMigrationHash },
     pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, endingOriginPins,

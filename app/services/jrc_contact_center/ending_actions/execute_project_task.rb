@@ -14,6 +14,8 @@ class JrcContactCenter::EndingActions::ExecuteProjectTask
     context = JrcContactCenter::EndingActions::OriginalActorContext.new(account: @account, origin_id: @origin_id)
     context.call do |member, origin|
       rule = JrcContactCenter::EndingActions::PinnedRule.new(account: @account, origin: origin).call(@rule_code)
+      raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' if rule.key?('destination_schema_version')
+
       readiness = JrcContactCenter::EndingActions::ExecutionReadiness.new(account: @account, origin: origin).call(@rule_code)
       action = rule.fetch('actions').find { |entry| entry.fetch('kind') == 'project_task' }
       raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action

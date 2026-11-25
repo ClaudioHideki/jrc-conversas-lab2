@@ -101,6 +101,7 @@ jobs:
           node --test script/validate_cc_ending_execution_migration.test.mjs script/validate_cc_ending_execution_admission.test.mjs
           node --test script/validate_cc_ending_attempt_migration.test.mjs script/validate_cc_ending_attempt_admission.test.mjs
           node --test script/validate_cc_nico_intent_admission.test.mjs
+          node --test script/validate_cc_typed_destination_admission.test.mjs
           node script/validate_cc_access_migration.mjs
       - name: Focused lint of new private ending version sources
         id: ending_version_lint
@@ -112,6 +113,10 @@ jobs:
           bundle exec rubocop app/models/jrc_contact_center/ending_action_readiness.rb app/services/jrc_contact_center/ending_actions/activate_rule.rb app/services/jrc_contact_center/ending_actions/execution_readiness.rb db/migrate/20261123235000_create_contact_center_ending_action_readinesses.rb lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb script/jrc_call_center_ending_readiness_schema_probe.rb script/jrc_call_center_ending_readiness_upgrade.rb spec/services/jrc_contact_center/ending_actions/activate_rule_spec.rb spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb spec/models/jrc_contact_center/ending_action_readiness_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb spec/services/jrc_contact_center/synthetic_ending_readiness_upgrade_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb spec/support/contact_center_ending_origin_schema_dependencies.rb --format json --out /tmp/call-center-ending-readiness-lint.json
           bundle exec rubocop app/models/jrc_contact_center/ending_action_execution.rb app/services/jrc_contact_center/ending_actions/execute_project_task.rb db/migrate/20261124000000_create_contact_center_ending_action_executions.rb lib/jrc_contact_center/ending_action_execution_schema_receipt.rb script/jrc_call_center_ending_execution_schema_probe.rb script/jrc_call_center_ending_success_upgrade.rb spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb spec/support/contact_center_ending_origin_schema_dependencies.rb --format json --out /tmp/call-center-ending-success-lint.json
           bundle exec rubocop app/jobs/jrc_contact_center/ending_actions_job.rb app/jobs/jrc_contact_center/ending_attempt_reconcile_job.rb app/models/jrc_contact_center/ending_action_attempt.rb app/models/jrc_contact_center/ending_action_attempt_outcome.rb app/services/jrc_contact_center/ending_actions/attempt_failure.rb app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb app/services/jrc_contact_center/ending_actions/execute_attempt.rb app/services/jrc_contact_center/ending_actions/execute_project_task.rb app/services/jrc_contact_center/ending_actions/initial_project_attempts.rb app/services/jrc_contact_center/ending_actions/queue_project_attempt.rb app/services/jrc_contact_center/ending_actions/record_attempt.rb db/migrate/20261124001000_create_contact_center_ending_action_attempts.rb lib/jrc_contact_center/ending_action_attempt_schema_receipt.rb script/jrc_call_center_ending_attempt_schema_probe.rb script/jrc_call_center_ending_attempt_upgrade.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb spec/services/jrc_contact_center/synthetic_ending_attempt_upgrade_spec.rb spec/support/contact_center_ending_attempt_operators.rb spec/support/contact_center_ending_origin_schema_dependencies.rb --format json --out /tmp/call-center-ending-attempt-lint.json
+      - name: Typed immutable destination history and current-actor executor lint
+        id: typed_destination_lint
+        run: |
+          bundle exec rubocop app/models/jrc_contact_center/ending_destination_attempt.rb app/models/jrc_contact_center/ending_destination_consent.rb app/models/jrc_contact_center/ending_destination_execution.rb app/models/jrc_contact_center/ending_destination_outcome.rb app/services/jrc_contact_center/ending_actions/execute_destination_attempt.rb app/services/jrc_contact_center/ending_actions/execute_native_destination.rb app/services/jrc_contact_center/ending_actions/execute_project_task.rb app/services/jrc_contact_center/ending_actions/initial_project_attempts.rb app/services/jrc_contact_center/ending_actions/pending_project_action.rb app/services/jrc_contact_center/ending_actions/queue_project_attempt.rb db/migrate/20261125060000_create_contact_center_typed_destinations.rb lib/jrc_contact_center/ending_destination_schema_receipt.rb script/jrc_call_center_typed_destination_schema_probe.rb script/jrc_call_center_typed_destination_upgrade.rb spec/models/jrc_contact_center/ending_destination_consent_account_lifecycle_spec.rb spec/models/jrc_contact_center/ending_destination_attempt_retry_and_success_spec.rb spec/models/jrc_contact_center/ending_destination_attempt_schema_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb spec/services/jrc_contact_center/create_contact_center_typed_destinations_spec.rb spec/services/jrc_contact_center/synthetic_typed_destination_upgrade_spec.rb spec/support/contact_center_typed_destination_schema.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb --format json --out /tmp/call-center-typed-destination-lint.json
       - name: Disposable application schema and pending migrations
         id: native_schema
         run: |
@@ -132,6 +137,7 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_execution_schema_probe"); JrcContactCenter::SyntheticEndingExecutionSchemaProbe.record("fresh")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_attempt_schema_probe"); JrcContactCenter::SyntheticEndingAttemptSchemaProbe.record("fresh")'
           bundle exec rspec spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb --format progress --format json --out /tmp/call-center-nico-intent-fresh-rspec.json
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_typed_destination_schema_probe"); JrcContactCenter::SyntheticTypedDestinationSchemaProbe.record("fresh")'
           } > /tmp/call-center-initial-schema.log 2>&1
           cat /tmp/call-center-initial-schema.log
       - name: Reload migrated schema in a separate disposable database
@@ -161,6 +167,8 @@ jobs:
           bundle exec rspec spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb --format progress --format json --out /tmp/call-center-ending-success-reload.json
           bundle exec rspec spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb --format progress --format json --out /tmp/call-center-ending-attempt-reload.json
           bundle exec rspec spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb --format progress --format json --out /tmp/call-center-nico-intent-reload-rspec.json
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_typed_destination_schema_probe"); JrcContactCenter::SyntheticTypedDestinationSchemaProbe.record("reload")'
+          bundle exec rspec spec/services/jrc_contact_center/create_contact_center_typed_destinations_spec.rb --format progress --format json --out /tmp/call-center-typed-destination-reload-rspec.json
       - name: Populated ending origin upgrade without retroactive evidence or effects
         id: ending_origin_upgrade
         env:
@@ -285,6 +293,37 @@ jobs:
           assert proof['technical_intents'] == 0 and proof['provider_or_broker_execution'] is False
           assert len(proof['preserved_records']) == 27 and proof['exact_old_columns_and_values_preserved'] is True
           assert [proof[k] for k in ['existing_tasks', 'existing_native_successes', 'existing_tickets', 'legacy_events']] == [2, 1, 1, 1]
+          PY
+      - name: Populated v1 history upgrade without retroactive typed work
+        id: typed_destination_upgrade
+        env:
+          POSTGRES_DATABASE: jrc_cc_typed_destination_upgrade_synthetic
+          SCHEMA: /tmp/call-center-typed-upgrade-schema.rb
+        run: |
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = jrc_cc_typed_destination_upgrade_synthetic
+          test "$REDIS_URL" = redis://127.0.0.1:6379/15
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate VERSION=20261124200000
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_typed_destination_upgrade"); JrcContactCenter::SyntheticTypedDestinationUpgrade.prepare!'
+          bundle exec rails db:migrate
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_typed_destination_upgrade"); JrcContactCenter::SyntheticTypedDestinationUpgrade.verify!'
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_typed_destination_schema_probe"); JrcContactCenter::SyntheticTypedDestinationSchemaProbe.record("populated")'
+          bundle exec rspec spec/services/jrc_contact_center/synthetic_typed_destination_upgrade_spec.rb --format progress --format json --out /tmp/call-center-typed-destination-upgrade-rspec.json
+          python3 -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-typed-destination-upgrade-rspec.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) == 3
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          proof = json.loads(Path('/tmp/call-center-typed-destination-upgrade.json').read_text())
+          assert proof['sha'] == os.environ['GITHUB_SHA'] and proof['synthetic'] is True
+          assert proof['exact_old_columns_and_values_preserved'] is True and proof['rerun_idempotent'] is True
+          assert len(proof['preserved_records']) == 19
+          assert [proof[key] for key in ['existing_tasks_preserved', 'successful_v1_receipts_preserved', 'completed_v1_attempts_preserved', 'completed_v1_outcomes_preserved', 'typed_rows', 'operational_effects_delta']] == [2, 1, 1, 1, 0, 0]
           PY
       - name: Native ending origin and actual ACW completion preflight
         id: ending_origin_preflight
@@ -559,17 +598,21 @@ jobs:
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb \
             spec/serializers/jrc_approvals/request_serializer_pause_spec.rb \
-            --exclude-pattern '**/ending_native_sd_update_concurrency_spec.rb,**/ending_native_crm_activity_concurrency_spec.rb,**/ending_native_service_desk_concurrency_spec.rb,**/ending_native_nico_queue_transaction_spec.rb,**/synthetic_nico_dispatch_upgrade_spec.rb,**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
+            --exclude-pattern '**/ending_typed_mixed_destinations_spec.rb,**/ending_typed_execution_concurrency_spec.rb,**/synthetic_typed_destination_upgrade_spec.rb,**/ending_native_sd_update_concurrency_spec.rb,**/ending_native_crm_activity_concurrency_spec.rb,**/ending_native_service_desk_concurrency_spec.rb,**/ending_native_nico_queue_transaction_spec.rb,**/synthetic_nico_dispatch_upgrade_spec.rb,**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
-        if: failure() && (steps.native_schema.outcome == 'failure' || steps.native_concurrency.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_fixture_core_preflight.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure' || steps.ending_history_lint.outcome == 'failure' || steps.ending_actual_broker_lint.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure')
+        if: failure() && (steps.native_schema.outcome == 'failure' || steps.native_concurrency.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_fixture_core_preflight.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure' || steps.ending_history_lint.outcome == 'failure' || steps.ending_actual_broker_lint.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure' || steps.typed_destination_upgrade.outcome == 'failure' || steps.typed_destination_lint.outcome == 'failure' || steps.typed_destination_coverage.outcome == 'failure' || steps.typed_destination_concurrency.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
           path: |
             /tmp/call-center-initial-schema.log
             /tmp/call-center-nico-*.json
+            /tmp/call-center-typed-*.json
+            /tmp/call-center-crm-*.json
+            /tmp/call-center-sd-*.json
             /tmp/call-center-schema.rb
+            /tmp/call-center-typed-upgrade-schema.rb
             /tmp/call-center-rspec.json
             /tmp/call-center-pabx-rspec.json
             /tmp/call-center-ending-fixture-contention-preflight.json
@@ -667,6 +710,59 @@ jobs:
               selected = [row for row in report['examples'] if row['file_path'].removeprefix('./') == source]
               assert len(selected) == count and all(row['status'] == 'passed' for row in selected)
           PY
+      - name: Typed destination native schema, account lifecycle and source integrity coverage
+        id: typed_destination_coverage
+        run: |
+          python3 -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-rspec.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) > 0
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          expected = {'spec/models/jrc_contact_center/ending_destination_attempt_schema_spec.rb': 23, 'spec/models/jrc_contact_center/ending_destination_attempt_retry_and_success_spec.rb': 16, 'spec/models/jrc_contact_center/ending_destination_consent_account_lifecycle_spec.rb': 4, 'spec/services/jrc_contact_center/create_contact_center_typed_destinations_spec.rb': 11}
+          selected = [row for row in report['examples'] if row['file_path'].removeprefix('./') in expected]
+          assert len(selected) == len({(row['file_path'], row['line_number'], row['full_description']) for row in selected}) == 54
+          for source, count in expected.items():
+              assert len([row for row in selected if row['file_path'].removeprefix('./') == source]) == count
+          proofs = [json.loads(Path('/tmp', 'call-center-typed-destination-schema-' + stage + '.json').read_text()) for stage in ['fresh', 'reload', 'populated']]
+          for proof in proofs:
+              assert proof['product_sha'] == os.environ['GITHUB_SHA'] and proof['verified'] is True
+              assert len(proof['table_counts']) == 4 and all(count == 0 for count in proof['table_counts'].values())
+              assert len(proof['stored']) == 4 and all(value == proof['calculated'] for value in proof['stored'].values())
+          assert all(proof['component_hashes'] == proofs[0]['component_hashes'] for proof in proofs)
+          reload = json.loads(Path('/tmp/call-center-typed-destination-reload-rspec.json').read_text())
+          assert reload['summary']['example_count'] == len(reload['examples']) == 11
+          assert all(reload['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in reload['examples'])
+          PY
+      - name: Typed original-agent native execution and actual PostgreSQL contention
+        id: typed_destination_concurrency
+        env:
+          POSTGRES_DATABASE: corporate_gratuity_disposable
+        run: |
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = corporate_gratuity_disposable
+          test "$REDIS_URL" = redis://127.0.0.1:6379/15
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb --format progress --format json --out /tmp/call-center-typed-destination-concurrency-rspec.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-typed-destination-concurrency-rspec.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) == 25
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert len({(row['file_path'], row['line_number'], row['full_description']) for row in report['examples']}) == 25
+          expected = {'spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb': 15,
+                      'spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb': 10}
+          actual = {}
+          for row in report['examples']:
+              assert row['status'] == 'passed'
+              path = row['file_path'].removeprefix('./')
+              actual[path] = actual.get(path, 0) + 1
+          assert actual == expected
+          PY
       - name: Explicit selected pending operation native authority and actual contention
         id: ending_pending_preflight
         env:
@@ -726,7 +822,7 @@ jobs:
           bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb --fail-fast --format progress --format json --out /tmp/call-center-ending-actual-broker-rspec.json
           python3 -B script/jrc_call_center_ending_broker_check.py
       - name: Preserve failed native concurrency reports before later lint diagnostics
-        if: failure() && (steps.native_concurrency.outcome == 'failure' || steps.ending_actual_broker.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure')
+        if: failure() && (steps.native_concurrency.outcome == 'failure' || steps.ending_actual_broker.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure' || steps.typed_destination_upgrade.outcome == 'failure' || steps.typed_destination_lint.outcome == 'failure' || steps.typed_destination_coverage.outcome == 'failure' || steps.typed_destination_concurrency.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-concurrency-${{ github.sha }}
@@ -847,7 +943,7 @@ jobs:
           matrix = json.loads(source.read_text())
           assert sorted(row['figure'] for row in matrix['figures']) == list(range(1, 24))
           summaries = {}
-          for name in ['call-center-ending-fixture-core-preflight.json', 'call-center-ending-fixture-contention-preflight.json', 'call-center-nico-native-regressions-rspec.json', 'call-center-nico-preserved-contention-rspec.json', 'call-center-nico-intent-fresh-rspec.json', 'call-center-nico-intent-reload-rspec.json', 'call-center-nico-intent-upgrade-rspec.json', 'call-center-ending-nico-queue-rspec.json', 'call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
+          for name in ['call-center-typed-destination-upgrade-rspec.json', 'call-center-typed-destination-concurrency-rspec.json', 'call-center-typed-destination-reload-rspec.json', 'call-center-ending-fixture-core-preflight.json', 'call-center-ending-fixture-contention-preflight.json', 'call-center-nico-native-regressions-rspec.json', 'call-center-nico-preserved-contention-rspec.json', 'call-center-nico-intent-fresh-rspec.json', 'call-center-nico-intent-reload-rspec.json', 'call-center-nico-intent-upgrade-rspec.json', 'call-center-ending-nico-queue-rspec.json', 'call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
               summary = json.loads(Path('/tmp', name).read_text())['summary']
               assert summary['example_count'] > 0
               assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0
@@ -1109,6 +1205,7 @@ jobs:
             /tmp/call-center-*.txt
             /tmp/call-center-*.log
             /tmp/call-center-schema.rb
+            /tmp/call-center-typed-upgrade-schema.rb
             .codex/call-center-native-e2e
           if-no-files-found: error
           retention-days: 7
