@@ -4184,5 +4184,11 @@
     "all_252_reload_examples_passed_before_metadata_failure": true,
     "native_82_acceptance": false,
     "whole_Part1_accepted": false
+  },
+  "native_typed_fault_fixture_correction": {
+    "document": "docs/jrc_contact_center/ending_typed_native_fault_fixture_correction_20261125.json",
+    "sha256": "b68d7046652f56a6795e5b6ebbbc56056da6a94e671ad8a1b4ec2d8a4f7e052d",
+    "parent_native_failures": 4,
+    "no_native_acceptance": true
   }
 }

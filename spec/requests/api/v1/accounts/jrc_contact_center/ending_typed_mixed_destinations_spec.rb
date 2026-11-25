@@ -151,7 +151,7 @@ RSpec.describe 'Independent native CRM and Service Desk ending results' do
         END IF;
         RETURN NEW;
       END; $$;
-      CREATE TRIGGER #{name} BEFORE INSERT ON jrc_contact_center_ending_destination_executions
+      CREATE TRIGGER #{name} AFTER INSERT ON jrc_contact_center_ending_destination_executions
         FOR EACH ROW EXECUTE FUNCTION pg_temp.#{name}();
     SQL
     mixed_fault[:installed] = true

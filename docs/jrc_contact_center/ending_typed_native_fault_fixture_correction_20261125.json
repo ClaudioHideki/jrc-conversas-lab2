@@ -1,0 +1,51 @@
+{
+  "parent": "7f03af1c9f53525fd6a4797f0285f3be3c0815df",
+  "failed_run": 45661964796,
+  "failed_artifact": 15048039465,
+  "failed_artifact_sha256": "dc6254239152218962c302734dc5451534da941592c7a0f27061f31ccaab0249",
+  "native_cases_preserved": 82,
+  "actual_contention_examples": 25,
+  "actual_fixture_failures": 4,
+  "cause": "The test BEFORE trigger sorts before cc_typed_execution_immutable and sees destination_kind NULL. AFTER INSERT observes the derived row and still rolls back the same statement/transaction.",
+  "official_references": [
+    "https://www.postgresql.org/docs/16/sql-createtrigger.html",
+    "https://www.postgresql.org/docs/16/trigger-definition.html"
+  ],
+  "files": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb": {
+      "parent_sha256": "73e4059985507b84a2552fdebe4a0195e71fc37f295c41bf78938c5fe205723b",
+      "source_sha256": "10dc8ef6d7c73fe84fef7b9cf36342ddd2060cc8e3b0db4daa8908c3ca829d56",
+      "patches": [
+        {
+          "before": "      CREATE TRIGGER #{name} BEFORE INSERT ON jrc_contact_center_ending_destination_executions\n",
+          "after": "      CREATE TRIGGER #{name} AFTER INSERT ON jrc_contact_center_ending_destination_executions\n"
+        }
+      ]
+    },
+    ".github/workflows/call-center-administration.yml": {
+      "parent_sha256": "ae2dbf0e705250244332000eccf764118b850eda950c5b507671d03aad57c148",
+      "source_sha256": "8d3d636152256543fcaf380a29d0e700b6d09060c29b833dc7512ebb7eb4413b",
+      "unchanged_moved_step": "      - name: Typed original-agent native execution and actual PostgreSQL contention\n        id: typed_destination_concurrency\n        env:\n          POSTGRES_DATABASE: corporate_gratuity_disposable\n        run: |\n          test \"$RUNNER_ENVIRONMENT\" = github-hosted\n          test \"$RAILS_ENV\" = test\n          test \"$POSTGRES_HOST\" = 127.0.0.1\n          test \"$POSTGRES_DATABASE\" = corporate_gratuity_disposable\n          test \"$REDIS_URL\" = redis://127.0.0.1:6379/15\n          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb --format progress --format json --out /tmp/call-center-typed-destination-concurrency-rspec.json\n          python3 -B - <<'PY'\n          import json\n          from pathlib import Path\n          report = json.loads(Path('/tmp/call-center-typed-destination-concurrency-rspec.json').read_text())\n          assert report['summary']['example_count'] == len(report['examples']) == 25\n          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])\n          assert len({(row['file_path'], row['line_number'], row['full_description']) for row in report['examples']}) == 25\n          expected = {'spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb': 15,\n                      'spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb': 10}\n          actual = {}\n          for row in report['examples']:\n              assert row['status'] == 'passed'\n              path = row['file_path'].removeprefix('./')\n              actual[path] = actual.get(path, 0) + 1\n          assert actual == expected\n          PY\n",
+      "earlier_anchor": "      - name: Rails authorization, persistence and affected regressions\n",
+      "original_next_anchor": "      - name: Explicit selected pending operation native authority and actual contention\n",
+      "artifact_prefix_patch": {
+        "before": "            /tmp/call-center-pabx-rspec.json\n            /tmp/call-center-rspec.json\n            /tmp/call-center-ending-*.json\n",
+        "after": "            /tmp/call-center-pabx-rspec.json\n            /tmp/call-center-rspec.json\n            /tmp/call-center-typed-*.json\n            /tmp/call-center-ending-*.json\n"
+      }
+    }
+  },
+  "all_example_bodies_assertions_and_native_guards_unchanged": true,
+  "database_models_services_permissions_or_SQL_modified": false,
+  "no_timeout_retry_or_gate_reduced": true,
+  "native_acceptance": false,
+  "scope": "One test trigger timing word, unchanged contention step earlier, missing typed reports preserved.",
+  "new_Ruby_offenses_on_failed_parent": 0,
+  "native_core_on_failed_parent": {
+    "examples": 3088,
+    "failures": 0
+  },
+  "official_reference_basis": "PostgreSQL16: same-kind triggers alphabetical; AFTER sees BEFORE-derived row and errors roll back the statement/transaction.",
+  "actual_25_cases_and_4_failure_assertions_still_required": true,
+  "all_existing_checks_and_554_literal_requirements_preserved": true,
+  "whole_figure10_or_Part1_accepted": false
+}

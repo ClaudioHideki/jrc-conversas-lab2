@@ -174,5 +174,29 @@
         "script/validate_cc_typed_destination_migration.mjs": "8df19ec8f611662071ce9cd46bc7424178e49ad6cd7beaed29dfbbee0e1765d6"
       }
     }
-  ]
+  ],
+  "native_fault_corrections": [
+    {
+      "name": "exact_native_typed_fault_fixture_and_fail_fast_order",
+      "reviewed_receipt_sha256": "fbbff004bc22e0a1a6040ffda554c70af76420f33294efa99ae8ccd42ca8ce65",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb": "10dc8ef6d7c73fe84fef7b9cf36342ddd2060cc8e3b0db4daa8908c3ca829d56",
+        ".github/workflows/call-center-administration.yml": "8d3d636152256543fcaf380a29d0e700b6d09060c29b833dc7512ebb7eb4413b"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb": "73e4059985507b84a2552fdebe4a0195e71fc37f295c41bf78938c5fe205723b",
+        ".github/workflows/call-center-administration.yml": "ae2dbf0e705250244332000eccf764118b850eda950c5b507671d03aad57c148"
+      }
+    }
+  ],
+  "last_failed_native_contention": {
+    "sha": "7f03af1c9f53525fd6a4797f0285f3be3c0815df",
+    "run": 45661964796,
+    "artifact": 15048039465,
+    "artifact_sha256": "dc6254239152218962c302734dc5451534da941592c7a0f27061f31ccaab0249",
+    "examples": 25,
+    "failures": 4,
+    "root_cause": "The test BEFORE trigger sorts before cc_typed_execution_immutable and sees destination_kind NULL. AFTER INSERT observes the derived row and still rolls back the same statement/transaction.",
+    "correction_native_accepted": false
+  }
 }
