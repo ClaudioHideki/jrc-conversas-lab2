@@ -4105,5 +4105,13 @@
     "root_cause_or_fix_accepted": false,
     "all_6_cases_assertions_and_timeout_limits_preserved": true,
     "whole_Part1_accepted": false
+  },
+  "owned_worker_lock_chain_correction": {
+    "document": "docs/jrc_contact_center/ending_owned_lock_chain_correction_20261125.json",
+    "document_sha256": "66b9f1346ff718cb660101d00ed943553cfa49c10ce489a2effd6960123ffc38",
+    "status": "observed_worker_lock_chain_test_correction_pending_native_validation",
+    "existing_cases_and_timeout_limits_preserved": true,
+    "native_correction_accepted": false,
+    "whole_Part1_accepted": false
   }
 }

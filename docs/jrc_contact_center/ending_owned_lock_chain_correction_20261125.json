@@ -1,0 +1,66 @@
+{
+  "parent": "e99618dbe280a9bd48e56ad2b396a3d4f07c56a2",
+  "diagnostic_run": 45605586505,
+  "diagnostic_artifact": 15018212590,
+  "diagnostic_artifact_sha256": "c209b83d739928b9bba6cd275976ebb1e6b73494eeb75f7200a33bbc909d3ead",
+  "worker_diagnostic_sha256": "362469f44c97a4f76f1e7eecb2a0b9e17dc3447ad816457adf1a5a214758cd74",
+  "source_sha256": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "a2e3ec949704352513fe8ffc5db951148375eed781083d52d583389765b0fa5d"
+  },
+  "parent_sources": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "b5b323884fad6ac8160c864fb45bb8e8dbcc0ab9881ec8d0206005dff0b2bfe3"
+  },
+  "observed_wait": {
+    "observer_pid": 1343,
+    "first_worker_pid": 1344,
+    "second_worker_pid": 1345,
+    "second_worker_direct_blocker": 1344,
+    "completed_results": 0
+  },
+  "cause": "The second real worker waits behind the first; direct-owner-only observation rejects this legitimate lock queue.",
+  "official_references": [
+    "https://www.postgresql.org/docs/16/functions-info.html",
+    "https://www.postgresql.org/docs/16/queries-with.html"
+  ],
+  "correction": "Follow live blocking PIDs to the exact owned observer; UNION bounds cycles, unrelated blockers cannot pass.",
+  "additional_native_assertion": "The owned observer itself with no blockers must not pass the contention predicate.",
+  "all_6_native_cases_assertions_and_timeouts_preserved": true,
+  "production_locks_permissions_or_effects_modified": false,
+  "native_validation_pending": true,
+  "additional_unique_examples_claimed": 0,
+  "reviewed_diagnostic_ABC_correction": {
+    "new_offenses_identified": 1,
+    "offense": {
+      "severity": "convention",
+      "message": "Assignment Branch Condition size for record_native_sd_lock_diagnostic is too high. [<6, 26, 2> 26.76/26]",
+      "cop_name": "Metrics/AbcSize",
+      "corrected": false,
+      "correctable": false,
+      "location": {
+        "start_line": 112,
+        "start_column": 3,
+        "last_line": 126,
+        "last_column": 5,
+        "length": 1055,
+        "line": 112,
+        "column": 3
+      }
+    },
+    "before_private_source_sha256": "6dce262cfb8d6ec19d55ee2203b419fbdfd6cc951924a32ea204133cb579a90e",
+    "source_sha256": "a2e3ec949704352513fe8ffc5db951148375eed781083d52d583389765b0fa5d",
+    "all_previous_diagnostic_fields_and_stack_limits_preserved": true,
+    "lint_configuration_or_exclusions_modified": false,
+    "native_lint_validation_pending": true
+  },
+  "final_diagnostic_artifact": 15019293813,
+  "final_diagnostic_artifact_sha256": "df940164129853961885ac48b08fa3dc79781c9c9a0139142446a1b211be9695",
+  "previous_targeted_contention": {
+    "duration": 15.659824026,
+    "example_count": 9,
+    "failure_count": 1,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "previous_new_Ruby_offenses": 1,
+  "native_correction_accepted": false
+}

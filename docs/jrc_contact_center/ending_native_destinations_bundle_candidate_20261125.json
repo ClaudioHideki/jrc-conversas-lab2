@@ -262,6 +262,18 @@
         ".github/workflows/call-center-administration.yml": "5b371acf4d24627b510c68462588392810d28375e725b817db58a093f3e3f4dd"
       },
       "no_gate_or_native_coverage_weakened": true
+    },
+    {
+      "diagnostic_run": 45605586505,
+      "failed_product_sha": "e99618dbe280a9bd48e56ad2b396a3d4f07c56a2",
+      "diagnostic_artifact_sha256": "c209b83d739928b9bba6cd275976ebb1e6b73494eeb75f7200a33bbc909d3ead",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "a2e3ec949704352513fe8ffc5db951148375eed781083d52d583389765b0fa5d"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "b5b323884fad6ac8160c864fb45bb8e8dbcc0ab9881ec8d0206005dff0b2bfe3"
+      },
+      "no_gate_or_native_coverage_weakened": true
     }
   ],
   "reviewed_loaded_native_task_browser_correction": [

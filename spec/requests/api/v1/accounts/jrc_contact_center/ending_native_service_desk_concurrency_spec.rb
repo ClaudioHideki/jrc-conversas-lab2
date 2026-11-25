@@ -84,7 +84,7 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
 
   def wait_for_native_sd_lock(state)
     pid = Timeout.timeout(8) { state[:ready].pop }
-    sql = "SELECT pg_backend_pid() = ANY(pg_blocking_pids(#{Integer(pid)}))"
+    sql = native_sd_owned_lock_sql(pid)
     Timeout.timeout(8) do
       ApplicationRecord.connection.uncached do
         until ApplicationRecord.connection.select_value(sql) == true
@@ -97,6 +97,21 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
   rescue StandardError
     record_native_sd_lock_diagnostic(pid, state) if pid
     raise
+  end
+
+  def native_sd_owned_lock_sql(pid)
+    # A later contender may wait behind another worker before the owned lock.
+    # UNION visits each live blocker once, including when the graph has a cycle.
+    <<~SQL.squish
+      WITH RECURSIVE blockers(pid) AS (
+        SELECT unnest(pg_blocking_pids(#{Integer(pid)}))
+        UNION
+        SELECT next_blocker.pid FROM blockers
+        CROSS JOIN LATERAL unnest(pg_blocking_pids(blockers.pid)) AS next_blocker(pid)
+        WHERE blockers.pid <> pg_backend_pid() AND blockers.pid > 0
+      )
+      SELECT EXISTS (SELECT 1 FROM blockers WHERE pid = pg_backend_pid())
+    SQL
   end
 
   def reject_finished_native_sd_worker!(state)
@@ -121,8 +136,12 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
               database: connection.current_database, observer_pid: observer, worker_pid: pid,
               live_blockers: blockers, activity: activity, pool: ApplicationRecord.connection_pool.stat,
               completed_results: state[:results].size,
-              workers: native_sd_workers.map { |worker| { status: worker.status, backtrace: worker.backtrace&.first(10) } } }
+              workers: native_sd_worker_diagnostics }
     File.write("/tmp/call-center-ending-native-sd-lock-#{account.id}-#{pid}.json", JSON.pretty_generate(proof))
+  end
+
+  def native_sd_worker_diagnostics
+    native_sd_workers.map { |worker| { status: worker.status, backtrace: worker.backtrace&.first(10) } }
   end
 
   def join_native_sd_workers
@@ -139,6 +158,8 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
       # Prime a transaction-local activity snapshot before either worker.
       # The live lock-manager proof must still see both later contenders.
       ApplicationRecord.connection.select_values('SELECT pid FROM pg_stat_activity')
+      observer = ApplicationRecord.connection.raw_connection.backend_pid
+      expect(ApplicationRecord.connection.select_value(native_sd_owned_lock_sql(observer))).to be(false)
       2.times do
         native_sd_worker(state)
         pids << wait_for_native_sd_lock(state)
