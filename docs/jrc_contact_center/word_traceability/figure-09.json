@@ -2799,5 +2799,12 @@
     "all_existing_cases_and_production_validations_preserved": true,
     "additional_unique_native_cases_claimed": 0,
     "whole_Part1_accepted": false
+  },
+  "native_lock_observer_correction": {
+    "document": "docs/jrc_contact_center/ending_native_lock_observer_correction_20261125.json",
+    "document_sha256": "3b2d3a6d0d8137299f648665305914ed8d33f98c62f29a49115cff6829b5c17a",
+    "status": "native_observer_correction_prepared_not_natively_validated",
+    "all_six_cases_assertions_timeouts_and_product_locks_preserved": true,
+    "whole_figure10_or_Part1_accepted": false
   }
 }

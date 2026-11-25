@@ -1,0 +1,56 @@
+{
+  "parent": "fc1ead7e3b4c6fe25212e5b062a1ae78df58e67b",
+  "diagnostic_run": 45593110809,
+  "diagnostic_artifact": 15013436398,
+  "diagnostic_artifact_sha256": "50da46c2743e0dc75f17793a9242501f22e2cb86d336c541f96612f03dfae570",
+  "source_sha256": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "bc04686d1acb0052038da3c920af299b07166767738ebef6a3749e8bd8ed4511"
+  },
+  "parent_sources": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "4ef0e52a1cae5bfc6b8ca7c771423980e07235f8b2297ea96af6d3acd6e8a746"
+  },
+  "all_existing_6_case_titles_assertions_and_timeout_limits_preserved": true,
+  "existing_native_product_locks_permissions_or_services_modified": false,
+  "stronger_live_predicate": "The worker is actually blocked behind this observer session according to pg_blocking_pids.",
+  "regression": "Prime an activity snapshot before starting both actual PostgreSQL worker sessions.",
+  "documented_engine_behavior": "pg_stat_activity may retain the same session activity information throughout a transaction.",
+  "diagnostic_root_cause_still_requires_corrected_native_reproduction": true,
+  "references": [
+    "https://www.postgresql.org/docs/16/monitoring-stats.html",
+    "https://www.postgresql.org/docs/16/functions-info.html"
+  ],
+  "patches": [
+    {
+      "before": "    sql = \"SELECT count(*) FROM pg_stat_activity WHERE pid=#{Integer(pid)} AND wait_event_type='Lock'\"\n",
+      "after": "    sql = \"SELECT pg_backend_pid() = ANY(pg_blocking_pids(#{Integer(pid)}))\"\n"
+    },
+    {
+      "before": "      ApplicationRecord.connection.uncached { sleep 0.02 until ApplicationRecord.connection.select_value(sql).to_i == 1 }\n",
+      "after": "      ApplicationRecord.connection.uncached { sleep 0.02 until ApplicationRecord.connection.select_value(sql) == true }\n"
+    },
+    {
+      "before": "    pids = []\n    account.with_lock('FOR NO KEY UPDATE') do\n      2.times do\n",
+      "after": "    pids = []\n    account.with_lock('FOR NO KEY UPDATE') do\n      # Prime a transaction-local activity snapshot before either worker.\n      # The live lock-manager proof must still see both later contenders.\n      ApplicationRecord.connection.select_values('SELECT pid FROM pg_stat_activity')\n      2.times do\n"
+    }
+  ],
+  "native_tests_executed_on_corrected_source": false,
+  "new_unique_cases_claimed": 0,
+  "final_diagnostic_artifact": 15014801012,
+  "final_diagnostic_artifact_sha256": "5f97518bc722b9e7b6527bdf89726e857e4b73e7027419ad8bc876909e72ed90",
+  "previous_core_RSpec": {
+    "duration": 628.782801405,
+    "example_count": 3034,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "previous_targeted_contention_RSpec": {
+    "duration": 14.166981842,
+    "example_count": 9,
+    "failure_count": 1,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "previous_new_Ruby_offenses": 0,
+  "corrected_observer_still_requires_native_validation": true
+}

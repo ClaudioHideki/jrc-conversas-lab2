@@ -84,9 +84,9 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
 
   def wait_for_native_sd_lock(state)
     pid = Timeout.timeout(8) { state[:ready].pop }
-    sql = "SELECT count(*) FROM pg_stat_activity WHERE pid=#{Integer(pid)} AND wait_event_type='Lock'"
+    sql = "SELECT pg_backend_pid() = ANY(pg_blocking_pids(#{Integer(pid)}))"
     Timeout.timeout(8) do
-      ApplicationRecord.connection.uncached { sleep 0.02 until ApplicationRecord.connection.select_value(sql).to_i == 1 }
+      ApplicationRecord.connection.uncached { sleep 0.02 until ApplicationRecord.connection.select_value(sql) == true }
     end
     pid
   end
@@ -102,6 +102,9 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
     state = { ready: Queue.new, results: Queue.new }
     pids = []
     account.with_lock('FOR NO KEY UPDATE') do
+      # Prime a transaction-local activity snapshot before either worker.
+      # The live lock-manager proof must still see both later contenders.
+      ApplicationRecord.connection.select_values('SELECT pid FROM pg_stat_activity')
       2.times do
         native_sd_worker(state)
         pids << wait_for_native_sd_lock(state)
