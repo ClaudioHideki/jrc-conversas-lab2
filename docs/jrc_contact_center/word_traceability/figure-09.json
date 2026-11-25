@@ -2992,5 +2992,14 @@
     "prepared_native_cases_not_executed": 82,
     "public_editor_API_outbox_or_activation": false,
     "whole_Part1_accepted": false
+  },
+  "native_typed_reload_fixture_followup": {
+    "document": "docs/jrc_contact_center/ending_typed_reload_fixture_correction_20261125.json",
+    "document_sha256": "be45e9c61a13d8d7c3a208e48fcdf17adf44c6e8d61b5e071fafcf85aaf7b407",
+    "failed_run": 45652076644,
+    "failed_sha": "88fea32ec5805305f9240537faf7836fbeffcd37",
+    "fixture_only": true,
+    "native_82_acceptance": false,
+    "whole_Part1_accepted": false
   }
 }

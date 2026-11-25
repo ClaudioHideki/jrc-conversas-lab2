@@ -1075,3 +1075,5 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - Próximo incremento interno: recibos imutáveis por destino, executor com autoridade atual do agente original e 82 cenários preparados de integridade, atualização, concorrência e falha parcial CRM/Service Desk. A migração aditiva cria somente histórico técnico vazio; não ativa regras nem concede permissões. O editor/API público, despacho operacional e o aceite integral da figura 10/Parte 1 continuam pendentes.
 
 - CI 45649123744/1368b12f: lint dos novos recibos encontrou 84 infrações; nenhuma homologação nativa foi atribuída. Correção pontual mantém os 82 cenários, o SQL byte a byte e os predicados de segurança. Instalação, atualização populada, recarga e todos os gates devem ser aprovados no próximo SHA.
+
+- CI 45652076644/88fea32e: lint direcionado aprovado e instalação nova verificada. A recarga teve 251 exemplos aprovados e um fixture histórico bloqueado pelas quatro FKs novas. Correção restrita à preparação rollbackable do teste, sem CASCADE, exclusão de dados ou mudança nas migrations. Os 82 casos e o aceite integral continuam pendentes de nova CI.

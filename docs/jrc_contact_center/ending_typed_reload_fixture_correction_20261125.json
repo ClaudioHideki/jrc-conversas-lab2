@@ -1,0 +1,29 @@
+{
+  "classification": "private_native_reload_dependency_fixture_correction",
+  "parent": "88fea32ec5805305f9240537faf7836fbeffcd37",
+  "failed_run": 45652076644,
+  "failed_job": 139338953102,
+  "failing_existing_example": "CreateContactCenterEndingActionScopes anchors existing queues at installation time without rewriting populated native calls or catalogues",
+  "cause": "Four additive typed account FKs prevent the historical test from temporarily recreating its parent scope ledger.",
+  "native_cases_removed_or_assertions_reduced": false,
+  "migrations_SQL_runtime_constraints_or_permissions_changed": false,
+  "requires_reload_252_and_fresh_reload_populated_typed_structure_proofs": true,
+  "native_tests_or_CI_started": false,
+  "exact_correction": {
+    "name": "exact_typed_scope_fixture_dependency_correction",
+    "reviewed_receipt_sha256": "91f0c55d9358bdc6f74028c63e0104ceb58be8c69b6a375e95545fedc0b7b646",
+    "parent_sources": {
+      "spec/support/contact_center_ending_origin_schema_dependencies.rb": "cf424b0eb09113d7109945ff5f2d4735ab683f4e8ab2e23433ccd538dbb34057"
+    },
+    "source_sha256": {
+      "spec/support/contact_center_ending_origin_schema_dependencies.rb": "590a4b61570204b97b7afe8137c2a1e3afef4eabf6082089917770ced82a6c1c"
+    }
+  },
+  "reported_reload_examples": 252,
+  "reported_reload_failures": 1,
+  "fresh_schema_metadata": "partial-fresh-typed-schema-88fea32e-verified.json",
+  "existing_case_and_all_assertions_preserved": true,
+  "runtime_FKs_and_rows_preserved": true,
+  "scope": "Only detach four known immediate account FKs inside the rollbackable historical installation fixture; retain all typed tables and data. No CASCADE.",
+  "native_approval_or_whole_Part1_accepted": false
+}

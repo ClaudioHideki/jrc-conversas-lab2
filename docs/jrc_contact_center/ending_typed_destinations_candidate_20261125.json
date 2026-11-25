@@ -148,5 +148,17 @@
     "SQL_changed": false,
     "table_created_at_declaration_split_same_column_order_and_options": true,
     "migrations_FKs_triggers_identity_and_all_native_gates_still_required": true
-  }
+  },
+  "schema_fixture_corrections": [
+    {
+      "name": "exact_typed_scope_fixture_dependency_correction",
+      "reviewed_receipt_sha256": "91f0c55d9358bdc6f74028c63e0104ceb58be8c69b6a375e95545fedc0b7b646",
+      "parent_sources": {
+        "spec/support/contact_center_ending_origin_schema_dependencies.rb": "cf424b0eb09113d7109945ff5f2d4735ab683f4e8ab2e23433ccd538dbb34057"
+      },
+      "source_sha256": {
+        "spec/support/contact_center_ending_origin_schema_dependencies.rb": "590a4b61570204b97b7afe8137c2a1e3afef4eabf6082089917770ced82a6c1c"
+      }
+    }
+  ]
 }

@@ -1,6 +1,20 @@
 # Test-only DDL dependency handling. Call exclusively inside the existing
 # rollbackable migration examples; production foreign keys are never removed.
 module ContactCenterEndingOriginSchemaDependencies
+  # Only this rollbackable historical-installation fixture may detach the
+  # four known immediate account FKs. Keep typed tables/data, all production
+  # migrations and SQL untouched; never use CASCADE or disable constraints.
+  def detach_typed_ending_scope_references(connection)
+    raise 'Rollbackable test DDL required' unless Rails.env.test? && connection.transaction_open?
+
+    tables = %i[jrc_contact_center_ending_destination_attempts jrc_contact_center_ending_destination_consents
+                jrc_contact_center_ending_destination_executions jrc_contact_center_ending_destination_outcomes]
+    present = tables.select { |table| connection.table_exists?(table) }
+    raise 'Incomplete typed fixture dependency set' unless present.empty? || present == tables
+
+    present.each { |table| connection.remove_foreign_key(table, :jrc_contact_center_ending_scope_accounts) }
+  end
+
   def detach_ending_origin_version_reference
     connection = ApplicationRecord.connection
     connection.execute('SET CONSTRAINTS cc_ending_readiness_version_fk IMMEDIATE')
@@ -11,6 +25,7 @@ module ContactCenterEndingOriginSchemaDependencies
 
   def detach_ending_origin_scope_references
     connection = ApplicationRecord.connection
+    detach_typed_ending_scope_references(connection)
     # Validate this owned deferred FK before fixture-only DDL. Never disable it
     # or alter the runtime deferrability; the enclosing test rolls back the DDL.
     connection.execute('SET CONSTRAINTS cc_ending_execution_leg_scope_fk IMMEDIATE')
