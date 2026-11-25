@@ -160,12 +160,16 @@ describe('native pause catalog editor', () => {
 
   it('preserves a rejected server draft and does not close the popup or report it saved', async () => {
     API.updatePauseCatalog.mockRejectedValueOnce({
-      response: { status: 422, data: { invalid_attributes: ['name'] } },
+      response: {
+        status: 422,
+        data: { invalid_attributes: ['name', 'description'] },
+      },
     });
     const wrapper = render();
     await flushPromises();
     await button(wrapper, 'EDIT').trigger('click');
     await field(wrapper, 'NAME').setValue('SYNTHETIC retained draft');
+    await wrapper.get('textarea').setValue('SYNTHETIC retained description');
     await wrapper.get('[data-confirm]').trigger('click');
     await flushPromises();
     expect(field(wrapper, 'NAME').element.value).toBe(
@@ -173,6 +177,23 @@ describe('native pause catalog editor', () => {
     );
     expect(wrapper.text()).toContain(copy('SAVE_FAILED'));
     expect(wrapper.emitted('changed')).toBeUndefined();
+    expect(wrapper.get('[role="dialog"]').exists()).toBe(true);
+    expect(field(wrapper, 'NAME').attributes('aria-invalid')).toBe('true');
+    expect(wrapper.get('textarea').element.value).toBe(
+      'SYNTHETIC retained description'
+    );
+    expect(wrapper.get('textarea').attributes('aria-invalid')).toBe('true');
+    expect(wrapper.findAll('[data-pause-invalid-field]')).toHaveLength(2);
+    expect(wrapper.get('[data-pause-invalid-field="name"]').text()).toBe(
+      copy('INVALID_FIELD')
+    );
+    expect(wrapper.get('[data-pause-invalid-field="description"]').text()).toBe(
+      copy('INVALID_FIELD')
+    );
+    await wrapper.get('[data-confirm]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+    expect(wrapper.emitted('changed')).toHaveLength(1);
   });
 
   it('requires the explicit checkbox before submitting account-wide enforcement', async () => {

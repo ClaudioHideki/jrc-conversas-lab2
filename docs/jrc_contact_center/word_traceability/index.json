@@ -4236,5 +4236,27 @@
     "external_total_not_yet_estimable": true,
     "cross_figure_status_conflicts_preserved_for_reconciliation": 19,
     "complete": false
+  },
+  "implementation_vs_homologation_triage": {
+    "path": "docs/jrc_contact_center/partial_requirements_implementation_vs_homologation_20261125.json",
+    "sha256": "cbf7e9f48f6b7e5e52387b374b27ee383364ea579f9a8d15fbce3a5e2ed18e7c",
+    "functional_clauses": 410,
+    "documental_clauses_not_development_tasks": 56,
+    "counts": {
+      "implemented_pending_homologation": 141,
+      "small_adjustments": 102,
+      "significant_development": 167
+    },
+    "no_new_literal_acceptance_from_classification": true
+  },
+  "current_grouped_functional_increment": {
+    "candidate": "docs/jrc_contact_center/ending_typed_original_event_candidate_20261125.json",
+    "delivery_windows": "docs/jrc_contact_center/part1_functional_delivery_windows_20261125.json",
+    "new_native_cases_prepared_not_executed": 10,
+    "figures": [
+      8,
+      10
+    ],
+    "whole_Part1_complete": false
   }
 }

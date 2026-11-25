@@ -19,7 +19,9 @@ class JrcContactCenter::EndingActions::EnqueueQualification
     return unless account.active? && account.feature_enabled?('jrc_contact_center')
 
     rows = JrcContactCenter::EndingActions::InitialProjectAttempts.new(account: account, qualification_id: qualification_id).call
-    Rails.logger.warn("ending_automation_enqueue_unavailable account_id=#{account_id} qualification_id=#{qualification_id} pending=#{rows.length}")
+    typed_rows = JrcContactCenter::EndingActions::InitialDestinationAttempts.new(account: account, qualification_id: qualification_id).call
+    pending = rows.length + typed_rows.length
+    Rails.logger.warn("ending_automation_enqueue_unavailable account_id=#{account_id} qualification_id=#{qualification_id} pending=#{pending}")
   rescue StandardError
     # The attested original remains durable even if the history database itself
     # is temporarily unavailable. Alert rather than claim execution or success.

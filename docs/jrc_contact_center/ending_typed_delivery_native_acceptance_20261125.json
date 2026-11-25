@@ -1,0 +1,134 @@
+{
+  "sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+  "run": 45693144825,
+  "artifact": 15065693526,
+  "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+  "new_native_cases": 37,
+  "native_distinct_examples": 3619,
+  "accepted_scope": "Internal durable typed delivery, original-company reauthorization and actual owned Sidekiq/Redis/PostgreSQL worker. Public source activation and manual UI are not accepted.",
+  "native_evidence": {
+    "typed_delivery_writer_coverage": {
+      "summary": {
+        "example_count": 12,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/ending_actions/record_destination_attempt_spec.rb": 12
+      }
+    },
+    "typed_delivery_CRM_company_coverage": {
+      "summary": {
+        "example_count": 17,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": 17
+      }
+    },
+    "typed_delivery_committed_coverage": {
+      "summary": {
+        "example_count": 20,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/ending_actions/queue_destination_attempt_spec.rb": 10,
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_delivery_transaction_spec.rb": 10
+      },
+      "path": "tmp/call-center-typed-delivery-transaction-rspec.json",
+      "sha256": "714287651ecfd0a0c0d85e2aca6fb7affd9cd33825abea982298162209d31d49"
+    },
+    "typed_delivery_actual_worker_coverage": {
+      "summary": {
+        "example_count": 3,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_actual_broker_concurrency_spec.rb": 3
+      },
+      "path": "tmp/call-center-ending-typed-actual-broker-rspec.json",
+      "sha256": "862b2f7b837c30c069c49c6247f487ab33a151db355844cc4a4ac078dbef5fbc"
+    },
+    "typed_delivery_focused_lint": {
+      "files": [
+        "app/jobs/jrc_contact_center/ending_destination_job.rb",
+        "app/jobs/jrc_contact_center/ending_destination_reconcile_job.rb",
+        "app/models/jrc_contact_center/ending_destination_attempt.rb",
+        "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb",
+        "app/services/jrc_contact_center/ending_actions/dispatch_destination_attempt.rb",
+        "app/services/jrc_contact_center/ending_actions/queue_destination_attempt.rb",
+        "app/services/jrc_contact_center/ending_actions/record_destination_attempt.rb",
+        "spec/integration/jrc_contact_center/owned_ending_typed_worker_boot.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_actual_broker_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_delivery_transaction_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/queue_destination_attempt_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/record_destination_attempt_spec.rb"
+      ],
+      "offenses": 0,
+      "path": "tmp/call-center-typed-delivery-lint.json",
+      "sha256": "78922a0ac10aefa2eb001fa940ed248b59cfd265c17b5a3a184b5de7d813c43a"
+    },
+    "typed_delivery_runner_verification": {
+      "path": "tmp/call-center-ending-typed-actual-broker-verification.json",
+      "sha256": "1b6a8bcf047310986b82e60287d36477ce46d1992c5cf125924f00a1490286db",
+      "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+      "witness_sha256": "4189d6562110261d2e6e04f76fbfde4e5002a67ceefa06514a8e8f522c065e62"
+    }
+  },
+  "Vue": {
+    "numTotalTests": 1869,
+    "numPassedTests": 1869,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "Chrome": {
+    "startTime": "2026-11-25T21:20:21.054Z",
+    "duration": 1904951.115,
+    "expected": 276,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "screenshot_hashes_verified": 644,
+  "actual_visual_review": {
+    "current_original_files_actually_opened": 4,
+    "current_files": [
+      {
+        "file": "desktop-dark-ending-history-independent-outcomes.png",
+        "sha256": "f223b89e1e94da953ebe55d77d3f1d4488a90c13f2497533a6abadfcd5b9cb3c",
+        "actually_opened": true
+      },
+      {
+        "file": "desktop-light-ending-automation-editor.png",
+        "sha256": "053be4c945ece4b0d881d4b2eae9e141e5b31c3601cf0fd6a2a4a8f7a96b6521",
+        "actually_opened": true
+      },
+      {
+        "file": "mobile-dark-ending-confirmation-confirmed-open-acw.png",
+        "sha256": "195e32bdc5b3ab86447395aa4cb8d99596e1ecea0ad417af8722d8486f9e28ad",
+        "actually_opened": true
+      },
+      {
+        "file": "mobile-light-ending-history-independent-outcomes.png",
+        "sha256": "75614e2267d19d38f91f182d973728d41cd80f320484d57b17722bcb641ed45f",
+        "actually_opened": true
+      }
+    ],
+    "previous_46_file_review_reused_only_for_unchanged_frontend_sources": true,
+    "previous_accepted_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+    "no_new_whole_UI_acceptance": true
+  },
+  "comparison_sha256": "cb83aa1c409f4d3b8a70783f57198537b48c4da822d07e1545dd3c74a1df20fe",
+  "public_editor_manual_API_or_automatic_source_activation_accepted": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false,
+  "no_productive_or_external_provider_operations": true
+}

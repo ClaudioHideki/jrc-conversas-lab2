@@ -2157,6 +2157,7 @@
       "ACTIVE_FOR_NEW": "Ativo para novas pausas",
       "TIME_INFORMATION": "Tempos são informativos nesta versão. A pausa não termina sozinha. Publicação no PABX e regras avançadas continuam pendentes.",
       "INVALID_TIME": "Informe HH:MM e mantenha mínimo ≤ padrão ≤ máximo.",
+      "INVALID_FIELD": "Verifique este campo antes de salvar.",
       "TIME_PLACEHOLDER": "HH:MM",
       "SAVE_FAILED": "Não foi possível salvar. Seu rascunho foi preservado.",
       "ENTRIES": "Motivos cadastrados",

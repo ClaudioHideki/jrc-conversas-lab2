@@ -3989,7 +3989,7 @@ test('local pause catalog editor persists HH:MM, pagination, explicit policy and
     .click();
   await expectContainedDialog(page);
   let dialog = page.getByRole('dialog');
-  await dialog.getByLabel('Código', { exact: true }).fill('synthetic_created');
+  await dialog.getByLabel('Código', { exact: true }).fill('INVALID SPACE');
   await dialog
     .getByLabel('Nome', { exact: true })
     .fill('SYNTHETIC created by real UI');
@@ -4011,10 +4011,34 @@ test('local pause catalog editor persists HH:MM, pagination, explicit policy and
   await expect(
     dialog.getByRole('button', { name: 'Salvar', exact: true })
   ).toBeEnabled();
+  const rejectedSave = page.waitForResponse(
+    response =>
+      response.request().method() === 'PATCH' && response.url() === endpoint
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await rejectedSave).status()).toBe(422);
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Código', { exact: true })).toHaveValue(
+    'INVALID SPACE'
+  );
+  await expect(dialog.locator('[data-pause-invalid-field="code"]')).toHaveText(
+    'Verifique este campo antes de salvar.'
+  );
+  await expect(dialog.getByLabel('Nome', { exact: true })).toHaveValue(
+    'SYNTHETIC created by real UI'
+  );
+  const rejectedState = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect(rejectedState.status()).toBe(200);
+  expect((await rejectedState.json()).item.revision).toBe(
+    (await prepared.json()).item.revision
+  );
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-pause-catalog-popup.png`,
     fullPage: false,
   });
+  await dialog.getByLabel('Código', { exact: true }).fill('synthetic_created');
   await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(dialog).toBeHidden();
   await catalog.getByRole('button', { name: 'Próxima', exact: true }).click();

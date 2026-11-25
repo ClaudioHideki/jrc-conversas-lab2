@@ -1,0 +1,35 @@
+{
+  "parent": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+  "stage": {
+    "name": "exact_original_event_current_actor_and_pause_field_feedback",
+    "source_sha256": {
+      "app/jobs/jrc_contact_center/ending_actions_job.rb": "b00f64f1a3ef8240e1effb8b3da0bc55478c0814bd6f0ac22ab91c818fd8d500",
+      "app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb": "6445524d6f04506980e19f156843e47f533b3f2ae2bd70470455c4af2071b0e8",
+      "app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb": "03c3830b21667d00c3753d7b055abce4fbb8bf7536e0204a153246f63df4947a",
+      "spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb": "e36e907d17f4d6b3b33488c0c643bcae25d8880ca546ddd269578e7cafed7e48",
+      ".github/workflows/call-center-administration.yml": "5ffe0f09dadfd41508ba622f873126b0bdc58987821d6262ac91d5a199d5a57d",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue": "93f062fec17c43403d81da97ef41dcc62978e1001685d229aebb28ac06960bf9",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.spec.js": "93bcb9fac2fa36ac12ec1a83ffb615a27e1c979c6166af076f9ac80c7e6c1ff2",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "28e21b7a81639af4d06e4a9a9e3a30a2d9465c0eac6177c44a1aa5323a963e45",
+      "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "2e1649a3526ba578c5e0d3b7d9557b9efba82d1cbe7be591d3b354d85ff9e8f7"
+    },
+    "parent_sources": {
+      "app/jobs/jrc_contact_center/ending_actions_job.rb": "7d53a7d946c0d463b0fb15fad45825e9b4be08eb807c07feb67b42c3527b44a1",
+      "app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb": "6e0148d28d098680ce9f350142cfab0f5660e02e9f81db4f8045722001d5f0c7",
+      "app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb": null,
+      "spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb": null,
+      ".github/workflows/call-center-administration.yml": "d5fcc22bbd956a78bb6740a3fe5f118f6a880401451af34e224ecfeec07d32f8",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue": "1758cac2c62729a1ad29c689472ad6a319f39b7d471ef4ac12ab7936ace35b76",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.spec.js": "5759b054cc18c3df4eca2ff6d75f440bf1906fb9bfd938137146202f57efacef",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "2dd8d573956f0ec8c9146dbb28de95949ae77653d29ff82cccfa7c9c72da10d7",
+      "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "c491448b9dc31e9bcdfdf15c9355eb96bd32a9c20d92c64a0b6e619287f572a5"
+    }
+  },
+  "new_native_cases_prepared": 10,
+  "accepted_delivery_receipt_sha256": "4dee60f3f97cfcb398f27f1998f2cb82e21d1584a057d7202d529dddfaf2a53a",
+  "scope": "Native original event to independent typed durable intents, plus usable pause field validation feedback.",
+  "no_migrations_permissions_or_external_provider_commands_changed": true,
+  "manual_UI_CRM_SD_or_whole_figure10_accepted": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

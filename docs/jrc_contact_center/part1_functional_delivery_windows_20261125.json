@@ -1,0 +1,91 @@
+{
+  "reference_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+  "two_Word_documents_and_554_IDs_preserved": true,
+  "measurement": "Rolling blocks of 24 effective working hours; not a scheduled unattended execution or a promise of elapsed delivery time.",
+  "cadence": {
+    "report_each_effective_work_hours": 24,
+    "report_fields": [
+      "Functional user delivery",
+      "Literal requirements accepted with evidence",
+      "Native and browser results",
+      "Effective effort used and remaining estimate",
+      "External dependencies separately"
+    ],
+    "do_not_wait_for_report_boundary_to_continue": true
+  },
+  "grouped_deliveries": [
+    {
+      "order": 1,
+      "figures": [
+        8,
+        10
+      ],
+      "delivery": "Pause field failure/recovery in the real popup and original-event durable ending delivery.",
+      "status": "candidate_requires_native_and_Chrome_acceptance",
+      "acceptance": [
+        "Native original-agent authority",
+        "No classified reason reused as action consent",
+        "No duplicate destinations",
+        "Real API 422 retains fields and can save after correction in four Chrome modes"
+      ]
+    },
+    {
+      "order": 2,
+      "figures": [
+        9,
+        10,
+        21,
+        22
+      ],
+      "delivery": "Scoped rule editor, native destination configuration, selected action and typed history in the existing inbox.",
+      "status": "private_increment_in_progress_not_homologated",
+      "acceptance": [
+        "Current original-agent permission per attempt",
+        "Explicit manual review",
+        "Independent CRM/SD/Projects receipts",
+        "Real complete UI flow, partial failure and selected retry without replay of success"
+      ]
+    },
+    {
+      "order": 3,
+      "figures": [
+        1,
+        2,
+        3,
+        7,
+        8,
+        11,
+        12,
+        14
+      ],
+      "delivery": "Close bounded administrative gaps and literal acceptance using existing queue/team/profile/pause/calendar/audit workflows.",
+      "status": "reuse_approved_checkpoints_and_target_only_real_remaining_gaps"
+    },
+    {
+      "order": 4,
+      "figures": [
+        5,
+        6,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "delivery": "Reuse institutional audio and native recording/quality sources; complete internal analysis/review/context surfaces.",
+      "status": "internal_work_independent_of_external_provider_homologation"
+    }
+  ],
+  "external_dependencies": [
+    "PABX operations/capabilities/ACK contract",
+    "Authorized external PABX application and reconciliation",
+    "Nico provider voices/limits and external analysis homologation",
+    "Operational/legal retention parameters where not defined"
+  ],
+  "no_new_modules_or_general_frameworks": true,
+  "validation": "Focused changed-source lint and targeted native/Vue cases before full affected regressions; one own CI at a time.",
+  "no_scope_reduction_or_simulated_operational_success": true
+}

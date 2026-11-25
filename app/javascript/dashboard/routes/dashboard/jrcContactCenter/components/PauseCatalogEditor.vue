@@ -61,6 +61,7 @@ const copy = computed(() => ({
   ACTIVE_FOR_NEW: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.ACTIVE_FOR_NEW'),
   TIME_INFORMATION: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.TIME_INFORMATION'),
   INVALID_TIME: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.INVALID_TIME'),
+  INVALID_FIELD: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.INVALID_FIELD'),
   TIME_PLACEHOLDER: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.TIME_PLACEHOLDER'),
   SAVE_FAILED: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.SAVE_FAILED'),
   JUSTIFICATION_REQUIRED: t(
@@ -540,14 +541,31 @@ onBeforeUnmount(() => {
               :aria-invalid="invalid.includes(field) || undefined"
               class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2 aria-invalid:border-n-ruby-8"
             />
+            <span
+              v-if="invalid.includes(field)"
+              role="alert"
+              :data-pause-invalid-field="field"
+              class="mt-1 block text-xs text-n-ruby-11"
+            >
+              {{ text('INVALID_FIELD') }}
+            </span>
           </label>
           <label class="min-w-0 text-sm text-n-slate-12 sm:col-span-2">
             {{ text('DESCRIPTION') }}
             <textarea
               v-model="input.description"
+              :aria-invalid="invalid.includes('description') || undefined"
               maxlength="1000"
               class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2 aria-invalid:border-n-ruby-8"
             />
+            <span
+              v-if="invalid.includes('description')"
+              role="alert"
+              data-pause-invalid-field="description"
+              class="mt-1 block text-xs text-n-ruby-11"
+            >
+              {{ text('INVALID_FIELD') }}
+            </span>
           </label>
           <label
             v-for="field in times"

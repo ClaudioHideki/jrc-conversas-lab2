@@ -14,6 +14,7 @@ class JrcContactCenter::EndingActionsJob < ApplicationJob
     attempts.each do |attempt|
       JrcContactCenter::EndingActions::ExecuteAttempt.new(account: account, attempt_id: attempt.id).call
     end
-    attempts.length
+    typed_attempts = JrcContactCenter::EndingActions::InitialDestinationAttempts.new(account: account, qualification_id: qualification_id).call
+    attempts.length + typed_attempts.length
   end
 end
