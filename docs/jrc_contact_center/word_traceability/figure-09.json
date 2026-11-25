@@ -2829,5 +2829,13 @@
     "status": "native_survey_job_fixture_and_equivalent_event_assertion_correction_pending_validation",
     "all_cases_predicates_permissions_and_provider_guards_preserved": true,
     "whole_Part1_accepted": false
+  },
+  "native_nico_master_reference_fixture_correction": {
+    "document": "docs/jrc_contact_center/ending_native_nico_master_reference_correction_20261125.json",
+    "document_sha256": "68e5da6edef617f81740fa86506179fd3cbf4a113d0e53d317a67965c642eea8",
+    "status": "native_master_reference_fixture_correction_prepared_not_validated",
+    "all_14_native_cases_and_real_Redis_ownership_preserved": true,
+    "native_R15_87_and_preserved_contention_2_passed_on_parent": "3447401e22f8178702bf16ea7359586f38b2d40c",
+    "whole_Part1_accepted": false
   }
 }

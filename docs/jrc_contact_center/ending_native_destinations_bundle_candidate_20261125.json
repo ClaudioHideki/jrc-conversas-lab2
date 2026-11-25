@@ -288,6 +288,20 @@
         ".github/workflows/call-center-administration.yml": "52fd68ecd3c17f844f609013738391a183ed6806c3e442f11b03f5a30bfda7fd"
       },
       "no_gate_or_native_coverage_weakened": true
+    },
+    {
+      "diagnostic_run": 45620382967,
+      "failed_product_sha": "3447401e22f8178702bf16ea7359586f38b2d40c",
+      "diagnostic_artifact_sha256": "14782eac816e2edc6ebdb6cb6702fa64100b84d8d0f5f79771bfa400e1eba193",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb": "2d1f9a3eccef79800015f12b5681798508db437c826474f9660fee968ce21c69",
+        ".github/workflows/call-center-administration.yml": "e3aa4086dcb97df356484bc2ff29231bd5f29bbeca8cbcbe59e2ff4ee13b8cfc"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb": "ca6519e48a3ff204dd550a9c300a5f64626f0aec615b92c11661f6bf8430eeb4",
+        ".github/workflows/call-center-administration.yml": "d90a3b06ca9920234700c819925e9ed99efa53815e10a015df7b6f155d43078f"
+      },
+      "no_gate_or_native_coverage_weakened": true
     }
   ],
   "reviewed_loaded_native_task_browser_correction": [

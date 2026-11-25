@@ -1,0 +1,71 @@
+{
+  "parent": "3447401e22f8178702bf16ea7359586f38b2d40c",
+  "diagnostic_run": 45620382967,
+  "diagnostic_artifact": 15028178767,
+  "diagnostic_artifact_sha256": "14782eac816e2edc6ebdb6cb6702fa64100b84d8d0f5f79771bfa400e1eba193",
+  "source_sha256": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb": "2d1f9a3eccef79800015f12b5681798508db437c826474f9660fee968ce21c69",
+    ".github/workflows/call-center-administration.yml": "e3aa4086dcb97df356484bc2ff29231bd5f29bbeca8cbcbe59e2ff4ee13b8cfc"
+  },
+  "parent_sources": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb": "ca6519e48a3ff204dd550a9c300a5f64626f0aec615b92c11661f6bf8430eeb4",
+    ".github/workflows/call-center-administration.yml": "d90a3b06ca9920234700c819925e9ed99efa53815e10a015df7b6f155d43078f"
+  },
+  "root_cause": "The synthetic helper assigned a Master Company object to Contact.company, which expects the legacy Company class.",
+  "correction": "Use company_id with the native customer-master feature already explicitly enabled; all model/workflow validations still execute.",
+  "all_14_cases_names_assertions_and_real_Redis_ownership_guards_preserved": true,
+  "same_exact_probe_block_moved_after_owned_database_setup_before_full_core": true,
+  "all_workflow_commands_and_mandatory_coverage_preserved": true,
+  "native_Company_Contact_associations_or_permissions_modified": false,
+  "native_validation_or_acceptance": false,
+  "new_unique_native_cases_claimed": 0,
+  "spec_exact_before": "    sd_contact.update!(company: company)\n",
+  "spec_exact_after": "    sd_contact.update!(company_id: company.id)\n",
+  "final_diagnostic_artifact": 15029794783,
+  "final_diagnostic_artifact_sha256": "9f71abad101e632c83d38a66a2a5b1e6d9109e760ed13acf801cfbdfb71cca7c",
+  "actual_prior_native_positive_reports": {
+    "call-center-rspec.json": {
+      "summary": {
+        "duration": 817.763926061,
+        "example_count": 3034,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "json_sha256": "ebe8240278d9a35867bd64d4a66915e507dd823e4e3d91bad3a0c2cc3cfa36bb"
+    },
+    "call-center-ending-fixture-contention-preflight.json": {
+      "summary": {
+        "duration": 8.552659937,
+        "example_count": 9,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "json_sha256": "a4031f4cddfb8364b08d9647facb2b8c849cf344863bdeb246a5ebda5c3acd44"
+    },
+    "call-center-nico-native-regressions-rspec.json": {
+      "summary": {
+        "duration": 91.10304162,
+        "example_count": 87,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "json_sha256": "99076eb2aad995451973701d480609d152488a1d44f2d87e78060bdb574a8a95"
+    },
+    "call-center-nico-preserved-contention-rspec.json": {
+      "summary": {
+        "duration": 3.020979528,
+        "example_count": 2,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "json_sha256": "7b40420fc06a341dbcec8ea5b3f3607c93af56c8b591044000eba1afeccbf346"
+    }
+  },
+  "new_Ruby_offenses_before_correction": 0,
+  "native_correction_accepted": false,
+  "whole_Part1_accepted": false
+}

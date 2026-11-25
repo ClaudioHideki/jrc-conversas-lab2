@@ -76,7 +76,7 @@ RSpec.describe 'Native NICO capture delivery inside an ending destination transa
 
   def create_through_native_workflow
     sd_account.enable_features!('jrc_customer_master')
-    sd_contact.update!(company: company)
+    sd_contact.update!(company_id: company.id)
     attributes = sd_create_attributes.merge(company_id: company.id, title: 'SYNTHETIC native workflow queue boundary')
     JrcServiceDesk::CreateTicketWorkflowService.new(user_context: sd_context).call(
       unit_id: sd_unit.id, attributes: attributes, idempotency_key: SecureRandom.uuid, origin_channel: 'manual'
