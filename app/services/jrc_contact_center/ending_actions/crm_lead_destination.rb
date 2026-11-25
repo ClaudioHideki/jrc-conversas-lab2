@@ -36,6 +36,7 @@ class JrcContactCenter::EndingActions::CrmLeadDestination
       unless result.fetch(:lead).company_id == reference.fetch(:current_company_id)
         raise JrcContactCenter::OperationError, 'ending_customer_reference_changed'
       end
+
       require_native_creation_audit!(result.fetch(:lead)) if result.fetch(:created)
       result
     end

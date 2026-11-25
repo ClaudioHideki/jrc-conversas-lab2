@@ -31,6 +31,7 @@ class JrcContactCenter::EndingActions::QueueDestinationAttempt
   def validate_automatic_rule!(origin, rule)
     raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless rule['destination_schema_version'] == 2
     raise JrcContactCenter::OperationError, 'ending_action_requires_agent_confirmation' unless rule.fetch('execution_mode') == 'automatic'
+
     configured = rule.fetch('actions').any? { |row| row.fetch('kind') == @kind }
     raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless configured
 

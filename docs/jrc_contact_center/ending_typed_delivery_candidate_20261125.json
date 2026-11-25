@@ -64,5 +64,34 @@
     "Original event materialization and original-agent manual consent/selected retry.",
     "Independent destination history and mixed CRM/Service Desk Chrome flow.",
     "Notifications and NICO configuration using their native authorization."
-  ]
+  ],
+  "source_lint_corrections": [
+    {
+      "name": "exact_delivery_fourteen_lint_corrections",
+      "reviewed_receipt_sha256": "d9ed4ca850f5f11b125f34dd3f12c2e61115f13b87db21bd203f4532fc58df81",
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb": "3ddae88fc396376d8345ee8ed567d8fdda48a9e585ec32416741be568361e43f",
+        "app/services/jrc_contact_center/ending_actions/queue_destination_attempt.rb": "5a0abe284d3f9592cfd06e938a5d66ddc0faa8d5e27e61ff5657dc1aa7cd8b88",
+        "spec/services/jrc_contact_center/ending_actions/record_destination_attempt_spec.rb": "bb9728e15dc20f38ec34d4cb879686c71c451315cc3c8eef1599e2798425b39c",
+        "spec/services/jrc_contact_center/ending_actions/queue_destination_attempt_spec.rb": "db464ec52ecd0dca36cf2cc949c7805a89bde0cd0bc226db4fdbcad86c6d17ed",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_actual_broker_concurrency_spec.rb": "11ef46f79cfdd8012290ba0c8316e386e3dfdd62909471f625074b97afe7d75d"
+      },
+      "parent_sources": {
+        "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb": "bfcef1d2bb72d1b69cd0fe1af1326f9afe45af08e8ac3326a2f70435a4a579b3",
+        "app/services/jrc_contact_center/ending_actions/queue_destination_attempt.rb": "7acc67e046ba9a394e2eb988d732d27b91f15bbb7a659d6e2885ce1f7db7f837",
+        "spec/services/jrc_contact_center/ending_actions/record_destination_attempt_spec.rb": "4ca24ee84ec5bab23f662811eaa2b10942dcd9c3c415c4b5fa38272cf5a75f28",
+        "spec/services/jrc_contact_center/ending_actions/queue_destination_attempt_spec.rb": "560b8ea148039b0b60565fc3d75b0cf9f2cbf7a5a5079af16d5c9824183b4c88",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_actual_broker_concurrency_spec.rb": "ad15633ab3ce5a454448f4cb09da50d1ab684171cfe06731c4a3de49a5896dd4"
+      }
+    }
+  ],
+  "last_failed_native_gate": {
+    "sha": "14ef8da900e101344997e6ce494d5b3b75edd2c0",
+    "run": 45686184912,
+    "job": 139459277767,
+    "stage": "Typed delivery and original-customer authority focused lint",
+    "offenses": 14,
+    "new_native_examples_executed": 0,
+    "correction_preserves_37_cases_and_all_assertions": true
+  }
 }

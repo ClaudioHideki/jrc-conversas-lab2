@@ -129,12 +129,18 @@ RSpec.describe 'Actual owned typed Sidekiq execution and original authority' do
                  'source_sha' => ENV.fetch('GITHUB_SHA'), 'witness_sha256' => Digest::SHA256.file(boot).hexdigest,
                  'database' => 'corporate_gratuity_disposable', 'redis_database' => 15 }
     expect(rows).to all(include(expected))
-    expect(rows.map { |row| row.fetch('postgres_backend_pid') }).to all(be_positive)
-    expect(rows.map { |row| row.fetch('postgres_backend_pid') }).not_to include(ApplicationRecord.connection.raw_connection.backend_pid)
+    verify_worker_postgres_receipts(rows)
+  end
+
+  def verify_worker_postgres_receipts(rows)
+    backends = rows.map { |row| row.fetch('postgres_backend_pid') }
+    expect(backends).to all(be_positive)
+    expect(backends).not_to include(ApplicationRecord.connection.raw_connection.backend_pid)
   end
 
   def preserve_typed_broker_proof(rows, attempt, mode)
-    raise 'Owned typed queue not drained' unless Sidekiq::Queue.new(broker_state.fetch(:queue)).size.zero?
+    raise 'Owned typed queue not drained' unless Sidekiq::Queue.new(broker_state.fetch(:queue)).size == 0
+
     if Process.waitpid(broker_state.fetch(:pid), Process::WNOHANG)
       broker_state[:pid] = nil
       raise 'Owned typed worker must remain healthy through verification'

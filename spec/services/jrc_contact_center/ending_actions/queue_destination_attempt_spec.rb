@@ -21,7 +21,7 @@ RSpec.describe JrcContactCenter::EndingActions::QueueDestinationAttempt do
     job.enable_test_adapter(ActiveJob::QueueAdapters::TestAdapter.new)
     example.run
   ensure
-    job.enable_test_adapter(previous_test_adapter) if job
+    job&.enable_test_adapter(previous_test_adapter)
   end
 
   include_context 'with native typed ending schema evidence'

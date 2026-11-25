@@ -16,9 +16,9 @@ RSpec.describe JrcContactCenter::EndingActions::RecordDestinationAttempt do
     consent = typed_consent
     row = writer.call(request_key: typed_key, consent: consent)
     expect(row.attributes).to include('account_id' => account.id, 'origin_id' => typed_origin.id,
-                                     'readiness_id' => typed_readiness.id, 'version_id' => typed_version.id,
-                                     'actor_account_user_id' => member.id, 'actor_user_id' => actor.id,
-                                     'consent_id' => consent.id, 'destination_kind' => 'project_task')
+                                      'readiness_id' => typed_readiness.id, 'version_id' => typed_version.id,
+                                      'actor_account_user_id' => member.id, 'actor_user_id' => actor.id,
+                                      'consent_id' => consent.id, 'destination_kind' => 'project_task')
     expect(row.effect_key).to eq(typed_key)
     expect(JrcProjects::Task.where(account: account)).to be_empty
     expect(row.outcome).to be_nil
