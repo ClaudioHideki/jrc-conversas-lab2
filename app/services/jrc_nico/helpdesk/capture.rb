@@ -32,14 +32,14 @@ class JrcNico::Helpdesk::Capture
     evidence = match.fetch(:evidence).merge('origin_key' => origin_key, 'cycle_key' => facts.fetch('cycle_key'),
                                             'source_occurred_at' => facts.fetch('source_occurred_at'))
     key = correlation(ticket, match.fetch(:rule_key), evidence)
-    event = @context.account.with_lock do
-      JrcNico::Helpdesk::Event.find_or_create_by!(account: @context.account, correlation_key: key) do |row|
+    @context.account.with_lock do
+      event = JrcNico::Helpdesk::Event.find_or_create_by!(account: @context.account, correlation_key: key) do |row|
         row.assign_attributes(policy_version: policy, actor: @context.member, ticket: ticket, rule_key: match.fetch(:rule_key),
                               evidence: evidence, detected_at: Time.current)
       end
+      JrcNico::Helpdesk::DispatchIntent.find_or_create_by!(account: @context.account, event: event) if event.state == 'detected'
+      event
     end
-    JrcNico::Helpdesk::EventJob.perform_later(event.id) if event.state == 'detected'
-    event
   end
 
   def correlation(ticket, key, evidence)

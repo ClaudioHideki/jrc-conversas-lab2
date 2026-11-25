@@ -405,7 +405,7 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "native_automation_clause_reconciliation_sha": "d7f170620da3a548bd31da450889fc1baf7d670e"
+      "native_automation_clause_reconciliation_sha": "28e0f4400bb5723a90a2f47e848b411aff98ea34"
     },
     {
       "figure": 10,
@@ -440,7 +440,11 @@
         "app/services/jrc_contact_center/ending_actions/activate_rule.rb",
         "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingRuleActivation.vue",
         "app/services/jrc_contact_center/ending_actions/attempt_history.rb",
-        "app/javascript/dashboard/routes/dashboard/inbox/EndingAttemptHistory.vue"
+        "app/javascript/dashboard/routes/dashboard/inbox/EndingAttemptHistory.vue",
+        "app/services/jrc_contact_center/ending_actions/run_pending_project_attempt.rb",
+        "app/javascript/dashboard/routes/dashboard/inbox/PendingEndingReview.vue",
+        "app/services/jrc_contact_center/ending_actions/original_customer_reference.rb",
+        "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb"
       ],
       "native_spec_paths": [
         "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
@@ -467,13 +471,18 @@
         "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb",
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb",
-        "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb"
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/original_customer_reference_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb"
       ],
       "divergences": [
-        "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados.",
-        "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
+        "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Uma pendência selecionada de Projetos pode ser confirmada pelo agente original, sem repetir outra regra ou resultado terminal. A identidade imutável do cliente e o adaptador de Lead CRM possuem provas nativas de autorização atual, inclusive escopo organizacional; o fluxo operacional completo de oportunidade, atividade e resultado ainda não está habilitado.",
+        "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
       ],
-      "native_automation_clause_reconciliation_sha": "d7f170620da3a548bd31da450889fc1baf7d670e"
+      "native_automation_clause_reconciliation_sha": "28e0f4400bb5723a90a2f47e848b411aff98ea34"
     },
     {
       "figure": 11,
@@ -3443,8 +3452,8 @@
     "whole_part1_accepted": false
   },
   "native_automation_clause_reconciliation": {
-    "sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
-    "run": 45516626913,
+    "sha": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
+    "run": 45558082951,
     "requirements_total_preserved": 554,
     "figure_clause_ids": 459,
     "global_clause_ids": 95,
@@ -4036,5 +4045,28 @@
     "Chrome_scenarios_preserved": 276,
     "new_native_validation_still_required": true,
     "whole_figure10_or_Part1_accepted": false
+  },
+  "selected_operation_customer_and_native_CRM_bundle_acceptance": {
+    "sha": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
+    "run": 45558082951,
+    "document": "docs/jrc_contact_center/ending_operational_bundle_A_native_acceptance_20261124.json",
+    "document_sha256": "3059c4b7beb53d4bd5c816fe0c81c0f0c6e5d2dbf03c45a55b3fedf0ff8e8af3",
+    "native_distinct_examples": 3269,
+    "whole_requirement_figure10_or_Part1_accepted": false
+  },
+  "native_SD_NICO_and_shapes_bundle_candidate": {
+    "parent": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
+    "document": "docs/jrc_contact_center/ending_operational_bundle_B_candidate_20261124.json",
+    "document_sha256": "97d3070eb2fd1a552f7fe0d2ef82082bb41078c13dd17e867017673ba056caeb",
+    "native_cases_prepared_not_executed": 68,
+    "whole_figure10_or_Part1_accepted": false
+  },
+  "native_destinations_bundle_candidate": {
+    "parent": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
+    "document": "docs/jrc_contact_center/ending_native_destinations_bundle_candidate_20261125.json",
+    "document_sha256": "5654394ee349628df86442bbd93d0bed2e34d5d922c64259895f678cb63abea2",
+    "prepared_native_cases_not_executed": 142,
+    "no_intermediate_native_acceptance_simulated": true,
+    "operational_dispatch_or_whole_Part1_accepted": false
   }
 }

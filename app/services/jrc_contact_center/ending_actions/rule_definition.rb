@@ -4,6 +4,8 @@
 class JrcContactCenter::EndingActions::RuleDefinition
   TIMINGS = %w[call_end acw_completed].freeze
   EXECUTION_MODES = %w[automatic agent_confirmation].freeze
+  DESTINATION_SCHEMA = 'destination_schema_version'
+  OPTIONAL_FIELDS = ['execution_mode', DESTINATION_SCHEMA].freeze
   FIELDS = %w[code name reason_code queue_id timing active actions conditions scope].freeze
   SCOPE_FIELDS = %w[queue_scope_version_id integrity_sha256 unit_id issuer_company_id business_unit_id].freeze
 
@@ -37,16 +39,26 @@ class JrcContactCenter::EndingActions::RuleDefinition
     invalid! unless text?(row['code'], 100) && text?(row['name'], 120) && text?(row['reason_code'], 100)
     invalid! unless identifier?(row['queue_id']) && [true, false].include?(row['active']) && TIMINGS.include?(row['timing'])
     validate_scope!(row.fetch('scope'), active: row.fetch('active'))
-    validate_actions!(row.fetch('actions'), active: row.fetch('active'))
+    validate_actions!(row.fetch('actions'), active: row.fetch('active'), schema: row.fetch(DESTINATION_SCHEMA, 1))
     validate_conditions!(row.fetch('conditions'), timing: row.fetch('timing'))
   end
 
   # Legacy immutable definitions remain readable byte for byte. Absence of this
   # field never grants an executor permission to run a historical rule.
   def validate_entry_keys!(row)
-    fields = row.is_a?(Hash) && row.key?('execution_mode') ? FIELDS + ['execution_mode'] : FIELDS
+    fields = FIELDS + OPTIONAL_FIELDS.select { |field| row.is_a?(Hash) && row.key?(field) }
     validate_keys!(row, fields)
     invalid! if row.key?('execution_mode') && EXECUTION_MODES.exclude?(row['execution_mode'])
+    validate_destination_schema!(row)
+  end
+
+  # Only explicitly opted-in new definitions admit additional native kinds.
+  # Historical definitions keep their exact old grammar and gain no execution.
+  def validate_destination_schema!(row)
+    return unless row.key?(DESTINATION_SCHEMA)
+
+    invalid! unless row[DESTINATION_SCHEMA].is_a?(Integer) && row[DESTINATION_SCHEMA] == 2
+    invalid! if row.fetch('active') && !row.key?('execution_mode')
   end
 
   def validate_scope!(scope, active:)
@@ -62,20 +74,27 @@ class JrcContactCenter::EndingActions::RuleDefinition
     %w[issuer_company_id business_unit_id].each { |key| invalid! unless scope[key].nil? || identifier?(scope[key]) }
   end
 
-  def validate_actions!(actions, active:)
+  def validate_actions!(actions, active:, schema:)
     invalid! unless actions.is_a?(Array) && actions.length <= 5
     invalid! if active && actions.empty?
 
-    actions.each { |action| validate_action!(action) }
+    actions.each { |action| validate_action!(action, schema: schema) }
     invalid! unless actions.pluck('kind').uniq.length == actions.length
   end
 
-  def validate_action!(action)
+  def validate_action!(action, schema:)
+    return validate_current_action!(action) if schema == 2
+
     validate_keys!(action, %w[kind parameters])
     raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action['kind'] == 'project_task'
 
     normalized = JrcContactCenter::EndingActions::TaskDefinition.new.call(action.fetch('parameters'))
     invalid! unless normalized == action.fetch('parameters')
+  end
+
+  def validate_current_action!(action)
+    normalized = JrcContactCenter::EndingActions::DestinationOperationDefinition.new.call(action)
+    invalid! unless normalized == action
   end
 
   def validate_conditions!(conditions, timing:)

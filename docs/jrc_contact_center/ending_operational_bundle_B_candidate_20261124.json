@@ -1,0 +1,79 @@
+{
+  "parent": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
+  "status": "combined_SD_NICO_and_shapes_prepared_not_executed",
+  "accepted_bundle_A_sha256": "3059c4b7beb53d4bd5c816fe0c81c0f0c6e5d2dbf03c45a55b3fedf0ff8e8af3",
+  "source_sha256": {
+    "app/services/jrc_contact_center/ending_actions/service_desk_destination_definition.rb": "329fe099e56f921fa3f10f8c33870665645006e41c374ef77ed54e5a8b89e2ab",
+    "app/services/jrc_contact_center/ending_actions/service_desk_ticket_destination.rb": "fec33b3a014c6ea1690649e9f4d7f4949644e4cdff0737f9e8a59f76c92b62cb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "75350708b23fff00e0b02d9d45506a7a257876b6d79e1003c8db267986496f33",
+    "spec/services/jrc_contact_center/ending_actions/service_desk_destination_definition_spec.rb": "443f4fc06584b88f05eb5b93222be4aa585f967b70e05d59b0e9c423375944ea",
+    "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_destination_spec.rb": "e6529225c6aea29d1329b49e180b7dc0472606e75afd8ed3dcb041ebf3b06ff8",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb": "4e5a2b72828095ad124443979390c775441a55d16178b8189c7157a128a6be12",
+    "app/services/jrc_nico/helpdesk/capture.rb": "58c7a4d4f439a667fd39b37e7af771617633ca26ece7f51ebeea444e64367bc2",
+    "app/jobs/jrc_nico/helpdesk/monitor_job.rb": "ca7317992c844b3b8a3c4eb7449e158a67abf724e4e49640706232d70e679ce1",
+    "app/services/jrc_nico/helpdesk/event_dispatch.rb": "8261e3ed22bf3138d50abe91ef2e544d668e2b77d174106b6c61ca1224fd9df0",
+    "app/models/jrc_nico/helpdesk/dispatch_intent.rb": "1d95a5ed15c7eea28ff53ee6c961f0483faee7545eb59bd583dd96decaef0177",
+    "db/migrate/20261124200000_create_nico_helpdesk_dispatch_intents.rb": "a8791e39d46060922e7057fc18c04486c8cf4b774758f48a3930023748491050",
+    "spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb": "0d6eff0eb359b7226d7e033dddf1869d7f9396f1288ee0f2711b3559948e8b74",
+    "docs/adr/20261124-native-nico-delivery-intents.md": "69b1e08f919330fdd952e65d1bead2df6afb10e4b18969a680f405f6b7497352",
+    "script/jrc_call_center_native_nico_dispatch_upgrade.rb": "ceb6546445e3b6d8b3aabe747baa671a272c0e8edcfed779b13b6dde37f3e566",
+    "spec/services/jrc_contact_center/synthetic_nico_dispatch_upgrade_spec.rb": "fed57d41e838a4c16819aacb8fbc07e49bb8a50249ab3a2b0d9e3728fb78bd13",
+    ".github/workflows/call-center-administration.yml": "eb88e8d32d88bab88560eb468162cc929f412333018b3884b4adc7755bb92aa1",
+    "app/services/jrc_contact_center/ending_actions/action_definition.rb": "59147150783c15fd88d133d7f61d8ff18dad8792c527bb1b0ed267b5f8b041a2",
+    "spec/services/jrc_contact_center/ending_actions/action_definition_spec.rb": "880d7614c0a49ec5be8d5aa7ad5df5ffe7a3905353c099fc6703f271f8dd0115"
+  },
+  "parent_sources": {
+    ".github/workflows/call-center-administration.yml": "2ad94f071029d57bbc609fd592d6836e0cda118c6d0c3a306036d0aa6f9f29af",
+    "app/services/jrc_nico/helpdesk/capture.rb": "a7eaefdd661ae0de7bbe9d6446db5efb23eedd6bb472dd7557cf07726349621a",
+    "app/jobs/jrc_nico/helpdesk/monitor_job.rb": "308ab14eee937c0b409e3f309f1a56b44579df647f4e7b16e49509ddc332b9ea"
+  },
+  "unchanged_native_dependencies": {
+    "app/models/jrc_crm/business_unit.rb": "f4697cce02cc797aaa050d230ec08276f1d1d1953a1844c8bdde5d6309d545fe",
+    "app/jobs/jrc_nico/helpdesk/event_job.rb": "cd7f17da40c0b79ba0f3338d47910bdb92690579a20eb906c1de3eee71e0e3ea",
+    "app/models/jrc_nico/helpdesk/event.rb": "3ac587a958b3b36238d207c01cf9af530339c6e21947ef7b41111d4124a42c05",
+    "app/models/jrc_nico/helpdesk/policy_version.rb": "f2299bc5741e7fb38c77e8a9f5cf9a74f19548405fdd1d2c20f925cd396a022d",
+    "app/models/jrc_service_desk/base.rb": "dd11d622813bf53d5aa8882f4505fec01c48ce6f97abc3774700bb3d6624b0ea",
+    "app/services/jrc_nico/helpdesk/event_processor.rb": "5a5c704429871c57d262674e9fdc1ec93810ef1ba8d5956661c439b89938bfab",
+    "app/services/jrc_service_desk/create_ticket_workflow_service.rb": "a63897eeceea96337f64c8f20eafab5f526f2e8aec1391799abb52cc808a366f",
+    "app/services/jrc_service_desk/input.rb": "ca98faea83daccd02e0637290af07c410e3f1cba0c8888dcdc23c78222397b1b",
+    "app/services/jrc_service_desk/operational_context.rb": "5cdcca5c3a2e234eb3827054e0fd90677c2d40558d8ba4647dd614410fdeb2e3",
+    "app/services/jrc_service_desk/native_execution_context.rb": "acb8d504f0a6a600ee747e6adfb1d7545b3f731524bcd6f8be25153aa182bdfc"
+  },
+  "unchanged_native_regression_paths": {
+    "spec/requests/jrc_nico_helpdesk_rules_native_spec.rb": "8065d6dd4f338c2f476f5d18efecbe2ca5b4d7ba71b1265b28eb66b822d9fd12",
+    "spec/requests/jrc_nico_helpdesk_spec.rb": "3c01091f3a31f56818f075d21f3e8f06886123c08307cd61294283045fcedf73",
+    "spec/services/jrc_nico/helpdesk/capture_boundaries_spec.rb": "d362c835ab0e08e3de2d11dfad48da8b59e2f49ed599e11e9d28b79d001f401d",
+    "spec/services/jrc_nico/helpdesk/capture_concurrency_spec.rb": "c00c888bad366057c520fce293ee7c119d09a44ee639edd4efc9e616f7d57296",
+    "spec/services/jrc_nico/helpdesk/controls_spec.rb": "4f688dbc8c1d4346ce8cbdbc09a464fead01f5743ecc11095f4f7c5f5a4a2c18",
+    "spec/services/jrc_nico/helpdesk/cycle_evidence_spec.rb": "118207495aecbf7d82310fce8a064ef631781812d9b44b296b89a0396f0472f8",
+    "spec/services/jrc_service_desk/cp4_workflow_spec.rb": "1856d6ff595039fe2ed10d5ab1cec3661c564e7902207167a95fb00c3cc22cce",
+    "spec/services/jrc_service_desk/create_ticket_service_spec.rb": "f9fe87890486daba7b39e893c3663414acaabb7a187fae4bd5359e211e079d63"
+  },
+  "new_native_cases_prepared": 68,
+  "native_cases_executed": 0,
+  "new_native_cases_by_scope": {
+    "native_SD_and_prospective_NICO": 56,
+    "action_shapes": 12
+  },
+  "new_empty_technical_migration": "db/migrate/20261124200000_create_nico_helpdesk_dispatch_intents.rb",
+  "migration_inventory": {
+    "parent": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
+    "existing": 356,
+    "last": "20261124001000",
+    "new_version_unused_and_forward": true
+  },
+  "no_historical_backfill_or_published_ledger_rewrite": true,
+  "no_intermediate_native_acceptance_simulated": true,
+  "no_operational_dispatch_or_new_grants": true,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false,
+  "source_admission": {
+    "writer_before_sha256": "48a87d0f6a754b48ebc442326eee0163503ba3546d3fc6202a2c4ad3f902f936",
+    "writer_after_sha256": "7d230ee5eba660a379ad6f6176297e1e3d5fe6580e286bada1d63cf6ac8ba89c",
+    "all_existing_writer_guards_byte_recoverable": true,
+    "only_exact_additive_migration_admitted": "db/migrate/20261124200000_create_nico_helpdesk_dispatch_intents.rb",
+    "prepared_native_cases_not_executed": 68,
+    "preserved_native_regression_files": 8,
+    "full_actual_queue_upgrade_schema_and_native_regressions_required": true
+  }
+}

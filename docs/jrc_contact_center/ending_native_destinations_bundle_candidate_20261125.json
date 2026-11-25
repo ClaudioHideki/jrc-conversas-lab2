@@ -1,0 +1,163 @@
+{
+  "parent": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
+  "status": "combined_native_destinations_prepared_not_executed",
+  "reviewed_inventory_sha256": "6921933c5521035ef803d397463fcd94f68abca532aa44a0f31c0fc5da3895e0",
+  "source_sha256": {
+    "app/services/jrc_contact_center/ending_actions/service_desk_destination_definition.rb": "329fe099e56f921fa3f10f8c33870665645006e41c374ef77ed54e5a8b89e2ab",
+    "app/services/jrc_contact_center/ending_actions/service_desk_ticket_destination.rb": "fec33b3a014c6ea1690649e9f4d7f4949644e4cdff0737f9e8a59f76c92b62cb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "75350708b23fff00e0b02d9d45506a7a257876b6d79e1003c8db267986496f33",
+    "spec/services/jrc_contact_center/ending_actions/service_desk_destination_definition_spec.rb": "443f4fc06584b88f05eb5b93222be4aa585f967b70e05d59b0e9c423375944ea",
+    "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_destination_spec.rb": "e6529225c6aea29d1329b49e180b7dc0472606e75afd8ed3dcb041ebf3b06ff8",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb": "4e5a2b72828095ad124443979390c775441a55d16178b8189c7157a128a6be12",
+    "app/services/jrc_nico/helpdesk/capture.rb": "58c7a4d4f439a667fd39b37e7af771617633ca26ece7f51ebeea444e64367bc2",
+    "app/jobs/jrc_nico/helpdesk/monitor_job.rb": "ca7317992c844b3b8a3c4eb7449e158a67abf724e4e49640706232d70e679ce1",
+    "app/services/jrc_nico/helpdesk/event_dispatch.rb": "8261e3ed22bf3138d50abe91ef2e544d668e2b77d174106b6c61ca1224fd9df0",
+    "app/models/jrc_nico/helpdesk/dispatch_intent.rb": "1d95a5ed15c7eea28ff53ee6c961f0483faee7545eb59bd583dd96decaef0177",
+    "db/migrate/20261124200000_create_nico_helpdesk_dispatch_intents.rb": "a8791e39d46060922e7057fc18c04486c8cf4b774758f48a3930023748491050",
+    "spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb": "0d6eff0eb359b7226d7e033dddf1869d7f9396f1288ee0f2711b3559948e8b74",
+    "docs/adr/20261124-native-nico-delivery-intents.md": "69b1e08f919330fdd952e65d1bead2df6afb10e4b18969a680f405f6b7497352",
+    "script/jrc_call_center_native_nico_dispatch_upgrade.rb": "ceb6546445e3b6d8b3aabe747baa671a272c0e8edcfed779b13b6dde37f3e566",
+    "spec/services/jrc_contact_center/synthetic_nico_dispatch_upgrade_spec.rb": "fed57d41e838a4c16819aacb8fbc07e49bb8a50249ab3a2b0d9e3728fb78bd13",
+    ".github/workflows/call-center-administration.yml": "752c95082b696b9519c54f81e836934f4a153194944d95b3482eeec0db107036",
+    "app/services/jrc_contact_center/ending_actions/action_definition.rb": "59147150783c15fd88d133d7f61d8ff18dad8792c527bb1b0ed267b5f8b041a2",
+    "spec/services/jrc_contact_center/ending_actions/action_definition_spec.rb": "880d7614c0a49ec5be8d5aa7ad5df5ffe7a3905353c099fc6703f271f8dd0115",
+    "app/services/jrc_contact_center/ending_actions/crm_activity_definition.rb": "c386571cdeb1c7d558ef7850de5a655e82f56c8a13aaeeb1bf332f230ffa041b",
+    "app/services/jrc_contact_center/ending_actions/crm_activity_destination.rb": "232757c17086defb658f881d4b464cc5d7acc66330eabb28d31669a269c154c8",
+    "spec/services/jrc_contact_center/ending_actions/crm_activity_definition_spec.rb": "6b5fdd16fde9a2b07bb654ac2dd07dc409bf150cb815cbd5705ed149d56f1979",
+    "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb": "53e21990501aff601f64f9693f93297fe2f961e2fadb717eb693db9e03ac2140",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb": "83f232e1467f9849c78928285a50f8c24681eb07fdd73f7f84036cd1ba87c551",
+    "app/services/jrc_contact_center/ending_actions/service_desk_ticket_update.rb": "a39caf163912b0c9c8c12ff86b0dea1f507efc75913fa28e896d4e958e7377de",
+    "app/services/jrc_contact_center/ending_actions/service_desk_update_definition.rb": "b7f88802c2330cf619870d9a94c60fdfcd5824e617d9b5611928c90e77bec337",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb": "713882b48390feb60743625f0e10dd989f9d4026a36162b195a47bed87d84048",
+    "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb": "e3e28d74886ae7a6f51a6d5b4867d26e244374563d90f883e73f9fe9a4980aed",
+    "spec/services/jrc_contact_center/ending_actions/service_desk_update_definition_spec.rb": "982a45a9e67bb14f0bcda586782b47b8b0cf2042fd674cddc39236831222939a",
+    "app/services/jrc_contact_center/ending_actions/rule_definition.rb": "a651ce2cd3ddb76dbaab5cbede44bedf43caf7822feada967e79fcfbfab75869",
+    "spec/services/jrc_contact_center/ending_actions/explicit_destination_schema_spec.rb": "dfe43693bc6d306edf7ece5dfb658cb640b6ea5c260c71c3c28fd78a314ee8ab",
+    "app/services/jrc_contact_center/ending_actions/destination_operation_definition.rb": "0b5229c1c9683befa042d32baaa5e52ea79198d907c41792682ec5dc44502914",
+    "spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb": "5a820119a89b53b061ccdbf15ab3ed3e5d022005eee088cd0e6fca1e57582fe3"
+  },
+  "stages": [
+    {
+      "name": "native_ServiceDesk_NICO_and_shapes",
+      "new_native_cases": 68,
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/service_desk_destination_definition.rb": "329fe099e56f921fa3f10f8c33870665645006e41c374ef77ed54e5a8b89e2ab",
+        "app/services/jrc_contact_center/ending_actions/service_desk_ticket_destination.rb": "fec33b3a014c6ea1690649e9f4d7f4949644e4cdff0737f9e8a59f76c92b62cb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "75350708b23fff00e0b02d9d45506a7a257876b6d79e1003c8db267986496f33",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_destination_definition_spec.rb": "443f4fc06584b88f05eb5b93222be4aa585f967b70e05d59b0e9c423375944ea",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_destination_spec.rb": "e6529225c6aea29d1329b49e180b7dc0472606e75afd8ed3dcb041ebf3b06ff8",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb": "4e5a2b72828095ad124443979390c775441a55d16178b8189c7157a128a6be12",
+        "app/services/jrc_nico/helpdesk/capture.rb": "58c7a4d4f439a667fd39b37e7af771617633ca26ece7f51ebeea444e64367bc2",
+        "app/jobs/jrc_nico/helpdesk/monitor_job.rb": "ca7317992c844b3b8a3c4eb7449e158a67abf724e4e49640706232d70e679ce1",
+        "app/services/jrc_nico/helpdesk/event_dispatch.rb": "8261e3ed22bf3138d50abe91ef2e544d668e2b77d174106b6c61ca1224fd9df0",
+        "app/models/jrc_nico/helpdesk/dispatch_intent.rb": "1d95a5ed15c7eea28ff53ee6c961f0483faee7545eb59bd583dd96decaef0177",
+        "db/migrate/20261124200000_create_nico_helpdesk_dispatch_intents.rb": "a8791e39d46060922e7057fc18c04486c8cf4b774758f48a3930023748491050",
+        "spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb": "0d6eff0eb359b7226d7e033dddf1869d7f9396f1288ee0f2711b3559948e8b74",
+        "docs/adr/20261124-native-nico-delivery-intents.md": "69b1e08f919330fdd952e65d1bead2df6afb10e4b18969a680f405f6b7497352",
+        "script/jrc_call_center_native_nico_dispatch_upgrade.rb": "ceb6546445e3b6d8b3aabe747baa671a272c0e8edcfed779b13b6dde37f3e566",
+        "spec/services/jrc_contact_center/synthetic_nico_dispatch_upgrade_spec.rb": "fed57d41e838a4c16819aacb8fbc07e49bb8a50249ab3a2b0d9e3728fb78bd13",
+        ".github/workflows/call-center-administration.yml": "eb88e8d32d88bab88560eb468162cc929f412333018b3884b4adc7755bb92aa1",
+        "app/services/jrc_contact_center/ending_actions/action_definition.rb": "59147150783c15fd88d133d7f61d8ff18dad8792c527bb1b0ed267b5f8b041a2",
+        "spec/services/jrc_contact_center/ending_actions/action_definition_spec.rb": "880d7614c0a49ec5be8d5aa7ad5df5ffe7a3905353c099fc6703f271f8dd0115"
+      },
+      "parent_sources": {
+        ".github/workflows/call-center-administration.yml": "2ad94f071029d57bbc609fd592d6836e0cda118c6d0c3a306036d0aa6f9f29af",
+        "app/services/jrc_nico/helpdesk/capture.rb": "a7eaefdd661ae0de7bbe9d6446db5efb23eedd6bb472dd7557cf07726349621a",
+        "app/jobs/jrc_nico/helpdesk/monitor_job.rb": "308ab14eee937c0b409e3f309f1a56b44579df647f4e7b16e49509ddc332b9ea"
+      }
+    },
+    {
+      "name": "native_CRM_activity",
+      "new_native_cases": 24,
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/crm_activity_definition.rb": "c386571cdeb1c7d558ef7850de5a655e82f56c8a13aaeeb1bf332f230ffa041b",
+        "app/services/jrc_contact_center/ending_actions/crm_activity_destination.rb": "232757c17086defb658f881d4b464cc5d7acc66330eabb28d31669a269c154c8",
+        "spec/services/jrc_contact_center/ending_actions/crm_activity_definition_spec.rb": "6b5fdd16fde9a2b07bb654ac2dd07dc409bf150cb815cbd5705ed149d56f1979",
+        "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb": "53e21990501aff601f64f9693f93297fe2f961e2fadb717eb693db9e03ac2140",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb": "83f232e1467f9849c78928285a50f8c24681eb07fdd73f7f84036cd1ba87c551",
+        ".github/workflows/call-center-administration.yml": "1d87cc7cd392b06ba04a2ba85042048d411f8163a4aad735e159d4a07ec913d9"
+      },
+      "parent_sources": {
+        ".github/workflows/call-center-administration.yml": "eb88e8d32d88bab88560eb468162cc929f412333018b3884b4adc7755bb92aa1"
+      }
+    },
+    {
+      "name": "native_linked_ServiceDesk_update",
+      "new_native_cases": 25,
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/service_desk_ticket_update.rb": "a39caf163912b0c9c8c12ff86b0dea1f507efc75913fa28e896d4e958e7377de",
+        "app/services/jrc_contact_center/ending_actions/service_desk_update_definition.rb": "b7f88802c2330cf619870d9a94c60fdfcd5824e617d9b5611928c90e77bec337",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb": "713882b48390feb60743625f0e10dd989f9d4026a36162b195a47bed87d84048",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb": "e3e28d74886ae7a6f51a6d5b4867d26e244374563d90f883e73f9fe9a4980aed",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_update_definition_spec.rb": "982a45a9e67bb14f0bcda586782b47b8b0cf2042fd674cddc39236831222939a",
+        ".github/workflows/call-center-administration.yml": "4150fe812de19984c1d6c5cac84060b50dc660d3665c2a907ab3c19c98a01409"
+      },
+      "parent_sources": {
+        ".github/workflows/call-center-administration.yml": "1d87cc7cd392b06ba04a2ba85042048d411f8163a4aad735e159d4a07ec913d9"
+      }
+    },
+    {
+      "name": "explicit_prospective_operation_shapes",
+      "new_native_cases": 25,
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/rule_definition.rb": "a651ce2cd3ddb76dbaab5cbede44bedf43caf7822feada967e79fcfbfab75869",
+        "spec/services/jrc_contact_center/ending_actions/explicit_destination_schema_spec.rb": "dfe43693bc6d306edf7ece5dfb658cb640b6ea5c260c71c3c28fd78a314ee8ab",
+        "app/services/jrc_contact_center/ending_actions/destination_operation_definition.rb": "0b5229c1c9683befa042d32baaa5e52ea79198d907c41792682ec5dc44502914",
+        "spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb": "5a820119a89b53b061ccdbf15ab3ed3e5d022005eee088cd0e6fca1e57582fe3",
+        ".github/workflows/call-center-administration.yml": "752c95082b696b9519c54f81e836934f4a153194944d95b3482eeec0db107036"
+      },
+      "parent_sources": {
+        ".github/workflows/call-center-administration.yml": "4150fe812de19984c1d6c5cac84060b50dc660d3665c2a907ab3c19c98a01409",
+        "app/services/jrc_contact_center/ending_actions/rule_definition.rb": "0923fb023ecf13d53e799791ce9701334bc25c904465a7a52ae8df943242ec45"
+      }
+    }
+  ],
+  "parent_sources": {
+    "app/services/jrc_nico/helpdesk/capture.rb": "a7eaefdd661ae0de7bbe9d6446db5efb23eedd6bb472dd7557cf07726349621a",
+    "app/jobs/jrc_nico/helpdesk/monitor_job.rb": "308ab14eee937c0b409e3f309f1a56b44579df647f4e7b16e49509ddc332b9ea",
+    ".github/workflows/call-center-administration.yml": "2ad94f071029d57bbc609fd592d6836e0cda118c6d0c3a306036d0aa6f9f29af",
+    "app/services/jrc_contact_center/ending_actions/rule_definition.rb": "0923fb023ecf13d53e799791ce9701334bc25c904465a7a52ae8df943242ec45"
+  },
+  "unchanged_native_dependencies": {
+    "app/models/jrc_crm/business_unit.rb": "f4697cce02cc797aaa050d230ec08276f1d1d1953a1844c8bdde5d6309d545fe",
+    "app/jobs/jrc_nico/helpdesk/event_job.rb": "cd7f17da40c0b79ba0f3338d47910bdb92690579a20eb906c1de3eee71e0e3ea",
+    "app/models/jrc_nico/helpdesk/event.rb": "3ac587a958b3b36238d207c01cf9af530339c6e21947ef7b41111d4124a42c05",
+    "app/models/jrc_nico/helpdesk/policy_version.rb": "f2299bc5741e7fb38c77e8a9f5cf9a74f19548405fdd1d2c20f925cd396a022d",
+    "app/models/jrc_service_desk/base.rb": "dd11d622813bf53d5aa8882f4505fec01c48ce6f97abc3774700bb3d6624b0ea",
+    "app/services/jrc_nico/helpdesk/event_processor.rb": "5a5c704429871c57d262674e9fdc1ec93810ef1ba8d5956661c439b89938bfab",
+    "app/services/jrc_service_desk/create_ticket_workflow_service.rb": "a63897eeceea96337f64c8f20eafab5f526f2e8aec1391799abb52cc808a366f",
+    "app/services/jrc_service_desk/input.rb": "ca98faea83daccd02e0637290af07c410e3f1cba0c8888dcdc23c78222397b1b",
+    "app/services/jrc_service_desk/operational_context.rb": "5cdcca5c3a2e234eb3827054e0fd90677c2d40558d8ba4647dd614410fdeb2e3",
+    "app/services/jrc_service_desk/native_execution_context.rb": "acb8d504f0a6a600ee747e6adfb1d7545b3f731524bcd6f8be25153aa182bdfc",
+    "app/services/jrc_contact_center/ending_actions/task_definition.rb": "3c61ff6911314a4e25d6263991dfea7e715ec25363e1e1294d846fb95c28a5f0",
+    "app/services/jrc_contact_center/ending_actions/service_desk_destination_definition.rb": "329fe099e56f921fa3f10f8c33870665645006e41c374ef77ed54e5a8b89e2ab",
+    "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb": "d6a3ce9c7d5f9010edeb031a692dc117367a540d668ec39984aa1c7aba14eeb4",
+    "app/services/jrc_contact_center/ending_actions/service_desk_ticket_destination.rb": "fec33b3a014c6ea1690649e9f4d7f4949644e4cdff0737f9e8a59f76c92b62cb",
+    "app/services/jrc_contact_center/ending_actions/original_customer_reference.rb": "3c62a65b673c2f3564ae25cc2433d84ecce858782f929dcbc90c0251da6931dd",
+    "app/services/jrc_crm/deal_pipeline_service.rb": "adcb445717bc47a765d48dac1022c67cc9d1ba81788ab6a1204ad64a6708b58e",
+    "app/services/jrc_crm/activity_dispatch_service.rb": "9624452dca2091e982d27e2ab417f0eab6bc0c7e986fa983dd38823da21f51ac",
+    "app/controllers/api/v1/accounts/crm/deals_controller.rb": "7fbb56386db17ea379e7a0685d86537aa5d65ab180ac29021fcc9ff8a332d913",
+    "app/controllers/api/v1/accounts/crm/activities_controller.rb": "2c5011e86e6637bbd222c911a5f1d96f96b894496f15f036d567c2ebb6e16fe5",
+    "app/policies/jrc_crm/deal_policy.rb": "e79634851d6aeaea2f4eda6c9323984bfeab5dbb8c80f56bbadc987b8ced56b9",
+    "app/models/jrc_crm/deal.rb": "8d96f3a4f47ea08a9d5b3f070afbdb79a385be72414ed9f58e4431fc816c4241",
+    "app/models/jrc_crm/activity.rb": "6f8c1de66b42fff4b181979969f07da06e44491be13a730c600cd394a91c5361",
+    "app/services/jrc_domain_commands/resource_scope.rb": "0981ed615451d5cb7c5db8a6c7aa03a49717422582536ad5cc6c244d6fbc1d88",
+    "app/services/jrc_service_desk/update_ticket_service.rb": "d633de19b8d898fee4af21087b25600a5a5702b5db44eb5c7f7591a0af5e1d1e",
+    "app/services/jrc_service_desk/find_ticket_service.rb": "3004268568e8fbcf088caacda45d2bbcdc8f864e8f5e120a62e4fc045b0974c0",
+    "app/services/jrc_service_desk/base_service.rb": "e83f40ece087975511f283e6d16975b001597ad5207716ee417188b22a3126bd",
+    "app/services/jrc_service_desk/native_mutation_origin.rb": "870d04da032d998f76dd22fc3529a697ca17738ec4d5549b35e20bc61be6e107",
+    "app/controllers/api/v1/accounts/jrc_service_desk/tickets_controller.rb": "eff9effebc1062ba84450829d3be03f48caa59dd53aface60f3c3fe917826403",
+    "app/models/jrc_service_desk/ticket.rb": "640c7b9717d16728d72d6900c9cbd7622e706a8168ed16760096866a599a1555",
+    "app/policies/jrc_service_desk/ticket_policy.rb": "a0b60ef3a94b3d3e91c0bd4c446daec34c485c5cc224a16ed73d6a0e68b41262",
+    "app/services/jrc_contact_center/ending_actions/action_definition.rb": "59147150783c15fd88d133d7f61d8ff18dad8792c527bb1b0ed267b5f8b041a2",
+    "app/services/jrc_contact_center/ending_actions/crm_activity_definition.rb": "c386571cdeb1c7d558ef7850de5a655e82f56c8a13aaeeb1bf332f230ffa041b",
+    "app/services/jrc_contact_center/ending_actions/service_desk_update_definition.rb": "b7f88802c2330cf619870d9a94c60fdfcd5824e617d9b5611928c90e77bec337"
+  },
+  "accepted_A_sha256": "3059c4b7beb53d4bd5c816fe0c81c0f0c6e5d2dbf03c45a55b3fedf0ff8e8af3",
+  "new_native_cases_prepared": 142,
+  "native_cases_executed": 0,
+  "no_intermediate_native_acceptance_simulated": true,
+  "no_new_operational_dispatch_API_editor_grant_or_extra_migration": true,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

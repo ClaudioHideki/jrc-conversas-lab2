@@ -1,6 +1,6 @@
 {
   "parent": "d7f170620da3a548bd31da450889fc1baf7d670e",
-  "status": "combined49case_operational_sources_prepared_not_executed",
+  "status": "combined_native_selected_operation_customer_and_CRM_adapter_validated",
   "reviewed_inventory_sha256": "66f58e1e161d2470e72042b5dacf60374a9885800e85c1274dcf1c148a91e9e5",
   "source_sha256": {
     "script/jrc_call_center_chrome_counter_test.py": "2f45a64a255beec68e71f5f6280bb06e48db7e8cb14b6fc6c795b129ae4ee01c",
@@ -138,7 +138,7 @@
   "new_native_cases_prepared": 49,
   "new_Vue_cases_prepared": 15,
   "new_Chrome_cases_prepared": 4,
-  "native_cases_executed": 0,
+  "native_cases_executed": 49,
   "light_Node_syntax": [
     "app/javascript/dashboard/api/jrcContactCenter.js",
     "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.js",
@@ -286,5 +286,7 @@
       "source_byte_limit_400000_preserved": true
     }
   ],
-  "browser_correction": "docs/jrc_contact_center/ending_operational_A_browser_correction_20261125.json"
+  "browser_correction": "docs/jrc_contact_center/ending_operational_A_browser_correction_20261125.json",
+  "native_verified_sha": "28e0f4400bb5723a90a2f47e848b411aff98ea34",
+  "native_acceptance": "docs/jrc_contact_center/ending_operational_bundle_A_native_acceptance_20261124.json"
 }

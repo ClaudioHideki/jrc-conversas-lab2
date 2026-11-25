@@ -130,6 +130,7 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_readiness_schema_probe"); JrcContactCenter::SyntheticEndingReadinessSchemaProbe.record("fresh")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_execution_schema_probe"); JrcContactCenter::SyntheticEndingExecutionSchemaProbe.record("fresh")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_attempt_schema_probe"); JrcContactCenter::SyntheticEndingAttemptSchemaProbe.record("fresh")'
+          bundle exec rspec spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb --format progress --format json --out /tmp/call-center-nico-intent-fresh-rspec.json
           } > /tmp/call-center-initial-schema.log 2>&1
           cat /tmp/call-center-initial-schema.log
       - name: Reload migrated schema in a separate disposable database
@@ -158,6 +159,7 @@ jobs:
           bundle exec rspec spec/services/jrc_contact_center/ending_actions/activate_rule_spec.rb spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb spec/models/jrc_contact_center/ending_action_readiness_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb --format progress --format json --out /tmp/call-center-ending-readiness-reload.json
           bundle exec rspec spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb --format progress --format json --out /tmp/call-center-ending-success-reload.json
           bundle exec rspec spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb --format progress --format json --out /tmp/call-center-ending-attempt-reload.json
+          bundle exec rspec spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb --format progress --format json --out /tmp/call-center-nico-intent-reload-rspec.json
       - name: Populated ending origin upgrade without retroactive evidence or effects
         id: ending_origin_upgrade
         env:
@@ -247,6 +249,41 @@ jobs:
           assert report['summary']['example_count'] == len(report['examples']) == 1
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert all(row['status'] == 'passed' for row in report['examples'])
+          PY
+      - name: Native NICO delivery intent upgrade preserves all existing evidence
+        id: nico_intent_upgrade
+        env:
+          POSTGRES_DATABASE: jrc_cc_nico_intent_upgrade_synthetic
+          SCHEMA: /tmp/call-center-nico-intent-upgrade-schema.rb
+        run: |
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = jrc_cc_nico_intent_upgrade_synthetic
+          test "$REDIS_URL" = redis://127.0.0.1:6379/15
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate VERSION=20261124001000
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_native_nico_dispatch_upgrade"); JrcContactCenter::SyntheticNicoDispatchUpgrade.prepare!'
+          bundle exec rails db:migrate
+          bundle exec rails db:migrate
+          bundle exec rspec spec/services/jrc_contact_center/synthetic_nico_dispatch_upgrade_spec.rb --format progress --format json --out /tmp/call-center-nico-intent-upgrade-rspec.json
+          python3 -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-nico-intent-upgrade-rspec.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) == 1
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          for stage in ['fresh', 'reload']:
+              model = json.loads(Path('/tmp', f'call-center-nico-intent-{stage}-rspec.json').read_text())
+              assert model['summary']['example_count'] == len(model['examples']) == 6
+              assert all(model['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+              assert all(row['status'] == 'passed' for row in model['examples'])
+          proof = json.loads(Path('/tmp/call-center-nico-dispatch-upgrade.json').read_text())
+          assert proof['sha'] == os.environ['GITHUB_SHA'] and proof['synthetic'] is True
+          assert proof['technical_intents'] == 0 and proof['provider_or_broker_execution'] is False
+          assert len(proof['preserved_records']) == 27 and proof['exact_old_columns_and_values_preserved'] is True
+          assert [proof[k] for k in ['existing_tasks', 'existing_native_successes', 'existing_tickets', 'legacy_events']] == [2, 1, 1, 1]
           PY
       - name: Native ending origin and actual ACW completion preflight
         id: ending_origin_preflight
@@ -398,6 +435,18 @@ jobs:
               actual[path] = actual.get(path, 0) + 1
           assert actual == expected
           PY
+      - name: Native CRM activity adapter and parameter lint
+        id: ending_crm_activity_lint
+        run: |
+          bundle exec rubocop app/services/jrc_contact_center/ending_actions/crm_activity_definition.rb app/services/jrc_contact_center/ending_actions/crm_activity_destination.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb spec/services/jrc_contact_center/ending_actions/crm_activity_definition_spec.rb spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb --format json --out /tmp/call-center-crm-activity-lint.json
+      - name: Linked native Service Desk update adapter and parameter lint
+        id: ending_sd_update_lint
+        run: |
+          bundle exec rubocop app/services/jrc_contact_center/ending_actions/service_desk_ticket_update.rb app/services/jrc_contact_center/ending_actions/service_desk_update_definition.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb spec/services/jrc_contact_center/ending_actions/service_desk_update_definition_spec.rb --format json --out /tmp/call-center-sd-update-lint.json
+      - name: Explicit prospective destination grammar and native operation shape lint
+        id: ending_destination_schema_lint
+        run: |
+          bundle exec rubocop app/services/jrc_contact_center/ending_actions/rule_definition.rb app/services/jrc_contact_center/ending_actions/destination_operation_definition.rb spec/services/jrc_contact_center/ending_actions/explicit_destination_schema_spec.rb spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb --format json --out /tmp/call-center-destination-schema-lint.json
       - name: Rails authorization, persistence and affected regressions
         id: native_core
         run: |
@@ -416,20 +465,24 @@ jobs:
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb \
             spec/serializers/jrc_approvals/request_serializer_pause_spec.rb \
-            --exclude-pattern '**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
+            --exclude-pattern '**/ending_native_sd_update_concurrency_spec.rb,**/ending_native_crm_activity_concurrency_spec.rb,**/ending_native_service_desk_concurrency_spec.rb,**/ending_native_nico_queue_transaction_spec.rb,**/synthetic_nico_dispatch_upgrade_spec.rb,**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
-        if: failure() && (steps.native_schema.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure' || steps.ending_history_lint.outcome == 'failure' || steps.ending_actual_broker_lint.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure')
+        if: failure() && (steps.native_schema.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure' || steps.ending_history_lint.outcome == 'failure' || steps.ending_actual_broker_lint.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
           path: |
             /tmp/call-center-initial-schema.log
+            /tmp/call-center-nico-*.json
             /tmp/call-center-schema.rb
             /tmp/call-center-rspec.json
             /tmp/call-center-ending-version-preflight.json
             /tmp/call-center-ending-version-lint.json
             /tmp/call-center-ending-editor-lint.json
+            /tmp/call-center-crm-activity-lint.json
+            /tmp/call-center-sd-update-lint.json
+            /tmp/call-center-destination-schema-lint.json
             /tmp/call-center-ending-editor-preflight.json
             /tmp/call-center-ending-origin-*.json
             /tmp/call-center-ending-readiness-*.json
@@ -456,7 +509,76 @@ jobs:
         run: |
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
-          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
+          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
+      - name: Native CRM activity positive cases and actual contention coverage
+        id: ending_crm_activity_coverage
+        run: |
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == os.environ['GITHUB_SHA']
+          expected = {
+              'call-center-rspec.json': {
+                  'spec/services/jrc_contact_center/ending_actions/crm_activity_definition_spec.rb': 9,
+                  'spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb': 12,
+              },
+              'call-center-pabx-rspec.json': {
+                  'spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb': 3,
+              },
+          }
+          for name, paths in expected.items():
+              report = json.loads(Path('/tmp', name).read_text())
+              assert report['summary']['example_count'] == len(report['examples']) > 0
+              assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+              assert all(row['status'] == 'passed' for row in report['examples'])
+              for source, count in paths.items():
+                  selected = [row for row in report['examples'] if row['file_path'].removeprefix('./') == source]
+                  assert len(selected) == count and all(row['status'] == 'passed' for row in selected)
+          PY
+      - name: Linked native Service Desk update effects and actual contention coverage
+        id: ending_sd_update_coverage
+        run: |
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == os.environ['GITHUB_SHA']
+          expected = {
+              'call-center-rspec.json': {
+                  'spec/services/jrc_contact_center/ending_actions/service_desk_update_definition_spec.rb': 10,
+                  'spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb': 12,
+              },
+              'call-center-pabx-rspec.json': {
+                  'spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb': 3,
+              },
+          }
+          for name, paths in expected.items():
+              report = json.loads(Path('/tmp', name).read_text())
+              assert report['summary']['example_count'] == len(report['examples']) > 0
+              assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+              assert all(row['status'] == 'passed' for row in report['examples'])
+              for source, count in paths.items():
+                  selected = [row for row in report['examples'] if row['file_path'].removeprefix('./') == source]
+                  assert len(selected) == count and all(row['status'] == 'passed' for row in selected)
+          PY
+      - name: Explicit prospective destination grammar and native operation shape coverage
+        id: ending_destination_schema_coverage
+        run: |
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == os.environ['GITHUB_SHA']
+          report = json.loads(Path('/tmp/call-center-rspec.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) > 0
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          expected = {
+              'spec/services/jrc_contact_center/ending_actions/explicit_destination_schema_spec.rb': 13,
+              'spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb': 12,
+          }
+          for source, count in expected.items():
+              selected = [row for row in report['examples'] if row['file_path'].removeprefix('./') == source]
+              assert len(selected) == count and all(row['status'] == 'passed' for row in selected)
+          PY
       - name: Explicit selected pending operation native authority and actual contention
         id: ending_pending_preflight
         env:
@@ -483,6 +605,70 @@ jobs:
               actual[path] = actual.get(path, 0) + 1
           assert actual == expected
           PY
+      - name: Preserve native NICO capture and Service Desk workflow regressions
+        id: nico_native_regressions
+        env:
+          POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
+          JRC_SD_CONCURRENCY: '1'
+        run: |
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test
+          test "$REDIS_URL" = redis://127.0.0.1:6379/15
+          bundle exec rspec spec/services/jrc_nico/helpdesk/capture_boundaries_spec.rb spec/services/jrc_nico/helpdesk/controls_spec.rb spec/services/jrc_nico/helpdesk/cycle_evidence_spec.rb spec/requests/jrc_nico_helpdesk_spec.rb spec/requests/jrc_nico_helpdesk_rules_native_spec.rb spec/services/jrc_service_desk/create_ticket_service_spec.rb spec/services/jrc_service_desk/cp4_workflow_spec.rb --format progress --format json --out /tmp/call-center-nico-native-regressions-rspec.json
+          bundle exec rspec spec/services/jrc_nico/helpdesk/capture_concurrency_spec.rb --format progress --format json --out /tmp/call-center-nico-preserved-contention-rspec.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          expected = ['spec/services/jrc_nico/helpdesk/capture_boundaries_spec.rb', 'spec/services/jrc_nico/helpdesk/controls_spec.rb', 'spec/services/jrc_nico/helpdesk/cycle_evidence_spec.rb', 'spec/requests/jrc_nico_helpdesk_spec.rb', 'spec/requests/jrc_nico_helpdesk_rules_native_spec.rb', 'spec/services/jrc_service_desk/create_ticket_service_spec.rb', 'spec/services/jrc_service_desk/cp4_workflow_spec.rb']
+          for name, files in [('call-center-nico-native-regressions-rspec.json', set(expected)),
+                              ('call-center-nico-preserved-contention-rspec.json', {'spec/services/jrc_nico/helpdesk/capture_concurrency_spec.rb'})]:
+              report = json.loads(Path('/tmp', name).read_text())
+              assert report['summary']['example_count'] == len(report['examples']) > 0
+              assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+              assert all(row['status'] == 'passed' for row in report['examples'])
+              assert {row['file_path'].removeprefix('./') for row in report['examples']} == files
+          PY
+      - name: Native NICO committed transaction boundaries with actual own Redis
+        id: nico_intent_queue
+        env:
+          POSTGRES_DATABASE: corporate_gratuity_disposable
+        run: |
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = corporate_gratuity_disposable
+          test "$REDIS_URL" = redis://127.0.0.1:6379/15
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb --format progress --format json --out /tmp/call-center-ending-nico-queue-rspec.json
+          python3 -B - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-ending-nico-queue-rspec.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) == 14
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          examples = {row['line_number'] for row in report['examples']}
+          proofs = list(Path('/tmp').glob('call-center-ending-nico-queue-*.json'))
+          proofs = [path for path in proofs if path.name != 'call-center-ending-nico-queue-rspec.json']
+          assert len(proofs) == 14
+          lines = set()
+          source = Path('spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb')
+          for path in proofs:
+              proof = json.loads(path.read_text())
+              assert proof['synthetic'] is True and proof['worker_or_provider_execution'] is False
+              assert proof['source_sha'] == os.environ['GITHUB_SHA']
+              assert proof['actual_database'] == 'corporate_gratuity_disposable' and proof['actual_Redis_database'] == 15
+              assert isinstance(proof['native_backend_pid'], int) and proof['native_backend_pid'] > 0
+              assert proof['source_spec_sha256'] == hashlib.sha256(source.read_bytes()).hexdigest()
+              assert isinstance(proof['account_id'], int) and proof['account_id'] > 0
+              assert isinstance(proof['policy_version_id'], int) and proof['policy_version_id'] > 0
+              assert 'jrc_cc_nico_txn_' in proof['queue'] and proof['known_transport_faults_are_injected'] is True
+              assert proof['source_line'] in examples and proof['source_line'] not in lines
+              assert all(isinstance(row, list) and len(row) == 1 and isinstance(row[0], int) for row in proof['queued_arguments'])
+              lines.add(proof['source_line'])
+          assert lines == examples
+          PY
       - name: Actual own Sidekiq dequeue and native authority under duplicate deliveries
         id: ending_actual_broker
         env:
@@ -491,7 +677,7 @@ jobs:
           bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb --fail-fast --format progress --format json --out /tmp/call-center-ending-actual-broker-rspec.json
           python3 -B script/jrc_call_center_ending_broker_check.py
       - name: Preserve failed native concurrency reports before later lint diagnostics
-        if: failure() && (steps.native_concurrency.outcome == 'failure' || steps.ending_actual_broker.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure')
+        if: failure() && (steps.native_concurrency.outcome == 'failure' || steps.ending_actual_broker.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
@@ -516,7 +702,7 @@ jobs:
           bundle exec rspec spec/services/jrc_approvals/core_spec.rb spec/services/jrc_backoffice/authority_proposals_spec.rb spec/services/jrc_backoffice/signer_rosters_spec.rb --format progress --format json --out /tmp/call-center-corporate-rspec.json
       - name: Require positive examples and zero failures, pending or outside errors
         run: >-
-          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/call-center-ending-pending-rspec.json /tmp/call-center-ending-actual-broker-rspec.json /tmp/call-center-rspec.json /tmp/call-center-pabx-rspec.json /tmp/call-center-ivr-schema-reload-rspec.json /tmp/call-center-corporate-rspec.json
+          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/call-center-nico-native-regressions-rspec.json /tmp/call-center-nico-preserved-contention-rspec.json /tmp/call-center-nico-intent-fresh-rspec.json /tmp/call-center-nico-intent-reload-rspec.json /tmp/call-center-nico-intent-upgrade-rspec.json /tmp/call-center-ending-nico-queue-rspec.json /tmp/call-center-ending-pending-rspec.json /tmp/call-center-ending-actual-broker-rspec.json /tmp/call-center-rspec.json /tmp/call-center-pabx-rspec.json /tmp/call-center-ivr-schema-reload-rspec.json /tmp/call-center-corporate-rspec.json
       - name: Supabase storage guards in a separate synthetic database
         env:
           PGPASSWORD: disposable-test-only
@@ -610,7 +796,7 @@ jobs:
           matrix = json.loads(source.read_text())
           assert sorted(row['figure'] for row in matrix['figures']) == list(range(1, 24))
           summaries = {}
-          for name in ['call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
+          for name in ['call-center-nico-native-regressions-rspec.json', 'call-center-nico-preserved-contention-rspec.json', 'call-center-nico-intent-fresh-rspec.json', 'call-center-nico-intent-reload-rspec.json', 'call-center-nico-intent-upgrade-rspec.json', 'call-center-ending-nico-queue-rspec.json', 'call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
               summary = json.loads(Path('/tmp', name).read_text())['summary']
               assert summary['example_count'] > 0
               assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0

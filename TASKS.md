@@ -1047,3 +1047,9 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - Relatório final 45540056856 preservado e verificado por SHA-256: 630 arquivos Ruby comparados, zero infrações novas. Falha restrita aos dois testes de pré-admissão; correção ainda requer nova CI. Frontend/Chrome ignorados não foram aprovados.
 
 - CI 45544762024: 3269 exemplos operacionais Rails e 1869 Vue passaram; Chrome teve 273 aprovações e 3 falhas. Preparadas correção de contraste no popup escuro e sincronização com HTTP 201/identidade nativa da gravação de vínculo. Mesmo cenário extraído para preservar o limite de 400000 bytes, sem remover asserções ou aumentar timeouts. 276 cenários continuam obrigatórios; bloco A e Parte 1 ainda sem aceite.
+
+- Bloco operacional A/28e0f440/CI 45558082951: 49 novos casos nativos verificados no mesmo SHA, 3269 Rails distintos, 1869 Vue, 276 Chrome e 644 PNG; 46 originais abertos. Sem aceites intermediários inventados. CRM completo, SD, F10-B e Parte 1 permanecem abertos.
+
+- Bloco B após 28e0f440: adaptador Service Desk, entrega NICO prospectiva após commit e validação dos formatos de destino; 68 casos nativos novos e oito arquivos de regressão exigidos. Migration técnica vazia e sem backfill. Execução CRM/SD, recibos independentes, F10-B e Parte 1 ainda abertos.
+
+- Após 28e0f440: agrupados adaptadores nativos Service Desk/atividade CRM/edição de chamado e formatos prospectivos para uma única CI, com os 142 cenários novos e regressões anteriores preservados. Sem aceites intermediários inventados; uma única migration técnica já auditada. Nenhum novo destino operacional habilitado. Recibos independentes, F10-B e Parte 1 permanecem abertos.
