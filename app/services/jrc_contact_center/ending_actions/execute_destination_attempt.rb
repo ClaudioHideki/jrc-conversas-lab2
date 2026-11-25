@@ -55,12 +55,13 @@ class JrcContactCenter::EndingActions::ExecuteDestinationAttempt
     # Compare the exact stored attempt to current database-derived provenance.
     # Avoid timezone-dependent Ruby reconstruction or selecting a newer arming
     # receipt. This proves identity, not source/destination authorization.
-    query = ApplicationRecord.sanitize_sql_array([
+    query = [
       "SELECT to_jsonb(evidence) @> (cc_ending_destination_context(?, ?, ?, ?, ?) - 'execution_mode' - 'source_timezone') " \
       'FROM jrc_contact_center_ending_destination_attempts evidence WHERE evidence.account_id = ? AND evidence.id = ?',
       @account.id, @attempt.origin_id, @attempt.readiness_id, @attempt.rule_code, @attempt.destination_kind,
       @account.id, @attempt.id
-    ])
+    ]
+    query = ApplicationRecord.sanitize_sql_array(query)
     return if ApplicationRecord.connection.select_value(query) == true
 
     raise JrcContactCenter::OperationError, 'ending_attempt_identity_mismatch'

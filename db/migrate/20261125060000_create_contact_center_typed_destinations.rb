@@ -14,7 +14,7 @@ class CreateContactCenterTypedDestinations < ActiveRecord::Migration[7.1]
   RECEIPT = 'lib/jrc_contact_center/ending_destination_schema_receipt.rb'
   SOURCES = {
     SQL => '2a1512a700604017b5f62b05d02e7152eb4335e61785775e041ba5bcca142940',
-    RECEIPT => '9c2a53008b9b7ce7935419d2845d65a0fc91fd6b2624ed4ff23253868a0a52ae'
+    RECEIPT => 'c9a18646d496cc2ec06605dfaaa81290ad5ea030419dc10fe170d00015899f7b'
   }.freeze
 
   def up
@@ -52,7 +52,8 @@ class CreateContactCenterTypedDestinations < ActiveRecord::Migration[7.1]
       table.string :destination_kind, :operation, :trigger_kind, null: false, limit: 50
       table.string :rule_sha256, :integrity_sha256, null: false, limit: 64
       table.bigint :trigger_id, null: false
-      table.datetime :triggered_at, :created_at, null: false
+      table.datetime :triggered_at, null: false
+      table.datetime :created_at, null: false
       yield table
     end
   end
@@ -85,7 +86,7 @@ class CreateContactCenterTypedDestinations < ActiveRecord::Migration[7.1]
     add_index CONSENTS, %i[account_id request_key], unique: true, name: 'cc_typed_consent_request'
     add_index ATTEMPTS, %i[account_id request_key], unique: true, name: 'cc_typed_attempt_request'
     add_index ATTEMPTS, %i[account_id origin_id rule_code destination_kind], unique: true,
-              where: 'retry_of_id IS NULL', name: 'cc_typed_one_root_attempt'
+                                                                             where: 'retry_of_id IS NULL', name: 'cc_typed_one_root_attempt'
     add_index ATTEMPTS, %i[account_id retry_of_id], unique: true, where: 'retry_of_id IS NOT NULL', name: 'cc_typed_one_retry_child'
     add_index ATTEMPTS, %i[account_id consent_id], unique: true, where: 'consent_id IS NOT NULL', name: 'cc_typed_consent_used_once'
     add_index ATTEMPTS, %i[account_id origin_id rule_code destination_kind id], name: 'cc_typed_attempt_history'
@@ -120,12 +121,12 @@ class CreateContactCenterTypedDestinations < ActiveRecord::Migration[7.1]
     end
     add_check_constraint ATTEMPTS, '(retry_of_id IS NULL) = (retry_requested_by_account_user_id IS NULL)', name: 'cc_typed_retry_actor'
     add_check_constraint ATTEMPTS, '(consent_id IS NULL OR consent_id > 0) AND (retry_of_id IS NULL OR retry_of_id > 0) AND ' \
-                                  '(retry_requested_by_account_user_id IS NULL OR retry_requested_by_account_user_id > 0)',
+                                   '(retry_requested_by_account_user_id IS NULL OR retry_requested_by_account_user_id > 0)',
                          name: 'cc_typed_attempt_optional_refs'
     add_check_constraint EXECUTIONS, 'attempt_id > 0 AND target_id > 0 AND (native_audit_id IS NULL OR native_audit_id > 0)',
                          name: 'cc_typed_execution_target'
     add_check_constraint EXECUTIONS, "(destination_kind = 'service_desk' AND native_version IS NOT NULL AND native_version >= 0) OR " \
-                                    "(destination_kind <> 'service_desk' AND native_version IS NULL)", name: 'cc_typed_execution_version'
+                                     "(destination_kind <> 'service_desk' AND native_version IS NULL)", name: 'cc_typed_execution_version'
     add_check_constraint OUTCOMES, 'account_id > 0 AND attempt_id > 0', name: 'cc_typed_outcome_identity'
     add_check_constraint OUTCOMES, "integrity_sha256 ~ '^[0-9a-f]{64}$'", name: 'cc_typed_outcome_digest'
     execution_type_constraint

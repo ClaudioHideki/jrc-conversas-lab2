@@ -34,7 +34,7 @@ RSpec.describe 'Independent native CRM and Service Desk ending results' do
     call = new_origin_source_call
     call.update!(contact_id: contact.id, company_id: customer.id)
     JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: operator, queue: queue,
-                                    direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
+                                      direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
     call.update!(status: 'ended', ended_at: Time.current)
     row = JrcContactCenter::Qualification.find_by!(account: account, account_user: operator, call_session: call)
     JrcContactCenter::QualificationManager.new(account: account, member: operator).complete!(
@@ -68,7 +68,8 @@ RSpec.describe 'Independent native CRM and Service Desk ending results' do
     attributes = { account: account, origin: typed_origin, readiness: typed_readiness,
                    rule_code: 'SYNTHETIC_ORIGIN_RULE', destination_kind: kind, request_key: SecureRandom.uuid }
     if retry_of
-      attributes.merge!(retry_of: retry_of, retry_requested_by_account_user_id: actor_member.id)
+      attributes[:retry_of] = retry_of
+      attributes[:retry_requested_by_account_user_id] = actor_member.id
     end
     JrcContactCenter::EndingDestinationAttempt.create!(**attributes).reload
   end
@@ -187,7 +188,8 @@ RSpec.describe 'Independent native CRM and Service Desk ending results' do
     it "serializes actual duplicate #{destination} deliveries on separate PostgreSQL backends" do
       row = mixed_attempt(destination)
       states = Array.new(2) { { ready: Queue.new, results: Queue.new } }
-      workers, pids = [], []
+      workers = []
+      pids = []
       begin
         account.with_lock do
           ApplicationRecord.connection.select_values('SELECT pid FROM pg_stat_activity')

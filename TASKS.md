@@ -1073,3 +1073,5 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - Adaptadores nativos/ea09a785/CI 45631075549: 142 casos novos e regressões SD/NICO validados juntos; 3500 Rails distintos, 1869 Vue, 276 Chrome e 644 PNG, com 46 originais abertos. Sem aceites intermediários inventados. Nenhum novo destino habilitado no editor. Recibos CC independentes, executor completo, F10-B e Parte 1 permanecem abertos.
 
 - Próximo incremento interno: recibos imutáveis por destino, executor com autoridade atual do agente original e 82 cenários preparados de integridade, atualização, concorrência e falha parcial CRM/Service Desk. A migração aditiva cria somente histórico técnico vazio; não ativa regras nem concede permissões. O editor/API público, despacho operacional e o aceite integral da figura 10/Parte 1 continuam pendentes.
+
+- CI 45649123744/1368b12f: lint dos novos recibos encontrou 84 infrações; nenhuma homologação nativa foi atribuída. Correção pontual mantém os 82 cenários, o SQL byte a byte e os predicados de segurança. Instalação, atualização populada, recarga e todos os gates devem ser aprovados no próximo SHA.

@@ -47,10 +47,8 @@ class JrcContactCenter::SyntheticTypedDestinationUpgrade < JrcContactCenter::Syn
   private
 
   def guard!(installed:)
-    config = ApplicationRecord.connection_db_config
-    owned = runner_owned? && config.configuration_hash[:host] == '127.0.0.1' && config.database == DATABASE &&
-            ApplicationRecord.connection.current_database == DATABASE && !ApplicationRecord.connection.transaction_open?
-    raise 'Exclusive committed typed destination upgrade database required' unless owned
+    raise 'Exclusive committed typed destination upgrade database required' unless database_owned?
+
     expected = TABLES.all? { |table| ApplicationRecord.connection.table_exists?(table) == installed }
     raise 'Unexpected typed destination installation stage' unless expected
 
@@ -60,6 +58,12 @@ class JrcContactCenter::SyntheticTypedDestinationUpgrade < JrcContactCenter::Syn
     ActiveJob::Base.queue_adapter = :test
     WebMock.enable!
     WebMock.disable_net_connect!(allow_localhost: true)
+  end
+
+  def database_owned?
+    config = ApplicationRecord.connection_db_config
+    runner_owned? && config.configuration_hash[:host] == '127.0.0.1' && config.database == DATABASE &&
+      ApplicationRecord.connection.current_database == DATABASE && !ApplicationRecord.connection.transaction_open?
   end
 
   def create_existing_attempt

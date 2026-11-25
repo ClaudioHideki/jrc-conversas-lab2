@@ -10,9 +10,9 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
   it 'derives exact original metadata from real readiness and actual native ACW completion' do
     result = typed_context
     expect(result).to include('account_id' => account.id, 'origin_id' => typed_origin.id, 'version_id' => typed_version.id,
-                             'actor_account_user_id' => member.id, 'actor_user_id' => actor.id,
-                             'operation' => 'create_task', 'execution_mode' => 'agent_confirmation',
-                             'trigger_kind' => 'ending_action_completion', 'rule_sha256' => typed_readiness.rule_sha256)
+                              'actor_account_user_id' => member.id, 'actor_user_id' => actor.id,
+                              'operation' => 'create_task', 'execution_mode' => 'agent_confirmation',
+                              'trigger_kind' => 'ending_action_completion', 'rule_sha256' => typed_readiness.rule_sha256)
     expect(JrcProjects::Task.where(account: account)).to be_empty
   end
 
@@ -49,8 +49,8 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
   it 'records exact original-agent action consent separately without creating a business effect' do
     row = typed_consent
     expect(row.attributes).to include('version_id' => typed_version.id, 'actor_account_user_id' => member.id,
-                                     'actor_user_id' => actor.id, 'operation' => 'create_task',
-                                     'rule_sha256' => typed_readiness.rule_sha256)
+                                      'actor_user_id' => actor.id, 'operation' => 'create_task',
+                                      'rule_sha256' => typed_readiness.rule_sha256)
     expect(row.integrity_sha256).to match(/\A[0-9a-f]{64}\z/)
     expect(described_class.where(account: account)).to be_empty
     expect(JrcProjects::Task.where(account: account)).to be_empty
@@ -70,9 +70,9 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
     expect do
       refused_typed_schema_write do
         JrcContactCenter::EndingDestinationConsent.create!(account: account, origin: typed_origin, readiness: typed_readiness,
-                                                          actor_account_user_id: member.id, actor_user_id: actor.id,
-                                                          rule_code: 'SYNTHETIC_ORIGIN_RULE', destination_kind: 'project_task',
-                                                          request_key: typed_key)
+                                                           actor_account_user_id: member.id, actor_user_id: actor.id,
+                                                           rule_code: 'SYNTHETIC_ORIGIN_RULE', destination_kind: 'project_task',
+                                                           request_key: typed_key)
       end
     end.to raise_error(ActiveRecord::StatementInvalid, /consent evidence is server generated/)
   end
@@ -109,7 +109,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
     row = typed_attempt(consent: typed_consent)
     expect(row.effect_key).to eq(typed_key)
     expect(row.attributes).to include('actor_account_user_id' => member.id, 'actor_user_id' => actor.id,
-                                     'version_id' => typed_version.id, 'operation' => 'create_task')
+                                      'version_id' => typed_version.id, 'operation' => 'create_task')
     expect(row.outcome).to be_nil
     expect(row.execution).to be_nil
     expect(JrcProjects::Task.where(account: account)).to be_empty
@@ -142,7 +142,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
     row = typed_attempt(consent: typed_consent)
     before = row.attributes
     result = JrcContactCenter::EndingDestinationOutcome.create!(account: account, attempt: row,
-                                                               outcome: 'blocked', result_code: 'authorization_denied').reload
+                                                                outcome: 'blocked', result_code: 'authorization_denied').reload
     expect(result.integrity_sha256).to match(/\A[0-9a-f]{64}\z/)
     expect(row.reload.attributes).to eq(before)
     expect(JrcProjects::Task.where(account: account)).to be_empty
@@ -154,7 +154,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
     expect do
       refused_typed_schema_write do
         JrcContactCenter::EndingDestinationOutcome.create!(account: account, attempt: row,
-                                                          outcome: 'failed', result_code: 'SYNTHETIC_PRIVATE_MESSAGE')
+                                                           outcome: 'failed', result_code: 'SYNTHETIC_PRIVATE_MESSAGE')
       end
     end.to raise_error(ActiveRecord::StatementInvalid, /cc_typed_outcome_result/)
     expect(row.reload.outcome).to be_nil
@@ -165,7 +165,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
     expect do
       refused_typed_schema_write do
         JrcContactCenter::EndingDestinationOutcome.create!(account: account, attempt: row,
-                                                          outcome: 'succeeded', result_code: 'completed')
+                                                           outcome: 'succeeded', result_code: 'completed')
       end
     end.to raise_error(ActiveRecord::StatementInvalid, /native success identity mismatch/)
   end
@@ -173,7 +173,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
   it 'does not rewrite a terminal result after a later manual review' do
     row = typed_attempt(consent: typed_consent)
     result = JrcContactCenter::EndingDestinationOutcome.create!(account: account, attempt: row,
-                                                               outcome: 'failed', result_code: 'destination_failure').reload
+                                                                outcome: 'failed', result_code: 'destination_failure').reload
     expect { guarded_origin_sql("UPDATE jrc_contact_center_ending_destination_outcomes SET outcome = 'succeeded' WHERE id = #{result.id}") }
       .to raise_error(ActiveRecord::StatementInvalid, /destination outcomes are immutable/)
     expect(result.reload.outcome).to eq('failed')

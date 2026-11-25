@@ -90,7 +90,7 @@ RSpec.describe CreateContactCenterTypedDestinations do
   it 'refuses to turn a deferred composite reference into an immediate reference' do
     expect do
       ApplicationRecord.transaction(requires_new: true) do
-        ApplicationRecord.connection.execute(<<~SQL)
+        ApplicationRecord.connection.execute(<<~SQL.squish)
           ALTER TABLE jrc_contact_center_ending_destination_attempts
           ALTER CONSTRAINT cc_typed_attempt_origin_fk NOT DEFERRABLE;
         SQL

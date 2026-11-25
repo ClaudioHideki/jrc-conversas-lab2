@@ -81,9 +81,9 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
     task = typed_native_task(attempt)
     result = JrcContactCenter::EndingDestinationExecution.create!(account: account, attempt: attempt, target_id: task.id).reload
     expect(result.attributes).to include('origin_id' => typed_origin.id, 'version_id' => typed_version.id,
-                                        'actor_account_user_id' => member.id, 'actor_user_id' => actor.id,
-                                        'destination_kind' => 'project_task', 'operation' => 'create_task',
-                                        'target_type' => 'JrcProjects::Task', 'effect_key' => attempt.effect_key)
+                                         'actor_account_user_id' => member.id, 'actor_user_id' => actor.id,
+                                         'destination_kind' => 'project_task', 'operation' => 'create_task',
+                                         'target_type' => 'JrcProjects::Task', 'effect_key' => attempt.effect_key)
     expect(JrcProjects::AuditEvent.where(account: account, action: 'projects.task.created')).not_to be_empty
     expect(result.integrity_sha256).to match(/\A[0-9a-f]{64}\z/)
   end
@@ -94,7 +94,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
     task = typed_native_task(attempt)
     execution = JrcContactCenter::EndingDestinationExecution.create!(account: account, attempt: attempt, target_id: task.id).reload
     result = JrcContactCenter::EndingDestinationOutcome.create!(account: account, attempt: attempt, execution: execution,
-                                                               outcome: 'succeeded', result_code: 'completed').reload
+                                                                outcome: 'succeeded', result_code: 'completed').reload
     expect(result.execution_id).to eq(execution.id)
     expect(attempt.reload.attributes).to eq(before)
     expect(JrcProjects::Task.where(account: account).count).to eq(1)
@@ -128,7 +128,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
     expect do
       refused_typed_schema_write do
         JrcContactCenter::EndingDestinationExecution.create!(account: account, attempt: attempt,
-                                                           target_id: task.id, target_type: 'JrcProjects::Task')
+                                                             target_id: task.id, target_type: 'JrcProjects::Task')
       end
     end.to raise_error(ActiveRecord::StatementInvalid, /native success evidence is server generated/)
   end
@@ -141,7 +141,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
       refused_typed_schema_write do
         task = typed_native_task(attempt)
         JrcContactCenter::EndingDestinationExecution.create!(account: account, attempt: attempt,
-                                                           target_id: task.id, actor_user_id: actor.id)
+                                                             target_id: task.id, actor_user_id: actor.id)
       end
     end.to raise_error(ActiveRecord::StatementInvalid, /native success evidence is server generated/)
     expect(JrcProjects::Task.where(account: account).count).to eq(tasks_before)
@@ -156,7 +156,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
         task = typed_native_task(attempt)
         execution = JrcContactCenter::EndingDestinationExecution.create!(account: account, attempt: attempt, target_id: task.id).reload
         JrcContactCenter::EndingDestinationOutcome.create!(account: account, attempt: attempt, execution: execution,
-                                                          outcome: 'succeeded', result_code: 'SYNTHETIC_INVALID_RESULT')
+                                                           outcome: 'succeeded', result_code: 'SYNTHETIC_INVALID_RESULT')
       end
     end.to raise_error(ActiveRecord::StatementInvalid, /cc_typed_outcome_result/)
     expect(JrcProjects::Task.where(account: account)).to be_empty
@@ -191,7 +191,7 @@ RSpec.describe JrcContactCenter::EndingDestinationAttempt, type: :model do
     task = typed_native_task(attempt)
     execution = JrcContactCenter::EndingDestinationExecution.create!(account: account, attempt: attempt, target_id: task.id).reload
     JrcContactCenter::EndingDestinationOutcome.create!(account: account, attempt: attempt, execution: execution,
-                                                      outcome: 'succeeded', result_code: 'completed')
+                                                       outcome: 'succeeded', result_code: 'completed')
     expect { refused_typed_schema_write { typed_consent(key: SecureRandom.uuid) } }
       .to raise_error(ActiveRecord::StatementInvalid, /already succeeded/)
     expect(JrcProjects::Task.where(account: account).count).to eq(1)

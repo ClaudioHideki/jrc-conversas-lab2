@@ -49,13 +49,19 @@ class JrcContactCenter::EndingDestinationSchemaReceipt
   private
 
   def verify_structure!
-    valid = COLUMNS.all? { |table, columns| @connection.table_exists?(table) && @connection.columns(table).map(&:name).sort == columns.sort }
-    raise ActiveRecord::MigrationError, 'Incomplete typed ending history; preserve existing schema' unless valid
+    raise ActiveRecord::MigrationError, 'Incomplete typed ending history; preserve existing schema' unless complete_columns?
 
-    keys = TABLES.flat_map { |table| @connection.foreign_keys(table) }
-    valid &&= keys.length == 13 && keys.count { |key| REFERENCES.include?(key.name) && key.deferrable == :deferred } == 9
-    valid &&= functions.map(&:first).sort == FUNCTIONS.sort && triggers.map { |row| row.first(2) } == TRIGGERS
+    valid = complete_references? && functions.map(&:first).sort == FUNCTIONS.sort && triggers.map { |row| row.first(2) } == TRIGGERS
     raise ActiveRecord::MigrationError, 'Unknown typed ending history references or functions' unless valid
+  end
+
+  def complete_columns?
+    COLUMNS.all? { |table, columns| @connection.table_exists?(table) && @connection.columns(table).map(&:name).sort == columns.sort }
+  end
+
+  def complete_references?
+    keys = TABLES.flat_map { |table| @connection.foreign_keys(table) }
+    keys.length == 13 && keys.count { |key| REFERENCES.include?(key.name) && key.deferrable == :deferred } == 9
   end
 
   def structure

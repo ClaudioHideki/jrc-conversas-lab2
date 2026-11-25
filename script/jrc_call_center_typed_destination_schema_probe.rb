@@ -26,11 +26,15 @@ module JrcContactCenter::SyntheticTypedDestinationSchemaProbe
 
   def self.guard!(stage)
     config = ApplicationRecord.connection_db_config
-    owned = Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
-            ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15' && config.configuration_hash[:host] == '127.0.0.1' &&
+    owned = runner_owned? && config.configuration_hash[:host] == '127.0.0.1' &&
             config.database == DATABASES.fetch(stage) && ApplicationRecord.connection.current_database == config.database &&
             !ApplicationRecord.connection.transaction_open?
     raise 'Exclusive typed ending schema diagnostics required' unless owned
+  end
+
+  def self.runner_owned?
+    Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
+      ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'
   end
 
   def self.report(stage, receipt)

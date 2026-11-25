@@ -103,5 +103,50 @@
     "Operational opportunity transitions/results and notification/NICO destinations.",
     "Mixed-destination Chrome proof and all remaining Part 1 observable criteria.",
     "External provider contracts and homologation without real PABX commands."
-  ]
+  ],
+  "source_lint_corrections": [
+    {
+      "name": "exact_native_typed_lint_84_offense_correction",
+      "reviewed_receipt_sha256": "3d65666bc03bd3d0ed91d5c33db1e73be51a38092238bf3557a467cbe4abbe16",
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/execute_destination_attempt.rb": "4bcbcdf9228bde8d2f34bcbe9e023d449e7529e31ea55902c308755e325c873d",
+        "db/migrate/20261125060000_create_contact_center_typed_destinations.rb": "3c6f40a7a9dff0dd1b03c0035fef3cc9d1f66b60566d02746e7c14051b1d8ec7",
+        "lib/jrc_contact_center/ending_destination_schema_receipt.rb": "c9a18646d496cc2ec06605dfaaa81290ad5ea030419dc10fe170d00015899f7b",
+        "script/jrc_call_center_typed_destination_schema_probe.rb": "7bbfc4706400f2d0e0e6eb296494daeac741a3f92624da1a75e699569ec59620",
+        "script/jrc_call_center_typed_destination_upgrade.rb": "4ce5c1683c61f83d6aa03866fc87b544cdd77a5596319d1a201adcfe8f8389b6",
+        "spec/models/jrc_contact_center/ending_destination_attempt_retry_and_success_spec.rb": "2adc44fa5f3832049d53db6491abda871173db6d401f285548f8cfa9d06efd7e",
+        "spec/models/jrc_contact_center/ending_destination_attempt_schema_spec.rb": "8a555a21db6a24588da342818ca7429eb907d752911f50c39674a2bdbdbb66de",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb": "25ba4b38d96894e2a2c3b93b207c0109204c6846201d76038655df4970ff1111",
+        "spec/services/jrc_contact_center/create_contact_center_typed_destinations_spec.rb": "9bdad7230d5bcdbc31e29139c2ce9b0557156f3175aa605ab38fb50c520c1957",
+        "spec/services/jrc_contact_center/synthetic_typed_destination_upgrade_spec.rb": "6d325317114ca075c999ded7f304c326c3e0e8d33743a552a3c06f775b1dcc2c",
+        "spec/support/contact_center_typed_destination_schema.rb": "045964c87c15acd9037a14e22ba2007c43579074ffb5f63de33f47084f03c94b",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb": "73e4059985507b84a2552fdebe4a0195e71fc37f295c41bf78938c5fe205723b",
+        "script/validate_cc_typed_destination_migration.mjs": "8df19ec8f611662071ce9cd46bc7424178e49ad6cd7beaed29dfbbee0e1765d6"
+      },
+      "parent_sources": {
+        "app/services/jrc_contact_center/ending_actions/execute_destination_attempt.rb": "efad2952a6b49c7bac9411a54963d0cbc0213195a7ae9fac8970b6cd234ff4dc",
+        "db/migrate/20261125060000_create_contact_center_typed_destinations.rb": "e7b2540684d6bf4a215c28f73e6db561abd25178c2533ebeb9702eb631a85c00",
+        "lib/jrc_contact_center/ending_destination_schema_receipt.rb": "9c2a53008b9b7ce7935419d2845d65a0fc91fd6b2624ed4ff23253868a0a52ae",
+        "script/jrc_call_center_typed_destination_schema_probe.rb": "a403f3e473a08ee20629c0ccf9e6913c6e9f15798ea7182d90395984d5b79714",
+        "script/jrc_call_center_typed_destination_upgrade.rb": "478f2045c442a9878223da78f13945d5c59ab49483448785f85b03e50ed049d2",
+        "spec/models/jrc_contact_center/ending_destination_attempt_retry_and_success_spec.rb": "d13fb52865273483879c407177d745493e6db7171c13a633df2e8ddcd908c3d2",
+        "spec/models/jrc_contact_center/ending_destination_attempt_schema_spec.rb": "657cc7f0ec06f715d1b0b020082b90fa5b00fec8f0a2b7ec7f72e8adf791e1d7",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb": "8a1f318e3bfde9266dc33e4d87cb64d1391efe22ef01d0a16cb5156ec6b4ef92",
+        "spec/services/jrc_contact_center/create_contact_center_typed_destinations_spec.rb": "9b32ad46cfd7748793cc9f6b9b92d4e960b4087c9201296ce91a67ffc82d53b6",
+        "spec/services/jrc_contact_center/synthetic_typed_destination_upgrade_spec.rb": "3d01db968e4828e4e7b6c91ff05a2aa1163b952396579543d9f3faa5462da3e8",
+        "spec/support/contact_center_typed_destination_schema.rb": "5bb16501622d45272f18152ed44f50655f287e4174001741b3c2a3e610e8c0f8",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb": "c247468060d1583a31fb418555f16ebc1c23897111bb693f498b8257fa1600df",
+        "script/validate_cc_typed_destination_migration.mjs": "89fb3bda92a7741ce7694a27ca2375642d35e74af8765bf262560fd6ec3f8324"
+      }
+    }
+  ],
+  "actual_lint_failure_followup": {
+    "sha": "1368b12f0f269639e24ecd09a3308d76a29ecaa3",
+    "run": 45649123744,
+    "reported_offenses": 84,
+    "correction_prepared_native_confirmation_pending": true,
+    "SQL_changed": false,
+    "table_created_at_declaration_split_same_column_order_and_options": true,
+    "migrations_FKs_triggers_identity_and_all_native_gates_still_required": true
+  }
 }

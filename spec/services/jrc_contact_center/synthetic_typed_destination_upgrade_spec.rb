@@ -21,14 +21,14 @@ RSpec.describe JrcContactCenter::SyntheticTypedDestinationUpgrade do
   it 'preserves exact old columns and values through installation and an idempotent second application' do
     report = upgrade_report
     expect(report).to include('sha' => ENV.fetch('GITHUB_SHA'), 'synthetic' => true,
-                             'exact_old_columns_and_values_preserved' => true, 'rerun_idempotent' => true)
+                              'exact_old_columns_and_values_preserved' => true, 'rerun_idempotent' => true)
     expect(report.fetch('preserved_records').length).to be >= 19
     expect(report.fetch('preserved_records').all? { |row| row.fetch('sha256').match?(/\A[0-9a-f]{64}\z/) }).to be true
   end
 
   it 'preserves the manual and automated Tasks, v1 success and its completed durable attempt' do
     expect(upgrade_report).to include('existing_tasks_preserved' => 2, 'successful_v1_receipts_preserved' => 1,
-                                     'completed_v1_attempts_preserved' => 1, 'completed_v1_outcomes_preserved' => 1)
+                                      'completed_v1_attempts_preserved' => 1, 'completed_v1_outcomes_preserved' => 1)
     expect(JrcProjects::Task.count).to eq(2)
     expect(JrcContactCenter::EndingActionExecution.count).to eq(1)
     expect(JrcContactCenter::EndingActionAttemptOutcome.sole.outcome).to eq('succeeded')

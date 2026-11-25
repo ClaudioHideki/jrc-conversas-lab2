@@ -98,7 +98,7 @@ RSpec.describe 'Independent typed ending execution and actual PostgreSQL content
     result = execute_typed_attempt(row)
     expect(result).to have_attributes(outcome: 'succeeded', result_code: 'completed', attempt_id: row.id)
     expect(result.execution).to have_attributes(target_type: 'JrcProjects::Task', operation: 'create_task',
-                                               target_id: JrcProjects::Task.where(account: account).sole.id)
+                                                target_id: JrcProjects::Task.where(account: account).sole.id)
     expect(typed_effect_counts).to eq([1, 1, 1, 1])
     expect(JrcContactCenter::EndingActionExecution.where(account: account)).to be_empty
   end
@@ -211,7 +211,8 @@ RSpec.describe 'Independent typed ending execution and actual PostgreSQL content
   it 'serializes two actual workers and commits only one native Task, audit and terminal outcome' do
     row = queued_typed_attempt
     states = Array.new(2) { { ready: Queue.new, results: Queue.new } }
-    workers, pids = [], []
+    workers = []
+    pids = []
     begin
       account.with_lock do
         ApplicationRecord.connection.select_values('SELECT pid FROM pg_stat_activity')
