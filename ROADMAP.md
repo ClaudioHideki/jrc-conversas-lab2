@@ -183,3 +183,7 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 - CI 45534964667: 2925 Rails principais e 241 de concorrência passaram; o gate de execução selecionada parou antes dos 15 casos por duas infrações de linhas em branco. Correção preparada preservando todas as linhas executáveis, testes e gates. Aceite do bloco A e Parte 1 continuam abertos.
 
 - Relatório final da CI 45534964667: sete infrações novas, incluindo as duas linhas em branco já tratadas, quatro alinhamentos de fixtures e uma associação ambígua do matcher. Correções mínimas preparadas em três arquivos Ruby, com os 49 cenários e gates preservados. Revalidação nativa e Chrome continuam obrigatórias; sem aceite do bloco A ou da Parte 1.
+
+- CI 45540056856: 2925 Rails principais e 241 de concorrência passaram; lint focado corrigido. Dos 15 cenários selecionados, dois confundiram recusa anterior ao executor com recibo terminal de worker. Preparada correção somente dos testes: recusa permanente explícita, repetição segura e zero efeitos/alterações. Executor, SQL, gates e testes anteriores do worker preservados. Bloco A e Parte 1 ainda sem aceite.
+
+- Relatório final 45540056856 preservado e verificado por SHA-256: 630 arquivos Ruby comparados, zero infrações novas. Falha restrita aos dois testes de pré-admissão; correção ainda requer nova CI. Frontend/Chrome ignorados não foram aprovados.

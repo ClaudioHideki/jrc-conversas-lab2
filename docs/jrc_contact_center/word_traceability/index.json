@@ -4017,5 +4017,16 @@
       "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": 15
     },
     "whole_figure10_or_Part1_accepted": false
+  },
+  "operational_A_pre_admission_correction": {
+    "parent": "24441e55ab8bef686d8172591b9cf1c20084c03c",
+    "document": "docs/jrc_contact_center/ending_operational_A_pre_admission_correction_20261125.json",
+    "document_sha256": "8300c924f5139105694c6bb327936bf9a44dd21563ab5bda0c92252d8325e8f3",
+    "same_test_names_and_counts": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": 12,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": 3
+    },
+    "all_runtime_and_native_worker_tests_unchanged": true,
+    "whole_figure10_or_Part1_accepted": false
   }
 }

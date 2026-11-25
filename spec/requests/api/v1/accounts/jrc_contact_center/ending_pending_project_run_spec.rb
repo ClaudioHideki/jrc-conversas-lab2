@@ -146,6 +146,7 @@ RSpec.describe 'Explicit selected pending Project automation', type: :request do
 
   it 'does not revive a formerly pending action after disabling and reactivating its rule' do
     row = pending_attempt
+    previous = row.attributes
     project = JrcProjects::Project.where(account: account).sole
     [false, true].each do |active|
       JrcContactCenter::EndingActions::ConfigureRule.new(
@@ -153,12 +154,16 @@ RSpec.describe 'Explicit selected pending Project automation', type: :request do
         expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision
       ).call
     end
-    blocked = row.reload.outcome.attributes
-    request_run
-    expect(response).to have_http_status(:conflict)
-    expect(row.reload.outcome.attributes).to eq(blocked)
-    expect(row.outcome.result_code).to eq('deactivated')
-    expect(effect_counts).to eq([0, 0, 1])
+    # Admission refuses before the worker; it must not fabricate a terminal
+    # receipt. The immutable intervening rule version is the permanent barrier.
+    2.times do
+      request_run
+      expect([response.status, response.parsed_body.fetch('error')]).to eq([422, 'ending_action_pending_permanently_blocked'])
+    end
+    expect(row.reload.attributes).to eq(previous)
+    expect(row.outcome).to be_nil
+    expect(effect_counts).to eq([0, 0, 0])
+    expect(JrcProjects::AuditEvent.where(account: account, action: 'projects.task.created')).to be_empty
   end
 
   it 'revalidates current native Project permission without changing an unauthorized pending operation' do

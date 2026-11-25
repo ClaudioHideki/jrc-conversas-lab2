@@ -120,6 +120,7 @@ RSpec.describe 'Selected pending Project execution under actual PostgreSQL conte
 
   it 'does not revive a pending command after a real concurrent disable and reactivation of its rule' do
     fixture = selected_pending_fixture
+    previous = fixture.last.attributes
     state = { ready: Queue.new, result: Queue.new }
     workers = []
     account.with_lock do
@@ -135,9 +136,10 @@ RSpec.describe 'Selected pending Project execution under actual PostgreSQL conte
     end
     result = Timeout.timeout(20) { state[:result].pop }
     expect([result.class.name, result.respond_to?(:code) && result.code])
-      .to eq(['JrcContactCenter::OperationError', 'ending_attempt_no_longer_pending'])
-    expect(selected_effects).to eq([0, 0, 0, 1])
-    expect(fixture.last.reload.outcome.result_code).to eq('deactivated')
+      .to eq(['JrcContactCenter::OperationError', 'ending_action_pending_permanently_blocked'])
+    expect(selected_effects).to eq([0, 0, 0, 0])
+    expect(fixture.last.reload.attributes).to eq(previous)
+    expect(fixture.last.outcome).to be_nil
   ensure
     join_selected_workers(workers || [])
   end

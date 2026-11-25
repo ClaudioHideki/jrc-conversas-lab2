@@ -225,9 +225,30 @@
         "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": 15
       },
       "new_native_validation_still_required": true
+    },
+    {
+      "diagnostic_run": 45540056856,
+      "failed_product_sha": "24441e55ab8bef686d8172591b9cf1c20084c03c",
+      "diagnostic_artifact_sha256": "bb05bb32ab1de3b9d99872a6f5e019564b0313d78ffe09a1a70c8015aea87c03",
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": "fa5da83950a75e68eb3a4965e678f3d46969cb5fd23187bacf33a94dc0218de2",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": "0db4fd6b6da3caa66ce75e9dd33a5f762731ce88d8cd2366fa64848b4ba57faf"
+      },
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": "9be7d1710cf86c3a389a5cc1eafefbfdcdf64f13e5a7804888b1f239195f2b9e",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": "7dc31c2414ac509b3aaf1ada102a0cd48bdce033da4308cc6c1734c92d28e1cd"
+      },
+      "no_gate_or_native_coverage_weakened": true,
+      "same_test_names_and_counts": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": 12,
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": 3
+      },
+      "only_two_pre_admission_expectations_corrected": true,
+      "new_native_validation_still_required": true
     }
   ],
   "native_fixture_lint_correction": "docs/jrc_contact_center/ending_operational_A_native_correction_20261124.json",
   "selected_pending_spacing_correction": "docs/jrc_contact_center/ending_operational_A_pending_spacing_correction_20261125.json",
-  "remaining_spec_lint_correction": "docs/jrc_contact_center/ending_operational_A_remaining_lint_correction_20261125.json"
+  "remaining_spec_lint_correction": "docs/jrc_contact_center/ending_operational_A_remaining_lint_correction_20261125.json",
+  "selected_pre_admission_correction": "docs/jrc_contact_center/ending_operational_A_pre_admission_correction_20261125.json"
 }

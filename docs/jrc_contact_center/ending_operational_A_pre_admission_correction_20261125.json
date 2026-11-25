@@ -1,0 +1,58 @@
+{
+  "parent": "24441e55ab8bef686d8172591b9cf1c20084c03c",
+  "status": "pre_admission_native_contract_spec_correction_prepared_not_validated",
+  "source_correction": {
+    "diagnostic_run": 45540056856,
+    "failed_product_sha": "24441e55ab8bef686d8172591b9cf1c20084c03c",
+    "diagnostic_artifact_sha256": "bb05bb32ab1de3b9d99872a6f5e019564b0313d78ffe09a1a70c8015aea87c03",
+    "parent_sources": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": "fa5da83950a75e68eb3a4965e678f3d46969cb5fd23187bacf33a94dc0218de2",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": "0db4fd6b6da3caa66ce75e9dd33a5f762731ce88d8cd2366fa64848b4ba57faf"
+    },
+    "source_sha256": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": "9be7d1710cf86c3a389a5cc1eafefbfdcdf64f13e5a7804888b1f239195f2b9e",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": "7dc31c2414ac509b3aaf1ada102a0cd48bdce033da4308cc6c1734c92d28e1cd"
+    },
+    "no_gate_or_native_coverage_weakened": true,
+    "same_test_names_and_counts": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": 12,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": 3
+    },
+    "only_two_pre_admission_expectations_corrected": true,
+    "new_native_validation_still_required": true
+  },
+  "unchanged_runtime_native_worker_specs_and_workflow": {
+    "app/services/jrc_contact_center/ending_actions/pending_project_action.rb": "be6f97764b53041a6e7cb855f67b34b973be9a3a15cbc89376dee6bbfc1e9e3f",
+    "app/services/jrc_contact_center/ending_actions/pinned_rule.rb": "3f34821c58d2743fec4907b7943641e60adca0836568d9bd18b5a9efec5158b2",
+    "app/services/jrc_contact_center/ending_actions/blocking_revision.rb": "b1ccf985696d98449fe04d3e22b1d60dae579c8007b76cb1f5911ff5f300e955",
+    "app/services/jrc_contact_center/ending_actions/execute_attempt.rb": "510a4786a30d2f05fb751c54e0fdd57e410b521c60f7ad6224cebda5eef21334",
+    "app/services/jrc_contact_center/operation_error.rb": "78f97bf7ee245632f1f70383d62eeb4ce54314b88016d3694156b3a136afb021",
+    "app/controllers/api/v1/accounts/jrc_contact_center/base_controller.rb": "daa89667d0635c90d6128e2f990a8d1a3195b8471fe9c19d00e93ab16b63509e",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": "03684ab8dcc9cfafd9f86567211fbfec587b2d9a211fe9451d388ca1bad0adbc",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": "1d9a5432835a78cb21323934cd1e46ff95fa6db8305078e5c4438c5732ea74c9",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb": "20be28ab548cf8c2133dbcfc8f34b775cb4dd2b48d4dc31b5293dd8f32af86ee",
+    ".github/workflows/call-center-administration.yml": "2ad94f071029d57bbc609fd592d6836e0cda118c6d0c3a306036d0aa6f9f29af"
+  },
+  "cause": "The selected admission path invokes PinnedRule before ExecuteAttempt. An intervening disabled version raises the existing permanent-barrier code before any worker or terminal outcome write.",
+  "native_contract_distinction": {
+    "selected_admission_denied": "Existing OperationError is rendered as HTTP 422; attempt stays immutable and no Task, native audit, success or outcome is created.",
+    "worker_already_running_or_delivered": "Existing ExecuteAttempt appends its immutable blocked/deactivated outcome after rollback; the original native and real-Redis tests remain unchanged and mandatory."
+  },
+  "strengthened_assertions": [
+    "Repeat the denied API request twice after reactivation and require its exact status and permanent-barrier code.",
+    "Preserve all original immutable attempt attributes and require no synthetic terminal receipt.",
+    "Require exactly zero native Task/audit/success/outcome effects in the real lock-contention case."
+  ],
+  "native_execution_of_fix": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false,
+  "complete_parent_diagnostic": {
+    "run": 45540056856,
+    "artifact": 14990318020,
+    "artifact_sha256": "0e56cd04249642c7ccd7e71eb02a43929c5aacc740454c9975beb59ad7397fb1",
+    "Ruby_changed_paths_inspected": 630,
+    "new_Ruby_offenses": 0,
+    "only_two_selected_admission_specs_failed": true,
+    "frontend_and_Chrome_skipped_not_approved": true
+  }
+}
