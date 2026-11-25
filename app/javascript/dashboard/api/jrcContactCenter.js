@@ -51,6 +51,11 @@ export default {
       `${base(accountId)}/qualifications/${recordIdentity(qualificationId)}/ending_attempts`,
       { params: { page: params.page || 1 } }
     ),
+  runPendingEndingAttempt: (accountId, qualificationId, attemptId, review) =>
+    axios.post(
+      `${base(accountId)}/qualifications/${recordIdentity(qualificationId)}/ending_attempts/${recordIdentity(attemptId)}/reprocess`,
+      review
+    ),
   queueCalendars: (accountId, unitId, calendarId, params = {}) =>
     axios.get(`${base(accountId)}/queue_calendars`, {
       params: {

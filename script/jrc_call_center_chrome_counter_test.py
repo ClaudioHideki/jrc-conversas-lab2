@@ -33,16 +33,20 @@ class ChromeCounterTest(unittest.TestCase):
         cls.text = WORKFLOW.read_text(encoding='utf-8')
         cls.code = compile_stats_guard(cls.text, str(WORKFLOW))
 
-    def check_report(self, *, expected=272, unexpected=0, skipped=0, flaky=0, errors=None):
+    def check_report(self, *, expected=276, unexpected=0, skipped=0, flaky=0, errors=None):
         stats = {'expected': expected, 'unexpected': unexpected, 'skipped': skipped, 'flaky': flaky}
         exec(self.code, {'__builtins__': {}}, {'stats': stats, 'report': {'errors': errors or []}})
 
-    def test_accepts_272_cases_including_four_native_history_runs(self):
+    def test_accepts_276_cases_including_four_selected_pending_runs(self):
         self.check_report()
 
     def test_rejects_the_previous_264_cases_without_explicit_activation(self):
         with self.assertRaises(AssertionError):
             self.check_report(expected=264)
+
+    def test_rejects_the_previous_272_cases_without_selected_pending(self):
+        with self.assertRaises(AssertionError):
+            self.check_report(expected=272)
 
     def test_rejects_the_previous_268_cases_without_native_history(self):
         with self.assertRaises(AssertionError):

@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useEndingAttemptHistory } from './useEndingAttemptHistory';
+import { usePendingEndingRun } from './usePendingEndingRun';
+import PendingEndingReview from './PendingEndingReview.vue';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -13,7 +15,7 @@ const labels = computed(() => ({
   OPEN: t('JRC_CONTACT_CENTER.ENDING_ATTEMPTS.OPEN'),
   TITLE: t('JRC_CONTACT_CENTER.ENDING_ATTEMPTS.TITLE'),
   CLOSE: t('JRC_CONTACT_CENTER.ENDING_ATTEMPTS.CLOSE'),
-  READ_ONLY: t('JRC_CONTACT_CENTER.ENDING_ATTEMPTS.READ_ONLY'),
+  READ_ONLY: t('JRC_CONTACT_CENTER.ENDING_PENDING.HISTORY_HINT'),
   LOADING: t('JRC_CONTACT_CENTER.ENDING_ATTEMPTS.LOADING'),
   DENIED: t('JRC_CONTACT_CENTER.ENDING_ATTEMPTS.DENIED'),
   LOAD_FAILED: t('JRC_CONTACT_CENTER.ENDING_ATTEMPTS.LOAD_FAILED'),
@@ -65,6 +67,34 @@ const history = useEndingAttemptHistory({
   authorityKey: computed(() => props.authorityKey),
 });
 const { opened, items, callSessionId, meta, loading, error } = history;
+const pending = usePendingEndingRun({
+  accountId: computed(() => props.accountId),
+  qualificationId: computed(() => props.qualificationId),
+  authorityKey: computed(() => props.authorityKey),
+  enabled: opened,
+  onComplete: () => history.load(meta.value?.page || 1),
+  onDenied: () => history.close(),
+});
+const {
+  selected,
+  reviewed,
+  busy: pendingBusy,
+  error: pendingError,
+  canSubmit,
+} = pending;
+const controlsLocked = computed(
+  () => loading.value || pendingBusy.value || Boolean(selected.value)
+);
+const pendingLabels = computed(() => ({
+  RUN: t('JRC_CONTACT_CENTER.ENDING_PENDING.RUN'),
+  DENIED: t('JRC_CONTACT_CENTER.ENDING_PENDING.DENIED'),
+  CHANGED: t('JRC_CONTACT_CENTER.ENDING_PENDING.CHANGED'),
+  UNKNOWN: t('JRC_CONTACT_CENTER.ENDING_PENDING.UNKNOWN'),
+  NATIVE_REFUSAL: t('JRC_CONTACT_CENTER.ENDING_PENDING.NATIVE_REFUSAL'),
+}));
+const pendingMessage = computed(
+  () => pendingLabels.value[pendingError.value] || ''
+);
 const stateClasses = {
   pending: 'bg-n-blue-2 text-n-blue-11',
   succeeded: 'bg-n-teal-2 text-n-teal-11',
@@ -80,6 +110,23 @@ const taskRoute = row => ({
 
 <template>
   <section class="mt-3 min-w-0 space-y-3" data-ending-attempt-history>
+    <p
+      v-if="pendingMessage && !selected"
+      role="alert"
+      class="break-words text-sm text-n-ruby-11"
+    >
+      {{ pendingMessage }}
+    </p>
+    <PendingEndingReview
+      v-if="selected"
+      v-model:reviewed="reviewed"
+      :operation="selected"
+      :busy="pendingBusy"
+      :can-submit="canSubmit"
+      :message="pendingMessage"
+      @confirm="pending.submit()"
+      @close="pending.cancel()"
+    />
     <button
       v-if="!opened"
       type="button"
@@ -95,6 +142,7 @@ const taskRoute = row => ({
         <button
           type="button"
           class="rounded-lg border border-n-weak px-3 py-2 text-xs"
+          :disabled="pendingBusy"
           @click="history.close()"
         >
           {{ text('CLOSE') }}
@@ -145,6 +193,16 @@ const taskRoute = row => ({
               <dd class="break-all">{{ row.queued_at }}</dd>
             </div>
           </dl>
+          <button
+            v-if="row.can_reprocess_pending"
+            type="button"
+            :disabled="controlsLocked"
+            class="max-w-full whitespace-normal rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11 disabled:opacity-40"
+            data-review-selected-ending-pending
+            @click="pending.open(row)"
+          >
+            {{ pendingLabels.RUN }}
+          </button>
           <router-link
             v-if="row.target"
             :to="taskRoute(row)"
@@ -164,7 +222,7 @@ const taskRoute = row => ({
       <div class="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          :disabled="loading || error === 'DENIED'"
+          :disabled="controlsLocked || error === 'DENIED'"
           class="rounded-lg border border-n-weak px-3 py-2 text-xs disabled:opacity-50"
           data-refresh-ending-attempts
           @click="history.load(meta?.page || 1)"
@@ -174,7 +232,7 @@ const taskRoute = row => ({
         <button
           v-if="meta"
           type="button"
-          :disabled="loading || meta.page <= 1"
+          :disabled="controlsLocked || meta.page <= 1"
           class="rounded-lg border border-n-weak px-3 py-2 text-xs disabled:opacity-50"
           @click="history.load(meta.page - 1)"
         >
@@ -183,7 +241,7 @@ const taskRoute = row => ({
         <button
           v-if="meta"
           type="button"
-          :disabled="loading || meta.page >= meta.pages"
+          :disabled="controlsLocked || meta.page >= meta.pages"
           class="rounded-lg border border-n-weak px-3 py-2 text-xs disabled:opacity-50"
           @click="history.load(meta.page + 1)"
         >

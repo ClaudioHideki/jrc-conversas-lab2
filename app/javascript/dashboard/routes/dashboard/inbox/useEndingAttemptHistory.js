@@ -56,6 +56,8 @@ const validPage = (body, accountId, qualificationId, page) =>
       row.rule_code.length > 0 &&
       row.rule_code.length <= 100 &&
       row.destination_kind === 'project_task' &&
+      typeof row.can_reprocess_pending === 'boolean' &&
+      (row.outcome === 'pending' || row.can_reprocess_pending === false) &&
       timestamp(row.queued_at) &&
       typeof row.request_id === 'string' &&
       /^[0-9a-f-]{36}$/.test(row.request_id) &&

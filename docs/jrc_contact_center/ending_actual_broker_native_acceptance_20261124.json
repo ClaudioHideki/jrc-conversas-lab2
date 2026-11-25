@@ -1,0 +1,251 @@
+{
+  "sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+  "run": 45516626913,
+  "artifact": 14982451508,
+  "artifact_sha256": "794ef813c017a1fc411911a8f9ead6ddfd1dde3999e7d2879012676eb47d5d40",
+  "accepted_scope": "Three actual owned Sidekiq/Redis/PostgreSQL cases: duplicate real delivery yields one native effect; original permission revoked before first dequeue yields refusal; disabling and reactivating keeps old pending work blocked.",
+  "previous_native_acceptance": "5040861ff6f1523d52ad617145d4eb923e73ce85",
+  "native_distinct_examples": 3220,
+  "new_native_cases": 3,
+  "broker_native": {
+    "summary": {
+      "example_count": 3,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb": 3
+    }
+  },
+  "worker_receipts": [
+    {
+      "mode": "revoked_original_permission",
+      "account_id": 245,
+      "worker_pid": 16388,
+      "owned_queue": "jrc_cc_native_1e553856ae30d5095e0487b9",
+      "worker_deliveries": 1,
+      "native_successes": 0,
+      "path": "tmp/call-center-ending-broker-1e553856ae30d5095e0487b9.json",
+      "sha256": "3b83d512c4b3d28778193ecfa69e70c7db22e77d6cf2a2c8dc6940ec52b25d54"
+    },
+    {
+      "mode": "deactivated_pending",
+      "account_id": 246,
+      "worker_pid": 16437,
+      "owned_queue": "jrc_cc_native_7a255625fe8ddcadaf78eba4",
+      "worker_deliveries": 1,
+      "native_successes": 0,
+      "path": "tmp/call-center-ending-broker-7a255625fe8ddcadaf78eba4.json",
+      "sha256": "537ae7231329bf2061807fb6b81fc0f31b93b2c7e225529a4e8b8b8b979cdd8d"
+    },
+    {
+      "mode": "duplicate_delivery",
+      "account_id": 244,
+      "worker_pid": 16313,
+      "owned_queue": "jrc_cc_native_86872badd4e4d15c6ee14683",
+      "worker_deliveries": 2,
+      "native_successes": 1,
+      "path": "tmp/call-center-ending-broker-86872badd4e4d15c6ee14683.json",
+      "sha256": "ba4c7507597c77543ca83124f598812d9d4f2faa350838121a0be28fdd6cfb2e"
+    }
+  ],
+  "worker_log_hashes": [
+    {
+      "path": "tmp/call-center-ending-broker-1e553856ae30d5095e0487b9.log",
+      "sha256": "acd8c89c3114e19361f4646dd3a0079d9712c21e841be749fe9599bed8e491af"
+    },
+    {
+      "path": "tmp/call-center-ending-broker-7a255625fe8ddcadaf78eba4.log",
+      "sha256": "9aac45746879cd43c844b1eaa0258097958a3cd7cfbf502cfcca2d04e6265ccd"
+    },
+    {
+      "path": "tmp/call-center-ending-broker-86872badd4e4d15c6ee14683.log",
+      "sha256": "52bfda7c6f8609a01385c7f89b3292c7da6ae199ef988dc8652c6c7c14be3d20"
+    }
+  ],
+  "independent_runner_verification": {
+    "path": "tmp/call-center-ending-actual-broker-verification.json",
+    "sha256": "0c5fe0aa6b6e0c233071e7be9544f88f0bbaaa6c2e26e5c48702c3f9ad304983",
+    "source_sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+    "witness_sha256": "346add63c54a1b657807a0547f7d0a8e3df3600f430953e18929e3844a1e2201"
+  },
+  "Vue": {
+    "examples": 1854,
+    "failures": 0,
+    "pending": 0
+  },
+  "Chrome": {
+    "examples": 272,
+    "failures": 0,
+    "pending": 0,
+    "flaky": 0
+  },
+  "screenshot_hashes_verified": 632,
+  "actual_visual_review": {
+    "source_sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+    "run": 45516626913,
+    "artifact_sha256": "794ef813c017a1fc411911a8f9ead6ddfd1dde3999e7d2879012676eb47d5d40",
+    "original_files_actually_opened": 34,
+    "files": [
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-d7f17062\\desktop-dark-authority-card.png",
+        "sha256": "7bbf773af41584d6b477125947754d67b29c37756cbd22f2b9777bde84e679b5"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-d7f17062\\desktop-light-authority-card.png",
+        "sha256": "2c50e7cd4e5ef6c30b2e57317fec4527613cfff80f338c13597e23e042085771"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-d7f17062\\mobile-dark-authority-card.png",
+        "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-d7f17062\\mobile-light-authority-card.png",
+        "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-d7f17062\\mobile-dark-authority-filters-closed.png",
+        "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-d7f17062\\mobile-light-authority-filters-closed.png",
+        "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-d7f17062\\desktop-dark-ending-automation-editor.png",
+        "sha256": "ff201bfedd03e7bb12bc47be38b258fe688b10abb6ecfdec5da6a644898d465b"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-d7f17062\\desktop-light-ending-automation-editor.png",
+        "sha256": "053be4c945ece4b0d881d4b2eae9e141e5b31c3601cf0fd6a2a4a8f7a96b6521"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-d7f17062\\mobile-dark-ending-automation-editor.png",
+        "sha256": "5e085cebd6f388bd7669ea99c6c3ecc31b8fbe735e9d90d367c6c3776beb194b"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-d7f17062\\mobile-light-ending-automation-editor.png",
+        "sha256": "7fa27755b9f209e9170d70bb821f1fdefe3de33894e806c5de7b4f2e08ac38e6"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\desktop-dark-ending-activation-recorded.png",
+        "sha256": "b60d45473fe4f5b5b9028a3bf05242e95e5c26ff92a2ac11eac8956851a2f295"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\desktop-dark-ending-activation-review.png",
+        "sha256": "81263cfb550af085a0b458d4185d436214b4dd3d97a91fc3bb378119df956751"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\desktop-dark-ending-activation-stale.png",
+        "sha256": "2312b0f47572eb9664e83264191c4d619fb55bff7963b929a2a67d0f48b17083"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\desktop-light-ending-activation-recorded.png",
+        "sha256": "cd247b98b297aeda007a555484bfdaa7f7ba21cde7784c28749b5c654dc10e64"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\desktop-light-ending-activation-review.png",
+        "sha256": "3d479fb54c6a197980d1a7d912aa6c90b5a92b11af9f72076064ea8e1ec39015"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\desktop-light-ending-activation-stale.png",
+        "sha256": "e60031528e28b04d5bb293d6516bda0c8457160e5b71c6bad6ecc37cade1d400"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\mobile-dark-ending-activation-recorded.png",
+        "sha256": "81b1271bec76bb6d6106b70954097e8b107e5018756a7df4e3c53e292ece9218"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\mobile-dark-ending-activation-review.png",
+        "sha256": "d00346fe74f591d31410080f163fa0e226447ba26714afdd12fdaa54fe46590a"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\mobile-dark-ending-activation-stale.png",
+        "sha256": "317128d04fa3fc94f5ad89a7b800743eec6d1d66d65538247a00983ea091317b"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\mobile-light-ending-activation-recorded.png",
+        "sha256": "d845aeab79ccb2d43b84ba492c529eb06664b3278c46d591f1c90c336ffd3ebc"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\mobile-light-ending-activation-review.png",
+        "sha256": "c6a3cc5e695009a59ab4f1d03d9bf0bfa7cdb71eee913c9234af6b7cf2beee81"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-d7f17062\\mobile-light-ending-activation-stale.png",
+        "sha256": "fc68fd498f19eec430cb3838a0598ac82b26dd6500d16220ae7fd2aab18a133b"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\desktop-dark-ending-history-independent-outcomes.png",
+        "sha256": "11616b71b88133578d34c191e5cbb6a555b1c993ad646877f885f25a1b2e1308"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\desktop-dark-ending-history-native-task.png",
+        "sha256": "44d9bdc09b28ba01f49485277cfc3eac38b58f2687fec8b65ed56a5faf907afe"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\desktop-dark-ending-history-pending-page.png",
+        "sha256": "e5caa698b02cc5dedfacb029189d3eadad4daf3ef109201b64f795aa991af6b7"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\desktop-light-ending-history-independent-outcomes.png",
+        "sha256": "193f5166f757001f0cc048c4ce5415f624648ea35ed2978e93cfb805eb26ba09"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\desktop-light-ending-history-native-task.png",
+        "sha256": "aec7ccf0eb3b251fd64ec85475e0c8f5f5c1ad16f68707a64eab9297169487a5"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\desktop-light-ending-history-pending-page.png",
+        "sha256": "be05b53c08fac50d5e5c613bb6d721f1c280f860a7c1c278f9ad337cbf82b1ea"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\mobile-dark-ending-history-independent-outcomes.png",
+        "sha256": "34bc329340b7762fc9cbdae008bf77b1aa3470f68022effba725976379a55437"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\mobile-dark-ending-history-native-task.png",
+        "sha256": "5d88f49675bc395a91069f1debb7d051564748f9b00226a131b0b9dfed37f563"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\mobile-dark-ending-history-pending-page.png",
+        "sha256": "5f5f0dd852f3713ee8fce444788a4508ceb595ea6a453b6b5d43c6be779aa62b"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\mobile-light-ending-history-independent-outcomes.png",
+        "sha256": "639c4af2dce10a3a93c7228636cb78b0c32f3002212d22a6d4d998fa361e77e9"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\mobile-light-ending-history-native-task.png",
+        "sha256": "ceffb3fcaaab969e14f70d02d3223941721c748135aea54f2108e03a7107e97a"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-d7f17062\\mobile-light-ending-history-pending-page.png",
+        "sha256": "1a585231f352482de05622f7e125928d71dd4d5ab5b40da6b2fc89d8ef489c1a"
+      }
+    ],
+    "observations": [
+      "Opened six current originals: desktop 1440 and mobile 390 in light and dark. Mobile filters are vertically separated; long team titles wrap and actions remain inside the card. The two mobile card/filter pairs are pixel-identical and were each opened, not treated as separate new states. Mobile captures are scrolled and do not show the full page header. PABX dependency is explicitly pending.",
+      "Opened four current saved-editor originals in both themes and viewport sizes. Project parameters have neutral wording and saving explicitly says no destination executed. CRM, Service Desk, notifications and NICO are visibly pending and disabled. Manual per-rule confirmation is explicitly pending. Captures are scrolled: upper fields, final controls and the complete lower warning are not all visible in these frames; this does not establish full Word completion.",
+      "Opened activation originals 0-3: desktop dark recorded, review and stale states plus desktop light recorded. Explicit review is required before enabling new calls; changed configuration disables consent and offers reload. Recorded readiness has a native version and ISO UTC timestamp. Other destinations remain pending; these frames do not prove their execution.",
+      "Opened activation originals 4-7: desktop light review/stale and mobile dark recorded/review. Stale consent remains disabled, reload remains available, and mobile text and controls fit the dialog without overlap. Current native timestamps remain ISO UTC rather than the localized Word presentation. The panels are scrolled; content outside these frames is not claimed visible.",
+      "Opened activation originals 8-11: mobile dark stale and mobile light recorded/review/stale. Review text wraps, consent and enable controls remain disabled on stale configuration, and the recorded native version fits. Some stale-state lower content and reload controls extend below the captured viewport and are not claimed fully visible. No horizontal control overlap is visible.",
+      "Opened history originals 0-3: desktop dark failure, native Task and pending states plus desktop light failure. The current history is explicitly read-only and distinguishes failure from pending. The authorized native Task editor is fully loaded in the dark desktop frame; its date placeholders follow the browser mm/dd/yyyy locale. Opening this editor does not prove editing or saving the Task. Only the first scrolled outcome card is fully shown in the history frames.",
+      "Opened history originals 4-7: desktop light native Task/pending and mobile dark outcomes/native Task. Desktop light captures a transient Carregando tarefa label despite the real Task title and route; it is not a fully loaded or saved Task proof. Mobile dark shows succeeded and blocked history plus an authorized loaded native Task form. The blocked badge is partially behind the sticky tabs in this scrolled frame; lower form content is outside the viewport.",
+      "Opened final four current history originals: mobile dark and light pending pages, light independent outcomes and light native Task. The outcome view distinguishes blocked from succeeded and offers the native Task link; the top blocked badge is partly obscured by sticky tabs in the scrolled frame. The light native Task form is loaded with title, assignee and priority; lower fields extend below the frame, browser dates remain mm/dd/yyyy. Pending-page captures show the upper history and ACW context, while the lower receipt details are outside these frames. These screenshots do not prove Task editing/saving or full Word conformity."
+    ],
+    "native_task_edit_or_save_tested_by_this_history_review": false,
+    "whole_figure10_or_Part1_accepted": false
+  },
+  "actual_owned_worker_dequeue_verified": true,
+  "production_worker_configuration_or_backlog_recovery_homologated": false,
+  "PABX_calls_or_external_provider_homologated": false,
+  "remaining": [
+    "Explicit manual execution and selected safe retry UI without reviving deactivated work.",
+    "Native CRM/ServiceDesk adapters with legitimate immutable customer context and independent receipts.",
+    "Representative scale, complete account lifecycle, operational recovery/scheduling and external PABX/provider homologation."
+  ],
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

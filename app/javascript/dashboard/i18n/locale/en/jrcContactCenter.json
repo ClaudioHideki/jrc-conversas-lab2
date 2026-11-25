@@ -3079,6 +3079,20 @@
         "trigger_pending": "Evento necessário ainda não confirmado.",
         "operation_unavailable": "Operação indisponível nas condições atuais."
       }
+    },
+    "ENDING_PENDING": {
+      "TITLE": "Reprocessar esta pendência",
+      "HINT": "Será tentada somente a pendência selecionada, com as permissões atuais do agente original. Resultados concluídos e outras regras não serão repetidos.",
+      "HISTORY_HINT": "Abrir o histórico apenas consulta os dados. Reprocessar uma pendência exige revisão e confirmação explícitas.",
+      "REVIEW": "Revisei a regra, a versão e a identificação da pendência. Confirmo somente esta tentativa pendente.",
+      "RUN": "Reprocessar pendência",
+      "CONFIRM": "Confirmar reprocessamento",
+      "RUNNING": "Verificando e processando…",
+      "CANCEL": "Voltar sem executar",
+      "DENIED": "Seu acesso mudou. Consulte novamente o atendimento com as permissões atuais.",
+      "CHANGED": "Esta pendência já foi processada ou seu contexto mudou. Confira o histórico atualizado.",
+      "UNKNOWN": "Não foi possível confirmar o resultado. Consulte o histórico antes de tentar novamente; nenhum resultado foi presumido.",
+      "NATIVE_REFUSAL": "A tentativa registrou uma recusa ou falha. Consulte o resultado real no histórico; nenhuma outra pendência foi executada."
     }
   }
 }

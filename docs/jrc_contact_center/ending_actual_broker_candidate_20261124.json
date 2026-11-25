@@ -1,6 +1,6 @@
 {
   "parent": "5040861ff6f1523d52ad617145d4eb923e73ce85",
-  "status": "actual_broker_verification_prepared_not_executed",
+  "status": "three_actual_owned_broker_native_cases_validated",
   "accepted_history_acceptance_sha256": "b3d3db4244f0f0141eb2bddf377f9a4fad4222a24199b7dfa8b47a218edc5586",
   "source_sha256": {
     "spec/integration/jrc_contact_center/owned_ending_worker_boot.rb": "346add63c54a1b657807a0547f7d0a8e3df3600f430953e18929e3844a1e2201",
@@ -12,7 +12,7 @@
     ".github/workflows/call-center-administration.yml": "a179a6223911a30dd0654cddb1493ca17c56215253e3131276cee54f4ddd009c"
   },
   "new_native_cases_prepared": 3,
-  "native_cases_executed": 0,
+  "native_cases_executed": 3,
   "no_product_function_migration_or_permission_change": true,
   "private_CI_draft": {
     "additive_patches": 8,
@@ -80,5 +80,7 @@
     "no_worker_was_started_in_the_failed_example": true,
     "native_correction_not_yet_executed": true,
     "whole_figure10_or_Part1_accepted": false
-  }
+  },
+  "native_verified_sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+  "native_acceptance": "docs/jrc_contact_center/ending_actual_broker_native_acceptance_20261124.json"
 }

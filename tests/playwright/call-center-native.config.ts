@@ -8,6 +8,7 @@ export default defineConfig({
     'call-center-native.spec.ts',
     'call-center-ending-activation-native.spec.ts',
     'call-center-ending-attempt-history-native.spec.ts',
+    'call-center-ending-pending-native.spec.ts',
   ],
   workers: 1,
   retries: 0,

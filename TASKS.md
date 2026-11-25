@@ -1031,3 +1031,7 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - M23:CI45506197668 bloqueada por15infrações novas em2arquivos de teste do worker; preparada correção por extração de métodos/alinhamento, mantendo3exemplos e todasas proteções. Novo lint/broker nativo ainda não aprovado. HistóricoM22 preservado; Parte1aberta.
 
 - M23/CI45510597893: lint focado corrigido eRails/concorrência anteriores passaram; primeiro caso real não chegou aoRedis porinterceptação doTestHelper. Preparada seleção doSidekiq somente paraoJob próprio apóssetup, comrestauração;3cenários preservados,ainda semaceite.
+
+- M23/d7f17062/CI 45516626913: 3 cenários reais isolados de Redis/Sidekiq/PostgreSQL validados; 3220 Rails distintos, 1854 Vue, 272 Chrome e 632 PNG verificados. Execução manual/retry, CRM/Service Desk, recuperação operacional, PABX externo e Parte 1 permanecem abertos.
+
+- Após o aceite da fila real em d7f17062: preparado bloco conjunto de operação selecionada, cliente original e adaptador CRM; 49 Rails, 15 Vue e 4 Chrome novos exigidos. Sem migrations, grants ou aceites intermediários simulados. Execução CRM/SD completa, F10-B e Parte 1 continuam abertos.

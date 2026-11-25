@@ -15,6 +15,7 @@ const row = (id = '21') => ({
   version_id: '8',
   rule_code: 'SYNTHETIC_RULE',
   destination_kind: 'project_task',
+  can_reprocess_pending: false,
   request_id: '12345678-1234-4234-8234-123456789abc',
   queued_at: '2026-11-24T12:00:00Z',
   outcome: 'pending',

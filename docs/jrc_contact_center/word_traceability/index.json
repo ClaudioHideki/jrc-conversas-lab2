@@ -405,7 +405,7 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "native_automation_clause_reconciliation_sha": "5040861ff6f1523d52ad617145d4eb923e73ce85"
+      "native_automation_clause_reconciliation_sha": "d7f170620da3a548bd31da450889fc1baf7d670e"
     },
     {
       "figure": 10,
@@ -466,13 +466,14 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb",
         "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb",
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
-        "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb"
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb"
       ],
       "divergences": [
-        "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real.",
-        "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
+        "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados.",
+        "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
       ],
-      "native_automation_clause_reconciliation_sha": "5040861ff6f1523d52ad617145d4eb923e73ce85"
+      "native_automation_clause_reconciliation_sha": "d7f170620da3a548bd31da450889fc1baf7d670e"
     },
     {
       "figure": 11,
@@ -3442,8 +3443,8 @@
     "whole_part1_accepted": false
   },
   "native_automation_clause_reconciliation": {
-    "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
-    "run": 45493347951,
+    "sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+    "run": 45516626913,
     "requirements_total_preserved": 554,
     "figure_clause_ids": 459,
     "global_clause_ids": 95,
@@ -3969,5 +3970,25 @@
     "document": "docs/jrc_contact_center/ending_actual_broker_transport_correction_20261124.json",
     "document_sha256": "26e5d6969ed72817a1cced2b059f410051430b2a07aa8869bff02b439f29cd8a",
     "native_broker_accepted": false
+  },
+  "actual_owned_broker_native_acceptance": {
+    "sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+    "run": 45516626913,
+    "document": "docs/jrc_contact_center/ending_actual_broker_native_acceptance_20261124.json",
+    "document_sha256": "d49e859a8c514a467c3a6f611583c1e8e4b756d026120d0db054f8217bb1ff35",
+    "native_distinct_examples": 3220,
+    "new_native_cases": 3,
+    "actual_owned_worker_dequeue_verified": true,
+    "whole_figure10_or_Part1_accepted": false
+  },
+  "selected_operation_customer_and_CRM_bundle_candidate": {
+    "parent": "d7f170620da3a548bd31da450889fc1baf7d670e",
+    "document": "docs/jrc_contact_center/ending_operational_bundle_A_candidate_20261124.json",
+    "document_sha256": "5cd6ed9b0c8b59a9f0ffb7c771556f2187c5b0211a144e108068f551605735fd",
+    "prepared_native_not_executed": 49,
+    "prepared_Vue_not_executed": 15,
+    "prepared_Chrome_not_executed": 4,
+    "no_intermediate_native_approval_simulated": true,
+    "whole_figure10_or_Part1_accepted": false
   }
 }

@@ -17,10 +17,16 @@ class JrcContactCenter::EndingActions::AttemptProjection
       request_id: attempt.request_key, queued_at: attempt.created_at.iso8601,
       outcome: outcome&.outcome || 'pending', result_code: outcome&.result_code,
       finished_at: outcome&.created_at&.iso8601, execution_id: execution&.id&.to_s,
-      target: visible_project_task(execution) }
+      target: visible_project_task(execution), can_reprocess_pending: pending_action_available?(attempt) }
   end
 
   private
+
+  def pending_action_available?(attempt)
+    JrcContactCenter::EndingActions::PendingProjectAction.new(
+      account: @member.account, member: @member, attempt: attempt
+    ).available?
+  end
 
   def visible_project_task(execution)
     return unless execution&.destination_kind == 'project_task'

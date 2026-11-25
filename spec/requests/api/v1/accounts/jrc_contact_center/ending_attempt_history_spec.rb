@@ -59,7 +59,7 @@ RSpec.describe 'Authorized native ending attempt history', type: :request do
     item = response.parsed_body.fetch('items').sole
     expect(item).to include('id' => row.id.to_s, 'outcome' => 'pending', 'target' => nil, 'result_code' => nil)
     expect(item.keys).to match_array(%w[id origin_id rule_code version_id destination_kind request_id queued_at
-                                        outcome result_code finished_at execution_id target])
+                                        outcome result_code finished_at execution_id target can_reprocess_pending])
     expect(response.body).not_to include('private_definition', 'SYNTHETIC unarmed original evidence', 'integrity_sha256', 'notes')
     expect(history_effects).to eq([0, 0, 1, 0])
   end

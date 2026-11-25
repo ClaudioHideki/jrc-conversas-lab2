@@ -513,7 +513,7 @@
         10
       ],
       "status": "parcial",
-      "verification": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+      "verification": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
       "code_reference_ids": [
         0,
         1,
@@ -576,7 +576,7 @@
       },
       "direct_functional_review": {
         "status": "parcial",
-        "behavior": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+        "behavior": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
         "code": [
           "app/services/jrc_contact_center/ending_actions/execute_attempt.rb",
           "app/services/jrc_contact_center/ending_actions/project_task_destination.rb",
@@ -598,17 +598,18 @@
           "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts",
           "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
           "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb",
-          "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts"
+          "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb"
         ],
-        "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
+        "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
       },
       "native_automation_scope_verified": {
-        "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
-        "run": 45493347951,
-        "phase": 22,
-        "scope": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real.",
+        "sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+        "run": 45516626913,
+        "phase": 23,
+        "scope": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados.",
         "evidence_ref": "native_automation_clause_reconciliation",
-        "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+        "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
         "whole_requirement_accepted": false
       }
     },
@@ -784,7 +785,7 @@
         10
       ],
       "status": "parcial",
-      "verification": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+      "verification": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
       "code_reference_ids": [
         0,
         1,
@@ -847,7 +848,7 @@
       },
       "direct_functional_review": {
         "status": "parcial",
-        "behavior": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+        "behavior": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
         "code": [
           "app/services/jrc_contact_center/ending_actions/execute_attempt.rb",
           "app/services/jrc_contact_center/ending_actions/project_task_destination.rb",
@@ -869,17 +870,18 @@
           "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts",
           "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
           "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb",
-          "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts"
+          "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb"
         ],
-        "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
+        "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
       },
       "native_automation_scope_verified": {
-        "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
-        "run": 45493347951,
-        "phase": 22,
-        "scope": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real.",
+        "sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+        "run": 45516626913,
+        "phase": 23,
+        "scope": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados.",
         "evidence_ref": "native_automation_clause_reconciliation",
-        "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+        "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
         "whole_requirement_accepted": false
       }
     },
@@ -903,7 +905,7 @@
         10
       ],
       "status": "parcial",
-      "verification": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+      "verification": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
       "code_reference_ids": [
         0,
         1,
@@ -966,7 +968,7 @@
       },
       "direct_functional_review": {
         "status": "parcial",
-        "behavior": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+        "behavior": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
         "code": [
           "app/services/jrc_contact_center/ending_actions/execute_attempt.rb",
           "app/services/jrc_contact_center/ending_actions/project_task_destination.rb",
@@ -988,17 +990,18 @@
           "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts",
           "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
           "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb",
-          "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts"
+          "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb"
         ],
-        "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
+        "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
       },
       "native_automation_scope_verified": {
-        "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
-        "run": 45493347951,
-        "phase": 22,
-        "scope": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real.",
+        "sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+        "run": 45516626913,
+        "phase": 23,
+        "scope": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados.",
         "evidence_ref": "native_automation_clause_reconciliation",
-        "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+        "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
         "whole_requirement_accepted": false
       }
     },
@@ -1174,7 +1177,7 @@
         10
       ],
       "status": "parcial",
-      "verification": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+      "verification": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
       "code_reference_ids": [
         0,
         1,
@@ -1237,7 +1240,7 @@
       },
       "direct_functional_review": {
         "status": "parcial",
-        "behavior": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+        "behavior": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados. Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
         "code": [
           "app/services/jrc_contact_center/ending_actions/execute_attempt.rb",
           "app/services/jrc_contact_center/ending_actions/project_task_destination.rb",
@@ -1259,17 +1262,18 @@
           "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts",
           "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
           "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb",
-          "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts"
+          "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb"
         ],
-        "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
+        "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados."
       },
       "native_automation_scope_verified": {
-        "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
-        "run": 45493347951,
-        "phase": 22,
-        "scope": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real.",
+        "sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+        "run": 45516626913,
+        "phase": 23,
+        "scope": "Projetos possui efeito nativo, auditoria, sucesso e resultado de tentativa persistidos atomicamente, com idempotência e revalidação do agente original. A habilitação prospectiva foi validada pela interface. As provas internas não constituem homologação do PABX ou de todos os destinos. O histórico autorizado com paginação e links nativos foi validado em Chrome real. Três cenários com Sidekiq/Redis/PostgreSQL próprios e recibos do worker foram validados.",
         "evidence_ref": "native_automation_clause_reconciliation",
-        "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; dequeue Sidekiq real; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
+        "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala; reprocessamento selecionado pela interface. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
         "whole_requirement_accepted": false
       }
     },
@@ -2687,9 +2691,9 @@
   "complete_figure_accepted": false,
   "tests_candidate_not_validated": [],
   "native_automation_clause_reconciliation": {
-    "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
-    "run": 45493347951,
-    "phase": 22,
+    "sha": "d7f170620da3a548bd31da450889fc1baf7d670e",
+    "run": 45516626913,
+    "phase": 23,
     "code": [
       "app/services/jrc_contact_center/ending_actions/execute_attempt.rb",
       "app/services/jrc_contact_center/ending_actions/project_task_destination.rb",
@@ -2711,7 +2715,8 @@
       "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts",
       "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
       "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb",
-      "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts"
+      "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb"
     ],
     "whole_figure10_or_Part1_accepted": false
   }
