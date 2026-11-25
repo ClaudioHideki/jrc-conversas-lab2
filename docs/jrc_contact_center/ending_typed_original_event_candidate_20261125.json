@@ -6,7 +6,7 @@
       "app/jobs/jrc_contact_center/ending_actions_job.rb": "b00f64f1a3ef8240e1effb8b3da0bc55478c0814bd6f0ac22ab91c818fd8d500",
       "app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb": "6445524d6f04506980e19f156843e47f533b3f2ae2bd70470455c4af2071b0e8",
       "app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb": "03c3830b21667d00c3753d7b055abce4fbb8bf7536e0204a153246f63df4947a",
-      "spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb": "e36e907d17f4d6b3b33488c0c643bcae25d8880ca546ddd269578e7cafed7e48",
+      "spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb": "fef317e320f28345026d67f699ca8821829554a8d4cb91304e4f5dd0ffb495b6",
       ".github/workflows/call-center-administration.yml": "5ffe0f09dadfd41508ba622f873126b0bdc58987821d6262ac91d5a199d5a57d",
       "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue": "93f062fec17c43403d81da97ef41dcc62978e1001685d229aebb28ac06960bf9",
       "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.spec.js": "93bcb9fac2fa36ac12ec1a83ffb615a27e1c979c6166af076f9ac80c7e6c1ff2",
@@ -31,5 +31,13 @@
   "no_migrations_permissions_or_external_provider_commands_changed": true,
   "manual_UI_CRM_SD_or_whole_figure10_accepted": false,
   "whole_figure10_accepted": false,
-  "whole_part1_accepted": false
+  "whole_part1_accepted": false,
+  "last_failed_lint_gate": {
+    "sha": "9f5ca16fc055524951e90502590558d88c529719",
+    "run": 45717253595,
+    "offenses": 6,
+    "only_one_spec_corrected": true,
+    "test_bodies_and_assertions_preserved": true,
+    "native_cases_executed": 0
+  }
 }

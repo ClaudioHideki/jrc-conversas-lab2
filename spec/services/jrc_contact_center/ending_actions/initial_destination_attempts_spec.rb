@@ -20,7 +20,7 @@ RSpec.describe JrcContactCenter::EndingActions::InitialDestinationAttempts do
     job.enable_test_adapter(ActiveJob::QueueAdapters::TestAdapter.new)
     example.run
   ensure
-    job.enable_test_adapter(previous) if job
+    job&.enable_test_adapter(previous)
   end
 
   include_context 'with native typed ending schema evidence'
@@ -34,7 +34,7 @@ RSpec.describe JrcContactCenter::EndingActions::InitialDestinationAttempts do
     rows = command.call
     expect(rows.length).to eq(1)
     expect(rows.first).to have_attributes(origin_id: typed_origin.id, readiness_id: typed_readiness.id,
-                                         actor_account_user_id: member.id, destination_kind: 'project_task')
+                                          actor_account_user_id: member.id, destination_kind: 'project_task')
     expect(command.call.map(&:id)).to eq(rows.map(&:id))
     expect(JrcContactCenter::EndingDestinationAttempt.where(account: account).count).to eq(1)
     expect(JrcContactCenter::EndingDestinationJob.queue_adapter.enqueued_jobs.length).to eq(2)
@@ -46,7 +46,7 @@ RSpec.describe JrcContactCenter::EndingActions::InitialDestinationAttempts do
     project = typed_version.definition.fetch('entries').first.fetch('actions').first
     version = publish_typed_schema_definition('actions' => [project, { 'kind' => 'crm', 'parameters' => {} }])
     ready = JrcContactCenter::EndingActionReadiness.create!(account: account, version: version, actor_account_user_id: member.id,
-                                                          rule_code: 'SYNTHETIC_ORIGIN_RULE', request_key: SecureRandom.uuid)
+                                                            rule_code: 'SYNTHETIC_ORIGIN_RULE', request_key: SecureRandom.uuid)
     original = completed_attempt_source(member)
     rows = described_class.new(account: account, qualification_id: original.source_qualification_id).call
     expect(rows.map(&:destination_kind).sort).to eq(%w[crm project_task])
@@ -122,7 +122,7 @@ RSpec.describe JrcContactCenter::EndingActions::InitialDestinationAttempts do
     end
   end
 
-  context 'before actual ACW completion' do
+  context 'when actual ACW is not yet completed' do
     let(:qualification_id) { origin.source_qualification_id }
 
     it 'does not run an ACW-completed rule merely because its telephone call already ended' do
