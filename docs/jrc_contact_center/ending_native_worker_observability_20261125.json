@@ -1,0 +1,42 @@
+{
+  "parent": "2cb42ad9a1b7e2b0d5b544fb6d604f694e645964",
+  "diagnostic_run": 45599320050,
+  "diagnostic_artifact": 15015727719,
+  "diagnostic_artifact_sha256": "91cf04996fc8d94eabc4dfc6506ca5f92d5e270565f99c3bdbf56b78d00e6f37",
+  "source_sha256": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "b5b323884fad6ac8160c864fb45bb8e8dbcc0ab9881ec8d0206005dff0b2bfe3",
+    ".github/workflows/call-center-administration.yml": "52fd68ecd3c17f844f609013738391a183ed6806c3e442f11b03f5a30bfda7fd"
+  },
+  "parent_sources": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "bc04686d1acb0052038da3c920af299b07166767738ebef6a3749e8bd8ed4511",
+    ".github/workflows/call-center-administration.yml": "5b371acf4d24627b510c68462588392810d28375e725b817db58a093f3e3f4dd"
+  },
+  "previous_live_observer_did_not_resolve_the_failure": true,
+  "root_cause_not_yet_confirmed": true,
+  "all_existing_test_titles_assertions_timeouts_and_full_commands_preserved": true,
+  "same_owned_concurrency_step_moved_before_full_core_regression": true,
+  "existing_concurrency_step_exact_bytes_preserved": true,
+  "no_gate_or_native_coverage_weakened": true,
+  "diagnostics_exclude_queries_parameters_tokens_and_environment_values": true,
+  "production_code_locks_or_permissions_modified": false,
+  "native_tests_executed_on_new_source": false,
+  "additional_unique_native_cases_claimed": 0,
+  "final_diagnostic_artifact": 15017203096,
+  "final_diagnostic_artifact_sha256": "0b05648b8d6d5e530da2997e25180f81b5c20466a78ee2c2201991653d0e3fa2",
+  "previous_native_core": {
+    "duration": 638.011492177,
+    "example_count": 3034,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "previous_targeted_contention": {
+    "duration": 14.11813469,
+    "example_count": 9,
+    "failure_count": 1,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "previous_new_Ruby_offenses": 0,
+  "native_root_cause_or_fix_not_yet_confirmed": true
+}

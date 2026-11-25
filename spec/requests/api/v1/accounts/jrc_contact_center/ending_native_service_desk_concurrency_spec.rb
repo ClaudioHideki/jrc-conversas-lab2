@@ -86,9 +86,43 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
     pid = Timeout.timeout(8) { state[:ready].pop }
     sql = "SELECT pg_backend_pid() = ANY(pg_blocking_pids(#{Integer(pid)}))"
     Timeout.timeout(8) do
-      ApplicationRecord.connection.uncached { sleep 0.02 until ApplicationRecord.connection.select_value(sql) == true }
+      ApplicationRecord.connection.uncached do
+        until ApplicationRecord.connection.select_value(sql) == true
+          reject_finished_native_sd_worker!(state)
+          sleep 0.02
+        end
+      end
     end
     pid
+  rescue StandardError
+    record_native_sd_lock_diagnostic(pid, state) if pid
+    raise
+  end
+
+  def reject_finished_native_sd_worker!(state)
+    return if state[:results].empty?
+
+    result = state[:results].pop
+    state[:results] << result
+    raise result if result.is_a?(StandardError)
+
+    raise 'Synthetic native Service Desk worker completed before owned contention was observed'
+  end
+
+  def record_native_sd_lock_diagnostic(pid, state)
+    connection = ApplicationRecord.connection
+    observer = connection.raw_connection.backend_pid
+    blockers = connection.select_value("SELECT pg_blocking_pids(#{Integer(pid)})::text")
+    connection.execute('SELECT pg_stat_clear_snapshot()')
+    activity = connection.select_rows(
+      "SELECT pid,state,wait_event_type,wait_event FROM pg_stat_activity WHERE pid IN (#{Integer(pid)},#{Integer(observer)})"
+    )
+    proof = { synthetic: true, source_sha: ENV.fetch('GITHUB_SHA'), account_id: account.id,
+              database: connection.current_database, observer_pid: observer, worker_pid: pid,
+              live_blockers: blockers, activity: activity, pool: ApplicationRecord.connection_pool.stat,
+              completed_results: state[:results].size,
+              workers: native_sd_workers.map { |worker| { status: worker.status, backtrace: worker.backtrace&.first(10) } } }
+    File.write("/tmp/call-center-ending-native-sd-lock-#{account.id}-#{pid}.json", JSON.pretty_generate(proof))
   end
 
   def join_native_sd_workers

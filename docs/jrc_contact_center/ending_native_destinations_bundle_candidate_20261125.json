@@ -248,6 +248,20 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "4ef0e52a1cae5bfc6b8ca7c771423980e07235f8b2297ea96af6d3acd6e8a746"
       },
       "no_gate_or_native_coverage_weakened": true
+    },
+    {
+      "diagnostic_run": 45599320050,
+      "failed_product_sha": "2cb42ad9a1b7e2b0d5b544fb6d604f694e645964",
+      "diagnostic_artifact_sha256": "91cf04996fc8d94eabc4dfc6506ca5f92d5e270565f99c3bdbf56b78d00e6f37",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "b5b323884fad6ac8160c864fb45bb8e8dbcc0ab9881ec8d0206005dff0b2bfe3",
+        ".github/workflows/call-center-administration.yml": "52fd68ecd3c17f844f609013738391a183ed6806c3e442f11b03f5a30bfda7fd"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "bc04686d1acb0052038da3c920af299b07166767738ebef6a3749e8bd8ed4511",
+        ".github/workflows/call-center-administration.yml": "5b371acf4d24627b510c68462588392810d28375e725b817db58a093f3e3f4dd"
+      },
+      "no_gate_or_native_coverage_weakened": true
     }
   ],
   "reviewed_loaded_native_task_browser_correction": [

@@ -4097,5 +4097,13 @@
     "status": "native_observer_correction_prepared_not_natively_validated",
     "all_six_cases_assertions_timeouts_and_product_locks_preserved": true,
     "whole_figure10_or_Part1_accepted": false
+  },
+  "native_worker_observability": {
+    "document": "docs/jrc_contact_center/ending_native_worker_observability_20261125.json",
+    "document_sha256": "e7bc7eb49764602931bb6f578ad561d5895c8b6ea1361b5839d4bade7308ed01",
+    "status": "bounded_native_worker_diagnostic_prepared",
+    "root_cause_or_fix_accepted": false,
+    "all_6_cases_assertions_and_timeout_limits_preserved": true,
+    "whole_Part1_accepted": false
   }
 }
