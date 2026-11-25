@@ -1,0 +1,68 @@
+{
+  "parent": "ad8a50a1371928e2309dd491d39acf558612d174",
+  "accepted_parent_document_sha256": "d5fc7b8b3fea942b2fcab95caf6d49e8daba0b3fb32b834b6a5fa205ac2c247c",
+  "stage": {
+    "name": "exact_typed_durable_delivery_and_original_company_guard",
+    "source_sha256": {
+      "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb": "bfcef1d2bb72d1b69cd0fe1af1326f9afe45af08e8ac3326a2f70435a4a579b3",
+      "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": "d83b02c127310cd54795597156dd17d8bb07ce6179b8d6e505a17287c77e6963",
+      "app/services/jrc_contact_center/ending_actions/record_destination_attempt.rb": "baa0e43c11303360a3b08c52c8f1090a0e54d8787b2acf6b0d70f131f687721d",
+      "spec/services/jrc_contact_center/ending_actions/record_destination_attempt_spec.rb": "4ca24ee84ec5bab23f662811eaa2b10942dcd9c3c415c4b5fa38272cf5a75f28",
+      "app/services/jrc_contact_center/ending_actions/queue_destination_attempt.rb": "7acc67e046ba9a394e2eb988d732d27b91f15bbb7a659d6e2885ce1f7db7f837",
+      "spec/services/jrc_contact_center/ending_actions/queue_destination_attempt_spec.rb": "560b8ea148039b0b60565fc3d75b0cf9f2cbf7a5a5079af16d5c9824183b4c88",
+      "app/jobs/jrc_contact_center/ending_destination_job.rb": "5e5004ca6e7bf95e02accacb7e9e828f58e3d2060190183ff5edbb271cb76dac",
+      "app/jobs/jrc_contact_center/ending_destination_reconcile_job.rb": "9f777d4827c7d4783a9f174c58107c5e81ed7d1531160d91a59521b4987192ae",
+      "app/models/jrc_contact_center/ending_destination_attempt.rb": "11a738b65c792a66b9092b34d65ad93d36249076e7ba2346031749faea680131",
+      "app/services/jrc_contact_center/ending_actions/dispatch_destination_attempt.rb": "59317557d5d5ce5e9f760ba29c0bce7fa22ab95a0ef01cccc0d54fa6282ec3e0",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_delivery_transaction_spec.rb": "da4beeebae779b5dad6d65898ece977b950c356f5f62616a72cd7ae6ac61c597",
+      "spec/integration/jrc_contact_center/owned_ending_typed_worker_boot.rb": "4189d6562110261d2e6e04f76fbfde4e5002a67ceefa06514a8e8f522c065e62",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_actual_broker_concurrency_spec.rb": "ad15633ab3ce5a454448f4cb09da50d1ab684171cfe06731c4a3de49a5896dd4",
+      "script/jrc_call_center_ending_typed_broker_check.py": "5f8669a48967735d189bb451487184b35468954b4227fcfecedb6ce5477a1c64",
+      ".github/workflows/call-center-administration.yml": "d5fcc22bbd956a78bb6740a3fe5f118f6a880401451af34e224ecfeec07d32f8"
+    },
+    "parent_sources": {
+      "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb": "d6a3ce9c7d5f9010edeb031a692dc117367a540d668ec39984aa1c7aba14eeb4",
+      "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": "67e0a352ca5401e23ead9f126a3385ec75ca9414f7c96a7bf9ce3b6fa041e58e",
+      "app/services/jrc_contact_center/ending_actions/record_destination_attempt.rb": null,
+      "spec/services/jrc_contact_center/ending_actions/record_destination_attempt_spec.rb": null,
+      "app/services/jrc_contact_center/ending_actions/queue_destination_attempt.rb": null,
+      "spec/services/jrc_contact_center/ending_actions/queue_destination_attempt_spec.rb": null,
+      "app/jobs/jrc_contact_center/ending_destination_job.rb": null,
+      "app/jobs/jrc_contact_center/ending_destination_reconcile_job.rb": null,
+      "app/models/jrc_contact_center/ending_destination_attempt.rb": "cf548179151aa81d0ce0b0deaa1418160f50aec2862eba036ffd128b5bdddecf",
+      "app/services/jrc_contact_center/ending_actions/dispatch_destination_attempt.rb": null,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_delivery_transaction_spec.rb": null,
+      "spec/integration/jrc_contact_center/owned_ending_typed_worker_boot.rb": null,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_actual_broker_concurrency_spec.rb": null,
+      "script/jrc_call_center_ending_typed_broker_check.py": null,
+      ".github/workflows/call-center-administration.yml": "8d3d636152256543fcaf380a29d0e700b6d09060c29b833dc7512ebb7eb4413b"
+    }
+  },
+  "new_native_cases_prepared": 37,
+  "native_cases_executed": 0,
+  "accepted_scope": "Own native delivery metadata and real worker; public automatic source and manual API still require integration.",
+  "native_case_files_prepared": {
+    "ending-existing-CRM-customer-identity-next-20261125": 2,
+    "ending-typed-recording-next-20261125": 12,
+    "ending-typed-queue-next-20261125": 10,
+    "ending-typed-delivery-next-20261125": 10,
+    "ending-typed-actual-broker-next-20261125": 3
+  },
+  "new_native_examples_required": 37,
+  "total_native_distinct_examples_required": 3619,
+  "separate_committed_tests": [
+    "queue_destination_attempt_spec.rb",
+    "ending_typed_delivery_transaction_spec.rb",
+    "ending_typed_actual_broker_concurrency_spec.rb"
+  ],
+  "public_editor_manual_API_or_automatic_source_activation": false,
+  "no_migration_grant_account_scan_cron_provider_or_production_activation": true,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false,
+  "still_pending": [
+    "Scoped CRM/Service Desk editor and parameter authorization.",
+    "Original event materialization and original-agent manual consent/selected retry.",
+    "Independent destination history and mixed CRM/Service Desk Chrome flow.",
+    "Notifications and NICO configuration using their native authorization."
+  ]
+}

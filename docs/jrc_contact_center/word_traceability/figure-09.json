@@ -670,7 +670,7 @@
         9,
         10
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -725,7 +725,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D1-P0128-C01",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D1-P0129-C01",
@@ -1138,7 +1152,7 @@
         9,
         10
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1193,7 +1207,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D1-P0133-C01",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D1-P0134-C01",
@@ -1214,7 +1242,7 @@
         9,
         10
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1269,7 +1297,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D1-P0134-C01",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D1-P0135-C01",
@@ -2148,7 +2190,7 @@
       "figures": [
         9
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -2203,7 +2245,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0212-C02",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0213-C01",
@@ -2218,7 +2274,7 @@
       "figures": [
         9
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -2273,7 +2329,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0213-C01",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0213-C02",
@@ -2358,7 +2428,7 @@
       "figures": [
         9
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -2413,7 +2483,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0213-C03",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0213-C04",
@@ -2428,7 +2512,7 @@
       "figures": [
         9
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -2483,7 +2567,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0213-C04",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0214-C01",
@@ -2498,7 +2596,7 @@
       "figures": [
         9
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -2553,7 +2651,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0214-C01",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0214-C02",
@@ -2638,7 +2750,7 @@
       "figures": [
         9
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -2693,7 +2805,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0214-C03",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0216-C01",
@@ -2708,7 +2834,7 @@
       "figures": [
         9
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -2763,7 +2889,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0216-C01",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0217-C01",
@@ -2778,7 +2918,7 @@
       "figures": [
         9
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -2833,7 +2973,21 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0217-C01",
+        "whole_figure_accepted": false
+      }
     }
   ],
   "divergences": [
@@ -3016,5 +3170,28 @@
     "sha256": "b68d7046652f56a6795e5b6ebbbc56056da6a94e671ad8a1b4ec2d8a4f7e052d",
     "parent_native_failures": 4,
     "no_native_acceptance": true
+  },
+  "typed_independent_destination_native_acceptance": {
+    "sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+    "run": 45670540681,
+    "document": "docs/jrc_contact_center/ending_typed_destinations_native_acceptance_20261125.json",
+    "document_sha256": "d5fc7b8b3fea942b2fcab95caf6d49e8daba0b3fb32b834b6a5fa205ac2c247c",
+    "new_native_cases": 82,
+    "internal_CRM_SD_selected_retry_verified": true,
+    "mixed_public_Chrome_flow_accepted": false,
+    "whole_figure10_or_Part1_accepted": false
+  },
+  "literal_functional_review": {
+    "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+    "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+    "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+    "run": 45670540681,
+    "closed_unique_literal_clauses": 18,
+    "not_full_global_implementation_estimate": true
+  },
+  "typed_durable_delivery_candidate": {
+    "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
+    "new_native_cases_prepared_not_accepted": 37,
+    "public_editor_dispatch_or_whole_Part1_accepted": false
   }
 }

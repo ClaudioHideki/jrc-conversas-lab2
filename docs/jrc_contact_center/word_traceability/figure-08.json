@@ -519,7 +519,7 @@
       "figures": [
         8
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -537,7 +537,21 @@
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0188-C02",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0188-C03",
@@ -717,7 +731,7 @@
       "figures": [
         8
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -735,7 +749,21 @@
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0190-C01",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0190-C02",
@@ -750,7 +778,7 @@
       "figures": [
         8
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -768,7 +796,21 @@
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0190-C02",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0190-C03",
@@ -882,7 +924,7 @@
       "figures": [
         8
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -900,7 +942,21 @@
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0193-C01",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0194-C01",
@@ -915,7 +971,7 @@
       "figures": [
         8
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -933,7 +989,21 @@
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+          "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+          "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+          "run": 45670540681,
+          "closed_unique_literal_clauses": 18,
+          "not_full_global_implementation_estimate": true
+        },
+        "requirement_id": "D2-P0194-C01",
+        "whole_figure_accepted": false
+      }
     }
   ],
   "divergences": [
@@ -941,5 +1011,13 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "literal_functional_review": {
+    "document": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+    "sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+    "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+    "run": 45670540681,
+    "closed_unique_literal_clauses": 18,
+    "not_full_global_implementation_estimate": true
+  }
 }

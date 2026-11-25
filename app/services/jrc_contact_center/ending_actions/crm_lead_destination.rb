@@ -33,6 +33,9 @@ class JrcContactCenter::EndingActions::CrmLeadDestination
       authorize_native_crm!
       result = JrcCrm::ContactLeadService.new(account: @account, actor: @member.user, contact_id: reference.fetch(:contact_id)).call(create: true)
       result = result.merge(lead: authorized_native_result!(result.fetch(:lead)))
+      unless result.fetch(:lead).company_id == reference.fetch(:current_company_id)
+        raise JrcContactCenter::OperationError, 'ending_customer_reference_changed'
+      end
       require_native_creation_audit!(result.fetch(:lead)) if result.fetch(:created)
       result
     end

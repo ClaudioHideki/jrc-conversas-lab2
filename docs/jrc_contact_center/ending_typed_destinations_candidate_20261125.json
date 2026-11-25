@@ -65,7 +65,7 @@
       "spec/models/jrc_contact_center/ending_destination_consent_account_lifecycle_spec.rb": null
     }
   },
-  "status": "internal_typed_receipts_and_executor_prepared_requires_native_validation",
+  "status": "internal_typed_native_receipts_and_executor_validated",
   "new_native_cases_prepared": 82,
   "native_case_files": {
     "spec/models/jrc_contact_center/ending_destination_attempt_retry_and_success_spec.rb": 16,
@@ -76,7 +76,7 @@
     "spec/models/jrc_contact_center/ending_destination_consent_account_lifecycle_spec.rb": 4,
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb": 10
   },
-  "native_cases_executed": 0,
+  "native_cases_executed": 82,
   "public_editor_API_outbox_or_runtime_activation": false,
   "whole_figure10_accepted": false,
   "whole_part1_accepted": false,
@@ -198,5 +198,7 @@
     "failures": 4,
     "root_cause": "The test BEFORE trigger sorts before cc_typed_execution_immutable and sees destination_kind NULL. AFTER INSERT observes the derived row and still rolls back the same statement/transaction.",
     "correction_native_accepted": false
-  }
+  },
+  "native_verified_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+  "native_acceptance": "docs/jrc_contact_center/ending_typed_destinations_native_acceptance_20261125.json"
 }

@@ -15,4 +15,11 @@ class JrcContactCenter::EndingDestinationAttempt < JrcContactCenter::Application
   has_one :outcome, class_name: 'JrcContactCenter::EndingDestinationOutcome', foreign_key: :attempt_id,
                     inverse_of: :attempt, dependent: :restrict_with_exception
   self.filter_attributes += %i[rule_code request_key effect_key rule_sha256 integrity_sha256]
+  after_create_commit :dispatch_after_commit
+
+  private
+
+  def dispatch_after_commit
+    JrcContactCenter::EndingActions::DispatchDestinationAttempt.call(self)
+  end
 end

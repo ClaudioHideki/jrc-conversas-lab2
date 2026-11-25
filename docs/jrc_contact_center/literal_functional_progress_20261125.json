@@ -1,0 +1,1570 @@
+{
+  "verified_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+  "run": 45670540681,
+  "artifact": 15055467597,
+  "artifact_sha256": "c189d7c9dd7e2b73dcb6d9178ccd16092bf54afec21a0a8eb0cd82920a1655c2",
+  "method": "Cláusula literal inteira: código, exemplos nativos positivos, Chrome atual e conferência visual. Parcial não recebe meio ponto; IDs repetidos entre figuras contam uma vez.",
+  "Word_requirements_unique": 554,
+  "formal_literal_reviews_closed": 18,
+  "figure10": {
+    "closed": 5,
+    "total": 25,
+    "proven_percentage": 20.0,
+    "complete": false
+  },
+  "Parte1": {
+    "formally_closed": 18,
+    "total": 554,
+    "proven_lower_bound_percentage": 3.25,
+    "full_global_reaudit_complete": false,
+    "estimated_total_implementation_percentage": null,
+    "qualification": "Limite inferior formal, não estimativa de quanto código já existe. Os demais critérios incluem funcionalidades parciais e evidências ainda não encerradas por cláusula."
+  },
+  "literal_reviews": {
+    "D1-P0128-C01": {
+      "status": "implementado",
+      "expected": "Cadastro do motivo: nome, categoria, descrição, ordem, status e obrigatoriedade por fila.",
+      "expected_sha256": "b275c4ba2431dfc0855242145771989b5b08bed361fb2f219dfae08d88f2efa2",
+      "scope": "Cadastro nativo do motivo com nome, categoria, descrição, ordem, ativo e exigência por fila. Não inclui a execução dos destinos.",
+      "native": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:11]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:12]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:13]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:14]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:15]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:16]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:17]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:18]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:19]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:20]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:21]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:22]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:23]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:24]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:25]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:26]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:27]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:28]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:11]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:12]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:13]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:14]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:15]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:16]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:17]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:18]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "ending reason native catalogue persists revisions and deactivation with filtering paging and authorized rule selection": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ],
+        "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D1-P0133-C01": {
+      "status": "implementado",
+      "expected": "Encerramento telefônico e conclusão do pós-atendimento são eventos distintos.",
+      "expected_sha256": "404e1a4d14aecdd14729afcf8e6b28b3e941487a0d80296ea52e4a678764aba0",
+      "scope": "Encerramento telefônico, confirmação explícita da classificação e conclusão do ACW permanecem distintos; confirmação mantém o ACW aberto.",
+      "native": {
+        "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-ending-confirmation-preflight.json": "b4f35c96915c08aa743a673f2506b334bf20bd9c10f315c96939e8bbb77e69d5",
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/qualification_manager_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:18]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:19]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:20]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:21]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:22]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "confirmed ending classification native keeps incomplete ACW open, survives reload and rejects changed reasons and foreign actors": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D1-P0134-C01": {
+      "status": "implementado",
+      "expected": "Tempo máximo de ACW alerta, não descarta dados nem conclui automaticamente o registro.",
+      "expected_sha256": "9a32263f69ac5d2b23a1e87c33c2d5e5646240f6a572258f37bcba6a2a94480a",
+      "scope": "Relógio e alerta não descartam respostas nem concluem automaticamente o ACW.",
+      "native": {
+        "spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:1]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:2]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:3]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:4]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:5]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:6]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:7]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/qualification_manager_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:18]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:19]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:20]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:21]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:22]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ],
+        "pending ACW native draft persists incomplete answers and completes only after explicit tabulation": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0224-C01": {
+      "status": "implementado",
+      "expected": "Regras e permissoes: Reutilizar as APIs e os modulos existentes; nao criar cadastros paralelos.",
+      "expected_sha256": "2eb188e9a912518bddbdda069af6565b5d94e73a4969988606891fbe1146e024",
+      "scope": "Destinos usam serviços e políticas nativos de Projetos, CRM e Service Desk. Ledgers técnicos não são cadastros paralelos de clientes, tarefas ou chamados. Integração operacional pública restante não é aceita por este requisito de reutilização.",
+      "native": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:11]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:12]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:13]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:14]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:15]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_execution_concurrency_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-typed-destination-concurrency-rspec.json": "f7e3012483a0c3ce77b23b2f8f6ad1c0c0ec374d410ba17335ea04ae80a9c892"
+          }
+        },
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-typed-destination-concurrency-rspec.json": "f7e3012483a0c3ce77b23b2f8f6ad1c0c0ec374d410ba17335ea04ae80a9c892"
+          }
+        }
+      },
+      "Chrome": {
+        "versioned ending automation native editor persists reviewed private rules and denies stale or unauthorized changes without executing destinations": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0225-C02": {
+      "status": "implementado",
+      "expected": "Desabilitacao nao apaga historico.",
+      "expected_sha256": "db27777ca8498115760c35369ff0b08c34ea4631d5c8aec0205fce377a3d2ac6",
+      "scope": "Desativar conserva versões, evidências e sucessos; reativar não libera pendências anteriores. Não significa que o painel multicanal esteja completo.",
+      "native": {
+        "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-ending-version-preflight.json": "0aea7c95d104997814407c000660821fd154c0eab0a2826d91cc11f734874027",
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-ending-version-preflight.json": "0aea7c95d104997814407c000660821fd154c0eab0a2826d91cc11f734874027",
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_mixed_destinations_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-typed-destination-concurrency-rspec.json": "f7e3012483a0c3ce77b23b2f8f6ad1c0c0ec374d410ba17335ea04ae80a9c892"
+          }
+        }
+      },
+      "Chrome": {
+        "ending attempt history reads real independent outcomes, paginates, persists and respects native destination and audit access": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0188-C02": {
+      "status": "implementado",
+      "expected": "Tempo Padrao, Minimo e Maximo: preencher em horas/minutos; se um desses campos nao estiver no mockup, deve ser incluido no formulario final ou em aba complementar.",
+      "expected_sha256": "fc71113b0fc2e5b26fc7b09696e5bacf79709bd58171a5c7d1b45427977858a0",
+      "scope": "Revisão literal dos três campos HH:MM e validação de ordem no popup nativo; não encerra os critérios de distribuição física ou normas legais.",
+      "native": {
+        "spec/services/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:18]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:19]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:20]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:21]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:22]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:23]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:24]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0190-C01": {
+      "status": "implementado",
+      "expected": "Regras e permissoes: Entrada de horario em HH:MM, nunca exigir segundos ao usuario.",
+      "expected_sha256": "2ee37535a10b1f8469267e10cee9f18dc164f8ce147b53e59d7a2a106618fdb7",
+      "scope": "Revisão literal dos três campos HH:MM e validação de ordem no popup nativo; não encerra os critérios de distribuição física ou normas legais.",
+      "native": {
+        "spec/services/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:18]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:19]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:20]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:21]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:22]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:23]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:24]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0190-C02": {
+      "status": "implementado",
+      "expected": "Validar minimo menor ou igual ao padrao e padrao menor ou igual ao maximo quando todos forem informados.",
+      "expected_sha256": "a54f02947713ff6eb083321707ca8bbf9ffaf34cd1cf78d937bab6c7f619fd36",
+      "scope": "Revisão literal dos três campos HH:MM e validação de ordem no popup nativo; não encerra os critérios de distribuição física ou normas legais.",
+      "native": {
+        "spec/services/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:18]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:19]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:20]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:21]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:22]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:23]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:24]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0193-C01": {
+      "status": "implementado",
+      "expected": "• F08-A: tempos 00:15, 00:30 e 01:00 sao salvos em horas/minutos e reabertos corretamente.",
+      "expected_sha256": "14c0be5ad9f1f045fd88331c5ab301ccd66afae9611ea09f5714e15acca6290f",
+      "scope": "Revisão literal dos três campos HH:MM e validação de ordem no popup nativo; não encerra os critérios de distribuição física ou normas legais.",
+      "native": {
+        "spec/services/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:18]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:19]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:20]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:21]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:22]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:23]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:24]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0194-C01": {
+      "status": "implementado",
+      "expected": "• F08-B: maximo menor que minimo impede salvar e identifica exatamente o campo incorreto.",
+      "expected_sha256": "07d8dd05f16cf2bc5796b196a57d174c1a0367361c117f7ae7e15119cb39c187",
+      "scope": "Revisão literal dos três campos HH:MM e validação de ordem no popup nativo; não encerra os critérios de distribuição física ou normas legais.",
+      "native": {
+        "spec/services/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:18]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:19]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:20]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:21]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:22]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:23]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:24]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:10]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:11]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:12]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:13]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:1]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:2]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:3]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:4]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:5]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:6]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:7]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:8]",
+            "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0212-C02": {
+      "status": "implementado",
+      "expected": "Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
+      "expected_sha256": "9c738aa71af42e69444128423cf5cede911d06c9c502feab382e24bf83631e84",
+      "scope": "Comportamento interno da qualificação/ACW, com separação dos eventos, validação nativa e preservação do rascunho. Não declara ACK nem bloqueio físico do PABX.",
+      "native": {
+        "spec/services/jrc_contact_center/qualification_manager_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:18]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:19]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:20]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:21]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:22]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/qualification_forms_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "confirmed ending classification native keeps incomplete ACW open, survives reload and rejects changed reasons and foreign actors": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0213-C01": {
+      "status": "implementado",
+      "expected": "Regras e permissoes: Se o tempo expirar, alertar sem descartar rascunho nem concluir automaticamente.",
+      "expected_sha256": "564fd3f132aa8014a6508c070aed90ef38258692d780f4f8afdd8d6a00f832ec",
+      "scope": "Comportamento interno da qualificação/ACW, com separação dos eventos, validação nativa e preservação do rascunho. Não declara ACK nem bloqueio físico do PABX.",
+      "native": {
+        "spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:1]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:2]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:3]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:4]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:5]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:6]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:7]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/qualification_draft_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "pending ACW native draft persists incomplete answers and completes only after explicit tabulation": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ],
+        "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0213-C03": {
+      "status": "implementado",
+      "expected": "Formulario obrigatorio sem preenchimento nao pode ser considerado concluido.",
+      "expected_sha256": "977b20c7e00b5a58ed2049fbe1fb5327c7f657c6db9fe8914aacc0560c51ddb6",
+      "scope": "Comportamento interno da qualificação/ACW, com separação dos eventos, validação nativa e preservação do rascunho. Não declara ACK nem bloqueio físico do PABX.",
+      "native": {
+        "spec/services/jrc_contact_center/qualification_forms_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/qualification_draft_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "pending ACW native draft persists incomplete answers and completes only after explicit tabulation": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0213-C04": {
+      "status": "implementado",
+      "expected": "A configuracao de fila prevalece conforme regra de precedencia explicitamente validada.",
+      "expected_sha256": "4ba12312034daf374bff0481e6209a9dd28604a3287061278d8b2cb7b77f1f6a",
+      "scope": "Comportamento interno da qualificação/ACW, com separação dos eventos, validação nativa e preservação do rascunho. Não declara ACK nem bloqueio físico do PABX.",
+      "native": {
+        "spec/services/jrc_contact_center/acw_rule_precedence_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/acw_rule_precedence_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/acw_qualification_policy_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/acw_qualification_policy_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/acw_qualification_policy_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/acw_qualification_policy_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/acw_qualification_policy_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/acw_qualification_policy_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/acw_qualification_policy_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/acw_qualification_policy_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/acw_qualification_policy_spec.rb[1:8]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "local ACW popup validates HH:MM preserves failed values and reloads the native policy": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0214-C01": {
+      "status": "implementado",
+      "expected": "Estados de erro e excecoes: A ausencia de motivo ou formulario exigido gera erro de validacao.",
+      "expected_sha256": "79ef513c09d9da189d18f519be68547a62e4c4863b629f43bedb2f6d4e9f908a",
+      "scope": "Comportamento interno da qualificação/ACW, com separação dos eventos, validação nativa e preservação do rascunho. Não declara ACK nem bloqueio físico do PABX.",
+      "native": {
+        "spec/services/jrc_contact_center/confirm_ending_reason_forms_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/confirm_ending_reason_forms_spec.rb[1:1:1]",
+            "./spec/services/jrc_contact_center/confirm_ending_reason_forms_spec.rb[1:1:2]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-ending-confirmation-preflight.json": "b4f35c96915c08aa743a673f2506b334bf20bd9c10f315c96939e8bbb77e69d5",
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/qualification_forms_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "pending ACW native draft persists incomplete answers and completes only after explicit tabulation": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0214-C03": {
+      "status": "implementado",
+      "expected": "Se o agente sair da pagina, rascunho e estado de ACW exigem recuperacao controlada.",
+      "expected_sha256": "e6f6dba76a571d4555d377cd395b80d6128eca47ea15c7dc5dd0ced8f3a7f48e",
+      "scope": "Comportamento interno da qualificação/ACW, com separação dos eventos, validação nativa e preservação do rascunho. Não declara ACK nem bloqueio físico do PABX.",
+      "native": {
+        "spec/services/jrc_contact_center/qualification_draft_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "pending ACW native navigation reviews unsaved edits preserves saved state and leaves other modules untouched": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0216-C01": {
+      "status": "implementado",
+      "expected": "• F09-A: encerrada a ligacao, o ACW permanece ativo ate conclusao do formulario obrigatorio.",
+      "expected_sha256": "32cff068a3b55cb652d01e75681304f734076ca5493a61d907acf796f272b1d8",
+      "scope": "Comportamento interno da qualificação/ACW, com separação dos eventos, validação nativa e preservação do rascunho. Não declara ACK nem bloqueio físico do PABX.",
+      "native": {
+        "spec/services/jrc_contact_center/qualification_manager_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:18]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:19]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:20]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:21]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:22]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_manager_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/qualification_forms_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_forms_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "confirmed ending classification native keeps incomplete ACW open, survives reload and rejects changed reasons and foreign actors": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    },
+    "D2-P0217-C01": {
+      "status": "implementado",
+      "expected": "• F09-B: exceder o tempo configurado emite aviso e conserva respostas nao concluidas.",
+      "expected_sha256": "429a2b6de0da836b8cab0a75ffea918f096d33288ab56957bc26246397737a1f",
+      "scope": "Comportamento interno da qualificação/ACW, com separação dos eventos, validação nativa e preservação do rascunho. Não declara ACK nem bloqueio físico do PABX.",
+      "native": {
+        "spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:1]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:2]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:3]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:4]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:5]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:6]",
+            "./spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb[1:7]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        },
+        "spec/services/jrc_contact_center/qualification_draft_spec.rb": {
+          "distinct_passed_example_ids": [
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:10]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:11]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:12]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:13]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:14]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:15]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:16]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:17]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:1]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:2]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:3]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:4]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:5]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:6]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:7]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:8]",
+            "./spec/services/jrc_contact_center/qualification_draft_spec.rb[1:9]"
+          ],
+          "reports_sha256": {
+            "tmp/call-center-rspec.json": "5acf2d7d3db214e1a814426eac0ed5adf92b57b5d686356f7ec41a7f230bd6e7"
+          }
+        }
+      },
+      "Chrome": {
+        "pending ACW native draft persists incomplete answers and completes only after explicit tabulation": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ],
+        "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya": [
+          "desktop-dark",
+          "desktop-light",
+          "mobile-dark",
+          "mobile-light"
+        ]
+      },
+      "whole_figure_accepted_by_this_clause": false
+    }
+  },
+  "visual_review": {
+    "sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+    "artifact": 15055467597,
+    "images": [
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\desktop-dark-ending-confirmation-confirmed-open-acw.png",
+        "sha256": "82cf0605e6e7476ed3078397398b4275229cebbf3bf9ad04c673469b77a842ca",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\desktop-dark-ending-reason-catalog.png",
+        "sha256": "a4bfcdcff56251a065c27d556ae422681de888f9bc27a9b8c0d5e32a1433265e",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\desktop-dark-pause-catalog-popup.png",
+        "sha256": "91428f3c7fae11527a2a11088bcf5b63f9cdc868680716f4c7fe236e479bb974",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\desktop-light-ending-confirmation-confirmed-open-acw.png",
+        "sha256": "1901379a24fe9dc15cb80becb39ae2b3819a305079e31a26d129937146fb0305",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\desktop-light-ending-reason-catalog.png",
+        "sha256": "1e97a8c337144ba0d32615f2a4303563deff6ee791fba33a0edfde7ef1fcda5b",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\desktop-light-pause-catalog-popup.png",
+        "sha256": "7fa4951b36fa61625e0202d5b30804529a450952c554cc61191e2112790afbdb",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\mobile-dark-ending-confirmation-confirmed-open-acw.png",
+        "sha256": "195e32bdc5b3ab86447395aa4cb8d99596e1ecea0ad417af8722d8486f9e28ad",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\mobile-dark-ending-reason-catalog.png",
+        "sha256": "22e3cf825a4411709c40a21985d39faf44b1c2d124cc3c65d217e3ad5c068199",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\mobile-dark-pause-catalog-popup.png",
+        "sha256": "4f032dcbec2bf9259f656faa5e05e5f2ee4802f7c698cec3d837634f8d6a1377",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\mobile-light-ending-confirmation-confirmed-open-acw.png",
+        "sha256": "4e43be756fb9e4d33c0076a61e820cb5048d5c1fefad45b99266a6709d0d9af7",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\mobile-light-ending-reason-catalog.png",
+        "sha256": "9aebec6eced784596abb65fcefe030d93b7e674e0b0bfc29d7d54b8795ccadd8",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\mobile-light-pause-catalog-popup.png",
+        "sha256": "629e8e46ce1104ea41d64024fec3a9f109e5a896400241bd8e9f932fe6fdae76",
+        "actually_viewed": true,
+        "observation": "Original aberto: catálogo com nome/categoria/ordem/descrição/ativo persistidos; popup de pausa em HH:MM ou classificação confirmada com formulário ainda incompleto, conforme o arquivo. Claro e escuro distintos. Recorte rolado não prova conteúdo fora da tela."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\desktop-dark-ending-frozen-hoya.png",
+        "sha256": "3b2cdafa77138c4421612326eed307bfff764a46e70b060cd66aefca0ed38a23",
+        "actually_viewed": true,
+        "observation": "Original Hoya de produção aberto: aviso vermelho de limite excedido, relógio e limite 03:00, respostas e rascunho mantidos, finalização continua explícita. Celular mantém conteúdo contido; tema claro/escuro conferido. O estado do fixture de confirmação isolado não foi usado como prova única deste aviso."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\desktop-light-ending-frozen-hoya.png",
+        "sha256": "01d3123be5134942c23a02ccca4d9161ee116442ddf0d3f25920637ecd882b24",
+        "actually_viewed": true,
+        "observation": "Original Hoya de produção aberto: aviso vermelho de limite excedido, relógio e limite 03:00, respostas e rascunho mantidos, finalização continua explícita. Celular mantém conteúdo contido; tema claro/escuro conferido. O estado do fixture de confirmação isolado não foi usado como prova única deste aviso."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\mobile-dark-ending-frozen-hoya.png",
+        "sha256": "667aa2554f8abbac7da336292c78a05e94ed57ed16bdd245c13491e2add55338",
+        "actually_viewed": true,
+        "observation": "Original Hoya de produção aberto: aviso vermelho de limite excedido, relógio e limite 03:00, respostas e rascunho mantidos, finalização continua explícita. Celular mantém conteúdo contido; tema claro/escuro conferido. O estado do fixture de confirmação isolado não foi usado como prova única deste aviso."
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\literal-extra-visual-review-ad8a50a1\\mobile-light-ending-frozen-hoya.png",
+        "sha256": "9e1ad101fbab115a4eb29d534c3fb2ed5f999e54e51323a5fec337d6e25bcc4d",
+        "actually_viewed": true,
+        "observation": "Original Hoya de produção aberto: aviso vermelho de limite excedido, relógio e limite 03:00, respostas e rascunho mantidos, finalização continua explícita. Celular mantém conteúdo contido; tema claro/escuro conferido. O estado do fixture de confirmação isolado não foi usado como prova única deste aviso."
+      }
+    ],
+    "whole_figure_or_Part1_accepted": false,
+    "actual_review_recorded_at": "2026-11-25T19:28:24.224162+00:00",
+    "expiry_alert_not_demonstrated_by_confirmation_fixture_screenshot_alone": true,
+    "production_Hoya_overdue_warning_native_browser_evidence": {
+      "desktop-dark": {
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-acw-deadline-paint.json",
+        "sha256": "c3c508728a4bfe28270b91c10c88176ab551f708b53f670683d89e1997d5706e",
+        "actual_browser_paint": {
+          "accent": "rgb(206, 44, 82)",
+          "value": 180,
+          "max": 180,
+          "paintedChannels": [
+            206,
+            44,
+            82
+          ]
+        }
+      },
+      "desktop-light": {
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-acw-deadline-paint.json",
+        "sha256": "c3c508728a4bfe28270b91c10c88176ab551f708b53f670683d89e1997d5706e",
+        "actual_browser_paint": {
+          "accent": "rgb(206, 44, 82)",
+          "value": 180,
+          "max": 180,
+          "paintedChannels": [
+            206,
+            44,
+            82
+          ]
+        }
+      },
+      "mobile-dark": {
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-acw-deadline-paint.json",
+        "sha256": "c3c508728a4bfe28270b91c10c88176ab551f708b53f670683d89e1997d5706e",
+        "actual_browser_paint": {
+          "accent": "rgb(206, 44, 82)",
+          "value": 180,
+          "max": 180,
+          "paintedChannels": [
+            206,
+            44,
+            82
+          ]
+        }
+      },
+      "mobile-light": {
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-acw-deadline-paint.json",
+        "sha256": "c3c508728a4bfe28270b91c10c88176ab551f708b53f670683d89e1997d5706e",
+        "actual_browser_paint": {
+          "accent": "rgb(206, 44, 82)",
+          "value": 180,
+          "max": 180,
+          "paintedChannels": [
+            206,
+            44,
+            82
+          ]
+        }
+      }
+    }
+  },
+  "remaining_figure10": [
+    "D1-P0126-C01",
+    "D1-P0129-C01",
+    "D1-P0130-C01",
+    "D1-P0131-C01",
+    "D1-P0135-C01",
+    "D1-P0136-C01",
+    "D2-P0221-C01",
+    "D2-P0222-C01",
+    "D2-P0222-C02",
+    "D2-P0222-C03",
+    "D2-P0222-C04",
+    "D2-P0222-C05",
+    "D2-P0223-C01",
+    "D2-P0223-C02",
+    "D2-P0224-C02",
+    "D2-P0224-C03",
+    "D2-P0224-C04",
+    "D2-P0225-C01",
+    "D2-P0227-C01",
+    "D2-P0228-C01"
+  ],
+  "functional_gaps": [
+    "Editor por origem/unidade e popups operacionais CRM/Service Desk.",
+    "Entrega durável das intenções e materialização a partir dos eventos nativos.",
+    "Confirmação manual da ação pelo agente original, repetição selecionada e histórico misto CRM/Service Desk pela interface.",
+    "Notificações e NICO com suas próprias permissões, sem converter sugestão em autorização.",
+    "Conformidade visual completa e fluxo Nova Ação/Salvar e concluir sem misturar ACW e integrações."
+  ],
+  "effort_unit": "horas de engenharia e testes, sem espera externa; faixas preliminares com incerteza; não somar figuras que reutilizam as mesmas bases",
+  "effort_by_figure": [
+    {
+      "figure": 1,
+      "remaining_hours_range": [
+        4,
+        8
+      ],
+      "scope": "Navegação e estados de carregamento/erro; prova externa de conexão separada."
+    },
+    {
+      "figure": 2,
+      "remaining_hours_range": [
+        8,
+        16
+      ],
+      "scope": "Contexto de retorno, alertas autorizados e falhas independentes."
+    },
+    {
+      "figure": 3,
+      "remaining_hours_range": [
+        8,
+        24
+      ],
+      "scope": "Filas/equipes/calendários; publicação DAC depende do contrato PABX."
+    },
+    {
+      "figure": 4,
+      "remaining_hours_range": [
+        8,
+        16
+      ],
+      "scope": "Conexão e diagnóstico seguros; comandos e ACK dependem do fornecedor."
+    },
+    {
+      "figure": 5,
+      "remaining_hours_range": [
+        8,
+        24
+      ],
+      "scope": "Interface e limites TTS; homologação do provedor não estimada."
+    },
+    {
+      "figure": 6,
+      "remaining_hours_range": [
+        8,
+        16
+      ],
+      "scope": "Vínculos de uso e validação final; reutilizar biblioteca já persistida."
+    },
+    {
+      "figure": 7,
+      "remaining_hours_range": [
+        4,
+        8
+      ],
+      "scope": "Acabamento funcional de estados e provas de retorno; PABX externo separado."
+    },
+    {
+      "figure": 8,
+      "remaining_hours_range": [
+        4,
+        8
+      ],
+      "scope": "Validação final de todos os campos, cancelamento e recarga."
+    },
+    {
+      "figure": 9,
+      "remaining_hours_range": [
+        8,
+        16
+      ],
+      "scope": "Fechar workspace por abas e critérios ACW ainda sem aceite integral."
+    },
+    {
+      "figure": 10,
+      "remaining_hours_range": [
+        32,
+        56
+      ],
+      "scope": "Editor CRM/SD, eventos, consentimento/retry, histórico misto, notificações/NICO e Chrome."
+    },
+    {
+      "figure": 11,
+      "remaining_hours_range": [
+        8,
+        16
+      ],
+      "scope": "Categorias/perfis, escopos e origem de concessões sem ampliar alçadas."
+    },
+    {
+      "figure": 12,
+      "remaining_hours_range": [
+        8,
+        16
+      ],
+      "scope": "Popup e revisão final de horários/capacidade; reutiliza figura3."
+    },
+    {
+      "figure": 13,
+      "remaining_hours_range": [
+        4,
+        8
+      ],
+      "scope": "Mesma base da figura4; evitar duplicar esforço ou telas."
+    },
+    {
+      "figure": 14,
+      "remaining_hours_range": [
+        4,
+        8
+      ],
+      "scope": "Filtros e detalhes de auditoria; trilha externa depende de ACK."
+    },
+    {
+      "figure": 15,
+      "remaining_hours_range": [
+        8,
+        24
+      ],
+      "scope": "Aprovações e estados de execução; adaptador PABX externo pendente."
+    },
+    {
+      "figure": 16,
+      "remaining_hours_range": [
+        4,
+        8
+      ],
+      "scope": "Detalhes e usos de áudio; reutiliza figura6."
+    },
+    {
+      "figure": 17,
+      "remaining_hours_range": [
+        16,
+        32
+      ],
+      "scope": "Retenção/hold, auditoria e console de gravação autorizado."
+    },
+    {
+      "figure": 18,
+      "remaining_hours_range": [
+        16,
+        24
+      ],
+      "scope": "Painel de qualidade e fontes reais; preservar área já existente."
+    },
+    {
+      "figure": 19,
+      "remaining_hours_range": [
+        16,
+        32
+      ],
+      "scope": "Agregação por fontes, denominadores e filtros do painel de sentimentos."
+    },
+    {
+      "figure": 20,
+      "remaining_hours_range": [
+        24,
+        40
+      ],
+      "scope": "Cinco abas e sincronização player/transcrição/gráfico com segmentos reais."
+    },
+    {
+      "figure": 21,
+      "remaining_hours_range": [
+        8,
+        16
+      ],
+      "scope": "Contexto 360 autorizado e falhas independentes de cada fonte."
+    },
+    {
+      "figure": 22,
+      "remaining_hours_range": [
+        16,
+        32
+      ],
+      "scope": "Nova ação/Salvar e Concluir e recibos independentes, reutilizando figura10."
+    },
+    {
+      "figure": 23,
+      "remaining_hours_range": [
+        16,
+        32
+      ],
+      "scope": "Revisão humana persistida, concorrência, auditoria e interface autorizada."
+    }
+  ],
+  "shortest_safe_path": [
+    "Entrega durável e worker próprio → eventos nativos sem repetir destinos antigos.",
+    "Editor restrito por origem e destinos nativos CRM, Projetos e Service Desk.",
+    "Prévia/consentimento/repetição selecionada e histórico independente; homologar F10-A/F10-B.",
+    "Notificações/NICO e consumo no atendimento; continuar demais lacunas por dependência e fechar critérios observáveis.",
+    "Homologação externa PABX e provedores quando existir contrato e ambiente autorizado."
+  ],
+  "external_blockers": [
+    "Contrato PABX, capacidades/ACKs/publicação e homologação de fornecedores não foram inventados."
+  ],
+  "whole_figure10_or_Part1_complete": false,
+  "private_preparations_counted_as_accepted": false
+}

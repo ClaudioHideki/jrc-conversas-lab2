@@ -229,4 +229,45 @@ RSpec.describe JrcContactCenter::EndingActions::CrmLeadDestination do
     expect(JrcCrm::AuditEvent.where(account: account, event_type: 'lead_created')).to be_empty
     expect(JrcCrm::UserBusinessUnit.where(account: account, user: operator.user).sole.scope).to eq('BUSINESS_UNIT')
   end
+
+  it 'refuses an otherwise visible legacy Lead linked to another company without rewriting the native record' do
+    row = reference
+    lead = account.jrc_crm_leads.create!(owner: operator.user, contact: contact, name: 'SYNTHETIC stale company Lead')
+    other = account.master_companies.create!(name: 'SYNTHETIC other legacy CRM customer')
+    # Model an existing pre-validation legacy inconsistency in this owned fixture.
+    # No production command repairs or grants access to such a record.
+    query = ApplicationRecord.sanitize_sql_array(
+      ['UPDATE jrc_crm_leads SET company_id = ? WHERE account_id = ? AND id = ?', other.id, account.id, lead.id]
+    )
+    ApplicationRecord.connection.execute(query)
+    native = JrcCrm::ContactLeadService.new(account: account, actor: operator.user, contact_id: contact.id).call(create: false)
+    expect(native.fetch(:lead).id).to eq(lead.id)
+    visible = JrcCrm::OrganizationalVisibility.new(account: account, user: operator.user, relation: account.jrc_crm_leads).call
+    expect(visible.find(lead.id).id).to eq(lead.id)
+    before = JrcCrm::AuditEvent.where(account: account).count
+    expect { described_class.new(account: account, member: operator).call(origin: row) }
+      .to raise_error(JrcContactCenter::OperationError, 'ending_customer_reference_changed')
+    expect(lead.reload.company_id).to eq(other.id)
+    expect(contact.reload.company_id).to eq(customer.id)
+    expect(account.jrc_crm_leads.where(contact: contact).count).to eq(1)
+    expect(JrcCrm::AuditEvent.where(account: account).count).to eq(before)
+  end
+
+  it 'does not reinterpret an existing unlinked legacy Lead as belonging to the attested company' do
+    row = reference
+    lead = account.jrc_crm_leads.create!(owner: operator.user, contact: contact, name: 'SYNTHETIC unlinked legacy Lead')
+    query = ApplicationRecord.sanitize_sql_array(
+      ['UPDATE jrc_crm_leads SET company_id = NULL WHERE account_id = ? AND id = ?', account.id, lead.id]
+    )
+    ApplicationRecord.connection.execute(query)
+    native = JrcCrm::ContactLeadService.new(account: account, actor: operator.user, contact_id: contact.id).call(create: false)
+    expect(native.fetch(:lead).id).to eq(lead.id)
+    visible = JrcCrm::OrganizationalVisibility.new(account: account, user: operator.user, relation: account.jrc_crm_leads).call
+    expect(visible.find(lead.id).id).to eq(lead.id)
+    expect { described_class.new(account: account, member: operator).call(origin: row) }
+      .to raise_error(JrcContactCenter::OperationError, 'ending_customer_reference_changed')
+    expect(lead.reload.company_id).to be_nil
+    expect(contact.reload.company_id).to eq(customer.id)
+    expect(account.jrc_crm_leads.where(contact: contact).count).to eq(1)
+  end
 end
