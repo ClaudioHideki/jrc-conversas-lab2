@@ -3001,5 +3001,14 @@
     "fixture_only": true,
     "native_82_acceptance": false,
     "whole_Part1_accepted": false
+  },
+  "native_typed_canonical_constraint_followup": {
+    "document": "docs/jrc_contact_center/ending_typed_canonical_constraint_correction_20261125.json",
+    "document_sha256": "6f84531fdf7c15ca30c8c9a89b648169abe37f3af2bc6174592e0a687da3d42c",
+    "failed_run": 45656359387,
+    "failed_sha": "115bd763194921c1f87cc81252e93929c6279f57",
+    "all_252_reload_examples_passed_before_metadata_failure": true,
+    "native_82_acceptance": false,
+    "whole_Part1_accepted": false
   }
 }

@@ -138,7 +138,7 @@ class CreateContactCenterTypedDestinations < ActiveRecord::Migration[7.1]
       (operation = 'create_task' AND target_type = 'JrcProjects::Task') OR
       (operation = 'create_lead' AND target_type = 'JrcCrm::Lead') OR
       (operation = 'create_activity' AND target_type = 'JrcCrm::Activity') OR
-      (operation IN ('create_ticket','update_ticket') AND target_type = 'JrcServiceDesk::Ticket')
+      (operation::text = ANY (ARRAY['create_ticket'::text,'update_ticket'::text]) AND target_type = 'JrcServiceDesk::Ticket')
     SQL
     add_check_constraint EXECUTIONS, check, name: 'cc_typed_execution_type'
   end
@@ -147,13 +147,14 @@ class CreateContactCenterTypedDestinations < ActiveRecord::Migration[7.1]
     fields = %w[account_id origin_id readiness_id version_id actor_account_user_id actor_user_id trigger_id]
     add_check_constraint table, fields.map { |field| "#{field} > 0" }.join(' AND '), name: "cc_typed_#{name}_identity"
     add_check_constraint table, "rule_sha256 ~ '^[0-9a-f]{64}$' AND integrity_sha256 ~ '^[0-9a-f]{64}$'", name: "cc_typed_#{name}_digests"
-    add_check_constraint table, "btrim(rule_code) <> '' AND trigger_kind IN ('ending_reason_confirmation','ending_action_completion')",
+    kinds = "ARRAY['ending_reason_confirmation'::text, 'ending_action_completion'::text]"
+    add_check_constraint table, "btrim(rule_code) <> '' AND trigger_kind::text = ANY (#{kinds})",
                          name: "cc_typed_#{name}_trigger"
     add_check_constraint table, 'created_at >= triggered_at', name: "cc_typed_#{name}_clock"
     allowed = <<~SQL.squish
       (destination_kind = 'project_task' AND operation = 'create_task') OR
-      (destination_kind = 'crm' AND operation IN ('create_lead','create_activity')) OR
-      (destination_kind = 'service_desk' AND operation IN ('create_ticket','update_ticket'))
+      (destination_kind = 'crm' AND operation::text = ANY (ARRAY['create_lead'::text,'create_activity'::text])) OR
+      (destination_kind = 'service_desk' AND operation::text = ANY (ARRAY['create_ticket'::text,'update_ticket'::text]))
     SQL
     add_check_constraint table, allowed, name: "cc_typed_#{name}_operation"
   end

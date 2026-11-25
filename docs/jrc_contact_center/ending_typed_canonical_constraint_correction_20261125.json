@@ -1,0 +1,42 @@
+{
+  "classification": "private_canonical_typed_constraint_DDL_not_native_acceptance",
+  "parent": "115bd763194921c1f87cc81252e93929c6279f57",
+  "failed_run": 45656359387,
+  "artifact": 15043182597,
+  "artifact_sha256": "c06994f84f0fccb38a9ec5f07d73d60fdd46d3755fbc3d6d52e017b564a92754",
+  "different_constraint_names": [
+    "cc_typed_attempt_operation",
+    "cc_typed_attempt_trigger",
+    "cc_typed_consent_operation",
+    "cc_typed_consent_trigger",
+    "cc_typed_execution_operation",
+    "cc_typed_execution_trigger",
+    "cc_typed_execution_type"
+  ],
+  "all_literal_values_preserved": true,
+  "existing_M19_canonical_text_array_pattern_reused": "db\\migrate\\20261124000000_create_contact_center_ending_action_executions.rb",
+  "SQL_library_fingerprint_algorithm_columns_FKs_and_triggers_changed": false,
+  "tests_or_hash_comparison_relaxed": false,
+  "unknown_existing_schema_will_not_be_repaired_or_restamped": true,
+  "native_fresh_reload_populated_all_82_cases_still_required": true,
+  "existing_historical_migrations_before_unreleased_M22_changed": false,
+  "exact_correction": {
+    "name": "exact_stable_text_array_typed_checks",
+    "reviewed_receipt_sha256": "90c3505f65da769dfd7eb8c2b38581e29aee54bc5ce2f37493bfd1b7d9b596da",
+    "source_sha256": {
+      "db/migrate/20261125060000_create_contact_center_typed_destinations.rb": "2f9ecb573f96fc6ad84a30db30629524d1f7c62d260733ba425af31220ebdb38",
+      "script/validate_cc_typed_destination_migration.mjs": "0e768c44b30d0f6371e09d4b65ed9dc727df448e1b379a7b53842fdcf79d0216"
+    },
+    "parent_sources": {
+      "db/migrate/20261125060000_create_contact_center_typed_destinations.rb": "3c6f40a7a9dff0dd1b03c0035fef3cc9d1f66b60566d02746e7c14051b1d8ec7",
+      "script/validate_cc_typed_destination_migration.mjs": "8df19ec8f611662071ce9cd46bc7424178e49ad6cd7beaed29dfbbee0e1765d6"
+    }
+  },
+  "reported_reload_examples": 252,
+  "reported_reload_failures": 0,
+  "fresh_constraints_hash": "89c6185818ec190db33d8fa67d9a122e44729c3e4e827c1f611bbf94789dbe8b",
+  "reload_constraints_hash": "ce959bf863bb2273c6cb26c231f729b692a606584acc6d0fa7427a02bbebcf1f",
+  "scope": "Use explicit text-array ANY expressions, as M19 already does, for the seven CHECK definitions in the unreleased M22 builder. Preserve exact fingerprint comparison.",
+  "existing_prototype_schema_not_automatically_repaired_or_restamped": true,
+  "native_approval_or_whole_Part1_accepted": false
+}

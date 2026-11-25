@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 export const sourcePins = Object.freeze({
   "migration": {
     "path": "db/migrate/20261125060000_create_contact_center_typed_destinations.rb",
-    "sha256": "3c6f40a7a9dff0dd1b03c0035fef3cc9d1f66b60566d02746e7c14051b1d8ec7"
+    "sha256": "2f9ecb573f96fc6ad84a30db30629524d1f7c62d260733ba425af31220ebdb38"
   },
   "sql": {
     "path": "db/functions/20261125060000_contact_center_typed_destinations.sql",

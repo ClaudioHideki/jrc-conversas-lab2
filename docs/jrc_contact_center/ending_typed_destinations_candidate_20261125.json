@@ -160,5 +160,19 @@
         "spec/support/contact_center_ending_origin_schema_dependencies.rb": "590a4b61570204b97b7afe8137c2a1e3afef4eabf6082089917770ced82a6c1c"
       }
     }
+  ],
+  "schema_cast_corrections": [
+    {
+      "name": "exact_stable_text_array_typed_checks",
+      "reviewed_receipt_sha256": "90c3505f65da769dfd7eb8c2b38581e29aee54bc5ce2f37493bfd1b7d9b596da",
+      "source_sha256": {
+        "db/migrate/20261125060000_create_contact_center_typed_destinations.rb": "2f9ecb573f96fc6ad84a30db30629524d1f7c62d260733ba425af31220ebdb38",
+        "script/validate_cc_typed_destination_migration.mjs": "0e768c44b30d0f6371e09d4b65ed9dc727df448e1b379a7b53842fdcf79d0216"
+      },
+      "parent_sources": {
+        "db/migrate/20261125060000_create_contact_center_typed_destinations.rb": "3c6f40a7a9dff0dd1b03c0035fef3cc9d1f66b60566d02746e7c14051b1d8ec7",
+        "script/validate_cc_typed_destination_migration.mjs": "8df19ec8f611662071ce9cd46bc7424178e49ad6cd7beaed29dfbbee0e1765d6"
+      }
+    }
   ]
 }
