@@ -41,10 +41,11 @@ RSpec.describe JrcContactCenter::EndingActions::CrmActivityDestination do
     account.disable_features!('jrc_broker')
     activity = command.call(origin: row, parameters: parameters, trigger_at: trigger_at)
     expect(activity).to have_attributes(account_id: account.id, user_id: operator.user_id, contact_id: contact.id,
-                                       company_id: customer.id, status: 'completed', completed_at: trigger_at, due_at: trigger_at)
+                                        company_id: customer.id, status: 'completed', completed_at: trigger_at, due_at: trigger_at)
     expect(activity.lead.owner_id).to eq(operator.user_id)
-    event = JrcCrm::AuditEvent.where(account: account, resource_type: activity.class.name, resource_id: activity.id,
-                                    event_type: 'activity_created').sole
+    event = JrcCrm::AuditEvent.where(
+      account: account, resource_type: activity.class.name, resource_id: activity.id, event_type: 'activity_created'
+    ).sole
     expect([event.actor_type, event.actor_id]).to eq([operator.user.class.name, operator.user_id])
     expect(JrcContactCenter::Qualification.find(row.source_qualification_id).completed_at).to be_nil
     expect(JrcContactCenter::EndingActionExecution.where(account: account)).to be_empty
@@ -113,8 +114,9 @@ RSpec.describe JrcContactCenter::EndingActions::CrmActivityDestination do
     JrcCrm::UserBusinessUnit.where(account: account, user: operator.user).sole.update!(
       scope: 'BUSINESS_UNIT', company_id: issuer.id, business_unit_id: business.id
     )
-    account.jrc_crm_leads.create!(owner: operator.user, contact: contact, business_unit_id: business.id,
-                                 name: 'SYNTHETIC visible activity Lead')
+    account.jrc_crm_leads.create!(
+      owner: operator.user, contact: contact, business_unit_id: business.id, name: 'SYNTHETIC visible activity Lead'
+    )
     activity = command.call(origin: row, parameters: parameters, trigger_at: trigger_at)
     expect(activity.business_unit_id).to eq(business.id)
     visible = JrcCrm::OrganizationalVisibility.new(account: account, user: operator.user, relation: account.jrc_crm_activities).call
@@ -127,18 +129,17 @@ RSpec.describe JrcContactCenter::EndingActions::CrmActivityDestination do
     allow(JrcCrm::AuditLoggerService).to receive(:new).and_call_original
     logger = instance_double(JrcCrm::AuditLoggerService, call: nil)
     allow(JrcCrm::AuditLoggerService).to receive(:new).with(hash_including(event_type: 'activity_created')).and_return(logger)
-    expect do
+    operation = proc do
       ApplicationRecord.transaction(requires_new: true) { command.call(origin: row, parameters: parameters, trigger_at: trigger_at) }
-    end.to raise_error do |error|
-      expect(error.code).to eq('ending_crm_native_audit_missing')
     end
+    expect(&operation).to raise_error { |error| expect(error.code).to eq('ending_crm_native_audit_missing') }
     expect(account.jrc_crm_leads.where(contact: contact)).to be_empty
     expect(account.jrc_crm_activities.where(contact: contact)).to be_empty
   end
 
   it 'rolls back the entire native operation on an actual PostgreSQL audit insertion rejection' do
     row = reference
-    ApplicationRecord.connection.execute(<<~SQL)
+    ApplicationRecord.connection.execute(<<~SQL.squish)
       CREATE FUNCTION pg_temp.cc_ending_activity_audit_reject() RETURNS trigger LANGUAGE plpgsql AS $$
       BEGIN
         IF NEW.account_id = #{Integer(account.id)} AND NEW.event_type = 'activity_created' THEN

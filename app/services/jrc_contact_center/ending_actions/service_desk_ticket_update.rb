@@ -37,8 +37,8 @@ class JrcContactCenter::EndingActions::ServiceDeskTicketUpdate
   end
 
   def authorize_mapping!(context, origin, ticket)
-    allowed = context.native_operator? && context.capability?(:customers_view) && context.operational_unit_allowed?(ticket.unit)
-    raise Pundit::NotAuthorizedError unless allowed
+    raise Pundit::NotAuthorizedError unless native_mapping_access?(context, ticket)
+
     raise JrcContactCenter::OperationError, 'ending_service_desk_mapping_required' unless origin.business_unit_id
 
     business = @account.jrc_crm_business_units.where(active: true).lock('FOR SHARE').find(origin.business_unit_id)
@@ -48,6 +48,10 @@ class JrcContactCenter::EndingActions::ServiceDeskTicketUpdate
     raise JrcContactCenter::OperationError.new('ending_service_desk_mapping_changed', status: :conflict)
   rescue KeyError, ArgumentError
     raise JrcContactCenter::OperationError, 'ending_service_desk_mapping_required'
+  end
+
+  def native_mapping_access?(context, ticket)
+    context.native_operator? && context.capability?(:customers_view) && context.operational_unit_allowed?(ticket.unit)
   end
 
   def verify_customer!(ticket, reference)
@@ -71,7 +75,7 @@ class JrcContactCenter::EndingActions::ServiceDeskTicketUpdate
   def verify_native_event!(context, ticket, last_event)
     actors = JrcServiceDesk::UnitMembership.where(account: @account, unit_id: ticket.unit_id, account_user_id: context.account_user.id)
     events = ticket.ticket_events.where(account: @account, event_type: 'ticket_updated', actor_membership_id: actors.select(:id))
-    return if events.where('id > ?', last_event).exists?
+    return if events.exists?(['id > ?', last_event])
 
     raise JrcContactCenter::OperationError, 'ending_service_desk_native_audit_missing'
   end

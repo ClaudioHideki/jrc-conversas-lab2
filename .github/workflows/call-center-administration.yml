@@ -100,6 +100,7 @@ jobs:
           node --test script/validate_cc_ending_readiness_migration.test.mjs script/validate_cc_ending_readiness_admission.test.mjs
           node --test script/validate_cc_ending_execution_migration.test.mjs script/validate_cc_ending_execution_admission.test.mjs
           node --test script/validate_cc_ending_attempt_migration.test.mjs script/validate_cc_ending_attempt_admission.test.mjs
+          node --test script/validate_cc_nico_intent_admission.test.mjs
           node script/validate_cc_access_migration.mjs
       - name: Focused lint of new private ending version sources
         id: ending_version_lint

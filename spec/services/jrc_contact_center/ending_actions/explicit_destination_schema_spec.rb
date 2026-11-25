@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 # Shape compatibility only; no execution, activation or permission is granted.
-RSpec.describe 'Explicit destination schema without historical reinterpretation' do
+RSpec.describe JrcContactCenter::EndingActions::RuleDefinition, 'explicit destination schema without historical reinterpretation' do
   let(:task) do
     { 'project_id' => '11', 'due_after_days' => nil,
       'attributes' => { 'title' => 'SYNTHETIC typed follow-up', 'priority' => 'medium',
@@ -21,8 +21,8 @@ RSpec.describe 'Explicit destination schema without historical reinterpretation'
   let(:validator) { JrcContactCenter::EndingActions::RuleDefinition.new }
   let(:sd_action) do
     { 'kind' => 'service_desk', 'parameters' => { 'unit_id' => '61', 'service_id' => nil,
-                                                 'attributes' => { 'title' => 'SYNTHETIC explicit ticket',
-                                                                   'status_id' => '62', 'priority_id' => '63' } } }
+                                                  'attributes' => { 'title' => 'SYNTHETIC explicit ticket',
+                                                                    'status_id' => '62', 'priority_id' => '63' } } }
   end
 
   it 'preserves a legacy document and its exact JSON without adding an execution schema or mode' do
@@ -50,7 +50,7 @@ RSpec.describe 'Explicit destination schema without historical reinterpretation'
     result = nil
     expect do
       result = validator.call(document)
-    end.not_to change { [JrcProjects::Task.count, JrcCrm::Lead.count, JrcServiceDesk::Ticket.count] }
+    end.not_to(change { [JrcProjects::Task.count, JrcCrm::Lead.count, JrcServiceDesk::Ticket.count] })
     expect(result).to eq(document)
     expect(result.fetch('entries').first.fetch('actions').pluck('kind')).to eq(%w[project_task crm service_desk])
   end

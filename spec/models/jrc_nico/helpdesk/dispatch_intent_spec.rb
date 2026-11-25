@@ -34,7 +34,7 @@ RSpec.describe JrcNico::Helpdesk::DispatchIntent do
     identifier = event.id
     expect do
       ApplicationRecord.transaction(requires_new: true) do
-        ApplicationRecord.connection.execute("INSERT INTO jrc_nico_helpdesk_dispatch_intents(account_id,event_id) " \
+        ApplicationRecord.connection.execute('INSERT INTO jrc_nico_helpdesk_dispatch_intents(account_id,event_id) ' \
                                              "VALUES(#{Integer(foreign.id)},#{Integer(identifier)})")
       end
     end.to raise_error(ActiveRecord::InvalidForeignKey)
@@ -46,7 +46,7 @@ RSpec.describe JrcNico::Helpdesk::DispatchIntent do
     value = described_class.create!(account: sd_account, event: event)
     expect do
       ApplicationRecord.transaction(requires_new: true) do
-        ApplicationRecord.connection.execute("INSERT INTO jrc_nico_helpdesk_dispatch_intents(account_id,event_id) " \
+        ApplicationRecord.connection.execute('INSERT INTO jrc_nico_helpdesk_dispatch_intents(account_id,event_id) ' \
                                              "VALUES(#{Integer(sd_account.id)},#{Integer(event.id)})")
       end
     end.to raise_error(ActiveRecord::RecordNotUnique)
@@ -57,7 +57,7 @@ RSpec.describe JrcNico::Helpdesk::DispatchIntent do
     value = described_class.create!(account: sd_account, event: event)
     previous = value.created_at
     expect { value.update!(created_at: 1.day.from_now) }.to raise_error do |error|
-      expect(%w[ActiveRecord::ReadOnlyRecord ActiveRecord::ReadonlyAttributeError]).to include(error.class.name)
+      expect(error.class.name).to eq('ActiveRecord::ReadOnlyRecord').or(eq('ActiveRecord::ReadonlyAttributeError'))
     end
     expect(value.reload.created_at).to eq(previous)
     expect(event.reload.state).to eq('detected')

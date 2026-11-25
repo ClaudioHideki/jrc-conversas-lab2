@@ -30,6 +30,7 @@ RSpec.describe 'Native NICO capture delivery inside an ending destination transa
             config.configuration_hash[:host] == '127.0.0.1' && ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15' &&
             ApplicationRecord.connection.current_database == 'corporate_gratuity_disposable'
     raise 'Owned NICO transaction probe required' unless owned && !ApplicationRecord.connection.transaction_open?
+
     redis_identity = Sidekiq.redis { |client| client.call('CLIENT', 'INFO') }
     raise 'Unexpected NICO Redis database' unless redis_identity.split.include?('db=15')
 
@@ -90,7 +91,7 @@ RSpec.describe 'Native NICO capture delivery inside an ending destination transa
   end
 
   def native_queue_identity
-    source = IO.popen(['git', 'rev-parse', 'HEAD'], &:read).strip
+    source = IO.popen(%w[git rev-parse HEAD], &:read).strip
     actual = Sidekiq.redis { |client| client.call('CLIENT', 'INFO') }
     raise 'Unexpected NICO Redis identity' unless actual.split.include?('db=15') && source == ENV.fetch('GITHUB_SHA')
 

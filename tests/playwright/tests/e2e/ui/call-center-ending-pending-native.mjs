@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { openLoadedNativeTask } from './call-center-native-loaded-task-view.mjs';
 import fs from 'node:fs';
 import { measureTextContrast } from './call-center-text-contrast.mjs';
 
@@ -188,13 +189,13 @@ export async function verifySelectedPendingEnding(parent, info, target) {
       `/app/accounts/${account}/projetos/${target.automation_project_id}`
     );
     expect(href.searchParams.get('taskId')).toBe(completed.target.id);
-    await link.click();
-    await expect(
-      page.getByRole('dialog', {
-        name: 'SYNTHETIC_SELECTED_PENDING native task',
-        exact: true,
-      })
-    ).toBeVisible();
+    const nativeTaskView = await openLoadedNativeTask(page, {
+      link,
+      accountId: account,
+      projectId: target.automation_project_id,
+      taskId: completed.target.id,
+      title: 'SYNTHETIC_SELECTED_PENDING native task',
+    });
     await capture('native-task');
     expect(errors).toEqual([]);
     expect(prohibited).toEqual([]);
@@ -211,6 +212,7 @@ export async function verifySelectedPendingEnding(parent, info, target) {
           original_actor_nonadministrator: true,
           only_selected_POST: true,
           explicit_confirmation: true,
+          native_task_view: nativeTaskView,
           native_tasks_before: 0,
           native_tasks_after: await taskTotal(),
           immutable_other_pending_preserved: true,

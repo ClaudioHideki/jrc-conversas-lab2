@@ -275,11 +275,33 @@ export function verifyEndingAttemptMigrations(changes, readCurrent, schema) {
   return validateNewMigrationTimestamps(schema, rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
 }
 
+// The existing M1-M20 verifiers and every historical source pin remain
+// unchanged. This outer admission adds only the separately reviewed, empty
+// native NICO delivery-intent migration; no unknown source is ignored.
+export const nicoDispatchIntentMigrationPath = 'db/migrate/20261124200000_create_nico_helpdesk_dispatch_intents.rb';
+export const nicoDispatchIntentMigrationHash = 'a8791e39d46060922e7057fc18c04486c8cf4b774758f48a3930023748491050';
+
+export function verifyNicoDispatchIntentMigrations(changes, readCurrent, schema) {
+  const rows = changes.trim().split('\n').filter(Boolean);
+  const addition = `A\t${nicoDispatchIntentMigrationPath}`;
+  if (rows.filter(row => row === addition).length !== 1)
+    throw new Error('Missing or duplicate reviewed native NICO dispatch-intent migration');
+  const raw = readCurrent(nicoDispatchIntentMigrationPath);
+  if (!Buffer.isBuffer(raw) || raw.length < 1 || raw.length > 400_000 ||
+      createHash('sha256').update(raw).digest('hex') !== nicoDispatchIntentMigrationHash)
+    throw new Error('Reviewed native NICO dispatch-intent migration content changed');
+  const prior = rows.filter(row => row !== addition);
+  verifyEndingAttemptMigrations(prior.join('\n'), readCurrent, schema);
+  return validateNewMigrationTimestamps(schema,
+    rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyEndingAttemptMigrations(changes, readFileSync, schema);
+  const result = verifyNicoDispatchIntentMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
     [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash, [endingActionVersionMigrationPath]: endingActionVersionMigrationHash },
-    pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, endingOriginPins, ...result }));
+    pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, endingOriginPins,
+    nicoDispatchIntentMigration: { path: nicoDispatchIntentMigrationPath, sha256: nicoDispatchIntentMigrationHash }, ...result }));
 }

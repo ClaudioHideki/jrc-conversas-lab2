@@ -136,7 +136,7 @@ RSpec.describe JrcContactCenter::EndingActions::ServiceDeskTicketDestination do
 
   it 'rolls back the actual native Ticket and creation event when PostgreSQL rejects the native creation context' do
     row = reference
-    sql = <<~SQL
+    sql = <<~SQL.squish
       CREATE FUNCTION pg_temp.cc_ending_sd_context_reject() RETURNS trigger LANGUAGE plpgsql AS $$
       BEGIN
         IF NEW.account_id = #{Integer(account.id)} AND NEW.event_type = 'creation_context_recorded' THEN

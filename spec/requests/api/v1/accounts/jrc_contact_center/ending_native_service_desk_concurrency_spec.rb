@@ -11,6 +11,7 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
   include_context 'JRC Service Desk domain'
 
   let(:operator) { attempt_operator }
+  let(:native_sd_workers) { [] }
   let(:customer) { account.master_companies.create!(name: 'SYNTHETIC concurrent SD customer') }
   let(:contact) { create(:contact, account: account, company_id: customer.id) }
   let(:sd_account) { account }
@@ -45,7 +46,6 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
   end
 
   before do
-    @native_sd_workers = []
     account.enable_features!('jrc_customer_master')
     business.update!(settings: business.settings.merge('service_desk_unit_id' => sd_unit.id.to_s))
     reference
@@ -63,19 +63,22 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
     worker = Thread.new do
       ApplicationRecord.connection_pool.with_connection do |connection|
         state[:ready] << connection.raw_connection.backend_pid
-        owner = Account.find(ids.first)
-        context = JrcContactCenter::EndingActions::OriginalActorContext.new(account: owner, origin_id: ids.second)
-        result = context.call do |member, origin|
-          JrcContactCenter::EndingActions::ServiceDeskTicketDestination.new(account: owner, member: member).call(
-            origin: origin, parameters: input, request_key: ids.last
-          )
-        end
-        state[:results] << result
+        state[:results] << execute_native_sd(ids, input)
       end
     rescue StandardError => e
       state[:results] << e
     end
-    @native_sd_workers << worker
+    native_sd_workers << worker
+  end
+
+  def execute_native_sd(ids, input)
+    owner = Account.find(ids.first)
+    context = JrcContactCenter::EndingActions::OriginalActorContext.new(account: owner, origin_id: ids.second)
+    context.call do |member, origin|
+      JrcContactCenter::EndingActions::ServiceDeskTicketDestination.new(account: owner, member: member).call(
+        origin: origin, parameters: input, request_key: ids.last
+      )
+    end
   end
 
   def wait_for_native_sd_lock(state)
@@ -88,7 +91,7 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
   end
 
   def join_native_sd_workers
-    @native_sd_workers.each do |worker|
+    native_sd_workers.each do |worker|
       worker.join(20)
       raise 'Synthetic native Service Desk worker remained active' if worker.alive?
     end
@@ -104,7 +107,7 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
       end
     end
     join_native_sd_workers
-    results = 2.times.map { Timeout.timeout(8) { state[:results].pop } }
+    results = Array.new(2) { Timeout.timeout(8) { state[:results].pop } }
     expect(results).to all(be_a(JrcServiceDesk::Ticket))
     expect(results.map(&:id).uniq.length).to eq(1)
     expect(pids.uniq.length).to eq(2)

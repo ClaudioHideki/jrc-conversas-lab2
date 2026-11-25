@@ -10,6 +10,7 @@ class JrcContactCenter::EndingActions::CrmActivityDestination
 
   def call(origin:, parameters:, trigger_at:)
     raise JrcContactCenter::OperationError, 'ending_destination_requires_transaction' unless Account.connection.transaction_open?
+
     valid_trigger = trigger_at.is_a?(Time) || trigger_at.is_a?(ActiveSupport::TimeWithZone)
     raise JrcContactCenter::OperationError, 'ending_action_trigger_pending' unless valid_trigger
 
@@ -36,18 +37,22 @@ class JrcContactCenter::EndingActions::CrmActivityDestination
   def build_activity(lead, attributes, trigger_at)
     # Corporate identity comes only from the already visible native Lead.
     # This copies no coverage/grant and never accepts an arbitrary unit or user.
-    @account.jrc_crm_activities.new(attributes.merge(
-      'lead' => lead, 'user' => @member.user, 'contact_id' => lead.contact_id, 'company_id' => lead.company_id,
-      'business_unit_id' => lead.business_unit_id, 'status' => 'completed', 'completed_at' => trigger_at, 'due_at' => trigger_at
-    ))
+    @account.jrc_crm_activities.new(
+      attributes.merge(
+        'lead' => lead, 'user' => @member.user, 'contact_id' => lead.contact_id, 'company_id' => lead.company_id,
+        'business_unit_id' => lead.business_unit_id, 'status' => 'completed', 'completed_at' => trigger_at, 'due_at' => trigger_at
+      )
+    )
   end
 
   def persist_native!(activity)
     result = JrcCrm::ActivityDispatchService.new(activity: activity, actor: @member.user).call
     raise JrcContactCenter::OperationError, 'ending_crm_native_activity_invalid' unless result.fetch(:success)
 
-    events = JrcCrm::AuditEvent.where(account: @account, resource_type: activity.class.name, resource_id: activity.id,
-                                     event_type: 'activity_created', actor_type: @member.user.class.name, actor_id: @member.user_id)
+    events = JrcCrm::AuditEvent.where(
+      account: @account, resource_type: activity.class.name, resource_id: activity.id,
+      event_type: 'activity_created', actor_type: @member.user.class.name, actor_id: @member.user_id
+    )
     raise JrcContactCenter::OperationError, 'ending_crm_native_audit_missing' unless events.exists?
   end
 end

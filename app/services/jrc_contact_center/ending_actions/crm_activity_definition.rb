@@ -7,15 +7,23 @@ class JrcContactCenter::EndingActions::CrmActivityDefinition
     invalid! unless value.is_a?(Hash)
 
     row = value.deep_stringify_keys
-    invalid! unless (row.keys - %w[activity_type description title]).empty? && (%w[activity_type title] - row.keys).empty?
+    invalid! unless shape?(row)
     invalid! unless text?(row['title'], 240)
     invalid! if row.key?('description') && !description?(row['description'])
-    invalid! unless row['activity_type'].is_a?(String) && JrcCrm::Activity::ACTIVITY_TYPES.include?(row['activity_type'])
+    invalid! unless activity_type?(row['activity_type'])
 
     row.deep_dup
   end
 
   private
+
+  def shape?(row)
+    (row.keys - %w[activity_type description title]).empty? && (%w[activity_type title] - row.keys).empty?
+  end
+
+  def activity_type?(value)
+    value.is_a?(String) && JrcCrm::Activity::ACTIVITY_TYPES.include?(value)
+  end
 
   def description?(value)
     value.nil? || (value.is_a?(String) && value.valid_encoding? && value.exclude?("\u0000") && value.length <= 6000)

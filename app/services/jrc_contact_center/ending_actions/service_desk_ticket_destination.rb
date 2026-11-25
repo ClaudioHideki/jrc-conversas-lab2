@@ -10,9 +10,7 @@ class JrcContactCenter::EndingActions::ServiceDeskTicketDestination
   end
 
   def call(origin:, parameters:, request_key:)
-    unless Account.connection.transaction_open?
-      raise JrcContactCenter::OperationError, 'ending_destination_requires_transaction'
-    end
+    raise JrcContactCenter::OperationError, 'ending_destination_requires_transaction' unless Account.connection.transaction_open?
 
     original = JrcContactCenter::EndingActionOrigin.where(account: @account).find(origin.id)
     input = JrcContactCenter::EndingActions::ServiceDeskDestinationDefinition.new.call(parameters)
@@ -85,8 +83,8 @@ class JrcContactCenter::EndingActions::ServiceDeskTicketDestination
   def verify_native_events!(ticket)
     events = ticket.ticket_events.where(account: @account, actor_membership_id: ticket.created_by_membership_id)
     actor = ticket.created_by_membership
-    unless actor.account_user_id == @member.id && events.where(event_type: 'ticket_created').exists? &&
-           events.where(event_type: 'creation_context_recorded').exists?
+    unless actor.account_user_id == @member.id && events.exists?(event_type: 'ticket_created') &&
+           events.exists?(event_type: 'creation_context_recorded')
       raise JrcContactCenter::OperationError, 'ending_service_desk_native_audit_missing'
     end
   end

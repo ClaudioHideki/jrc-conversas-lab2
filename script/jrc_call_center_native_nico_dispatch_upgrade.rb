@@ -56,16 +56,19 @@ class JrcContactCenter::SyntheticNicoDispatchUpgrade < JrcContactCenter::Synthet
   private
 
   def guard!(installed:)
-    config = ApplicationRecord.connection_db_config
-    owned = runner_owned? && config.configuration_hash[:host] == '127.0.0.1' && config.database == DATABASE &&
-            ApplicationRecord.connection.current_database == DATABASE && !ApplicationRecord.connection.transaction_open?
-    raise 'Exclusive committed native NICO upgrade database required' unless owned
+    raise 'Exclusive committed native NICO upgrade database required' unless owned_database?
     raise 'Unexpected native NICO intent installation stage' unless ApplicationRecord.connection.table_exists?(TABLE) == installed
     raise 'Complete M20 source schema required' unless ApplicationRecord.connection.table_exists?(:jrc_contact_center_ending_action_attempts)
 
     ActiveJob::Base.queue_adapter = :test
     WebMock.enable!
     WebMock.disable_net_connect!(allow_localhost: true)
+  end
+
+  def owned_database?
+    config = ApplicationRecord.connection_db_config
+    runner_owned? && config.configuration_hash[:host] == '127.0.0.1' && config.database == DATABASE &&
+      ApplicationRecord.connection.current_database == DATABASE && !ApplicationRecord.connection.transaction_open?
   end
 
   def create_native_unit
@@ -96,9 +99,10 @@ class JrcContactCenter::SyntheticNicoDispatchUpgrade < JrcContactCenter::Synthet
     definition = JrcNico::Helpdesk::Definition.defaults.merge('unit_ids' => [@sd_unit.id], 'company_ids' => [@sd_company.id],
                                                              'operator_ids' => [@member.id])
     definition['rules']['R16']['enabled'] = true
-    @nico_policy = JrcNico::Helpdesk::PolicyVersion.create!(account: @account, author: @member, number: 1, state: 'published', enabled: true,
-                                                            published_at: Time.current, definition: definition,
-                                                            digest: JrcNico::Helpdesk::Definition.digest(definition))
+    @nico_policy = JrcNico::Helpdesk::PolicyVersion.create!(
+      account: @account, author: @member, number: 1, state: 'published', enabled: true,
+      published_at: Time.current, definition: definition, digest: JrcNico::Helpdesk::Definition.digest(definition)
+    )
     @legacy_event = JrcNico::Helpdesk::Event.create!(account: @account, actor: @member, policy_version: @nico_policy, ticket: @sd_ticket,
                                                      rule_key: 'R16', correlation_key: "synthetic-legacy:#{SecureRandom.uuid}",
                                                      detected_at: Time.current)

@@ -159,5 +159,81 @@
   "no_intermediate_native_acceptance_simulated": true,
   "no_new_operational_dispatch_API_editor_grant_or_extra_migration": true,
   "whole_figure10_accepted": false,
-  "whole_part1_accepted": false
+  "whole_part1_accepted": false,
+  "reviewed_source_corrections": [
+    {
+      "diagnostic_run": 45574218280,
+      "failed_product_sha": "bf8ad8413e8d94cb414f72088f8fa13e6afe6219",
+      "diagnostic_artifact_sha256": "d0ba5670a2bcf1ca2a33d3e3e8b9ca04b20c3fbaa2e57f2b98c5c0b3a956e96a",
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/crm_activity_definition.rb": "ff2d0fa98f55107a8fd79938acf153f75f1b76aa0755b4da664598932eb361f2",
+        "app/services/jrc_contact_center/ending_actions/crm_activity_destination.rb": "87ed93567cca92490bbed6e4f4de1222e3682105a2f4495d61008e9996dfa21b",
+        "app/services/jrc_contact_center/ending_actions/service_desk_ticket_destination.rb": "5cc5b4c94c30309f3c30975a980fa660514b32c7b91de630461a7d33f78f8721",
+        "app/services/jrc_contact_center/ending_actions/service_desk_ticket_update.rb": "4cd3a9d59cdde0587e5667dd14640b1c4b8dc271cc4a6fbe494318b6014797d6",
+        "app/services/jrc_contact_center/ending_actions/service_desk_update_definition.rb": "e9564d05711542142de0413e02e67aa0eee429ce29011d354f3701cf34e44e00",
+        "script/jrc_call_center_native_nico_dispatch_upgrade.rb": "1abdb9da8f775bf41093738c36d6186bb85b88999b9cec93c815c59685bab17e",
+        "spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb": "5744b350e0f980a264acfe5acf50201577c699ebb2fec0109fda6aac1df62a47",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb": "ca6519e48a3ff204dd550a9c300a5f64626f0aec615b92c11661f6bf8430eeb4",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "a10af80aa6d1e549b8f9d1bf38cc1bd0f09dd9b7764b62f8db0b311fa8251ecf",
+        "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb": "746d94c2e4094e472effc42025f0d576b25996b44c5b55d88d4c1d6e40a74aa3",
+        "spec/services/jrc_contact_center/ending_actions/explicit_destination_schema_spec.rb": "235a6d880395e0634227e115c2fe8c8116fb5bae603fe524f93e17e5319df3f1",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_destination_spec.rb": "72433edb3d27fa31d7e06be5b3dbab9eeeeb280fbd0c1dc1422db5ae169bde2f",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb": "7d3a88e127711117253b2037b73a5d3be67ee2f85e6f9f590b8a2dc9109856aa",
+        ".github/workflows/call-center-administration.yml": "3e640e692899f60a92fa501882b542e7ff6ed40f6e3a6f811e8afc538628957c"
+      },
+      "parent_sources": {
+        "app/services/jrc_contact_center/ending_actions/crm_activity_definition.rb": "c386571cdeb1c7d558ef7850de5a655e82f56c8a13aaeeb1bf332f230ffa041b",
+        "app/services/jrc_contact_center/ending_actions/crm_activity_destination.rb": "232757c17086defb658f881d4b464cc5d7acc66330eabb28d31669a269c154c8",
+        "app/services/jrc_contact_center/ending_actions/service_desk_ticket_destination.rb": "fec33b3a014c6ea1690649e9f4d7f4949644e4cdff0737f9e8a59f76c92b62cb",
+        "app/services/jrc_contact_center/ending_actions/service_desk_ticket_update.rb": "a39caf163912b0c9c8c12ff86b0dea1f507efc75913fa28e896d4e958e7377de",
+        "app/services/jrc_contact_center/ending_actions/service_desk_update_definition.rb": "b7f88802c2330cf619870d9a94c60fdfcd5824e617d9b5611928c90e77bec337",
+        "script/jrc_call_center_native_nico_dispatch_upgrade.rb": "ceb6546445e3b6d8b3aabe747baa671a272c0e8edcfed779b13b6dde37f3e566",
+        "spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb": "0d6eff0eb359b7226d7e033dddf1869d7f9396f1288ee0f2711b3559948e8b74",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb": "4e5a2b72828095ad124443979390c775441a55d16178b8189c7157a128a6be12",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "75350708b23fff00e0b02d9d45506a7a257876b6d79e1003c8db267986496f33",
+        "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb": "53e21990501aff601f64f9693f93297fe2f961e2fadb717eb693db9e03ac2140",
+        "spec/services/jrc_contact_center/ending_actions/explicit_destination_schema_spec.rb": "dfe43693bc6d306edf7ece5dfb658cb640b6ea5c260c71c3c28fd78a314ee8ab",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_destination_spec.rb": "e6529225c6aea29d1329b49e180b7dc0472606e75afd8ed3dcb041ebf3b06ff8",
+        "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb": "e3e28d74886ae7a6f51a6d5b4867d26e244374563d90f883e73f9fe9a4980aed",
+        ".github/workflows/call-center-administration.yml": "752c95082b696b9519c54f81e836934f4a153194944d95b3482eeec0db107036"
+      },
+      "no_gate_or_native_coverage_weakened": true
+    }
+  ],
+  "reviewed_loaded_native_task_browser_correction": [
+    {
+      "diagnostic_run": 45574218280,
+      "failed_product_sha": "bf8ad8413e8d94cb414f72088f8fa13e6afe6219",
+      "diagnostic_artifact_sha256": "d0ba5670a2bcf1ca2a33d3e3e8b9ca04b20c3fbaa2e57f2b98c5c0b3a956e96a",
+      "parent_sources": {
+        "tests/playwright/tests/e2e/ui/call-center-native-loaded-task-view.mjs": null,
+        "tests/playwright/tests/e2e/ui/call-center-ending-pending-native.mjs": "53dfda17cc9caf613736ee61474afce92f7fb9632d730179718c85620a6f8642",
+        "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.mjs": "5286752553cd08a86233f9047e751d3a1cb28378a5bdc0ae3384c2b40ee8c2eb"
+      },
+      "source_sha256": {
+        "tests/playwright/tests/e2e/ui/call-center-native-loaded-task-view.mjs": "60cc0c0546006794922d3909697863f4ce5e716b8c01fdcda20e54fdbec73042",
+        "tests/playwright/tests/e2e/ui/call-center-ending-pending-native.mjs": "55d9e68ff69daeae49d36bb0e8882651b0bdb88c6b372a874c0ea9d434dcf3dc",
+        "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.mjs": "40ac7bb15acec156bca70afef3f911b60ce8ce342095e86ce3ca237fa61da279"
+      },
+      "same_276_Chrome_cases_without_retries_or_timeout_increase": true,
+      "native_component_API_or_permissions_modified": false,
+      "additional_real_GET_and_loaded_detail_assertions": true,
+      "no_gate_or_native_coverage_weakened": true
+    }
+  ],
+  "reviewed_native_NICO_source_admission": [
+    {
+      "parent_sources": {
+        "script/validate_cc_access_migration.mjs": "18618ffba6ad6f1edd6821f57db3ee40149469c3a86490e9e6a80433e34f4614",
+        "script/validate_cc_nico_intent_admission.test.mjs": null
+      },
+      "source_sha256": {
+        "script/validate_cc_access_migration.mjs": "d6b971191e8978c0f333311c2ffe74f199f2590ab8042ba396e91ece535df9a7",
+        "script/validate_cc_nico_intent_admission.test.mjs": "b0cdf372d7da21752b2bb56ff2a867c0ba21996c369360d6b0052da35bec026c"
+      },
+      "all_prior_migration_gate_bytes_recoverable": true,
+      "new_migration_bytes_unchanged": true,
+      "no_gate_or_native_coverage_weakened": true
+    }
+  ]
 }

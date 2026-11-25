@@ -24,14 +24,25 @@ class JrcContactCenter::EndingActions::ServiceDeskUpdateDefinition
   def attributes!(value)
     fields = JrcServiceDesk::Input.attributes(value, ATTRIBUTES).deep_dup
     invalid! if fields.empty?
+    validate_text!(fields)
+    validate_service_fields!(fields)
+    normalize_references!(fields)
+    fields
+  end
+
+  def validate_text!(fields)
     invalid! if fields.key?('title') && (!text?(fields['title']) || fields['title'].strip.empty?)
     invalid! unless fields['description'].nil? || text?(fields['description'])
-    invalid! if fields.key?('service_fields') && !fields['service_fields'].is_a?(Hash)
+  end
 
+  def validate_service_fields!(fields)
+    invalid! if fields.key?('service_fields') && !fields['service_fields'].is_a?(Hash)
+  end
+
+  def normalize_references!(fields)
     ATTRIBUTES.grep(/_id\z/).each do |key|
       fields[key] = JrcServiceDesk::Input.id(fields[key]).to_s unless fields[key].nil?
     end
-    fields
   end
 
   def text?(value)

@@ -142,7 +142,7 @@ RSpec.describe JrcContactCenter::EndingActions::ServiceDeskTicketUpdate do
 
   it 'rolls back the real native edit when PostgreSQL rejects its audit insertion' do
     input = parameters
-    ApplicationRecord.connection.execute(<<~SQL)
+    ApplicationRecord.connection.execute(<<~SQL.squish)
       CREATE FUNCTION pg_temp.cc_ending_update_audit_reject() RETURNS trigger LANGUAGE plpgsql AS $$
       BEGIN
         IF NEW.account_id = #{Integer(account.id)} AND NEW.event_type = 'ticket_updated' THEN

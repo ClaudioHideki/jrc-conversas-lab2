@@ -2777,5 +2777,12 @@
     "prepared_native_cases_not_executed": 142,
     "no_intermediate_native_acceptance_simulated": true,
     "operational_dispatch_or_whole_Part1_accepted": false
+  },
+  "reviewed_native_bundle_correction": {
+    "document": "docs/jrc_contact_center/ending_native_bundle_reviewed_corrections_20261125.json",
+    "document_sha256": "041df58991b8015df22f787eb5d1ab16936361d8e2174600ed16b9224f0cedd1",
+    "status": "corrections_prepared_native_lint_Rails_and_Chrome_not_yet_run",
+    "historical_migrations_unchanged": true,
+    "whole_Part1_accepted": false
   }
 }
