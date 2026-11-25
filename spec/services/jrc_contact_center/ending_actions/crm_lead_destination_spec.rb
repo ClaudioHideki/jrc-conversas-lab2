@@ -107,7 +107,7 @@ RSpec.describe JrcContactCenter::EndingActions::CrmLeadDestination do
 
   it 'does not infer or create a Contact for an unidentified source call' do
     row = reference
-    row.call_session.update!(contact_id: nil)
+    JrcContactCenter::CallSession.where(account: account).find(row.call_session_id).update!(contact_id: nil)
     original = account.contacts.count
     expect { described_class.new(account: account, member: operator).call(origin: row) }.to raise_error do |error|
       expect(error.code).to eq('ending_customer_reference_changed')
@@ -155,21 +155,20 @@ RSpec.describe JrcContactCenter::EndingActions::CrmLeadDestination do
     row = reference
     # Deliberate dependency persistence fault, not the success-path evidence.
     allow(JrcCrm::AuditEvent).to receive(:create!).and_raise(ActiveRecord::StatementInvalid, 'SYNTHETIC audit failure')
+    failure = nil
     expect do
       ApplicationRecord.transaction(requires_new: true) do
         described_class.new(account: account, member: operator).call(origin: row)
       end
-    end.to raise_error do |error|
-      expect(error.class.name).to eq('JrcContactCenter::OperationError')
-      expect(error.code).to eq('ending_crm_native_audit_missing')
-    end
+    end.to raise_error { |error| failure = error }
+    expect([failure.class.name, failure.code]).to eq(['JrcContactCenter::OperationError', 'ending_crm_native_audit_missing'])
     expect(account.jrc_crm_leads.where(contact: contact)).to be_empty
     expect(JrcCrm::AuditEvent.where(account: account, event_type: 'lead_created')).to be_empty
   end
 
   it 'also rolls back the native Lead on an actual PostgreSQL audit persistence rejection' do
     row = reference
-    sql = <<~SQL
+    sql = <<~SQL.squish
       CREATE FUNCTION pg_temp.cc_ending_crm_audit_reject() RETURNS trigger LANGUAGE plpgsql AS $$
       BEGIN
         IF NEW.account_id = #{Integer(account.id)} AND NEW.event_type = 'lead_created' THEN
@@ -192,7 +191,6 @@ RSpec.describe JrcContactCenter::EndingActions::CrmLeadDestination do
   end
 
   def restrict_original_actor_to_source_crm_unit
-    business.update!(company: issuer)
     JrcCrm::UserBusinessUnit.where(account: account, user: operator.user).sole.update!(
       scope: 'BUSINESS_UNIT', company_id: issuer.id, business_unit_id: business.id
     )
@@ -201,8 +199,10 @@ RSpec.describe JrcContactCenter::EndingActions::CrmLeadDestination do
   it 'does not return an owned existing Lead outside the native CRM unit despite an authorized Contact' do
     row = reference
     restrict_original_actor_to_source_crm_unit
-    other = JrcCrm::BusinessUnit.create!(account: account, company: issuer, operating_company: issuer,
-                                         name: 'SYNTHETIC hidden CRM unit', code: 'CRM_HIDDEN', active: true)
+    other = JrcCrm::BusinessUnit.create!(
+      account: account, operating_company: issuer,
+      name: 'SYNTHETIC hidden CRM unit', code: 'CRM_HIDDEN', active: true
+    )
     lead = account.jrc_crm_leads.create!(owner: operator.user, contact: contact, business_unit_id: other.id,
                                         name: 'SYNTHETIC hidden owned native Lead')
     policy = JrcCrm::LeadPolicy.new({ account: account, account_user: operator, user: operator.user }, lead)

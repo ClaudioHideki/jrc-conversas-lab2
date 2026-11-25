@@ -46,9 +46,9 @@ class JrcContactCenter::EndingActions::OriginalCustomerReference
   end
 
   def validate_company!(contact, captured)
-    if captured['company_id'] && company_identity(contact) != captured.fetch('company_id')
-      raise JrcContactCenter::OperationError, 'ending_customer_reference_changed'
-    end
+    return unless captured['company_id'] && company_identity(contact) != captured.fetch('company_id')
+
+    raise JrcContactCenter::OperationError, 'ending_customer_reference_changed'
   end
 
   def company_identity(contact)

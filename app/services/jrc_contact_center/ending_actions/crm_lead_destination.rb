@@ -10,9 +10,7 @@ class JrcContactCenter::EndingActions::CrmLeadDestination
   end
 
   def call(origin:)
-    unless Account.connection.transaction_open?
-      raise JrcContactCenter::OperationError, 'ending_destination_requires_transaction'
-    end
+    raise JrcContactCenter::OperationError, 'ending_destination_requires_transaction' unless Account.connection.transaction_open?
 
     # Scope only the native SQL diagnostics of this synchronous command. Native
     # audit rows, warnings and errors remain active; no global filter is changed.
@@ -61,8 +59,10 @@ class JrcContactCenter::EndingActions::CrmLeadDestination
   # The native logger deliberately rescues persistence errors. An automation may
   # not turn that absence into success or commit an unaudited new Lead.
   def require_native_creation_audit!(lead)
-    events = JrcCrm::AuditEvent.where(account: @account, resource_type: lead.class.name, resource_id: lead.id,
-                                     event_type: 'lead_created', actor_type: @member.user.class.name, actor_id: @member.user_id)
+    events = JrcCrm::AuditEvent.where(
+      account: @account, resource_type: lead.class.name, resource_id: lead.id,
+      event_type: 'lead_created', actor_type: @member.user.class.name, actor_id: @member.user_id
+    )
     raise JrcContactCenter::OperationError, 'ending_crm_native_audit_missing' unless events.exists?
   end
 end

@@ -152,5 +152,46 @@
   "no_new_registry_grants_migrations_or_CRM_dispatch": true,
   "no_intermediate_approval_document_invented": true,
   "whole_figure10_accepted": false,
-  "whole_part1_accepted": false
+  "whole_part1_accepted": false,
+  "reviewed_source_corrections": [
+    {
+      "diagnostic_run": 45530029703,
+      "failed_product_sha": "123bce44d9673f0f60fe476412faa18853dacb5b",
+      "diagnostic_artifact_sha256": "fa693565d716c9b98daabd3be37127f50b5e6df7a985b1f21d14ac8b71e8e96f",
+      "parent_sources": {
+        "script/jrc_call_center_ending_pending_seed.rb": "8674864bc4d2bda8ce6944d374d622c9b68e10fd8ae26008eb1ea6e5bdfc2441",
+        "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb": "8368dacdf727bd2c3f63b72847af694a8a71e9f777347950803ee71bd4eae3b7",
+        "app/services/jrc_contact_center/ending_actions/original_customer_reference.rb": "5541a22a0bbe798dd89cf7bbad178a43a89ab6e5b991ab5ee5d6d46b814280f2",
+        "app/services/jrc_contact_center/ending_actions/pending_project_action.rb": "39bbd8ca7d0e82e685a7576edd9f60ccbb88413f0f8144163c675fb6532912da",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": "da067ef53f4a9dafc26316b91711e78223f369fea3515c9d5f99a2c57dc99c8c",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": "b3956842660c4fec2077907dbcced87d04e37a4d14fc770676dafa77e5bdb1f7",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": "6173877be78c47be0eb5963402d83cfa0dd3bcee034c5bee140e74b4bf53a4f6",
+        "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": "454294ec81ac49aa628895acc5733c46697ba39b3a9452eeceb7468180a16b88",
+        "spec/services/jrc_contact_center/ending_actions/original_customer_reference_spec.rb": "3843546c7eb04777810952a9b536d8e595b7efe7c0d6068dc099dae2f36bc172"
+      },
+      "source_sha256": {
+        "script/jrc_call_center_ending_pending_seed.rb": "87b6c8d838effadfc518e981bfbf623b9c589ba7a8073237d913d7a75b51bb80",
+        "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb": "d6a3ce9c7d5f9010edeb031a692dc117367a540d668ec39984aa1c7aba14eeb4",
+        "app/services/jrc_contact_center/ending_actions/original_customer_reference.rb": "3c62a65b673c2f3564ae25cc2433d84ecce858782f929dcbc90c0251da6931dd",
+        "app/services/jrc_contact_center/ending_actions/pending_project_action.rb": "9a184373806bd6f4e83b0dfa14ab41828a306a5e1e17e47ec70dccda2c541b4e",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": "98aeeb2fa90be8e91a61ea790015ffcb2c5de53626b3bbccef4b1e592c95072b",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": "fa5da83950a75e68eb3a4965e678f3d46969cb5fd23187bacf33a94dc0218de2",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": "0db4fd6b6da3caa66ce75e9dd33a5f762731ce88d8cd2366fa64848b4ba57faf",
+        "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": "3ebc9814c181224985f2d8e2b38f0ed2272e32b63b038037381674721f019e33",
+        "spec/services/jrc_contact_center/ending_actions/original_customer_reference_spec.rb": "2d277712d7a362c0aa3ebe53a8af5ebd460f5ede1e458813d1008bfefd092fcd"
+      },
+      "no_gate_or_native_coverage_weakened": true,
+      "same_declared_native_examples_before_and_after": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": 6,
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb": 12,
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb": 3,
+        "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": 15,
+        "spec/services/jrc_contact_center/ending_actions/original_customer_reference_spec.rb": 13
+      },
+      "new_Ruby_offenses_identified": 16,
+      "RSpec_failures_identified": 8,
+      "native_confirmation_of_fix_still_required": true
+    }
+  ],
+  "native_fixture_lint_correction": "docs/jrc_contact_center/ending_operational_A_native_correction_20261124.json"
 }

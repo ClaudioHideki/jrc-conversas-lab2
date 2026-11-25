@@ -3990,5 +3990,13 @@
     "prepared_Chrome_not_executed": 4,
     "no_intermediate_native_approval_simulated": true,
     "whole_figure10_or_Part1_accepted": false
+  },
+  "operational_A_native_fixture_lint_correction": {
+    "parent": "123bce44d9673f0f60fe476412faa18853dacb5b",
+    "document": "docs/jrc_contact_center/ending_operational_A_native_correction_20261124.json",
+    "document_sha256": "14ea9641fc5715142698b106a885f0c865c818bd74edaba10bd00fbed5e845ba",
+    "new_Ruby_offenses_corrected_pending_native_confirmation": 16,
+    "declared_native_examples_preserved": 49,
+    "whole_figure10_or_Part1_accepted": false
   }
 }

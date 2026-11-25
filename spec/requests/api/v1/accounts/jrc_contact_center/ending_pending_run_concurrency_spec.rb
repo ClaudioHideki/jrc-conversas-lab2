@@ -41,13 +41,17 @@ RSpec.describe 'Selected pending Project execution under actual PostgreSQL conte
     Thread.new do
       ApplicationRecord.connection_pool.with_connection do |connection|
         state[:ready] << connection.raw_connection.backend_pid
-        state[:result] << JrcContactCenter::EndingActions::RunPendingProjectAttempt.new(
-          account: Account.find(ids[0]), member: AccountUser.find(ids[1]), qualification_id: ids[2], attempt_id: ids[3], review: review
-        ).call
+        state[:result] << run_selected_command(ids, review)
       end
     rescue StandardError => e
       state[:result] << e
     end
+  end
+
+  def run_selected_command(ids, review)
+    JrcContactCenter::EndingActions::RunPendingProjectAttempt.new(
+      account: Account.find(ids[0]), member: AccountUser.find(ids[1]), qualification_id: ids[2], attempt_id: ids[3], review: review
+    ).call
   end
 
   def wait_for_selected_lock(state)

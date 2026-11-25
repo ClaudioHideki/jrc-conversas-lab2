@@ -37,6 +37,10 @@ RSpec.describe JrcContactCenter::EndingActions::OriginalCustomerReference do
     described_class.new(account: owner, member: reader, origin: row).call
   end
 
+  def reference_source_call(row)
+    JrcContactCenter::CallSession.where(account: account).find(row.call_session_id)
+  end
+
   it 'reuses the native explicit customer link and returns IDs only without closing ACW or granting destination access' do
     row = original_reference
     original = row.attributes
@@ -63,7 +67,7 @@ RSpec.describe JrcContactCenter::EndingActions::OriginalCustomerReference do
   it 'rejects a call contact changed after the immutable capture instead of selecting the new customer' do
     row = original_reference
     other = create(:contact, account: account)
-    row.call_session.update!(contact_id: other.id)
+    reference_source_call(row).update!(contact_id: other.id)
     expect { resolve(row) }.to raise_error do |error|
       expect(error.code).to eq('ending_customer_reference_changed')
     end
@@ -73,7 +77,7 @@ RSpec.describe JrcContactCenter::EndingActions::OriginalCustomerReference do
   it 'rejects a call company changed after the immutable capture' do
     row = original_reference
     other = account.master_companies.create!(name: 'SYNTHETIC changed source company')
-    row.call_session.update!(company_id: other.id)
+    reference_source_call(row).update!(company_id: other.id)
     expect { resolve(row) }.to raise_error do |error|
       expect(error.code).to eq('ending_customer_reference_changed')
     end
@@ -85,7 +89,7 @@ RSpec.describe JrcContactCenter::EndingActions::OriginalCustomerReference do
     other = account.master_companies.create!(name: 'SYNTHETIC contact new company')
     contact.update!(company_id: other.id)
     context = { account: account, account_user: operator, user: operator.user }
-    current = JrcContactCenter::CustomerContext.new(account: account, user_context: context).for_call(row.call_session)
+    current = JrcContactCenter::CustomerContext.new(account: account, user_context: context).for_call(reference_source_call(row))
     expect(current.fetch(:contacts).sole.dig(:company, :id)).to eq(other.id.to_s)
     expect { resolve(row) }.to raise_error do |error|
       expect(error.code).to eq('ending_customer_reference_changed')
@@ -138,15 +142,17 @@ RSpec.describe JrcContactCenter::EndingActions::OriginalCustomerReference do
     expect { resolve(row, member, other) }.to raise_error(ActiveRecord::RecordNotFound)
   end
 
-  it 'does not treat a customer ID captured from a malformed cross-account call link as a permission' do
+  it 'rejects a cross-account customer at the native source FK while retaining the authorized original reference' do
     other = create(:account)
     foreign = create(:contact, account: other)
-    # Real legacy source/model write deliberately probes the authorization
-    # boundary. The immutable snapshot is evidence, never a contact grant.
-    row = original_reference(contact_id: foreign.id, company_id: nil)
-    expect { resolve(row) }.to raise_error do |error|
-      expect(error.class.name).to eq('Pundit::NotAuthorizedError')
-    end
+    row = original_reference
+    call = reference_source_call(row)
+    expect do
+      ApplicationRecord.transaction(requires_new: true) { call.update!(contact_id: foreign.id) }
+    end.to raise_error(ActiveRecord::InvalidForeignKey)
+    expect(call.reload.contact_id).to eq(contact.id)
+    expect(row.reload.private_origin_evidence['contact_id']).to eq(contact.id)
+    expect(resolve(row)).to eq(contact_id: contact.id, captured_company_id: customer.id, current_company_id: customer.id)
     expect(JrcContactCenter::EndingActionExecution.where(account: account)).to be_empty
   end
 
@@ -160,6 +166,6 @@ RSpec.describe JrcContactCenter::EndingActions::OriginalCustomerReference do
     row = original_reference(company_id: nil)
     expect(resolve(row)).to eq(contact_id: contact.id, captured_company_id: nil, current_company_id: customer.id)
     expect(row.reload.private_origin_evidence['company_id']).to be_nil
-    expect(row.call_session.reload.company_id).to be_nil
+    expect(reference_source_call(row).company_id).to be_nil
   end
 end

@@ -177,3 +177,5 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 - M23/d7f17062/CI 45516626913: 3 cenários reais isolados de Redis/Sidekiq/PostgreSQL validados; 3220 Rails distintos, 1854 Vue, 272 Chrome e 632 PNG verificados. Execução manual/retry, CRM/Service Desk, recuperação operacional, PABX externo e Parte 1 permanecem abertos.
 
 - Após o aceite da fila real em d7f17062: preparado bloco conjunto de operação selecionada, cliente original e adaptador CRM; 49 Rails, 15 Vue e 4 Chrome novos exigidos. Sem migrations, grants ou aceites intermediários simulados. Execução CRM/SD completa, F10-B e Parte 1 continuam abertos.
+
+- CI 45530029703 bloqueou o bloco A por oito erros de preparação nativa e 16 infrações novas Ruby. Preparada correção mínima em nove arquivos, preservando 49 cenários, FKs, permissões e todos os gates. Nova execução nativa e Chrome ainda exigidos; sem aceite do incremento ou da Parte 1.

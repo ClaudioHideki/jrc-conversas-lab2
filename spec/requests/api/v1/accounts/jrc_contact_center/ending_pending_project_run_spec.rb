@@ -122,9 +122,9 @@ RSpec.describe 'Explicit selected pending Project automation', type: :request do
   it 'keeps another agent read-only even for an explicit auditor with native Project creation authority' do
     pending_attempt
     account.enable_features!('custom_roles')
-    role = create(:custom_role, account: account,
-                  permissions: %w[jrc_contact_center_view jrc_contact_center_operate jrc_contact_center_supervise jrc_contact_center_audit
-                                  jrc_projects_project_view jrc_projects_task_create])
+    permissions = %w[jrc_contact_center_view jrc_contact_center_operate jrc_contact_center_supervise jrc_contact_center_audit
+                     jrc_projects_project_view jrc_projects_task_create]
+    role = create(:custom_role, account: account, permissions: permissions)
     member.update!(custom_role: role, jrc_projects_permissions: member.jrc_projects_permissions.merge('projects.task.create' => true))
     project = JrcProjects::Project.where(account: account).sole
     expect(JrcProjects::Authorization).to be_allowed(account_user: member, capability: 'projects.task.create', project: project)

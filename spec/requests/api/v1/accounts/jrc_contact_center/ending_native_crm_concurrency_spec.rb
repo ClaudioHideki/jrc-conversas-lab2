@@ -82,7 +82,7 @@ RSpec.describe 'Native CRM ending destination under concurrent original authorit
       end
     end
     join_native_crm_workers(workers)
-    results = 2.times.map { Timeout.timeout(8) { state[:results].pop } }
+    results = Array.new(2) { Timeout.timeout(8) { state[:results].pop } }
     expect(results).to all(be_a(Hash))
     expect(results.map { |result| result.fetch(:lead).id }.uniq.length).to eq(1)
     expect(results.map { |result| result.fetch(:created) }.sort_by(&:to_s)).to eq([false, true])
@@ -167,12 +167,13 @@ RSpec.describe 'Native CRM ending destination under concurrent original authorit
   end
 
   it 'rechecks the existing native Lead unit after an actual PostgreSQL Contact wait' do
-    business.update!(company: issuer)
     JrcCrm::UserBusinessUnit.where(account: account, user: operator.user).sole.update!(
       scope: 'BUSINESS_UNIT', company_id: issuer.id, business_unit_id: business.id
     )
-    other = JrcCrm::BusinessUnit.create!(account: account, company: issuer, operating_company: issuer,
-                                         name: 'SYNTHETIC moved CRM unit', code: 'CRM_MOVED', active: true)
+    other = JrcCrm::BusinessUnit.create!(
+      account: account, operating_company: issuer,
+      name: 'SYNTHETIC moved CRM unit', code: 'CRM_MOVED', active: true
+    )
     lead = account.jrc_crm_leads.create!(owner: operator.user, contact: contact, business_unit_id: business.id,
                                         name: 'SYNTHETIC moved owned native Lead')
     visible = JrcCrm::OrganizationalVisibility.new(account: account, user: operator.user, relation: account.jrc_crm_leads).call

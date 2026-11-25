@@ -22,11 +22,7 @@ class JrcContactCenter::SyntheticEndingPendingSeed
       authorize_synthetic_operator!(data)
       %w[SYNTHETIC_SELECTED_PENDING SYNTHETIC_UNSELECTED_PENDING].each { |code| configure_rule!(data, code) }
       qualification = completed_attendance!
-      rows = JrcContactCenter::EndingActions::InitialProjectAttempts.new(account: @account, qualification_id: qualification.id).call
-      raise 'Exactly two genuinely pending native attempts required' unless rows.length == 2 && rows.none?(&:outcome)
-      raise 'Pending fixture must not already contain a native success or task' if JrcProjects::Task.where(account: @account).exists?
-
-      selected = rows.find { |row| row.rule_code == 'SYNTHETIC_SELECTED_PENDING' }
+      selected = selected_pending_attempt!(qualification)
       data.merge(call_session_id: qualification.call_session_id.to_s, qualification_id: qualification.id.to_s,
                  selected_attempt_id: selected.id.to_s, selected_version_id: selected.version_id.to_s,
                  selected_request_id: selected.request_key, original_operator_user_id: @operator.user_id.to_s)
@@ -34,6 +30,14 @@ class JrcContactCenter::SyntheticEndingPendingSeed
   end
 
   private
+
+  def selected_pending_attempt!(qualification)
+    rows = JrcContactCenter::EndingActions::InitialProjectAttempts.new(account: @account, qualification_id: qualification.id).call
+    raise 'Exactly two genuinely pending native attempts required' unless rows.length == 2 && rows.none?(&:outcome)
+    raise 'Pending fixture must not already contain a native success or task' if JrcProjects::Task.exists?(account: @account)
+
+    rows.find { |row| row.rule_code == 'SYNTHETIC_SELECTED_PENDING' }
+  end
 
   def authorize_synthetic_operator!(data)
     @operator.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.task.create' => true })
