@@ -1,0 +1,27 @@
+{
+  "parent": "bbee7d06b196068749d5f2051e9614403ed76466",
+  "failed_run": 45510597893,
+  "failed_job": 138857015742,
+  "diagnostic_artifact": 14977490150,
+  "artifact_sha256": "e754214200b93a29932b44a3392080c6ff15effc8fa0a5b1802896abcea004f6",
+  "cause": "Native ActiveJob::TestHelper installs a TestAdapter override after around starts; Base.queue_adapter alone did not route this request-spec Job to Redis.",
+  "correction": "Opt out only EndingActionsJob after setup, require actual SidekiqAdapter, restore its prior adapter/test override/queue. Base and all other Jobs are unchanged.",
+  "native_dependency_versions": {
+    "activejob": "7.1.5.2",
+    "rails": "7.1.5.2",
+    "rspec-rails": "7.0.1"
+  },
+  "official_source": "https://github.com/rails/rails/blob/v7.1.5.2/activejob/lib/active_job/test_helper.rb#L14-L53",
+  "source_sha256": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb": {
+      "before": "f67bc3bf10e0dcb2b21c57fee8f61e2807ad4bc65482c58323dd0a28e7f992e6",
+      "after": "20be28ab548cf8c2133dbcfc8f34b775cb4dd2b48d4dc31b5293dd8f32af86ee"
+    }
+  },
+  "same_three_example_bodies_byte_identical": true,
+  "patch_sha256": "afb609022f9b5f6f435b24e48be4cf7cd5546397a71355ce989d1cf75132ae43",
+  "no_application_or_global_test_configuration_or_workflow_change": true,
+  "no_worker_was_started_in_the_failed_example": true,
+  "native_correction_not_yet_executed": true,
+  "whole_figure10_or_Part1_accepted": false
+}

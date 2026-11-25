@@ -21,9 +21,9 @@ RSpec.describe 'Actual owned Sidekiq ending execution and native authority' do
             ApplicationRecord.connection.current_database == 'corporate_gratuity_disposable'
     raise 'Owned disposable actual ending broker required' unless owned && !ApplicationRecord.connection.transaction_open?
 
-    previous_adapter = ActiveJob::Base.queue_adapter
+    previous_adapter = JrcContactCenter::EndingActionsJob.queue_adapter
+    previous_test_adapter = JrcContactCenter::EndingActionsJob._test_adapter
     previous_queue = JrcContactCenter::EndingActionsJob.queue_name
-    ActiveJob::Base.queue_adapter = :sidekiq
     JrcContactCenter::EndingActionsJob.queue_as "jrc_cc_native_#{broker_nonce}"
     broker_state[:queue] = JrcContactCenter::EndingActionsJob.new.queue_name
     Sidekiq::Testing.disable! { example.run }
@@ -32,15 +32,28 @@ RSpec.describe 'Actual owned Sidekiq ending execution and native authority' do
       stop_owned_worker
     ensure
       JrcContactCenter::EndingActionsJob.queue_name = previous_queue if previous_queue
-      ActiveJob::Base.queue_adapter = previous_adapter if previous_adapter
+      if previous_adapter
+        JrcContactCenter::EndingActionsJob.queue_adapter = previous_adapter
+        JrcContactCenter::EndingActionsJob.enable_test_adapter(previous_test_adapter)
+      end
     end
   end
 
   before do
+    configure_owned_transport
     account.update!(custom_attributes: account.custom_attributes.merge('jrc_cc_owned_broker_nonce' => broker_nonce))
     JrcContactCenter::EndingActions::ActivateRule.new(account: account, member: member, rule_code: 'SYNTHETIC_ORIGIN_RULE',
                                                       request_key: SecureRandom.uuid,
                                                       expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
+  end
+
+  # ActiveJob::TestHelper installs its override in before_setup, after around
+  # starts. Opt out only this owned Job after setup; other jobs retain :test.
+  def configure_owned_transport
+    job = JrcContactCenter::EndingActionsJob
+    job.disable_test_adapter
+    job.queue_adapter = :sidekiq
+    raise 'Actual owned Sidekiq adapter required' unless job.queue_adapter.is_a?(ActiveJob::QueueAdapters::SidekiqAdapter)
   end
 
   def run_owned_worker

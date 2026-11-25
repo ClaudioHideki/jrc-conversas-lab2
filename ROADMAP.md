@@ -171,3 +171,5 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 - ApósM22/5040861f aceito: preparadoM23 com3cenários reais deRedis/Sidekiq/PostgreSQL emrecursos próprios do runner; ainda não executados. Sem mudança funcional,grants oumigrations. Broker,PABX,CRM/ServiceDesk eParte1 ainda sem aceite integral.
 
 - M23:CI45506197668 bloqueada por15infrações novas em2arquivos de teste do worker; preparada correção por extração de métodos/alinhamento, mantendo3exemplos e todasas proteções. Novo lint/broker nativo ainda não aprovado. HistóricoM22 preservado; Parte1aberta.
+
+- M23/CI45510597893: lint focado corrigido eRails/concorrência anteriores passaram; primeiro caso real não chegou aoRedis porinterceptação doTestHelper. Preparada seleção doSidekiq somente paraoJob próprio apóssetup, comrestauração;3cenários preservados,ainda semaceite.
