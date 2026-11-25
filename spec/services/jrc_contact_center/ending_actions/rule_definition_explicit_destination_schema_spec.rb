@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 # Shape compatibility only; no execution, activation or permission is granted.
-RSpec.describe JrcContactCenter::EndingActions::RuleDefinition, 'explicit destination schema without historical reinterpretation' do
+RSpec.describe JrcContactCenter::EndingActions::RuleDefinition do
   let(:task) do
     { 'project_id' => '11', 'due_after_days' => nil,
       'attributes' => { 'title' => 'SYNTHETIC typed follow-up', 'priority' => 'medium',
@@ -18,7 +18,7 @@ RSpec.describe JrcContactCenter::EndingActions::RuleDefinition, 'explicit destin
       'actions' => [{ 'kind' => 'project_task', 'parameters' => task }] }
   end
   let(:document) { { 'version' => 1, 'entries' => [rule] } }
-  let(:validator) { JrcContactCenter::EndingActions::RuleDefinition.new }
+  let(:validator) { described_class.new }
   let(:sd_action) do
     { 'kind' => 'service_desk', 'parameters' => { 'unit_id' => '61', 'service_id' => nil,
                                                   'attributes' => { 'title' => 'SYNTHETIC explicit ticket',

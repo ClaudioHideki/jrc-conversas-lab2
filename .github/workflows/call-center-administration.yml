@@ -447,7 +447,7 @@ jobs:
       - name: Explicit prospective destination grammar and native operation shape lint
         id: ending_destination_schema_lint
         run: |
-          bundle exec rubocop app/services/jrc_contact_center/ending_actions/rule_definition.rb app/services/jrc_contact_center/ending_actions/destination_operation_definition.rb spec/services/jrc_contact_center/ending_actions/explicit_destination_schema_spec.rb spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb --format json --out /tmp/call-center-destination-schema-lint.json
+          bundle exec rubocop app/services/jrc_contact_center/ending_actions/rule_definition.rb app/services/jrc_contact_center/ending_actions/destination_operation_definition.rb spec/services/jrc_contact_center/ending_actions/rule_definition_explicit_destination_schema_spec.rb spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb --format json --out /tmp/call-center-destination-schema-lint.json
       - name: Rails authorization, persistence and affected regressions
         id: native_core
         run: |
@@ -573,7 +573,7 @@ jobs:
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert all(row['status'] == 'passed' for row in report['examples'])
           expected = {
-              'spec/services/jrc_contact_center/ending_actions/explicit_destination_schema_spec.rb': 13,
+              'spec/services/jrc_contact_center/ending_actions/rule_definition_explicit_destination_schema_spec.rb': 13,
               'spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb': 12,
           }
           for source, count in expected.items():
@@ -681,7 +681,7 @@ jobs:
         if: failure() && (steps.native_concurrency.outcome == 'failure' || steps.ending_actual_broker.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: call-center-native-early-${{ github.sha }}
+          name: call-center-native-concurrency-${{ github.sha }}
           path: |
             /tmp/call-center-pabx-rspec.json
             /tmp/call-center-rspec.json

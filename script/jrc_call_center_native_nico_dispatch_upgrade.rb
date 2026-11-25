@@ -96,8 +96,9 @@ class JrcContactCenter::SyntheticNicoDispatchUpgrade < JrcContactCenter::Synthet
 
   def create_legacy_nico_event
     @account.update!(custom_attributes: @account.custom_attributes.merge('nico_enabled' => true))
-    definition = JrcNico::Helpdesk::Definition.defaults.merge('unit_ids' => [@sd_unit.id], 'company_ids' => [@sd_company.id],
-                                                             'operator_ids' => [@member.id])
+    definition = JrcNico::Helpdesk::Definition.defaults.merge(
+      'unit_ids' => [@sd_unit.id], 'company_ids' => [@sd_company.id], 'operator_ids' => [@member.id]
+    )
     definition['rules']['R16']['enabled'] = true
     @nico_policy = JrcNico::Helpdesk::PolicyVersion.create!(
       account: @account, author: @member, number: 1, state: 'published', enabled: true,

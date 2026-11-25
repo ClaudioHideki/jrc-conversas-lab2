@@ -132,7 +132,7 @@ RSpec.describe JrcContactCenter::EndingActions::CrmActivityDestination do
     operation = proc do
       ApplicationRecord.transaction(requires_new: true) { command.call(origin: row, parameters: parameters, trigger_at: trigger_at) }
     end
-    expect(&operation).to raise_error { |error| expect(error.code).to eq('ending_crm_native_audit_missing') }
+    expect(&operation).to(raise_error { |error| expect(error.code).to eq('ending_crm_native_audit_missing') })
     expect(account.jrc_crm_leads.where(contact: contact)).to be_empty
     expect(account.jrc_crm_activities.where(contact: contact)).to be_empty
   end

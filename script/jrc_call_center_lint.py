@@ -52,7 +52,8 @@ def classify(baseline, candidate, old_source, new_source):
 def main():
     paths = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', BASE, 'HEAD', '--', '*.rb'], text=True).splitlines()
     results = []
-    for path in paths:
+    for index, path in enumerate(paths, start=1):
+        print(json.dumps({'event': 'ruby_lint_progress', 'current': index, 'total': len(paths), 'path': path}), flush=True)
         before = subprocess.run(['git', 'show', f'{BASE}:{path}'], capture_output=True, text=True)
         sources = dict(baseline=before.stdout if before.returncode == 0 else None, candidate=pathlib.Path(path).read_text())
         reports = {}

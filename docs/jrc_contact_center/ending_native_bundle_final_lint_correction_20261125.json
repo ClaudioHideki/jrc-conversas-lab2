@@ -1,0 +1,42 @@
+{
+  "parent": "a4463ee9fdeae4d1dce1ee5262a079eb45e50405",
+  "diagnostic_run": 45579388576,
+  "diagnostic_artifact_sha256": "5c22642d05db7712edf6e80b7618281c962d163260470a8d70f66c8e07a76b4c",
+  "source_sha256": {
+    "script/jrc_call_center_native_nico_dispatch_upgrade.rb": "529a9c479d67fc0d8af0a5e48e722826caef51a9c277dd0db07236c4f832d8ab",
+    "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb": "9c987cffbc930554859ea42add4ccb22e05a53ab731c97a025be0ea1606aa77f",
+    "spec/services/jrc_contact_center/ending_actions/rule_definition_explicit_destination_schema_spec.rb": "d4ab26492f943066d9717c14208d25a6acb22c3b622f0564ef16e091eb53000c",
+    ".github/workflows/call-center-administration.yml": "cb4378847c1ec2aa6363587bc6b16d176d8402ebe4517433092c4041bfc2dceb",
+    "script/jrc_call_center_lint.py": "cb82969d96186c5afba59702429ffa3a3ae7e70cbf307ed79344418c57a8af4e",
+    "script/jrc_call_center_lint_test.py": "406121b8f1902ca816d90cbb9f77984ed0309193a8e0cfc8263b18a0b9262143"
+  },
+  "parent_sources": {
+    "script/jrc_call_center_native_nico_dispatch_upgrade.rb": "1abdb9da8f775bf41093738c36d6186bb85b88999b9cec93c815c59685bab17e",
+    "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb": "746d94c2e4094e472effc42025f0d576b25996b44c5b55d88d4c1d6e40a74aa3",
+    "spec/services/jrc_contact_center/ending_actions/rule_definition_explicit_destination_schema_spec.rb": "235a6d880395e0634227e115c2fe8c8116fb5bae603fe524f93e17e5319df3f1",
+    ".github/workflows/call-center-administration.yml": "3e640e692899f60a92fa501882b542e7ff6ed40f6e3a6f811e8afc538628957c",
+    "script/jrc_call_center_lint.py": "b9ec85e23ff53169c879e73455be71b1a7724df57762c48bbc6e8159deeb0637",
+    "script/jrc_call_center_lint_test.py": "70e7b87b2e528815c2aed40088c82dd55488bc9656029e60f493bb9c55b56411"
+  },
+  "reviewed_spec_rename": {
+    "old": "spec/services/jrc_contact_center/ending_actions/explicit_destination_schema_spec.rb",
+    "new": "spec/services/jrc_contact_center/ending_actions/rule_definition_explicit_destination_schema_spec.rb",
+    "parent_sha256": "235a6d880395e0634227e115c2fe8c8116fb5bae603fe524f93e17e5319df3f1",
+    "after_sha256": "d4ab26492f943066d9717c14208d25a6acb22c3b622f0564ef16e091eb53000c",
+    "all_13_cases_and_all_other_body_bytes_preserved": true
+  },
+  "distinct_failure_artifacts_without_overwrite": true,
+  "all_other_workflow_bytes_recoverable": true,
+  "all_legacy_lint_classification_and_failure_criteria_unchanged": true,
+  "simulated_lint_procedure_regressions": {
+    "examples": 11,
+    "exit_code": 0,
+    "log_sha256": "07606e494ff592241acb5e56f3b7697046313ed678268c1cef11baf31e40c870",
+    "real_Ruby_processes_database_or_lint_execution": false
+  },
+  "native_tests_lint_or_browser_execution_claimed": false,
+  "classification": "six_remaining_native_lint_findings_and_artifact_collision_corrected_not_yet_revalidated",
+  "no_functional_product_service_migration_or_permission_changed": true,
+  "previous_focused_native_preflights_are_not_whole_SHA_acceptance": true,
+  "all_554_Word_requirements_preserved": true
+}

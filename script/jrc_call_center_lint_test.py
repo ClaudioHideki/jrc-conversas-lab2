@@ -45,5 +45,72 @@ class IncrementalLintTest(unittest.TestCase):
         self.assertEqual(classify([old], [new], 'unknown context', 'unknown context')[0], [new])
 
 
+class IncrementalLintProgressTest(unittest.TestCase):
+    """Simulated process replies verify the gate itself, never native Ruby."""
+
+    def run_procedure(self, baseline=None, candidate=None, returncode=0):
+        import contextlib
+        import io
+        import json
+        from types import SimpleNamespace
+        from unittest.mock import Mock, patch
+        import jrc_call_center_lint as lint
+
+        baseline, candidate = baseline or [], candidate or []
+        baseline_source, candidate_source = 'class Historical', 'class Candidate'
+        written = {}
+
+        def fake_path(name):
+            value = Mock()
+            value.read_text.return_value = candidate_source
+            value.write_text.side_effect = lambda text: written.update({str(name): text})
+            return value
+
+        def fake_run(command, **options):
+            if command[0] == 'git':
+                self.assertEqual(command[:2], ['git', 'show'])
+                return SimpleNamespace(returncode=0, stdout=baseline_source)
+            self.assertEqual(command[:4], ['bundle', 'exec', 'rubocop', '--stdin'])
+            self.assertEqual(command[-2:], ['--format', 'json'])
+            offenses = baseline if options['input'] == baseline_source else candidate
+            return SimpleNamespace(returncode=returncode, stdout=json.dumps({'files': [{'offenses': offenses}]}))
+
+        output = io.StringIO()
+        with patch.object(lint.subprocess, 'check_output', return_value='one.rb\ntwo.rb\n'), \
+                patch.object(lint.subprocess, 'run', side_effect=fake_run), \
+                patch.object(lint.pathlib, 'Path', side_effect=fake_path), contextlib.redirect_stdout(output):
+            result = lint.main()
+        report = json.loads(written['/tmp/call-center-rubocop.json'])
+        progress = [json.loads(line) for line in output.getvalue().splitlines() if line.startswith('{')]
+        return result, report, progress
+
+    def test_reports_each_position_without_changing_success_or_report_identity(self):
+        result, report, progress = self.run_procedure()
+        self.assertEqual(result, 0)
+        self.assertEqual([row['path'] for row in report], ['one.rb', 'two.rb'])
+        self.assertTrue(all(row['new_offenses'] == [] for row in report))
+        self.assertEqual(progress, [
+            {'event': 'ruby_lint_progress', 'current': 1, 'total': 2, 'path': 'one.rb'},
+            {'event': 'ruby_lint_progress', 'current': 2, 'total': 2, 'path': 'two.rb'},
+        ])
+
+    def test_progress_does_not_accept_a_new_offense(self):
+        row = finding('Layout/TrailingWhitespace', 'Trailing whitespace detected.')
+        result, report, progress = self.run_procedure(candidate=[row])
+        self.assertEqual(result, 1)
+        self.assertTrue(all(value['new_offenses'] == [row] for value in report))
+        self.assertEqual(len(progress), 2)
+
+    def test_progress_preserves_duplicate_style_detection(self):
+        row = finding('Layout/TrailingWhitespace', 'Trailing whitespace detected.')
+        result, report, _ = self.run_procedure(baseline=[row], candidate=[row, row])
+        self.assertEqual(result, 1)
+        self.assertTrue(all(value['new_offenses'] == [row] for value in report))
+
+    def test_runtime_failure_remains_an_error_instead_of_a_lint_success(self):
+        with self.assertRaisesRegex(RuntimeError, 'RuboCop did not complete: one.rb baseline'):
+            self.run_procedure(returncode=2)
+
+
 if __name__ == '__main__':
     unittest.main()
