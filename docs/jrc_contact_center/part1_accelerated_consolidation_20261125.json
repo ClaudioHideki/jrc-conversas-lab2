@@ -1,0 +1,4430 @@
+{
+  "validated_source_sha": "ad8a50a1371928e2309dd491d39acf558612d174",
+  "validated_run": 45670540681,
+  "validated_artifact": 15055467597,
+  "validated_artifact_sha256": "c189d7c9dd7e2b73dcb6d9178ccd16092bf54afec21a0a8eb0cd82920a1655c2",
+  "literal_progress_document_sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+  "matrix_input_sha256": {
+    "figure-01.json": "f54a211582fed8e206553e3173aebeafc2ff0ded09c1b1c116d7428bacd5bb46",
+    "figure-02.json": "d428734b59dba46a7537866df5632f35d6b0d4f27bfedb0aa5b2489819cee43c",
+    "figure-03.json": "f67934d15b8c58b7f916a9c68c28fedb298248167c737132c1bcc1d0260d746e",
+    "figure-04.json": "9058bd87e91f5e5d598457c94c30c1ff6b3257b370fcf50e7f2f6618f9563997",
+    "figure-05.json": "31de7651fb7ee7008f86d57fc97e8c5527ef4b3952ba6444339f31cd2a158a73",
+    "figure-06.json": "5cde7b3de896e8ad673499e871357117f43de25f25b6d54f30028ef4aa1f7c20",
+    "figure-07.json": "09d337e3ce8f34776a9595e3204313d1bac0ad4f644f0531793ebd1c17adab66",
+    "figure-08.json": "069e78487e7f448d6af597cb16f656e05cace684f9d2a9393f645b5ef2f3c7ec",
+    "figure-09.json": "ae713df1de4e5b17c34a450b8994645a931d2e3b418df9c16e77cd570e9e2b43",
+    "figure-10.json": "5afe346e31a8a220152ab766421f26fa328ed9b09d88c66bfaf0b17831fc6d18",
+    "figure-11.json": "6774a823ab8fa1b7e00f44d941da89e7da2e6ce62e4752c98f8d6ac7427ed0b0",
+    "figure-12.json": "ba92d7ffbb6b748425284b87a7a9803c8000f9c0f74cd342a5d92dff19bf8db2",
+    "figure-13.json": "ee78f3ba2c50f70a80e4db8a07c7e569a7e7a0d80968c0510d7bbebc19051da2",
+    "figure-14.json": "2786fa1c05c5fae27a38e8e06845b056b2eeb89b0e0175ecb5f59b0f08721b09",
+    "figure-15.json": "109ccb6001b4fc7a6efb51943b7bf83d88895fd7092addb5b526cbf5bd9b0c82",
+    "figure-16.json": "b3964f73f98559e851dad89d792aa21f810c39baae4487c864d61e47358c79e5",
+    "figure-17.json": "c075600171ab2a8141b64c4d199a9d8fb9339d9af41152f87f33a536c75b6e50",
+    "figure-18.json": "9ead5656ae780beb7f2245b25f63b1c4f29887726b77a7e2ea2fa7595419d762",
+    "figure-19.json": "cbded5b7b56da424026be5e52e579c5bed1f0ae14ea4e4765240ba8dcc818774",
+    "figure-20.json": "6a254d03f10cb2c72c514682529a3e2d7df3a2ae77c103b30cf7c53c90bc97ad",
+    "figure-21.json": "a9ead3cfe8e62dac06d87f4189fc1b706911ca99dedbb6a027a57da441817590",
+    "figure-22.json": "2f00ce37978f8e8cc2e67dd6b9b7d7b9d9a717609aa48139521309b8b5c0bdad",
+    "figure-23.json": "689362f498af54c97d044df65d194160291b91bfe2227fd426965c8436e9136e",
+    "global-requirements.json": "f979fad000cd9f04477d10c02f9499c5d948b8c63ebae99de9bdb8991a7aad38"
+  },
+  "unique_requirements": 554,
+  "occurrences_not_added_twice": 689,
+  "counts": {
+    "concluido_com_aceite": 18,
+    "implementado_sem_aceite": 0,
+    "parcial": 466,
+    "pendente": 46,
+    "bloqueado": 24
+  },
+  "percentages": {
+    "concluido_com_aceite": 3.25,
+    "implementado_sem_aceite": 0.0,
+    "parcial": 84.12,
+    "pendente": 8.3,
+    "bloqueado": 4.33
+  },
+  "proven_completion_percentage": 3.25,
+  "qualification": "Limite inferior formal de aceite literal, não percentual estimado do código implementado.",
+  "fully_implemented_without_acceptance_note": "Zero critérios identificados como integralmente implementados sem aceite; implementação parcial ou não reauditada permanece em parcial. Não significa ausência de código ainda sem aceite.",
+  "aggregation": "Por ID literal único. Divergências mantidas: bloqueado precede pendente, que precede parcial. Não fechar nem promover um requisito pela cópia mais favorável.",
+  "requirements": {
+    "D1-P0008-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "296ca10b14a9b76929be3cc905f90045fb733e396b736fd41b5d305a64b8d98d",
+      "fontes": [
+        "figure-01.json"
+      ]
+    },
+    "D1-P0008-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "83f747bc8b67b77f09673c87211314ffbec5810847d52d2a1fff45674bc37ab8",
+      "fontes": [
+        "figure-01.json"
+      ]
+    },
+    "D1-P0011-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e689a8c84bbbd4c138231f8f994556487467daf5ced8476a15e958b3e747808f",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0011-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e8004c46789ceea48ce2644aba13ae35e8c7e6b8f8f61cc91bcb5e2f8c938c65",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0011-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "02462880e5c160c980ce6af42f25ee0eaf2141ec658b85fde5dfd5da837aaeb9",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0011-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c179a6aa35b60bc832bc9ac59209146d9306621ae6a636c991cac3303d6d6db4",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0013-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d7022467d614b5fbdaf2dede7a5dff4563b185460dae6dbf074e9f0d39d6a986",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0014-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "caa20bf119fac84838513ab4a895153e2f8b630570b1d092075433f001c3cec3",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0015-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f425d6248e1b0a62c0d67c3aa7fc0d4ac9f8fd673cf715d53decfbefdee3a67d",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0016-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "48d71beded4d89fb6234268f879cdb9a774b99535b4cde4f7206ec59a3a7475d",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0016-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "7e88fe983a96441ce1de1cac495bcbfecb7e549a3a222e4d296aef433a820e02",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0018-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a0016d459ca13738cc564e5f62b80025946cfb7f8458f76f7653c93d8122455b",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0019-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2bdbfc9a8dd804b9ce30d5f2986091732aef28d4a3fc9877928c99cda676e41f",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0020-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "94db26ba9a4f3c751b164f0ea5535c2cb208e32e21be708d3ca0a54006ec7eb5",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0021-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "441061874a6ab01c09762568810c876c9ca6275ce8f9c7bbfc862ffda51a73a6",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0025-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "329272f874f172d81b9110fdb19f5ef0342e58c610c8c7ad0a76fad4e5d4b623",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0026-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "95b442b5c7840618f9617fb2ee692ac8015b4294693d90b5836b8a5247bad4fc",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0027-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e43812d2bb78f5a31af8cae88f01a6552239bbb1360c62ba12abfc14778e4f0f",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0028-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "715203ce62754f5d7148afa7f47cc12a3b5c04fb07cd99d447ba289a62bfc971",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0029-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ecc08db3153c5611a5b17b21c77e941c3b1561eb2c0cf9cca68450fe1d20d6eb",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0030-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4b981c95a027e19f4aa75ffab7e196b070d5064b744fcc5d0f561203f09884a2",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0031-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "95314e9afd3209f1ce5c910a99b78914cdb52d5bcfdb28a0de9d587aa01b8814",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0032-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4f38224a9258e034cd5f8e6e439ece2d6e888214db3ed051fc2ad734098e7c4a",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0033-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0687cdd02b1b4dd620ff716f63536be965b325f375f09ed34518c139b8e6d041",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0034-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "da163a042130bfffd5fa89280eaf3bd9cc311205af744fbffb0e9a176120710b",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0037-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "113c3f147e8b3876cfa98c45b71ef36191f34c36014fa254daea4f5c3a64a854",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0038-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "dc8104b0e5c10c0bc1de75bf6d6dd83cd779ddca9736389cebfb29ae6c6cb761",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0039-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ba7b0e9d4f92de0209097d39f445863e1ef19169807f1e10afcd49c50df180ed",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0040-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "90a84240a86200fb5869962aa2e2c55aa004d4cb9f5506b0da6c552f239dc87e",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0041-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6909e39bb89561d202f05775b66fe9e6056fba9262698b16671ed80a7007eda2",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0043-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "763e56142d5733f3a661245cfc95cd591ea52c47529fef230a13245c72c08cb4",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0043-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a61f6065a3eb195a64d6b90b8efc5f77d723b18b9756d1e3e839f059e7c2730c",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0045-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "dac7f959d7e13fb1cfdbe0cd9e24d59834de93699a9e314708a695b10b0ccf0c",
+      "fontes": [
+        "figure-01.json",
+        "figure-02.json"
+      ]
+    },
+    "D1-P0047-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1ec0e4ecefcc119238954e213258554eacb69b720f192b4f830e6f690db12c7a",
+      "fontes": [
+        "figure-01.json",
+        "figure-02.json"
+      ]
+    },
+    "D1-P0048-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "75cdcd04f4412702766fedc2cf787707e32d7188a24b9a6045e800cc8651a3f8",
+      "fontes": [
+        "figure-01.json",
+        "figure-02.json"
+      ]
+    },
+    "D1-P0049-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a32e11ba5a1c12caa1acd1e9c95e9a086de233df3f769b52f935a1ad5369619b",
+      "fontes": [
+        "figure-01.json",
+        "figure-02.json"
+      ]
+    },
+    "D1-P0049-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a9aa5a951d5203c6869aa90bc3ce9954a9a3ed87dab2d294770e900f3e0eb806",
+      "fontes": [
+        "figure-01.json",
+        "figure-02.json"
+      ]
+    },
+    "D1-P0051-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "09ea9ebdda20a68824ddf71f02b93fd8b50190269bf8a543a765b372b8f6bac4",
+      "fontes": [
+        "figure-01.json",
+        "figure-02.json"
+      ]
+    },
+    "D1-P0052-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f895bfbb276a3a394eecaaa480610b6801b36e53a2f3de793afed7964de2155b",
+      "fontes": [
+        "figure-01.json",
+        "figure-02.json"
+      ]
+    },
+    "D1-P0056-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ab0a2cd329b1785d5cd718f7777d71d6ed3a642bda33712b3b595dc549f6d942",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D1-P0058-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "5b07cc224e62e7aeb9dc5ef6ea062161b74b1a53028f8a19dcc468f8cabc4896",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D1-P0059-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1a7cf85954affb3ce2815cc35a852da1b91bb1fa1d76ac208a0398f089e165ac",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D1-P0060-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0d0bdc8fe2752bb660d0b664fb80ae4833a789cf30e838c76cb74bed9e6de3f1",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D1-P0061-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "dad849402a147f8dc16164e1f89cbbaf9af3de3a8dd675c208daa5ffb61a4f1e",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D1-P0063-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d308996d0e5d2177d9c9217bdf3364eaaaff5311a82ceb5bf08bb4251e3e505a",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D1-P0064-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2590f221ec4f1ab860c9062f82f624ea6d9d4a011ba5455fd301398116c8ffe1",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D1-P0065-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "001d89074b1b9f97366da41b8858a889544460d9bf907929f599c1d49c4a80ed",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D1-P0066-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "023f6a4208ffbcba757ff19509b978eaa3b94c79672b8a758eb278ad9e1ccc00",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D1-P0070-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "799bb9ce78eaec5ec25f689d8ff592961a9cac08d586776c43c52325b422c341",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json"
+      ]
+    },
+    "D1-P0072-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f2e2cfdd74ce6d97a707918d9779fb20b76575e81918b3e666163575dc136204",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json"
+      ]
+    },
+    "D1-P0073-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e8c5a725cd645021c96427cb1e31040dd7f8004a67df6748e1b5212244d36552",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json"
+      ]
+    },
+    "D1-P0074-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f3e9f492d1f1cf0f216f603a9f19034b8331814186f1dfec13863d3fc6bf4820",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json"
+      ]
+    },
+    "D1-P0075-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "67328f83abeb5767ae1d39e872d0dd59037c2371709835621f01ae876bdec509",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json"
+      ]
+    },
+    "D1-P0077-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f919ab59d2fa8a731cb77c056b105ba4526b25ee585e875e1dfe737a7cce04ed",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json"
+      ]
+    },
+    "D1-P0078-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "13b0beced48764f2fe478b0708aecc73d765ed5364e63c38b7c2ea2006bd54af",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json"
+      ]
+    },
+    "D1-P0079-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ddee597cf0aa375ac8be8a1740cc3616a1cc439891df24e3b436e9050081f253",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json"
+      ]
+    },
+    "D1-P0080-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a5f1d1307d5d216b256439e8a107cd727f2bc30cc4ff7f2e575d561656fb8101",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json"
+      ]
+    },
+    "D1-P0084-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "32dbabc52713ce9bf562b44b649ce9f3dc6dd8739306f676eac1b081e89e9fa2",
+      "fontes": [
+        "figure-03.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0086-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cf554c047f9325d1a195e27f6ce93072a748e8b67e5b159eb1b99786eb2e8726",
+      "fontes": [
+        "figure-03.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0087-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bba4ba74057f96414e1891d4dff951023df1579d3527ef4ffd60ed2b5d2e62a8",
+      "fontes": [
+        "figure-03.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0088-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "aee8b87b2204fea5133d1593a3631bacb8e31d0dbb99f83eee3faa154213db18",
+      "fontes": [
+        "figure-03.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0089-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d3ed4596ffb85c3a02d01db2caf72783cf602d7b7fae1b86955c9cb46d2fa469",
+      "fontes": [
+        "figure-03.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0091-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "91d5b7c071228b49e1d6c299464c0e0fe42f5dd67732e02cf826af353d89280b",
+      "fontes": [
+        "figure-03.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0092-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "dfa9b2713236aa1f3fc4742714399c6ef7895ca2de0b7515086a24fda4166902",
+      "fontes": [
+        "figure-03.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0093-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a5644dbab51b7b3f2c876a20cbb523a12275ff755ed3e4dba04761f2a58b54b4",
+      "fontes": [
+        "figure-03.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0095-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "504787583dc6bf319f0d7cbc4d44aa3753188c99b9390edbee6066f8eb4e88f1",
+      "fontes": [
+        "figure-05.json",
+        "figure-06.json",
+        "figure-16.json"
+      ]
+    },
+    "D1-P0097-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "3c1e32beefcbe96999d6f39741eedd91c3b90466cf70921699e65ae09e715341",
+      "fontes": [
+        "figure-05.json",
+        "figure-06.json",
+        "figure-16.json"
+      ]
+    },
+    "D1-P0098-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "1bbefc09b2ca4240cd47bb738e6c63c0ad3b1561ca8f7c9573590ca3ac19c4bc",
+      "fontes": [
+        "figure-05.json",
+        "figure-06.json",
+        "figure-16.json"
+      ]
+    },
+    "D1-P0099-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "9e3e0e4503d6acaa8a4cf1ea47fd2a8d28b149f852b508a30290dbe09f442e4b",
+      "fontes": [
+        "figure-05.json",
+        "figure-06.json",
+        "figure-16.json"
+      ]
+    },
+    "D1-P0100-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "0b24729731821de02f75f16f860c801eb16b15224c7d199f3d6d0abe6bb64d87",
+      "fontes": [
+        "figure-05.json",
+        "figure-06.json",
+        "figure-16.json"
+      ]
+    },
+    "D1-P0102-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "d6baee4383a41cff0ffe98deb87a97aad28a142c55535ad1eda29318c8ff2646",
+      "fontes": [
+        "figure-05.json",
+        "figure-06.json",
+        "figure-16.json"
+      ]
+    },
+    "D1-P0103-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "a68e5807177ffc44425f566fe0410d51d32ef5e7053f4c512afa20f1ebd3e137",
+      "fontes": [
+        "figure-05.json",
+        "figure-06.json",
+        "figure-16.json"
+      ]
+    },
+    "D1-P0104-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "088dc03755b35050423a31af040d891162a80c7a2f16f2eec5b992e88f7b9471",
+      "fontes": [
+        "figure-05.json",
+        "figure-06.json",
+        "figure-16.json"
+      ]
+    },
+    "D1-P0110-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "7bca3740238950c57457e7790380be2fcedca00ea83235db1c1e3677a2df9787",
+      "fontes": [
+        "figure-07.json",
+        "figure-08.json"
+      ]
+    },
+    "D1-P0112-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "acd03272ccf8892de104327854b0fef337e07e111d72ae724b62332049b00448",
+      "fontes": [
+        "figure-07.json",
+        "figure-08.json"
+      ]
+    },
+    "D1-P0113-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6209a88f3e0c96625a166b8d743e894e4c770eb0523349a23945fdf3fb1fc70d",
+      "fontes": [
+        "figure-07.json",
+        "figure-08.json"
+      ]
+    },
+    "D1-P0114-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6cea21b80181acfd3f9a1b9a81ef665a4387ef96ce2eee6ac68c42ff5c9d61dc",
+      "fontes": [
+        "figure-07.json",
+        "figure-08.json"
+      ]
+    },
+    "D1-P0115-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "17751bd3bb6ec5b6609430832a9feca8d6dad9be0b212ec2318c97b77005b076",
+      "fontes": [
+        "figure-07.json",
+        "figure-08.json"
+      ]
+    },
+    "D1-P0117-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "8e59c09641f59f54532604d7eddc3873473af0a9b6c348490f61e336da57d2b3",
+      "fontes": [
+        "figure-07.json",
+        "figure-08.json"
+      ]
+    },
+    "D1-P0118-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b4e8ff86c2e40cca7b8ee21b70795f8752dacc9c8bdf321324f484d96b3da4d2",
+      "fontes": [
+        "figure-07.json",
+        "figure-08.json"
+      ]
+    },
+    "D1-P0119-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4a931ae639182e595e8a8ab0ead59c7c2e80a83d8373c9a18663aefa2673adbf",
+      "fontes": [
+        "figure-07.json",
+        "figure-08.json"
+      ]
+    },
+    "D1-P0120-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "35005eeaa311467030c707ba6f1744e3fb70cce7c87014cca8e443ee5a53ebab",
+      "fontes": [
+        "figure-07.json",
+        "figure-08.json"
+      ]
+    },
+    "D1-P0126-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "fcead53b57c0389f8d65f651445c8acfdc025347e8639d476dfd73fc79fe3ec4",
+      "fontes": [
+        "figure-09.json",
+        "figure-10.json"
+      ]
+    },
+    "D1-P0128-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "b275c4ba2431dfc0855242145771989b5b08bed361fb2f219dfae08d88f2efa2",
+      "fontes": [
+        "figure-09.json",
+        "figure-10.json"
+      ]
+    },
+    "D1-P0129-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "5838251591d638cb9e216a05087a6130ee071f1e9759efc2da1c75edb18fc5b6",
+      "fontes": [
+        "figure-09.json",
+        "figure-10.json"
+      ]
+    },
+    "D1-P0130-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "322b1118cc1b3c5edba5c6390931109da0cceabf309b75bb60bf43eaae73ae7e",
+      "fontes": [
+        "figure-09.json",
+        "figure-10.json"
+      ]
+    },
+    "D1-P0131-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "da2a75a56d996dbeb27c05eef55b5a789a616b1f57d4b201447b866b64616ede",
+      "fontes": [
+        "figure-09.json",
+        "figure-10.json"
+      ]
+    },
+    "D1-P0133-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "404e1a4d14aecdd14729afcf8e6b28b3e941487a0d80296ea52e4a678764aba0",
+      "fontes": [
+        "figure-09.json",
+        "figure-10.json"
+      ]
+    },
+    "D1-P0134-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "9a32263f69ac5d2b23a1e87c33c2d5e5646240f6a572258f37bcba6a2a94480a",
+      "fontes": [
+        "figure-09.json",
+        "figure-10.json"
+      ]
+    },
+    "D1-P0135-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "230144b1bf3d29fdd3211cd8a942717e0065be29d3733d3ac5970a158f784262",
+      "fontes": [
+        "figure-09.json",
+        "figure-10.json"
+      ]
+    },
+    "D1-P0136-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "a19578845e53636f8ade0599575a8362c96b9b53fb706cee175ed8a1c00be837",
+      "fontes": [
+        "figure-09.json",
+        "figure-10.json"
+      ]
+    },
+    "D1-P0142-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f0e1628440c67059b81703774a89486ef7c5960b2576d43465383d7a669d4f88",
+      "fontes": [
+        "figure-11.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0144-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3b5bd6a284f7c0417d8a9f5a47272e575ef56292713a3f02a2b06402905e43e8",
+      "fontes": [
+        "figure-11.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0145-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "99efc4ba0224fad487a88454d1150f385c84e5b9c0a76fb257f81558c04ba3e6",
+      "fontes": [
+        "figure-11.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0146-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b5db2a9f7085670485a7d5dcbdbb7978d13d50cd24e08231c1f8efe6f08f88f8",
+      "fontes": [
+        "figure-11.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0147-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a26d3855a93f123346cf91a4fdd786efa0a40a999634e19f9b6b1e34662d4548",
+      "fontes": [
+        "figure-11.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0149-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "029e6db9ca9a8a685b40b86db6e80576c65defea774c2ca67ed6a0f304d43573",
+      "fontes": [
+        "figure-11.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0150-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2fea2ccc0be2efb3cc3ba2b52ca65d99df93790512f280c0a01db2bae7d7bd43",
+      "fontes": [
+        "figure-11.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0151-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "79dc4c845b748623538e3d5f106e12093e36fec3fcae4c82d1bcf0061ad9d945",
+      "fontes": [
+        "figure-11.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0152-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4609a1bf39fd1d7744fc40560bfe2146c1a88ba91529dd76cfa7e68201a20c88",
+      "fontes": [
+        "figure-11.json",
+        "figure-12.json"
+      ]
+    },
+    "D1-P0158-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "31eaa6f1b8a7163b5338ff319955b5413ba601f4f8d45758d0eb6b70587f765f",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json",
+        "figure-14.json"
+      ]
+    },
+    "D1-P0160-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a074a42b8997d03fad6bfc1609af8bf7173c57f0299304c9da03adf4b3c684a4",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json",
+        "figure-14.json"
+      ]
+    },
+    "D1-P0161-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4d15f0bdd7b8322255519e4ddd9372920d144ee269cfc1eb0a8c08166417d286",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json",
+        "figure-14.json"
+      ]
+    },
+    "D1-P0162-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e599240a39b6ae3ed145bb811bfe6fe33d4e73f583773069fcaa8d687aa96252",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json",
+        "figure-14.json"
+      ]
+    },
+    "D1-P0163-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ef4a9a62e08982493fe93a7efa36cd3d65de8e17b861741d274d06d61a9d2f91",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json",
+        "figure-14.json"
+      ]
+    },
+    "D1-P0165-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e6730bc423067516d75a9a09aee23c5a83e4f48927abcd35f38542188fd13cce",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json",
+        "figure-14.json"
+      ]
+    },
+    "D1-P0166-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f4813b6ece92f282e5c0cee8a0ae1b848aa1106cf4956e43898cce904e69f277",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json",
+        "figure-14.json"
+      ]
+    },
+    "D1-P0167-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e8ba6c1faabfcbb7e4541455178a371bff24371aac56ece6eea6fa828383c4af",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json",
+        "figure-14.json"
+      ]
+    },
+    "D1-P0168-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "326a42051ca9fc4c700865da1bdf42f847cb1d6d05f1e6776f817a8cd83f0143",
+      "fontes": [
+        "figure-04.json",
+        "figure-13.json",
+        "figure-14.json"
+      ]
+    },
+    "D1-P0174-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "65007ea7c6e4f78b7251e02f15f266c92abfc61f599dbf83f97bfd10ce52e758",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D1-P0176-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cdec9262e433325c1c96120e87d0924ac3112495c3f1064cc348680ea4df2b1f",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D1-P0177-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a252c72142985691592cca5cb25a6ca4157822cc23812578a3185471a7be9b84",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D1-P0178-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6d2d7b8cbfb7705b6a54acbd9e144299bcc8413b7e5cc1ea5f23ee19fa7c060a",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D1-P0179-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b8cac6b4e648e22f862e76443c309a24ad7879cfd0abe17f1cf89a5076ad4fa5",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D1-P0181-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9494fbdb8efb66bb502c0e708650dd164cbefeed6542a0ad19856995a3b8d2ae",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D1-P0182-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a29166247cdb904b212bdfecd625210407785ef14d14a630cb296b09c92394b6",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D1-P0183-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "faef392f3585bb21ad8066ebe0553751d9a0559a154b120ffd31f44d241ebe04",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D1-P0184-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ad95ae7bb32146cf35e92c562cbac7ae57972ed650dae45a1c17bbbe1307abe9",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D1-P0188-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c22130c09267499de2c769ce299660abf7d952272d746d72e60455ed47177672",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0190-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0d83ce664a68459331bc95e43c3e794f478e6e73473bb572eadc4bbb9b347be0",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0191-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4837e538ba225197abfa956b9df9ae04d1e0d63a30b61f5c700932a445fc3c01",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0192-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "094c3470b85ee890d1f36cde4423f0da2f39d2916a39ef2ddd1ab385544579d7",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0193-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1fe1d2514e7a4481cf4502c871597580f825448cb65a24cb2ef1b60daf19830f",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0194-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "73200ab2dfa55bf39ce3ba585d38f518e3fdbc0f960626e81e2a35bd418a635c",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0196-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f6e0dcdd3bbf186bdd670877ecc996d007519a4c342b55c6b19bf592efb62067",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0197-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9fc5b42c9cdf09ae6604a8ad35fc316a4541309e39c7b8dea3006edd56b323aa",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0198-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f3a36e2803c206b19c96968e223dce485d0c996ffc22bdf5e368fda00fba8e12",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0199-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ad2b55aefa91b8bf5620f83e5a668bc4c8853beb0d04b487b589cb514b554d67",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D1-P0205-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "98869beeb6dc3fed68382aeb0f1f24b3d00cda878bb0c1643296a4031a5461cb",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0207-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "13bdee9e8fb247dd2912bd51f8674714a6513d78c3faebe69b37e921236a50eb",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0208-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "0a3a1ce6e32b78636eaef7594197bc817f272ee33cf149c4c5b4b7e7e4dea692",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0209-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "194087f78fd302e8ba4e61b21c2105357abd999e5de387e5f1df7b9b62c8e4c0",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0210-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "5b0e8075bb39e27827b91d565687e67c3331b40d5fda90e0b30c46d4d096278a",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0211-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "a305f941a1548ae74bd120cf66a35719c44219f7b648b19de72a5d4bb39638fc",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0213-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "86f412269e7603ea6150b01647e8aace219a65c9cf49171d70d3cfe883c3b662",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0214-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "a7aacac3903403c35b5c3414989b37278abfbcbfc3c7bc03c9ae0bfc790e7b5c",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0215-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "7455f2cfcdd7f4852455212637bc16a593b8c47abe932a5fb2ebc894d30900b3",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0216-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "2c1def228ff7c1fb47cf2b7affedf1f69445b7a227dc6c8455a054cd748ae250",
+      "fontes": [
+        "figure-18.json",
+        "figure-19.json",
+        "figure-20.json",
+        "figure-21.json",
+        "figure-22.json",
+        "figure-23.json"
+      ]
+    },
+    "D1-P0232-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1b9c9b68737a98a5933aa0b9e195275324850b40847cc3295aef1a21e1aca16c",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0233-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9f5d21e54a5444a1f522c7d514aedf81294bcf2fc8ac946a997ced9779ff8626",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0234-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "20a0f5563528539877b42717b0f55cdb0c96e3d57ade52e9385eac02420615ad",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0235-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1775643e3e3c61f758bcf64b232bef3cdf86c96f2ff31839fcddae8583afb330",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0236-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d283a1207534342bae5fe1b928b61c4f5eccfbe13b375d4381d2d18e332a003b",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0237-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b2da400f5ea09590d70a12003600d1ac862598b65ebc555ee364b94713070a91",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0238-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "379c28547f10e8998946e1776982788c85d60228d4640ad4fb2339a3a3187439",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0239-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2045096e42738543e47a5411b3d2e945cd29260469fea473695c690419b3ed82",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0240-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "12bfaf9eb93feb38a8adbdc09b7f6a6f6f28fd8494fef3d86165cdb74f7efee4",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0241-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9b27807f116aa691525c090cf841c576b68708e509ad73dc289fcba9eeb9b733",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0242-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3c7d69019ff37f53be07ef597a99e043ee776f6c537b7458377094c0919d1cd6",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0243-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6e735b086b1e29c4af4a9491f0ffbbb3064bb41853dfc30a8350c7dc6fe50ea6",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0244-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d9eada774eff449d41de212ae539fa874393177b8c6fda6ebb60e31cd53d0d82",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0245-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f52690fb0db38b01e8126e8f1140e1f20b38aac172ac1ff64399d6f72c8cb5d2",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0247-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bad154ba36257378315085abe61974eb7c95776166ca8d497eb4c1bb51ca77df",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0248-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "71546789e051c30cbfabf87eb8b74762d3b95c92b29c56910b06ce38f96254b3",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0249-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "958d0cb61e017ab928a7f92a28b3fc56f70a4299a47074301d7c026e8b180624",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0250-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "21d745930b6fbb7d99629a2ed627b62aacc378c3e4aa599d1e3ca6b546864a8c",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0252-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4792701d307bfc610e0860378775920b7b4e968b886217491aff336f6eb6de7d",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0253-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e894c78e7b58730abf666465743da3c93b7c5938ffa4704716ed5546848fc20f",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0254-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "69f5a25c982884af18de30ea60d90676ffe0a9a3c80eda6660fde445bff2b318",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0255-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "33b7e8ad9766d1ac3dca39b83468bfdc89bafc961507de29e6ed0f30b259697c",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0256-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "81b8a670dc589ee0b49106be03e43c9b93f9c26877ca1bd732a5cee361b6575f",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0257-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bc318a0803623431a5c8e2e30a9e40a03ad979bd684f525f8a64892fa56c251d",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0258-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "644c3aa22f38a07c97b266c6c2de2753fc6449a028eecc4e2cd4a5e6fb2de223",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0259-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d3859e9624946528e7bfe9f1762cb36ca738504796bca10788fba56dc8192aba",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0260-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bf7dfc0f0deabb4d9f66ec39b79568827a835752850e08706b7a9f7f06119c99",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0261-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "18e540a232db562d429ad217ddc2af1ab138e9a322d4d52875cd670bf14bd370",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0262-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "44d4fd71ba2dea3e03dab3df34359b0e3069046a8175d372427b13e75c9ff575",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0263-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c47e1fc4c49a90b097beb5d21d6b052fef34162bb668874c7628a4e2528a071c",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0268-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "50dcb781a72e493fc909974374ff203039169bd186ccb77b34867a0394051c86",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0269-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "7a9bfc780d8ef261ae7a344b785e35d7f6764a8637c19f87bbd0f5b0c9db2d85",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0270-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a8fd7b6802ff9255fb8c9c0d2b06b1940e1a35c7223dfae794832c10724df73f",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0271-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9b2af9fea025a8c15270bc872d2e86bb7947bab4dcc9e14f36b0e08f27c2c463",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0272-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a87f0712859290000aed34899168486cf5ddcfd1f88dde7fb8c0d0975a2d1718",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0273-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0b8783fb1608dc07a1eb64c73bc0109c4ff67588c2389363d346fa4e18e8aeab",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0274-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c39a9e9bc15a3accfd2543913d4193da6dca8dd67cf1c751b5f986adaa83dff6",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0275-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c184e7f0683e33d81b8e2bf1dd8382e0a048f44a308726aa354911fdd859a043",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0276-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6a0de1cdcd0d64fc8a5e68427a586ee17ba04c00ed3ae423f158ca5509b9e38e",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0277-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "dda8be3707191a295c5a207489c4d9fde4fbd8089478325369a8a58f09031047",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0278-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2de18df53ba23145e5f3ac534d34cabb80f960b38b7f18cf54582cb7d5cc78df",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0279-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0acbafe58ba54ec61e8fa6de1b6eb33656d6703c42c53b335ecd707c40200e75",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0280-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c34b25c8b6bddee029407d8cd537d358d013ffe527fc1730645c9632f3e29ea2",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0281-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f16026d82d62c76976411fffed5d061ef67975a2b65976728d099f3a06a61915",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0282-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "54e9d78b72dff9d97c3193028a2035b9ddf66d3f718152faaf57b8b8f60ab715",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0283-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6f63ae106f25587c63d9cdd8cab8c7965b1d6ff4106bc705125a33d78a209396",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0284-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "77b80b8ebdd67535868770d003c794e998e36e8bc9d1ca77dad6ed47ef748474",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0285-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "63eda791ebaf1ab6f4adf5bb53f434ba2248ec98be5f2185f83b84501f735798",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0288-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "59cb0e5b80d215b3f9a00ced2b7646449a6e517659d8d5f0c225ef616f6e6f8b",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0288-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "8d01277511810c50cca0029713a62dc4b0d581bdeb38add67c57880d4dc19c36",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0289-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "71515d39fda3549d35e3ec264f00324c21cdcbef3563965962bd73bf68299315",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0290-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "326a44e6f339b5f9a5645e359ecbf1643a912714f4499b6b5e6bc08617399574",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0291-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9272d2d47b265b9f16f6a1418ff875a6e8163ef93ea8b1a67e807a3fe77b9c3b",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0292-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a28d1f79773b5f542b090cc0710ea4c8727cf6e83ef40a0baa71972951decc1e",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0293-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9d0fdd6305b9c1bdcd40a48bef1f273031405c071cb2a1121747324fbbb0ccd7",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0294-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3063a3e7b288413d1e19ce30b5811dbb561156f2b9e1ae9bc9c7850116b8bd0b",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0294-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e88e7719bac15cb619f0dd285a3c0bc99ac75cc7de1f30c80a07025e0f90463d",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0296-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d9a2d5608e3d74be7827450d6724ac4b7b604045f8df5037986fa6b8ac6056b4",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0296-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e90994f804279a36c7785bd3b547ee42d00cd6b1397be98fe265ec491addeb38",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D1-P0296-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f7bfa98ca0ae43345a9df0e3299789c1b83df9c9a9e26b6efab8eb455dafe041",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D2-P0009-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ea21586fdf97c2d712861d3a2ba956b10a92ae671270d9d202bb520aa7f671cd",
+      "fontes": [
+        "figure-01.json"
+      ]
+    },
+    "D2-P0010-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f72aa13428630543061045dc61dae407b26506b27ec160b81b45d72c598ed66b",
+      "fontes": [
+        "figure-01.json"
+      ]
+    },
+    "D2-P0010-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bf0ab80ec0169acb503418e4a3dca7c8ab1a8eae4df0a6df08d9bab826e92b1f",
+      "fontes": [
+        "figure-01.json"
+      ]
+    },
+    "D2-P0011-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "32ac36968c4119ec405d7ec80db13fbae1fff2dd18d1b92060b6bedd89563460",
+      "fontes": [
+        "figure-01.json"
+      ]
+    },
+    "D2-P0027-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1dc2e783699351f8b950ed95f32ffb98903346e02b135e5c0f7ae5dfaa9bb74a",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D2-P0027-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f877085388427f05ba958e5aac49d48ca11f6cccb8f2654bc5098e79d640df50",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D2-P0028-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "fee7bdc2348fb3abb033e5bee1123167340d743e031db05e9c9714d0b50765e6",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D2-P0028-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "718fdae038fafb02960edacb190c4fbdfb85373dd342d214616977dae32f5026",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D2-P0028-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "491068b15d7dfeefdc960af7ccdebf7808dadc76a086a679b06cb953f1c4c257",
+      "fontes": [
+        "global-requirements.json"
+      ]
+    },
+    "D2-P0063-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e47fe91e672ce149fc6db21a46d28cc0eee7642e19dbffa4dde1a2e1a2c893c6",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0064-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "40d799f9a8d972583cf5ed3e21404bc37d2d17930dfda00039a2b22a7d418384",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0064-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "96b0c772a599b928920ad2d8490ad8cb9589c7fe890a700ee5e3cebd44959af6",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0064-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4cbf01f2c2a5d12586a40a2d39dc52a978fa01082848872f510467fcbc0f0032",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0065-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "7e4fdddbe55108bb41fd9b7235a56c9be66b8058c6df2067a3d34a8d741764c7",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0065-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f567c4d8b81b99ed72fa56e65f4c78eeb243820e79eaeb04ca597de9d90dbde9",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0066-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f1b3919c0be2aa467af73004d64e35d3d4616465c6112174e6392b22f133b478",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0066-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d78a19d1b9ff4cd301f5dbedcec454f8dfd374fc5eb9d977d13b5cb54a57023f",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0066-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6062f1c72c7914aa8eec791984b71c012952ec4e44848b0803b1a2707f5069fd",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0067-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2735fb50296aa43fbda2176f2715fb1fa7b7d9dcd07766d91bc22d3244021fd6",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0067-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f67616dd79d076aa091d0f20192ac809f353786c6539ddb47cc8f8836c1ff93b",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0069-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "318a60e3d00f3bdc361dd19f18fac75fa57fe2f995e397c5dc112caac5550857",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0070-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "94afe365ad19eba52ff196ab3784c1f91b4fe48832c25f9bc482882bd5a8200b",
+      "fontes": [
+        "figure-02.json"
+      ]
+    },
+    "D2-P0086-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "57bd37c2c3d1fa1a6b9eab61f2152d45f76c0cadfa20fb3c3b345ceb46ec4af1",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0087-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c6eb93ba88edb7997283746e0f72d872ee4b93195aca2923b9604e2815abdf4c",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0087-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cf6d1c1f252161a42c38d39c95f7af9e15f79ef93b8bb04151e1910232f04df2",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0087-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "97c6410c2a538e53b8db96de8d0ed095ff57ba84898e4594f6896e2eac569211",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0087-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "12b3c9cd28c44298a7bb7b04ba154ab3b8ca0327f592bcad00a8f8ebece57f9d",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0088-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e0ebe6968ef87dbfc7f2243a055c9039b05e8ddecb11c2ace8c5e69f07da2cb3",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0088-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c48ff9144f6a66f5cdd92c3908574d0ad93adc8a0597acf9a422795986580bf8",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0088-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "7245f7e7399b7fc4fcde56f662f34b67d7841b9f01d64779016c92a50464857b",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0089-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "5a777998679356adeb9d22936aa3aa7a16df6c12b284fce278c33ad85a91316e",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0089-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c1845c48d67b999386fb875755239cd50022249d45ffbc16a4e667a731c00d2f",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0089-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "241a69a191be95d9f35a2d6a47ebe91812c680ce1ff7f77392d5a64c03c3f719",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0089-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "757deb3d1de97e8b24db20c8109603b5faa753c04490e83af1cce18d252de78a",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0090-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "294fee1194ae2b29c14b96a99e070695acb6418355fd338e1dd84366dbe5b2c1",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0090-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "8ee3efe59944455b8ef930fac49a690b6d7968cff56be929cc1035f486fff292",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0092-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a4abfe5bd61294b77887029526311870ea0ef73bab48e4f0e0c2452ae670c3ae",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0093-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "80f8192165feabc401fc74d54b58e147fa104046fd7e6b95772c6bd6a32058d0",
+      "fontes": [
+        "figure-03.json"
+      ]
+    },
+    "D2-P0109-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e89aec27bc9c5963efd33ec54c11ccf23fa573f5ca860675438cc0fb55f1d74f",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0109-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "96e8dad810eabe544677cf11a8da64ef6ed6cc1abaf04c8cea356e9539d9012f",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0110-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a35b671dda250f35e0507af836b63efb43a55bc4165c5bedf49467dba1124c64",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0110-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6b04fb7884320b975262e9fd69d08719a8bde916f2679c3b37ef646017c3df75",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0110-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a7309a382c26c5940f3b24c66123ee56fd635076f5e9c129475a391de89f0271",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0110-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f955aefa0e7ba9a751419e004f360b7780fcb5d66ec23b16bc914a05bdc53d0e",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0111-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9a3dbd35213d0e19bf7e1e83ca09cd1a5e4f1f85af5c58bbc0c1cea755bb603b",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0111-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "001b043ce03c1cd17ef1ddc09fa773e17fe67956cb146d8ab37be707cbefe331",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0112-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cb2392e7f3a5aa1bc9ebdb462bd96e560059ba8e1cb01dd2b62caf7ea29ad5fd",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0112-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "da70465f0c9eb2e7abb769bf7229b9abeb49c0e3088f51be66849a5bdf6ecd0d",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0112-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2d5c9dda5d72b5207e7af4f548380d86b04cb4a0900cb6082a9bce508a8001ef",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0113-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "91263589decbd8b376a79ef9b85b688138c3699a5c63a92e4b898c7d0037b492",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0113-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "03204763d54a27c3775b25be1edab320cbc2c782815ce27887561c4eec16e2a1",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0115-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "47b92eff84332703af61e2a81f9393ab36d62616af95874d31695cfbc616b94e",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0116-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "dfe6195e03910c1cd51dadab352a6d5e45d8cf1fb5af668049dd83aa58ddc568",
+      "fontes": [
+        "figure-04.json"
+      ]
+    },
+    "D2-P0142-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "5ba04fa0f2682feabd9443c27c4d7425a63332ba0469b3c765ccba9cfa7228cf",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0143-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "5275e2154f9d98fef6b54c0b14bfb2bbd2b4dedba7c177f2ed811ffc3262c4d7",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0143-C02": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "1a7949e0668adde88c581233b7b0caab908fb55e89d06c29963f8b5a17684fbc",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0143-C03": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "058229d1e7be20324759cc319ab1652eab9e08998b67b382ef664a5d17748312",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0143-C04": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "b95d6c71cbf7d3d895f9a368b7db5770156620ce4818536e2498be1f4886eda5",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0143-C05": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "141b756a427ee3688433c67e30e42a18e06d5422cc2cbc6afcd4b816872182f5",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0143-C06": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "59c4a248b080107b0932487ff77b2d52c9383b7ac3090fa9d8cc27e490d58f11",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0144-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "f6b473ac09fd1a7597ddfac6f56ea02356f5979aec41002470d348248a1e5fec",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0144-C02": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "342d773353c2f07baf26ac4ece9ef85580255903af91fdaf35eaade072e5dc58",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0145-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "22ba3536e8ecbda04ff3a88963dd2e5c57cbb737899dd7528d7480167b3c135b",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0145-C02": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "c3125df42fd921ccc80450ff32a875efaa6cf2b9f9b5226cfa3aa528a1c81ee8",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0145-C03": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "773a28bc561581837715c06819797bcb6e7837b5dbceed573ab081e61f9ed9f6",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0146-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "b764c6a010d46dbf8fa2a9240039432c30c778161fb40b576167eb2b270c98f4",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0146-C02": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "e036d1279b582195a87e0a6339b435b5b963e69f4ccc1fb9a8b99b7380a55e10",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0148-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "64bc3ff9193b08563f5d6aa2084ed3a9211ef7adef7a2a6508eb91ce9fa854db",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0149-C01": {
+      "status_conservador": "bloqueado",
+      "expected_sha256": "ffad293786bbe68f3f100494bc5ff8b1f6d347e001a9281266fa1949730f6ab9",
+      "fontes": [
+        "figure-05.json"
+      ]
+    },
+    "D2-P0153-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "49d89264df7821bb17e25196136f5b19ada56e12cdc4a6376908c45ae36c58ef",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0154-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "169ae8151e492ff762f3e1d9d68d2e55765de57455c414486be09fc4211dc571",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0154-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e070922b76143aa549bd777af9f168f3222f78b97c39fb886acca00dfc49c9cb",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0154-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4dfefb3c9be716d1a41898ea6fa5a21a585d477cb598a0d57d9801f20af5c46a",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0154-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "fe6e2dd87132aadceaee1b39e9c0642c2ddfaa50a586f8212d804acd07fc7c13",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0154-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cbba01c9dcb6290544b33c3165c26509933cab5367863662d2626e6aff84d3d2",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0154-C06": {
+      "status_conservador": "parcial",
+      "expected_sha256": "663c895e0e6257aad0ff7d1699d6d9e8a2d3e420ef99477712eea9aa8e18fd9a",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0155-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0316dd79babcd2827ba34d1fa463840dcfa5a56c2d1ef1b5305df61455ca958e",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0155-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "da8e8f7f3a80c8da003daf5ee6a40b6a4ce2929fe42f1a8a3f13b54e88a8c543",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0156-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0aeeecc7ca640551e777cac0fb8e975d98855118a4ef19b0eaeaa2e9c7affe27",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0156-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e8fcfd053be603791186dfc8046c729c59379a50283d7f76e17e68ce8ea74174",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0156-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "fd195b77609fa5025057594f5767567182639a427ffd3d3b5e349a88c3319fbd",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0156-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "68a7d423df3753854467201172c2f0be6c39e79d40cc1104c5072052359c943c",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0157-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d1132e5db0c539c8a091a1617b53de47c3d00cb185e0ba5545589913ef44b198",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0157-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "66140e561bc549a35926005b6a02fdc00b890220c3c1a5da281bd6c9ce051431",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0159-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "87ac8c27bac2e7cc97aff0a03486fa3352d202fd3af99185521aaa3af4328dc3",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0160-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6485abcffa0fe55396180e0e90ab9195b2686f921b0be572cde225825e8d833c",
+      "fontes": [
+        "figure-06.json"
+      ]
+    },
+    "D2-P0176-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "625e2925e0f3b03299798aa77a700aa089b9ba7ceeec62a63e4c170ac12fa5ca",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0177-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1b45b17396b99e7cb2a10176e83716be9927495e5e93c4f5bb8e58b812ef02c3",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0177-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bbf9797a8166477048478d5b3e8d5bbf0a68319b3e94e98d04ffa420473b7ef2",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0177-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "dd19d52e0256993ba0e01ceaa7b621053d669765cbd1300934fc5d9168429901",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0177-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3878f060dfc9d0767e218b77bc9e9ed186eec45cabf18c65d1d068b57a5741bd",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0178-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0781841216939800d48845d426b9aa047d1b26936e56882fe9e6c81ccc8987bc",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0178-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c44a2394283ef6337b09647da14b5bd9b5e1f1dc5e857a8e8928443c5f555de5",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0179-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "335bc6de2eaf0125e12811bc469c58193824395939560965017b0e10f3bf74e2",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0179-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1f4f6128db696970b27f3a26b0d98ef7cfa6ccf672540c29e2329225b66a7f8e",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0179-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a70be9069047458057d490c2d3ba87fadf1a8c61ffae199c975f9eef13eaeb42",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0180-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9def031ac99b0cc235dc61e9a4b1da77c884851d99e2b837f332a734f03b34ce",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0180-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2518d8333ec025e823081043c3de8341647a6cb8ecf3d6030346d5cb942616d1",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0180-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a8dbeebb10d015501167aa3ed09bb1ea7031f16221e81e836b6c6e20b1077dc5",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0182-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a65f247f47f979c62250cfc44f89b6434897d3683cc7776354193f748894585d",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0183-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "71fc9b1fc3a1346fe63018fe5fc9cac1685feedb99ce9ff955c978097ead11aa",
+      "fontes": [
+        "figure-07.json"
+      ]
+    },
+    "D2-P0187-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "605f08aef01b3e1eeea451c3beb99a5a8103dd35fc4d9bceae7ffb3631317695",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0188-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "60c8ea01aeba6211094184380d619246cc74215969b3fde49b64a57e241e6a48",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0188-C02": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "fc71113b0fc2e5b26fc7b09696e5bacf79709bd58171a5c7d1b45427977858a0",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0188-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "8ec4924b16dbc6f70d0c651e778199a15f17dc263684ada332627dc2999d5257",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0188-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "61e398da36be63293514171ec0760fb4e64a8367ccd0ea9ed58804641ff551ad",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0188-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cd46ce7c917b7202ac22b8ce0f33ad2940ade8223d3c50176f20745fb8ac4300",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0189-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3e08793a66ad9484003bf403639d6845145ec47dcdaa02a543ac5d8b939a70ad",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0189-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "10038bfcc706592ac138ec9c2567b84f6eb000783c99d1825981f9170513b9e4",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0190-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "2ee37535a10b1f8469267e10cee9f18dc164f8ce147b53e59d7a2a106618fdb7",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0190-C02": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "a54f02947713ff6eb083321707ca8bbf9ffaf34cd1cf78d937bab6c7f619fd36",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0190-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6bb6e7a8d4c5588fc88ba72921921e7ab114e74c7ae2f34783109777ad5df14a",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0191-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "aca6df107c0b098ec20adbdb94b11b526050f79895f0c4f5c5c386c7e82ce73c",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0191-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1a5a4d9761b644498a1577bc7d09e4c221a58c0ad029713594937672a64a4299",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0193-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "14c0be5ad9f1f045fd88331c5ab301ccd66afae9611ea09f5714e15acca6290f",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0194-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "07d8dd05f16cf2bc5796b196a57d174c1a0367361c117f7ae7e15119cb39c187",
+      "fontes": [
+        "figure-08.json"
+      ]
+    },
+    "D2-P0210-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "8826a38915f7cbbd96c865d006d1c46db1bd84440d827d7cfefae54b19d78f74",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0211-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "387f884ef02bd8f969fbfb60d49681f8aa138605d3bdda01782d3cf09cc8629e",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0211-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "8ef6beb6979acf8319e4c72dc3981041fe0d1085a669fbf95d939d5c8f371776",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0211-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "93f409982b71bfa2f5ebab11ed93834809ba69fc7385281a4c30afb8366077c1",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0211-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "412141302b7b47d0729d3a62dfee9565935bedeef1a3f74f511a359d60fb635f",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0211-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "01d7b05f893979c832e13ee9c245a85f5ec8f97c576a7c5439cdb51982f6fd09",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0211-C06": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6fcd0982280b7ec429221208ab3fb3fd973bca79c65504c60b0791b9bd8f6f06",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0211-C07": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bb9770796bb670cb501151cc92e1ef4f5c76abab0fb5aa4daacc3dcf6c81fc07",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0212-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f6ff2e8a345339f564739fb9dde7bb006d01935b24c17c863c13af45f1c550b9",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0212-C02": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "9c738aa71af42e69444128423cf5cede911d06c9c502feab382e24bf83631e84",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0213-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "564fd3f132aa8014a6508c070aed90ef38258692d780f4f8afdd8d6a00f832ec",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0213-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "10dfe48961c9e800995254e4f0b2f6a6dd55dc0428e8176068eac4a6876ea9eb",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0213-C03": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "977b20c7e00b5a58ed2049fbe1fb5327c7f657c6db9fe8914aacc0560c51ddb6",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0213-C04": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "4ba12312034daf374bff0481e6209a9dd28604a3287061278d8b2cb7b77f1f6a",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0214-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "79ef513c09d9da189d18f519be68547a62e4c4863b629f43bedb2f6d4e9f908a",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0214-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "96fc1c002c7c18f30d7dca0ab3a66b403f953479409bc4b8b4d048944836c82b",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0214-C03": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "e6f6dba76a571d4555d377cd395b80d6128eca47ea15c7dc5dd0ced8f3a7f48e",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0216-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "32cff068a3b55cb652d01e75681304f734076ca5493a61d907acf796f272b1d8",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0217-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "429a2b6de0da836b8cab0a75ffea918f096d33288ab56957bc26246397737a1f",
+      "fontes": [
+        "figure-09.json"
+      ]
+    },
+    "D2-P0221-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "67ee8b8d58a45c87287f9805f88022dbc580b08bf7330ff1cbb2d8c82aeddb9e",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0222-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4f77a2f806c7496f5da7b17816b8ae4b55f4330d1feaef8acdbed8bd89d7046b",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0222-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0c5b8ec5fb778728aa63ab80e7104445cea0cbb432e1b6e872e2e49d422940ed",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0222-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "beb64be748e7d222ac7e959f349741fdc1c54b2639f6798dffcc6359f90f1296",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0222-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e170ca101e50daca2e7c6d8c90023da11ef75b4c80c368d610d349edd116926e",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0222-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e620c6778d7a31375cd7d97afe8de8b8d60c7a3ba599299662d3da1e7f02e852",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0223-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1a4e5911402144f85a65b8baeb4f43d32608df889bfa96e1987a116410dbef3e",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0223-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c502700bf249d8687ee5250caf54fdae09b934230e822e5581154dab92dcde27",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0224-C01": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "2eb188e9a912518bddbdda069af6565b5d94e73a4969988606891fbe1146e024",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0224-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "8395290aff8c507b27e0290cfd8a4cd71b8e0086d3b998f27f2475c94e8f3d03",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0224-C03": {
+      "status_conservador": "pendente",
+      "expected_sha256": "9a667aebd648a526705a74d2205b0117e118be2d278c9b69e8cbc051954f28fb",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0224-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ed3609182af6b6ec30efe756ada90f009643a84ca2f6e293f4068945879910ec",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0225-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "98cc9d1a999aaf263877da16873ea3ecbc6812151fc2f69968c48bd416d81edb",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0225-C02": {
+      "status_conservador": "concluido_com_aceite",
+      "expected_sha256": "db27777ca8498115760c35369ff0b08c34ea4631d5c8aec0205fce377a3d2ac6",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0227-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "19e0d60ad3b976ce9180b1c6cc41debbe13adb274822e22d37cb0bf557093113",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0228-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "cf7a80ae2129726d7e902b6c34238d205bd543a1d5c6f1a25d8211ada54290fd",
+      "fontes": [
+        "figure-10.json"
+      ]
+    },
+    "D2-P0244-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e69784a0a8767191ae58fa31000051fb1e91bdb88bf6866cc4a32613169f9967",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0245-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cc08be91a63f6da4c79a3b817dd42f91999033b214be2042d6c97eedad5c0527",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0245-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "45504ec04a7827b0f2c2e8b4de5151b8c6210a69d0f978105b329f2cfd288ead",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0245-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "152d2b2ebb4f327d55f90f4f9adbd5333dd7bf3d24951bd55341b6a18eac6536",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0245-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6e8513003bc35b1a2cdc7aad931fd761c9fc1e63e1ee8082eb7006258eb5fcc0",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0246-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3b273ae66663607a81cf16789790df784fb105ab4cca91ecb6b30153a7f18c32",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0246-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3d8b179dd8086096d3dcad24d3145d75f8a687e2dc78812feab1f10abac14f76",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0247-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "02ba3e6a8b77cf5a4e5dc069b222973e0bfda436a148bf6139c9d592fe6abf78",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0247-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1216539a9ded478e45b2954dbf5b4ddfdf2018cfae34ab254ec8d6c305392313",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0247-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d1c10a35990d8b8797de5f2300c77d6e2795e79e7fdb5c9c7d7b6a1e40841725",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0247-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "efdd443f39b40bf62790bb8d39df36dccdb4bc1f643c2316ebfb91d5aa3ab3d9",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0248-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4d072656aa0ff102c0bd5702c30bc3707b9475f9a19d3935af65ff822f3921d9",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0248-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e7d97a294445f9c19e88b6d5df2b679c01de47af1ce3d67812532ed68e8b4b31",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0250-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "fecba9fb1f77ab65082e28dd0a3ca9e95616c6c04811080da865edc85a84b923",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0251-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "81712d8f1c66a002478d646f2c0c51ac2d27dc5a64245113fbbabd7ad441cd31",
+      "fontes": [
+        "figure-11.json"
+      ]
+    },
+    "D2-P0255-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "77ac5561b4e9f26262a77db9d470bfa03f0102aeb712303f3c3a4d29140fecf8",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0256-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f5b5463a74bcc18c4acc24b8b99b9701f6a88bd58d61432da41845c3d9582e46",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0256-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cfde18d09149a8eb50f1a21e29486738e4db77252cb79b5e37a96cd019ccc648",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0256-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cb3bb2b3df8d9a18e4921c2358d9a2633c6a04afd4b2ceca82773bf61b2479c9",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0256-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "de26957c9122b1d3e4041d040230c16558836abbea58e5568403115c59c7061e",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0256-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "466b01293bc51f506324a0ac55eca368e5c7792a43937b91dcf648bd3c48dc7f",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0256-C06": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6732d3927970e8615ddc7e015b0b96460b31751201822f81503b4e37278aeb48",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0257-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d692f0218133fa35bf6688ffd0541adce398842b51ba71d7aa9a2888726d0ae4",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0257-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a143e0b7979c9055542494e15445ecb628b968cfe2f3fbde4fd66f5e96376189",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0258-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "fd028c4b89d3760db52fbd831095db280920a80c4fc05fdf90b1bb0d19a6cdcd",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0258-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1a24dd5f43cd770baab38d460d8d5ae70d0863edb178e676f3f842e89fb0f1ea",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0258-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bca0a5df9e525df3baec96e47a20340c26460c06c40271d2bc6e69f9de48856e",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0259-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "01a40bddfa137baf9132302270f5ef1ba2964fc434b66a46cb9a5bbd7a78d92c",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0259-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "48bb8d2ec5f72e9757e8c1d056f0f3e13e7ccb8b41f67e9067c6e337d8ac2889",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0261-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4dbf8ef2cf0b7fb42fc54019e8086fc11a12da7732ffdba49cce0b854f7ec61d",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0262-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b9d0240ed3841cb88a2d948d280ee54ddd36e2110e472ce7968dd70ec4740068",
+      "fontes": [
+        "figure-12.json"
+      ]
+    },
+    "D2-P0278-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "fabe0dab6834f120c7bb33547ec1f7c5647afde7d766f3f6bbfb14c1edc3cca9",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0279-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "5a8393395cdccf5d23db69eb4466eaf52e6f1a524c099cda27184c6878e21f31",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0279-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "53eb18620b558d7248c163d0ce71a930d7be2d7af83a134c293d14f0343b5389",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0279-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "7cc1d67ce63c984a2be46f3e67b79d8513cbfded0f0585b5b34317d91a749de6",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0279-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c893357fcef85034220cb6c82d37f4db626d139909d4b6da179e30c514823cd9",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0279-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0ef578554cc7c5a2a6828152cbdf6f2b2febc5acabd49f8dba8fb00ad073a749",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0280-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "00f20dfdb285e993b6451c3db1e963a551c63a4bbba736768a8689b39057c39f",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0280-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "09b26f0bde9de3a9a41986fbc5e936b2f792c08059a78feeef94622e5f993d5a",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0281-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "effd90f41c34e89facda61e96871cb0e0e98d958b40baadb0b4a26eb4c3e5ce8",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0281-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ab51a986403a8664632f77416baa2860597f45e4f10c07c51585ffb9ea379083",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0281-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6f91c3b7a157fd1daee9ee5dd233758e4ae4452f70f45a28ca55fc81a75653b0",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0282-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f04bb651e08c6694e30460cc9682828b4ec0b6f6f4310df46be546fc0c4682d2",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0282-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a964b2965d76574935aaf898da3bb57d4cc68dddd971cdcf95fc9d249544c8f5",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0284-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "17f2cfa01c8428674a7d779934e25d4bfb4852347980ffb7f872363770e84855",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0285-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "7c8f4e6516f029440f62b71e3e3ed6fb169bc2bd3ddbd9557466158aacd11d91",
+      "fontes": [
+        "figure-13.json"
+      ]
+    },
+    "D2-P0289-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4e3198a657b51a323d23a2d562737a6df2f935cf1e8d2c15f089983a25d0704d",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0290-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "beef24389039e3c93bce5c40f91ef6fba5d25a0a90055975aeffa16e26ff79da",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0290-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "531a2c3fc8089cec2abeaeaa39454fcc3e7c254b480de3b2cf071d447754461e",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0290-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b7c46fb9b6269bb51fb52ddf222443634243a5365ba6da8ab2acc8ba16c20d8e",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0290-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "66fde18800e95829f0cf1a0f588b7d1ba3e64bdb3a116f555c2648b5916bdca5",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0290-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "904c2710a819f4458f1fd123c383c5d6f7f75a3011a59f88ffd90ba3009da801",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0290-C06": {
+      "status_conservador": "parcial",
+      "expected_sha256": "36d29b8fe3f2e4ac675a39d3df4580e0ec4fc6a67f071cb47825a2709c1d27d8",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0291-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3a7b3755edb14ed76f6ee0e080d60eff173062d7810872784f95317e996cf55b",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0291-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "07a24557e5d6cce80583c7dcfa3d386d4f2a1fdd7a16076e8ed588f2dd1b4c64",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0292-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "aead5b1976e91b92718dda0cf682b94cbf1ac393cb2a29970fa7f4e9f120e083",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0292-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "8122d4c98eee8e3f5fd1aca9fc0ee2ed422fea24259d72e6119b44096b465b08",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0292-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d0a472db22f8f974c82eb8dd208070fad2b36c404402d6e35ac86d164a4d70eb",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0292-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "47beb83a845bf7a9ef7a21d18dece8b02154a4941954a3d948bd0882ac168534",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0293-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "89eb36e42772c7d24a8e8c1f419e9d92b81b0ec7abd9e5262172029a5a686acd",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0293-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "f1a565ef1d085177ba209df95bc421fa0a332baea1b89fd52ec8e1af9c276427",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0295-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6dcb1ae29348406cac99be976d43793411359c474cd51a06f69373217f781b22",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0296-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c4ebc83ed4e5ab830dbbb66da5dccda4f0bb54e46b1aeaabe8c4f985a7453ad5",
+      "fontes": [
+        "figure-14.json"
+      ]
+    },
+    "D2-P0312-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "7cb0922e1ceea9d8b2b0a12bb5d0da0362daffb8f530ca7380712d34a33ea244",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0313-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "231d0b9e6afb05978821f4adfc3c92d042786c70a1a4e5a50cc0679cd2c7f559",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0313-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c62d3bbc05d4d6d54e7a16bbf576a7403a9016e7cbf5dbbe97a4e3626a59621a",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0313-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bb73cec5f9a5cc4773ef831815c9057cdd44bb1d1beaaccd9c8d2049a96798e0",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0313-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "768f076552272bbcc4040adfa352d2a5b70ac5eae8b1afd605588b77832c3905",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0313-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "50b2cd2e38f3e8fb8fb9653a933ac794a9454e218eeb3bd94d7a3fd46163cfd6",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0314-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bb25f7fcaaf7975a1817af8faecef390bea473415b9341fe8c13bb77ddb11051",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0314-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a4989399544db0a4fa48bcc8990585be2fbe9db39f2572eaa464b2882a4fb6fa",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0315-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d3a70b98c847e4bbc471c563cf3a92ea344af5a7fd8368fb08c8f27e5f9237a9",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0315-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "759352c37f5f032db1720dfd4ac31c3939bf43cbb28906b6bbfa2d5bb96c2808",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0315-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "df5befef13032ac7f446923f9478133177526ac3b79701c3a3c4a854c7eb3acb",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0315-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "7182506f1580b0dbb305f251a9ecb28c0e8cc03d5e8b591b91c5c545c20bb85f",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0316-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b55e1bd848ee970ce511977856e4f7c12f4be711fa0a603a4fb3e1c3c6ddf362",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0316-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2b02fbd2d882830d5349c6e72788e46571698b9438d35337a49e1edc0d203a6a",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0318-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b3d1a9ead8f1967b11ef6e250ac5f2a27171e4e2992533a24aef541efa5dc9f7",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0319-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "5ddc6248b830414e85fbb94394b663e41e26ecca596d1e42fb06b4c129eb1782",
+      "fontes": [
+        "figure-15.json"
+      ]
+    },
+    "D2-P0336-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "d3251b6b0ccb6d65037c71cada652c4cd9b6c901d675e3db84cb7e0f2c9f27b2",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0337-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "389bc6d2d925f9b21f4b2c1425b621bd5c3a459afd2f3309e94df228b1856179",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0337-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "467ac0fffbc9ac448dd22a87cd11c75ac7e30cd5ad9e2905a2dc625785d12fdb",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0337-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "81d192eeccf7a143ee46e41a924767d690a1f8e364d04b31deef9f1b1469b68d",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0337-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e83219af397569e9fdfa4b32b79e3862694ff593ca2893a82ba8824367ab888c",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0337-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "36b8423191604654793d202568b2d3df1a82393a9d4a25c351fd8e4daa75c97e",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0337-C06": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4e7aab55376b01cce29650604ea307cd33b454a5434f54158615ba879c8268a3",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0338-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6047ff074b08a67eb9e8901be79792ebd0d95d3b3214224e488179795d3a10cc",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0338-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "eba574b0b6b3f577c1c57f2b0dede2650cffc01dc09061791be2602bf447d42a",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0339-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "250998e2eacf8ce83fb91a2660ad4f2a0a12ed411db3041ec9ca1e666d85ebb2",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0339-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3fe6d000331f476280310e087081398355de0580ddd33d2893248d387c032e62",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0340-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "966c71edac4cee16de9b925372e843722663cf26d99f408f7dcd80f41969f2f6",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0340-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "bad5ef8122f56302fb48d53c556d144a9fb2b9f634baf60a3a363f6195bcd872",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0342-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "af25bd669eaf9ddff08c531b3c6bc37019b8f10ccd00cce7df53371d924d7fb8",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0343-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9666224d4fbf20c757338fccf84f49d131cbf5b775bdce0b455da599851a7bff",
+      "fontes": [
+        "figure-16.json"
+      ]
+    },
+    "D2-P0347-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "070e51273fe1de397f46524309e9d5fb2be75cd09094ac72402f27424e1680db",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0348-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6efa01d45a7b960a36db9fcd597b62deda2d38ce085b94ccef01210f82c24add",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0348-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e0a99f7d396919862392b6758acb7fb7dcac38d6520e0c21591ff8b4e8d67617",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0348-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6b3b5b86d7479c5d086d55f1c0dc2047a142406000431a71b915d65c2db805c9",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0348-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "402876cbfbadf619a4ec82b7d8f97c63ec974cfa366af1c346f0175534754d55",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0348-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "af376839aac75b6138f66f161d6b5ac1608a1ab065fd3b326f11cfa9963d3a7f",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0348-C06": {
+      "status_conservador": "parcial",
+      "expected_sha256": "baafd910cfe9d9e12f18705196e4b4e147e4e34531526254d3841bba64dc4992",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0349-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a8408c625b4aa80198c12405f505c8744ba10af055d86edba818d8829ddeacbe",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0349-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9f86cfe44814d13c3e03e423b4d1e75948406f129efd7f260acd5430f2309e5f",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0350-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ef3bba3d3fbe1580d8d54b4dc6e98b45ceb521de1d506fe1a7bc3834b0b541b1",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0350-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "855395d4eb7d94647a7a3db38d8fd82c65ba0b5a2efd467ff4f548d064d2f5cb",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0350-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b8a025d62419478c52b71d7c2f92a5ab1dede181bfa3b2f542fa81fdfa6d9e93",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0350-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3d62d9f35bf6900ea5bdc3d3fa21a668dce6fa4713e24bb95cbcc6f4cf8320b2",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0351-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "473ddc464273fc83fb565dc8433be376021be9c29ab135eb61b191714a847fb4",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0351-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "57dd54bb2d5d37d9de331d8cfe0e9920270b7a5bb496f44c604e4c72f7c2efe9",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0353-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "86879a78813f44db9b646b44186876f4bfc1fe1d710a3ba7e648be615e447688",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0354-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "560dd5b47dbade34d9cad28a44287dbfc8a61d65c081a791fe7f0addaeb01dc9",
+      "fontes": [
+        "figure-17.json"
+      ]
+    },
+    "D2-P0371-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c4922346461e68f5f1641d2dc8ff3dbd10ca65f0d389a9db99d51991f8ec8d95",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0372-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2c29c3801b69dbca0d8635782707c849df9b925aceb153e854847ec30662528e",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0372-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2dce87fe0b923bed2f154f0cacfb8255054c0a0a2d16e27e2981b4ca09d3a02e",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0372-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "fb0bd506775a19d6cabb4f78443894e683627e05de3268f229c5ff8be3ed03f4",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0373-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a6da0058c60df319ec60e291d9f9ad514ad192f002a3d54d099689079983bf5d",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0373-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c2d9cf6c9401cd2c37662b3448e39bb95c5e8ae151d11ba4d68788a93f44f08d",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0374-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3fdc7700e13c408edd0b0878776235466cf984f15e5885c3bca75ff35cd4a4be",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0374-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "9c43e4068a6a4a8359e0ec83b571a1734c38c0e4070b59eec395d10005ffc433",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0374-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1c828648f4fd99c538c080053c70ce7420d82267d88364e23017149217e72284",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0374-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a2acf2530dc23073d5d7719d72327fe894d8b453c8dcb7297dc11beecd3ac0e5",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0375-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "207cc239f1cd64238649d22f32eaa1543ada5810c6d9baf6c347db057481f1db",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0375-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "4ec1daf0448754ea77ae6467369a51ca71d38121e47413e5faf15410eda48469",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0377-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b6ef4723a00d19eaadb204738289c5535698e1c6061eb78d7386129c8a9ab714",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0378-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "eac116a033ca27fc727342f0c132e59ddb7e8fe9c9e48c79ed72e19e743296f8",
+      "fontes": [
+        "figure-18.json"
+      ]
+    },
+    "D2-P0382-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cf54553ab2043cd63771229ed9091c2c48bad77a5f8da8fa01614dbb191370f8",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0383-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "72e8238104d75838434cba0ca4611bd911265f9f3806337c12e2e5249beb014d",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0383-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "84a86cb2c7049ef7e36fd9d330436dc85d987a20ef17747cfd3722408d482c10",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0383-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "67a0c1f987f42c69275d96ef3de588a19979efeb97842a9fae90215064ab2300",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0383-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a11e18dd590b7fdeded18a488c0907e8e69f06010c48805c291779cd5ee1575d",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0383-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "61e728d17c68d437f25a48ecbc043552f0066f5d392b546e7b21fc8a91aafe15",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0384-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c47f17d48819d260a7f44083b5cfd1086798b159cd849cfb762cb47c6712a2a4",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0384-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "759fc8a8f87ea4010a68f08d1bafdf9baa45bffabf25c805bc4618383f667bb3",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0385-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "63ab607bc0379f29aa4f1704561e73eafb78f9d5535425779068dcfb2d25ba1f",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0385-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b6e90dee07ccde591b1c33882a0d73019c47dd59087243b9e90a7d0ce58cb350",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0385-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c9e1c85cac3bdb31ea5b2222ca31051adf5f36652e608657b59bb670d42e5081",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0385-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "51bc21356548c8d58b5225e1bbd9cf182436679652f50f443e6cada7eeaaa028",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0386-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "61ecb3ff93162d6a49bee907d4eb404d598e29a60a243ed01b09d2e987525124",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0386-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e4d9ca2098ad8b02a6863a5eecdbb90eb8847bd45e23dd3652bd96b5d3a37fd8",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0388-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "1af6084fae4113237a410f6640f23518b41425fdfac3531a413f05233a7a1bb9",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0389-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "68c3d38cd9b07485c53c20d387e49a3e5ef51f51ecd7dab326640be151c5c145",
+      "fontes": [
+        "figure-19.json"
+      ]
+    },
+    "D2-P0393-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "86d60f5a461764f2229148fbc9e47fe7886409ea737b94a0999dd64cbb75641b",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0394-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "baded4056daab5370d1de0650cbb3a0115a7ef729c1cd7f3fcf299a5c25ddcde",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0394-C02": {
+      "status_conservador": "pendente",
+      "expected_sha256": "afa39084e234bdfd996d44708eb731e980ea54dcceeee55c562613b5ab5553ad",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0394-C03": {
+      "status_conservador": "pendente",
+      "expected_sha256": "3ea0b9430ca4ddb60e738661aba82e33c9b2556f15e67c998dfdb69535b6a50a",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0394-C04": {
+      "status_conservador": "pendente",
+      "expected_sha256": "876e9e80bf8da799a02422dd22b4ab0b7ed491e55479d9f9d974870ed601eeed",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0394-C05": {
+      "status_conservador": "pendente",
+      "expected_sha256": "8ba89e5710f151fd15968eef7fe8573ff58817a3a64dc88e204a401f3d200044",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0395-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "6ee3765c233529ac42f893e204ca1ea54bdba8d33d25f8e1cc39ad8f475e9f6b",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0395-C02": {
+      "status_conservador": "pendente",
+      "expected_sha256": "149f6cd76e6b1240f7994cc890566c22956910104abaa3ed7a10e3db88b002cb",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0395-C03": {
+      "status_conservador": "pendente",
+      "expected_sha256": "1cb98adb74d744e3aede1ac27fde4a2e7cd09663cfb65ffa888a0f52ae09cbef",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0396-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "098db9e3c5f4bfcc312bd25878ab5fbb060a4117ca00fa39d4fa0cbe7af7784b",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0396-C02": {
+      "status_conservador": "pendente",
+      "expected_sha256": "2a65d345971aecc31d1184fd8ca1fabc4b12816154010e820ca3e56d4cab096d",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0396-C03": {
+      "status_conservador": "pendente",
+      "expected_sha256": "99cadc057c9c78d9f9b9325d5cebe415381d80c2634b1d9a012656b8fbb08ed8",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0397-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "d4c16b716af3841e8f04f73d93ef84409bb0f454b7b1cca884bcae5c26b33fc3",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0397-C02": {
+      "status_conservador": "pendente",
+      "expected_sha256": "51e957e4a8bec2d0f4376fc159e030da77159e4bb44b09ce8468fb2341b10cf9",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0399-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "feffccde9836e7722fde0fdc381b986aab91f89f2baabb8cca6a718fc89afc74",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0400-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "ce09b34cd612672a03edb1e6450c954c02d92040622dd4aedc359ef286349669",
+      "fontes": [
+        "figure-20.json"
+      ]
+    },
+    "D2-P0404-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "247a7480885494ff0fe7ddb68e5f4a8a5ec1b16576e0bce57d898a9cba243fe4",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0405-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "60cfc1c9010f55653e44e60ddb6420ef9994730057abc67a385fd56409315724",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0405-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "79878e4156d60ed6c29963092ef710c26750634eddad04ca6c3d77da9c0e0459",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0405-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6584850c36637b9f21b95d40dd24b680cae429afeb925326a7fcc146e4b55fb0",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0405-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "dfbbe4240ddef0c6a6bb0556c8703dc64cbfe33945a3943d7fb1277a52ccf158",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0406-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "c109079fe50b1bdb702bf7487238945319270fbe01b5511cc1aa550068177f03",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0406-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a698d477080052c267ad64867520a5875c619c28b2ad7e1f35a0bcc9fff815df",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0406-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "665fa05066f01346bde019bbf2b7a55f4f3e5ebd5c67747d04ad0d1ff3bcbce2",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0407-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3d2e11ec82e15e6b27f07187403152cede9a90e110493e1b7c20088ee070d3d1",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0407-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a65aaec7c5c2aa2292b5c6bdaa4f6c8d8b01299e3564b5e7402d2ee2e9adfa7f",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0407-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a0abeb6dc9c183fae4f73d369deebc43039b8f1db5e16a14b8026fa0f4eb3a4f",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0408-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e2a6f69953554da1de21ea8901446a093be7bdd30cacf61716c8a35e3dd06bd5",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0408-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "a8b260c2af61666be7e48c6226eb434086f07d45ba48d54eda2a589cee4b4f47",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0410-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "19d08a21b7162b4af29bd607537ce707ae3c1bd9b1d18e0a214f40bff260121a",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0411-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "cc66e23927856249ab34eda0627453a841ef49f739413d3d56206e186ff4ac01",
+      "fontes": [
+        "figure-21.json"
+      ]
+    },
+    "D2-P0415-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "3645f89990091f288dfd134b977805e0dd88e0e3480e7d04d0ca3503d01e716c",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0416-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "7f18ef46b5bb6c6a4c6e12604ede62c2d6bc354a3bbd9273310f7afb737aecfd",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0416-C02": {
+      "status_conservador": "pendente",
+      "expected_sha256": "8e80f41f1913f7313aa586f22158540484078b6928676510ac942f54ff2ddce5",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0416-C03": {
+      "status_conservador": "pendente",
+      "expected_sha256": "d7708aa6bf37c6188c29916cd6e8db33a97dc632ecfa78b73b7864df95bc94cf",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0416-C04": {
+      "status_conservador": "pendente",
+      "expected_sha256": "cf8135e35f3ca474435f2a261d26c4a556936bd67991d0a84c6776e3cb2bf24e",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0416-C05": {
+      "status_conservador": "pendente",
+      "expected_sha256": "59353cc3c9cec634f47ecb58b29588bff0da2431e45a6c38c3076e28af3ee6a7",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0417-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "80b7868e5d3db2d3c3f75763d5d95f87ee01f14a9ac1bf5a3b1d0a45e1529c99",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0417-C02": {
+      "status_conservador": "pendente",
+      "expected_sha256": "bb3409adf62bff3bf6e0e59da005a3e0970c2650cde5154c65e5af093d24021e",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0418-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "5406c23c6072086b0e9508dee7a5dc0e3c910bb5487af3f8a1fc02a5e757a1cc",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0418-C02": {
+      "status_conservador": "pendente",
+      "expected_sha256": "c25fe4e8880e07477126148d9b5ceb7e7622b8d30fc17ffaa6fd683439670ba2",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0418-C03": {
+      "status_conservador": "pendente",
+      "expected_sha256": "c73968a2bf2ddcebc6b38c2e0e95812b4fe8c45abba2b33d1cc58e02e357a0b1",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0419-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "a861710739c9f51515e475be20c5433b426c61458b04fea009b9bcb0e34e679e",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0419-C02": {
+      "status_conservador": "pendente",
+      "expected_sha256": "26076925ee6d898a95cd7de96f50f4ff22b1a086c08fca8579aac10fccf43b1f",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0419-C03": {
+      "status_conservador": "pendente",
+      "expected_sha256": "64d9e96376c0a2d00716f9cae380903392c96d510909df6a5e84daeea500a886",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0421-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "ff48557f5e25840810bff9c244947ef628a1ec20b232f9db0477107624dc1bc9",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0422-C01": {
+      "status_conservador": "pendente",
+      "expected_sha256": "542b02bb2e9c935306dadc07d3acf2106db1fd5f6f3257c71674bbdefcf59ba4",
+      "fontes": [
+        "figure-22.json"
+      ]
+    },
+    "D2-P0426-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "5dccba1639be757cba9aeaadc162692a5c58019525a93a9367621d07213fe1b3",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0427-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "3b2fbb644d3917bdaec8ffde53b60ef5dfdcf712527feec020a85fb3d2330687",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0427-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b36946b2e9423c971f62b785338db162506963a898f016b13b85bd343dd23304",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0427-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "ac43cce34c34438741f0a8cbdee3cef9f8442ea26b6d91515b1ba10ccd677dac",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0427-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "6c7cb3fabf499b3bbe4b092dd2bbe5f597c863497112941ece03719246b6543b",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0427-C05": {
+      "status_conservador": "parcial",
+      "expected_sha256": "5f84eb81194061968744731036fbf6cfecca19bb06086b032fe50469c2a2bffe",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0427-C06": {
+      "status_conservador": "parcial",
+      "expected_sha256": "85129d9f5a40a377fffeb253ddda71c0000c3278f7e5e8bc9fbe018696f45a43",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0428-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "650b4dafe494ce87f59c54c855dd0ce63998deb92b1b80ed0715875cbe576c34",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0428-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b78929db9401e01efee53e084a51e1ff1670e1600e943b80ab176ba91990e9ac",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0429-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "077c8371cbc5d7681d7e830ed7e404426aaf317310ca4d64d3ca207c657c51d2",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0429-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b78dfa366915d9d6ad2b603fc5287caf38f3dd9cadc312a70893650a09abe18d",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0429-C03": {
+      "status_conservador": "parcial",
+      "expected_sha256": "b96c6574be511e78a9a62914118570ee08ecca66a47577d91aa7bb46af0d5945",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0429-C04": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0fcf6f2428fca23f0de80197fce3e391a19b43b5824eec7f74feca1e42979334",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0430-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "e784db0e5d6efcb000326c2629929cd2e21151d09c7dd3d4e46a4501c35c1960",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0430-C02": {
+      "status_conservador": "parcial",
+      "expected_sha256": "dd9cd983aab26c654affa9e448f92300265e392b7aa9b061d36f0e5ee68694e8",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0432-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "2ee871f6b890bfeef0008a3462e622b7bbb2b68dd045ddfda39af8a70cfeecb2",
+      "fontes": [
+        "figure-23.json"
+      ]
+    },
+    "D2-P0433-C01": {
+      "status_conservador": "parcial",
+      "expected_sha256": "0d2f5a66c579a180e0fd43dd12955390a3bc7c44f024d7b6f0c90005e12d1d87",
+      "fontes": [
+        "figure-23.json"
+      ]
+    }
+  },
+  "historical_cross_figure_status_conflicts": {
+    "D1-P0095-C01": {
+      "status_by_file": {
+        "figure-05.json": "bloqueado",
+        "figure-06.json": "parcial",
+        "figure-16.json": "parcial"
+      },
+      "provisional_conservative_status": "bloqueado",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0097-C01": {
+      "status_by_file": {
+        "figure-05.json": "bloqueado",
+        "figure-06.json": "parcial",
+        "figure-16.json": "parcial"
+      },
+      "provisional_conservative_status": "bloqueado",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0098-C01": {
+      "status_by_file": {
+        "figure-05.json": "bloqueado",
+        "figure-06.json": "parcial",
+        "figure-16.json": "parcial"
+      },
+      "provisional_conservative_status": "bloqueado",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0099-C01": {
+      "status_by_file": {
+        "figure-05.json": "bloqueado",
+        "figure-06.json": "parcial",
+        "figure-16.json": "parcial"
+      },
+      "provisional_conservative_status": "bloqueado",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0100-C01": {
+      "status_by_file": {
+        "figure-05.json": "bloqueado",
+        "figure-06.json": "parcial",
+        "figure-16.json": "parcial"
+      },
+      "provisional_conservative_status": "bloqueado",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0102-C01": {
+      "status_by_file": {
+        "figure-05.json": "bloqueado",
+        "figure-06.json": "parcial",
+        "figure-16.json": "parcial"
+      },
+      "provisional_conservative_status": "bloqueado",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0103-C01": {
+      "status_by_file": {
+        "figure-05.json": "bloqueado",
+        "figure-06.json": "parcial",
+        "figure-16.json": "parcial"
+      },
+      "provisional_conservative_status": "bloqueado",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0104-C01": {
+      "status_by_file": {
+        "figure-05.json": "bloqueado",
+        "figure-06.json": "parcial",
+        "figure-16.json": "parcial"
+      },
+      "provisional_conservative_status": "bloqueado",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0136-C01": {
+      "status_by_file": {
+        "figure-09.json": "parcial",
+        "figure-10.json": "pendente"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0205-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0207-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0208-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0209-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0210-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0211-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0213-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0214-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0215-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    },
+    "D1-P0216-C01": {
+      "status_by_file": {
+        "figure-18.json": "parcial",
+        "figure-19.json": "parcial",
+        "figure-20.json": "pendente",
+        "figure-21.json": "parcial",
+        "figure-22.json": "pendente",
+        "figure-23.json": "parcial"
+      },
+      "provisional_conservative_status": "pendente",
+      "literal_code_and_acceptance_reconciliation_still_required": true
+    }
+  },
+  "full_global_functional_reaudit_complete": false,
+  "old_per_figure_sum_not_valid_for_delivery": [
+    240,
+    480
+  ],
+  "optimized_internal_engineering_hours": [
+    64,
+    104
+  ],
+  "estimate_confidence": "Planejamento preliminar, revisável após o próximo bloco integrado; não é prazo garantido nem mede a espera dos runners.",
+  "total_including_uncontracted_external_integration_hours": null,
+  "external_work": "Contrato/ACKs/capacidades PABX e homologação real de NICO/TTS/canais: prazo e desenvolvimento específico só podem ser estimados após contrato e ambiente autorizado. Permanecem no escopo, sem endpoints ou respostas fictícias.",
+  "groups_without_duplicate_shared_work": [
+    {
+      "group": "A",
+      "figures": [
+        9,
+        10,
+        21,
+        22
+      ],
+      "hours": [
+        20,
+        32
+      ],
+      "scope": "Um editor/executor/histórico: CRM, Service Desk e Projetos, confirmação/retry, integração ao atendimento e ações do contexto 360.",
+      "reuse": "Versões/readiness, 82 casos nativos tipados, adaptadores e políticas nativas, callback/worker e componentes de atendimento existentes."
+    },
+    {
+      "group": "B",
+      "figures": [
+        1,
+        2,
+        7,
+        8
+      ],
+      "hours": [
+        4,
+        8
+      ],
+      "scope": "Estados operacionais, navegação, filtros e formulários já existentes; validação dirigida dos campos restantes.",
+      "reuse": "Central administrativa, pausas, limites ACW e fixtures reais existentes; sem reconstrução de telas."
+    },
+    {
+      "group": "C",
+      "figures": [
+        3,
+        11,
+        12
+      ],
+      "hours": [
+        6,
+        10
+      ],
+      "scope": "Filas, equipes, horários, elegibilidade e herança por origem; um conjunto de testes de isolamento.",
+      "reuse": "Perfis/equipes/unidades e regras já aprovadas; revisão do último agente e precedência de calendários já implementadas."
+    },
+    {
+      "group": "D",
+      "figures": [
+        4,
+        13,
+        14,
+        15
+      ],
+      "hours": [
+        4,
+        8
+      ],
+      "scope": "Configuração interna, simulação, aprovação e auditoria; comandos externos permanecem bloqueados.",
+      "reuse": "Mesmos contratos de capacidade e Central de Aprovações; sem construir conectores ou ACKs presumidos."
+    },
+    {
+      "group": "E",
+      "figures": [
+        5,
+        6,
+        16
+      ],
+      "hours": [
+        4,
+        8
+      ],
+      "scope": "Uma biblioteca de áudios por unidade, vínculos e versões; terminar lacunas internas de gravação/TTS e estados de erro.",
+      "reuse": "Catálogo, armazenamento, scanner sintético e mídias nativas já disponíveis; fornecedor externo separado."
+    },
+    {
+      "group": "F",
+      "figures": [
+        17,
+        18,
+        19,
+        20,
+        23
+      ],
+      "hours": [
+        16,
+        24
+      ],
+      "scope": "Uma base de gravações/qualidade/sentimento, cinco abas, timestamps e revisão humana imutável e concorrente.",
+      "reuse": "Player, transcrição, análises NICO e contexto existentes; histórico/ações consomem o grupo A, sem segundo executor."
+    },
+    {
+      "group": "G",
+      "figures": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "hours": [
+        10,
+        14
+      ],
+      "scope": "Aceite literal 554 IDs, regressão consolidada final e evidências desktop/mobile claro/escuro somente dos caminhos afetados.",
+      "reuse": "Reutilizar provas compatíveis com hashes de fontes e testes; não tratar outra revisão como prova do código alterado."
+    }
+  ],
+  "acceleration": [
+    "Concluir as três infrações restantes sem mudar comportamento ou reduzir as 37 verificações novas.",
+    "Validar lint e testes direcionados do pacote funcional compatível antes de uma regressão consolidada; uma CI própria por vez.",
+    "Combinar editor restrito, eventos nativos e histórico por destino no mesmo fluxo de CRM/Projetos; Service Desk reutiliza seu workflow e políticas.",
+    "Uma confirmação/reexecução selecionada por destino, aproveitada também em Contexto e Ações; sem executor ou cadastro paralelo.",
+    "Antecipar revisão estática e sintaxe leve no Windows; lint, Rails, Vue, banco e Chrome nos runners GitHub.",
+    "Trabalhar nas próximas lacunas independentes durante CI; repetir regressão apenas por mudança, falha ou risco efetivo.",
+    "Preservar e reaproveitar evidência imutável compatível; fonte alterada exige os testes e a homologação correspondentes."
+  ],
+  "critical_path": [
+    "Entrega durável37 aprovada → editor/contexto autorizado + eventos e histórico nativos.",
+    "CRM/Projetos/Service Desk → consentimento e retry selecionados → F10-A/F10-B reais pela interface.",
+    "Notificações/NICO internos e ações compartilhadas → lacunas de gravações/qualidade e revisão humana.",
+    "Aceite literal consolidado e regressão final; homologações externas separadas quando autorizadas e disponíveis."
+  ],
+  "current_ci_not_accepted": {
+    "sha": "605b00acdb19a51614e905a4f214fc44a3e17d77",
+    "run": 45689740485,
+    "focused_lint_remaining": 3,
+    "new_native_cases_executed": 0
+  },
+  "whole_Part1_complete": false,
+  "no_scope_or_security_or_acceptance_reduction": true
+}

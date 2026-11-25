@@ -4216,5 +4216,25 @@
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
     "new_native_cases_prepared_not_accepted": 37,
     "public_editor_dispatch_or_whole_Part1_accepted": false
+  },
+  "accelerated_consolidation": {
+    "document": "docs/jrc_contact_center/part1_accelerated_consolidation_20261125.json",
+    "sha256": "9d25f7ea390929b39d89a51d576e1ab78c3f042ce6dae18a6c2e1fce62e9ee14",
+    "unique_requirements": 554,
+    "counts_conservative": {
+      "concluido_com_aceite": 18,
+      "implementado_sem_aceite": 0,
+      "parcial": 466,
+      "pendente": 46,
+      "bloqueado": 24
+    },
+    "proven_percentage_lower_bound": 3.25,
+    "optimized_internal_engineering_hours": [
+      64,
+      104
+    ],
+    "external_total_not_yet_estimable": true,
+    "cross_figure_status_conflicts_preserved_for_reconciliation": 19,
+    "complete": false
   }
 }

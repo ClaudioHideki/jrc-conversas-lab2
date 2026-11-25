@@ -58,7 +58,7 @@ RSpec.describe JrcContactCenter::EndingActions::QueueDestinationAttempt do
   it 'selects only an explicitly configured CRM intent without manufacturing a lead or destination unit' do
     version = publish_typed_schema_definition('actions' => [{ 'kind' => 'crm', 'parameters' => {} }])
     ready = JrcContactCenter::EndingActionReadiness.create!(account: account, version: version, actor_account_user_id: member.id,
-                                                          rule_code: 'SYNTHETIC_ORIGIN_RULE', request_key: SecureRandom.uuid).reload
+                                                            rule_code: 'SYNTHETIC_ORIGIN_RULE', request_key: SecureRandom.uuid).reload
     # Use the actual original fixture's native source; this changed definition
     # needs a new attendance, never a silent rewrite of its prior immutable origin.
     original = completed_attempt_source(member)

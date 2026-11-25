@@ -139,7 +139,8 @@ RSpec.describe 'Actual owned typed Sidekiq execution and original authority' do
   end
 
   def preserve_typed_broker_proof(rows, attempt, mode)
-    raise 'Owned typed queue not drained' unless Sidekiq::Queue.new(broker_state.fetch(:queue)).size == 0
+    queue_size = Sidekiq::Queue.new(broker_state.fetch(:queue)).size
+    raise 'Owned typed queue not drained' unless queue_size.zero?
 
     if Process.waitpid(broker_state.fetch(:pid), Process::WNOHANG)
       broker_state[:pid] = nil
