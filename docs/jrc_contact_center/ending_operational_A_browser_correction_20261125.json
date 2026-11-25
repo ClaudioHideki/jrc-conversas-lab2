@@ -1,0 +1,68 @@
+{
+  "parent": "e44cf3716f4e3375757d272891bd1731b9b5212b",
+  "status": "browser_visual_and_native_ack_correction_prepared_not_validated",
+  "diagnostic_run": 45544762024,
+  "diagnostic_artifact": 14996041127,
+  "diagnostic_artifact_sha256": "58d041e7ab35224ce9e6b6698a934f7d327011b0f5822c5db6ea2eb65a9e33d2",
+  "native_operational_examples_passed": 3269,
+  "new_native_bundle_A_examples_passed": {
+    "ending_pending_project_run_spec.rb": 12,
+    "ending_pending_run_concurrency_spec.rb": 3,
+    "ending_native_crm_concurrency_spec.rb": 6,
+    "crm_lead_destination_spec.rb": 15,
+    "original_customer_reference_spec.rb": 13
+  },
+  "Chrome": {
+    "passed": 273,
+    "failed": 3,
+    "pending": 0,
+    "flaky": 0
+  },
+  "corrections": [
+    {
+      "diagnostic_run": 45544762024,
+      "failed_product_sha": "e44cf3716f4e3375757d272891bd1731b9b5212b",
+      "diagnostic_artifact_sha256": "58d041e7ab35224ce9e6b6698a934f7d327011b0f5822c5db6ea2eb65a9e33d2",
+      "parent_sources": {
+        "app/javascript/dashboard/routes/dashboard/inbox/PendingEndingReview.vue": "8aad27e4fee7f76766d4e8d1bd760c9e7c27440023c69ee24e1270f564367aee",
+        "tests/playwright/tests/e2e/ui/call-center-ending-pending-native.mjs": "67b37186adea2ad16d50e85fa86545a6ff7b792e35a3569bf12c8b5de5ec0499"
+      },
+      "source_sha256": {
+        "app/javascript/dashboard/routes/dashboard/inbox/PendingEndingReview.vue": "fe54ba0fff5cb452312a1473be8d0abf2d7f41a18b2d020156979fced7b59113",
+        "tests/playwright/tests/e2e/ui/call-center-ending-pending-native.mjs": "53dfda17cc9caf613736ee61474afce92f7fb9632d730179718c85620a6f8642"
+      },
+      "no_gate_or_native_coverage_weakened": true,
+      "same_4_contrast_assertions_and_276_Chrome_scenarios": true
+    },
+    {
+      "diagnostic_run": 45544762024,
+      "failed_product_sha": "e44cf3716f4e3375757d272891bd1731b9b5212b",
+      "diagnostic_artifact_sha256": "58d041e7ab35224ce9e6b6698a934f7d327011b0f5822c5db6ea2eb65a9e33d2",
+      "parent_sources": {
+        "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "704ada447c9a9338c662b0fad3670d83f7219e03e9923d07455ba14c5ced99f4",
+        "tests/playwright/tests/e2e/ui/call-center-queue-membership-native.mjs": null
+      },
+      "source_sha256": {
+        "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "c491448b9dc31e9bcdfdf15c9355eb96bd32a9c20d92c64a0b6e619287f572a5",
+        "tests/playwright/tests/e2e/ui/call-center-queue-membership-native.mjs": "f9bcaa37bd038fadc149728d164928784e2ea60d629095fb714d16bb2477b079"
+      },
+      "existing_queue_scenario_name_and_assertions_preserved": true,
+      "additional_native_HTTP_201_and_identity_assertions": true,
+      "same_276_Chrome_cases_without_retries_or_timeout_increase": true,
+      "no_gate_or_native_coverage_weakened": true,
+      "source_byte_limit_400000_preserved": true
+    }
+  ],
+  "cause": {
+    "dark_contrast": "Unstyled slot text inherited a dark foreground; measured 1.5268 instead of at least 4.5. Use the existing theme-aware slate-12 token on the review body.",
+    "queue_synchronization": "The failure image still showed saving/loading without a validation alert. The test asserted closure before observing the persistence ACK. Require HTTP 201 and the exact native role/flags/identities, then retain the original closure assertion.",
+    "remaining_uncertainty": "A native UI close problem is not ruled out by a screenshot. If closure still fails after a verified ACK, the next CI must remain failed for investigation.",
+    "source_size": "The additional ACK assertions exceeded the 400000-byte gate in the monolithic spec. Extract exactly this existing scenario into an imported helper, preserving all original assertions, its name and all other scenarios.",
+    "failure_observability": "Capture the real pending-review UI before asserting contrast; a failed contrast check must retain its original screenshot."
+  },
+  "no_test_removed_or_retried_or_timeout_increased": true,
+  "no_Ruby_SQL_workflow_permissions_or_runtime_business_change": true,
+  "new_native_execution_or_visual_acceptance": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

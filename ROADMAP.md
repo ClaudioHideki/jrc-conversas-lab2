@@ -187,3 +187,5 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 - CI 45540056856: 2925 Rails principais e 241 de concorrência passaram; lint focado corrigido. Dos 15 cenários selecionados, dois confundiram recusa anterior ao executor com recibo terminal de worker. Preparada correção somente dos testes: recusa permanente explícita, repetição segura e zero efeitos/alterações. Executor, SQL, gates e testes anteriores do worker preservados. Bloco A e Parte 1 ainda sem aceite.
 
 - Relatório final 45540056856 preservado e verificado por SHA-256: 630 arquivos Ruby comparados, zero infrações novas. Falha restrita aos dois testes de pré-admissão; correção ainda requer nova CI. Frontend/Chrome ignorados não foram aprovados.
+
+- CI 45544762024: 3269 exemplos operacionais Rails e 1869 Vue passaram; Chrome teve 273 aprovações e 3 falhas. Preparadas correção de contraste no popup escuro e sincronização com HTTP 201/identidade nativa da gravação de vínculo. Mesmo cenário extraído para preservar o limite de 400000 bytes, sem remover asserções ou aumentar timeouts. 276 cenários continuam obrigatórios; bloco A e Parte 1 ainda sem aceite.

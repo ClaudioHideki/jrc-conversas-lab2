@@ -30,7 +30,7 @@ onMounted(() => dialog.value.open());
     contained
     @close="emit('close')"
   >
-    <div class="min-w-0 space-y-4" data-ending-pending-review>
+    <div class="min-w-0 space-y-4 text-n-slate-12" data-ending-pending-review>
       <p v-if="message" role="alert" class="break-words text-sm text-n-ruby-11">
         {{ message }}
       </p>

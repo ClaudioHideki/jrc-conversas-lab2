@@ -6148,5 +6148,13 @@
     },
     "all_runtime_and_native_worker_tests_unchanged": true,
     "whole_figure10_or_Part1_accepted": false
+  },
+  "operational_A_browser_correction": {
+    "parent": "e44cf3716f4e3375757d272891bd1731b9b5212b",
+    "document": "docs/jrc_contact_center/ending_operational_A_browser_correction_20261125.json",
+    "document_sha256": "7ff3902afde75be8a9b9051a3b93a618513de2b0a612c867843f42833e91a4d4",
+    "Chrome_scenarios_preserved": 276,
+    "new_native_validation_still_required": true,
+    "whole_figure10_or_Part1_accepted": false
   }
 }

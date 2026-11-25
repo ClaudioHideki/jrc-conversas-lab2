@@ -10,7 +10,10 @@ export async function verifySelectedPendingEnding(parent, info, target) {
   const root = `http://127.0.0.1:5387/api/v1/accounts/${account}`;
   const history = `${root}/jrc_contact_center/qualifications/${target.qualification_id}/ending_attempts`;
   const command = `${history}/${target.selected_attempt_id}/reprocess`;
-  const browserCommand = new URL(new URL(command).pathname, 'http://127.0.0.1:5386').href;
+  const browserCommand = new URL(
+    new URL(command).pathname,
+    'http://127.0.0.1:5386'
+  ).href;
   const location = `/app/accounts/${account}/synthetic-hoya-acw/${target.call_session_id}`;
   const dark = info.project.name.endsWith('dark');
   const screenshots = [];
@@ -27,7 +30,8 @@ export async function verifySelectedPendingEnding(parent, info, target) {
     const writing = !['GET', 'HEAD'].includes(request.method());
     if (
       outside ||
-      (writing && (request.url() !== browserCommand || request.method() !== 'POST'))
+      (writing &&
+        (request.url() !== browserCommand || request.method() !== 'POST'))
     ) {
       prohibited.push(url.origin + url.pathname);
       return route.abort('blockedbyclient');
@@ -130,16 +134,17 @@ export async function verifySelectedPendingEnding(parent, info, target) {
     await expect(
       dialog.getByText(target.selected_request_id, { exact: true })
     ).toBeVisible();
+    await capture('explicit-review');
     const [contrast] = await dialog
       .locator('[data-ending-pending-review] > p.font-semibold')
       .evaluate(measureTextContrast);
     expect(contrast.ratio).toBeGreaterThanOrEqual(4.5);
-    await capture('explicit-review');
     await dialog.locator('[data-ending-pending-confirmed]').check();
     await expect(submit).toBeEnabled();
     const acknowledgement = page.waitForResponse(
       response =>
-        response.url() === browserCommand && response.request().method() === 'POST'
+        response.url() === browserCommand &&
+        response.request().method() === 'POST'
     );
     await submit.click();
     expect((await acknowledgement).status()).toBe(200);
