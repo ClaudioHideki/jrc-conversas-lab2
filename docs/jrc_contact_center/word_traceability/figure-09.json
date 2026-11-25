@@ -2822,5 +2822,12 @@
     "existing_cases_and_timeout_limits_preserved": true,
     "native_correction_accepted": false,
     "whole_Part1_accepted": false
+  },
+  "native_survey_fixture_correction": {
+    "document": "docs/jrc_contact_center/ending_native_survey_fixture_correction_20261125.json",
+    "document_sha256": "864c3af699de51273b76252bc6e52e9621615dc4c52c0d636ce52a58f0eb1d76",
+    "status": "native_survey_job_fixture_and_equivalent_event_assertion_correction_pending_validation",
+    "all_cases_predicates_permissions_and_provider_guards_preserved": true,
+    "whole_Part1_accepted": false
   }
 }

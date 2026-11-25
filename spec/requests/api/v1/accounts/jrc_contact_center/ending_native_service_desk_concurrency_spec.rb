@@ -172,8 +172,8 @@ RSpec.describe 'Native Service Desk ending adapter under original authority cont
     expect(pids.uniq.length).to eq(2)
     expect(pids).not_to include(ApplicationRecord.connection.raw_connection.backend_pid)
     expect(JrcServiceDesk::Ticket.where(account: account).count).to eq(1)
-    expect(JrcServiceDesk::TicketEvent.where(account: account, event_type: 'ticket_created').count).to eq(1)
-    expect(JrcServiceDesk::TicketEvent.where(account: account, event_type: 'creation_context_recorded').count).to eq(1)
+    events = JrcServiceDesk::TicketEvent.where(account: account, event_type: %w[ticket_created creation_context_recorded])
+    expect(events.group(:event_type).count).to eq('ticket_created' => 1, 'creation_context_recorded' => 1)
   end
 
   it 'revalidates native unit membership after waiting for an authority writer' do

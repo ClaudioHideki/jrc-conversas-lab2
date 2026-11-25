@@ -96,8 +96,17 @@ RSpec.describe 'NICO HelpDesk R01-R16 native approval chains', type: :request do
 
     configure_shared_survey if selected_rule == 'R15'
     lc_publish
-    lc_execute(ticket, 'resolve')
-    lc_execute(ticket, 'close')
+    # R15 reads the decision made by the actual queued native closure job.
+    # Execute only that job in this synthetic setup; no delivery jobs or channels.
+    if selected_rule == 'R15'
+      perform_enqueued_jobs(only: JrcRelationship::SurveyClosureJob) do
+        lc_execute(ticket, 'resolve')
+        lc_execute(ticket, 'close')
+      end
+    else
+      lc_execute(ticket, 'resolve')
+      lc_execute(ticket, 'close')
+    end
     return unless selected_rule == 'R14'
 
     JrcNico::Helpdesk::ProfileWriter.new(sd_account_user).call(ticket_id: ticket.id, attributes: { negative_return: true })
@@ -362,6 +371,7 @@ RSpec.describe 'NICO HelpDesk R01-R16 native approval chains', type: :request do
       counts = [JrcRelationship::Survey.count, JrcRelationship::SurveyDispatchDecision.count, Message.count]
       process_source(event)
       JrcNico::Helpdesk::EventJob.perform_now(event.id)
+      JrcRelationship::SurveyClosureJob.perform_now(ticket.class.name, ticket.id, decision.cycle_key)
       expect(event.reload.result).to include('tools' => [], 'survey_decision_id' => decision.id, 'automatic_mutation' => false)
       expect([JrcRelationship::Survey.count, JrcRelationship::SurveyDispatchDecision.count, Message.count]).to eq(counts)
       verify_shared_survey_readback(decision)

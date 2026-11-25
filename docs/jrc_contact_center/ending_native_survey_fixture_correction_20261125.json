@@ -1,0 +1,68 @@
+{
+  "parent": "05439ab0bda00c9da6cd783a4b95ee36f9631972",
+  "diagnostic_run": 45611477837,
+  "diagnostic_artifact": 15024110775,
+  "diagnostic_artifact_sha256": "9decab4d68a981532abf051d26b8d667a2b78d30e93d417e2b0f7b957ac6ec5b",
+  "source_sha256": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "cd73bbeb2b03c0b0c21f3027788d9c4bab7b2c2886c8be1e70f5a085e0fe36c7",
+    "spec/requests/jrc_nico_helpdesk_rules_native_spec.rb": "7ca3c482f83a862bdb13c54601400a231174243934e3983211db3baaf6e9d1b7",
+    ".github/workflows/call-center-administration.yml": "d90a3b06ca9920234700c819925e9ed99efa53815e10a015df7b6f155d43078f"
+  },
+  "parent_sources": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "a2e3ec949704352513fe8ffc5db951148375eed781083d52d583389765b0fa5d",
+    "spec/requests/jrc_nico_helpdesk_rules_native_spec.rb": "8065d6dd4f338c2f476f5d18efecbe2ca5b4d7ba71b1265b28eb66b822d9fd12",
+    ".github/workflows/call-center-administration.yml": "52fd68ecd3c17f844f609013738391a183ed6806c3e442f11b03f5a30bfda7fd"
+  },
+  "exact_fixture_patches": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": [
+      {
+        "before": "    expect(JrcServiceDesk::TicketEvent.where(account: account, event_type: 'ticket_created').count).to eq(1)\n    expect(JrcServiceDesk::TicketEvent.where(account: account, event_type: 'creation_context_recorded').count).to eq(1)\n",
+        "after": "    events = JrcServiceDesk::TicketEvent.where(account: account, event_type: %w[ticket_created creation_context_recorded])\n    expect(events.group(:event_type).count).to eq('ticket_created' => 1, 'creation_context_recorded' => 1)\n"
+      }
+    ],
+    "spec/requests/jrc_nico_helpdesk_rules_native_spec.rb": [
+      {
+        "before": "    lc_publish\n    lc_execute(ticket, 'resolve')\n    lc_execute(ticket, 'close')\n    return unless selected_rule == 'R14'\n",
+        "after": "    lc_publish\n    # R15 reads the decision made by the actual queued native closure job.\n    # Execute only that job in this synthetic setup; no delivery jobs or channels.\n    if selected_rule == 'R15'\n      perform_enqueued_jobs(only: JrcRelationship::SurveyClosureJob) do\n        lc_execute(ticket, 'resolve')\n        lc_execute(ticket, 'close')\n      end\n    else\n      lc_execute(ticket, 'resolve')\n      lc_execute(ticket, 'close')\n    end\n    return unless selected_rule == 'R14'\n"
+      },
+      {
+        "before": "      JrcNico::Helpdesk::EventJob.perform_now(event.id)\n      expect(event.reload.result).to include('tools' => [], 'survey_decision_id' => decision.id, 'automatic_mutation' => false)\n",
+        "after": "      JrcNico::Helpdesk::EventJob.perform_now(event.id)\n      JrcRelationship::SurveyClosureJob.perform_now(ticket.class.name, ticket.id, decision.cycle_key)\n      expect(event.reload.result).to include('tools' => [], 'survey_decision_id' => decision.id, 'automatic_mutation' => false)\n"
+      }
+    ]
+  },
+  "native_R15_reference_provenance_sha256": "56a04491dc8e44fa64b52e831a9ad3494e85c9cd7ee83a7c8b5d961a1bf10328",
+  "root_cause_supported_by_native_stack_and_exact_source": "The R15 fixture captured before executing the actual SurveyClosureJob queued by the native lifecycle; no native decision existed yet.",
+  "native_survey_callback_engine_or_permissions_modified": false,
+  "all_native_cases_titles_timeouts_and_predicates_preserved": true,
+  "SD_two_exact_event_count_checks_preserved_as_one_explicit_grouped_count_assertion": true,
+  "native_lint_or_test_acceptance": false,
+  "new_unique_cases_claimed": 0,
+  "remaining_independent_gap": "The ordering with an already published NICO policy before closure and a later survey job is not proved by this fixture and needs a separate native race scenario.",
+  "no_real_provider_or_channel_operations": true,
+  "native_NICO_regression_summary_before_correction": {
+    "duration": 65.61696665,
+    "example_count": 87,
+    "failure_count": 2,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "observed_lint_finding": {
+    "severity": "convention",
+    "message": "Example has too many expectations [8/7].",
+    "cop_name": "RSpec/MultipleExpectations",
+    "corrected": false,
+    "correctable": false,
+    "location": {
+      "start_line": 154,
+      "start_column": 3,
+      "last_line": 154,
+      "last_column": 110,
+      "length": 108,
+      "line": 154,
+      "column": 3
+    }
+  },
+  "native_validation_pending": true,
+  "whole_figure10_or_Part1_accepted": false
+}

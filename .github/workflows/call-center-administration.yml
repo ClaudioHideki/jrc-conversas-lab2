@@ -735,6 +735,8 @@ jobs:
             /tmp/call-center-rspec.json
             /tmp/call-center-ending-*.json
             /tmp/call-center-ending-broker-*.log
+            /tmp/call-center-nico-native-regressions-rspec.json
+            /tmp/call-center-nico-preserved-contention-rspec.json
           if-no-files-found: error
           retention-days: 7
       - name: Affected Approvals and Backoffice in their guarded disposable candidate database

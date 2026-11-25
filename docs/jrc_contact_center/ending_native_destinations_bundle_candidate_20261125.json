@@ -274,6 +274,20 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "b5b323884fad6ac8160c864fb45bb8e8dbcc0ab9881ec8d0206005dff0b2bfe3"
       },
       "no_gate_or_native_coverage_weakened": true
+    },
+    {
+      "diagnostic_run": 45611477837,
+      "failed_product_sha": "05439ab0bda00c9da6cd783a4b95ee36f9631972",
+      "diagnostic_artifact_sha256": "9decab4d68a981532abf051d26b8d667a2b78d30e93d417e2b0f7b957ac6ec5b",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "cd73bbeb2b03c0b0c21f3027788d9c4bab7b2c2886c8be1e70f5a085e0fe36c7",
+        ".github/workflows/call-center-administration.yml": "d90a3b06ca9920234700c819925e9ed99efa53815e10a015df7b6f155d43078f"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": "a2e3ec949704352513fe8ffc5db951148375eed781083d52d583389765b0fa5d",
+        ".github/workflows/call-center-administration.yml": "52fd68ecd3c17f844f609013738391a183ed6806c3e442f11b03f5a30bfda7fd"
+      },
+      "no_gate_or_native_coverage_weakened": true
     }
   ],
   "reviewed_loaded_native_task_browser_correction": [
@@ -339,5 +353,13 @@
     },
     "additional_unique_native_examples": 0,
     "full_regressions_and_all_case_names_preserved": true
+  },
+  "reviewed_native_survey_fixture": {
+    "preparation_directory": "native-survey-fixture-correction-next-20261125",
+    "preparation_sha256": "f2e8a48ede3d83c13ed35c66777f54c8e5b3d8320cae98cf0fbddc0ddd087075",
+    "spec": "spec/requests/jrc_nico_helpdesk_rules_native_spec.rb",
+    "source_sha256": "7ca3c482f83a862bdb13c54601400a231174243934e3983211db3baaf6e9d1b7",
+    "all_case_names_and_assertions_preserved": true,
+    "native_job_setup_not_stubs": true
   }
 }
