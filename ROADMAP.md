@@ -179,3 +179,7 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 - Após o aceite da fila real em d7f17062: preparado bloco conjunto de operação selecionada, cliente original e adaptador CRM; 49 Rails, 15 Vue e 4 Chrome novos exigidos. Sem migrations, grants ou aceites intermediários simulados. Execução CRM/SD completa, F10-B e Parte 1 continuam abertos.
 
 - CI 45530029703 bloqueou o bloco A por oito erros de preparação nativa e 16 infrações novas Ruby. Preparada correção mínima em nove arquivos, preservando 49 cenários, FKs, permissões e todos os gates. Nova execução nativa e Chrome ainda exigidos; sem aceite do incremento ou da Parte 1.
+
+- CI 45534964667: 2925 Rails principais e 241 de concorrência passaram; o gate de execução selecionada parou antes dos 15 casos por duas infrações de linhas em branco. Correção preparada preservando todas as linhas executáveis, testes e gates. Aceite do bloco A e Parte 1 continuam abertos.
+
+- Relatório final da CI 45534964667: sete infrações novas, incluindo as duas linhas em branco já tratadas, quatro alinhamentos de fixtures e uma associação ambígua do matcher. Correções mínimas preparadas em três arquivos Ruby, com os 49 cenários e gates preservados. Revalidação nativa e Chrome continuam obrigatórias; sem aceite do bloco A ou da Parte 1.

@@ -174,8 +174,9 @@ RSpec.describe 'Native CRM ending destination under concurrent original authorit
       account: account, operating_company: issuer,
       name: 'SYNTHETIC moved CRM unit', code: 'CRM_MOVED', active: true
     )
-    lead = account.jrc_crm_leads.create!(owner: operator.user, contact: contact, business_unit_id: business.id,
-                                        name: 'SYNTHETIC moved owned native Lead')
+    lead = account.jrc_crm_leads.create!(
+      owner: operator.user, contact: contact, business_unit_id: business.id, name: 'SYNTHETIC moved owned native Lead'
+    )
     visible = JrcCrm::OrganizationalVisibility.new(account: account, user: operator.user, relation: account.jrc_crm_leads).call
     expect(visible.where(id: lead.id)).to exist
     context = JrcContactCenter::EndingActions::OriginalActorContext.new(account: account, origin_id: reference.id)

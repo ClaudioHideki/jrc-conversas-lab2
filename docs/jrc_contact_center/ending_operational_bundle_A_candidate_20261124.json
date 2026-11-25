@@ -191,7 +191,43 @@
       "new_Ruby_offenses_identified": 16,
       "RSpec_failures_identified": 8,
       "native_confirmation_of_fix_still_required": true
+    },
+    {
+      "diagnostic_run": 45534964667,
+      "failed_product_sha": "feaca47bfe4790f0fd2ba216256f1f2e22de64d3",
+      "diagnostic_artifact_sha256": "0a135c168537207744f22b0689dc5cc30baa63f2cb7ee400d849280138a39478",
+      "parent_sources": {
+        "app/services/jrc_contact_center/ending_actions/pending_project_action.rb": "9a184373806bd6f4e83b0dfa14ab41828a306a5e1e17e47ec70dccda2c541b4e"
+      },
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/pending_project_action.rb": "be6f97764b53041a6e7cb855f67b34b973be9a3a15cbc89376dee6bbfc1e9e3f"
+      },
+      "no_gate_or_native_coverage_weakened": true,
+      "only_blank_lines_changed": true,
+      "all_tests_and_nonblank_source_lines_unchanged": true,
+      "new_native_validation_still_required": true
+    },
+    {
+      "diagnostic_run": 45534964667,
+      "failed_product_sha": "feaca47bfe4790f0fd2ba216256f1f2e22de64d3",
+      "diagnostic_artifact_sha256": "affb7eeb2b4189903a27935a9de53924e8e45a0188bb3a7b70796df3fcb48ff5",
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": "98aeeb2fa90be8e91a61ea790015ffcb2c5de53626b3bbccef4b1e592c95072b",
+        "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": "3ebc9814c181224985f2d8e2b38f0ed2272e32b63b038037381674721f019e33"
+      },
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": "38483548d1ce5bc9ea5d1d708ac34607e09331e94ce301a8c987400ca6430f08",
+        "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": "67e0a352ca5401e23ead9f126a3385ec75ca9414f7c96a7bf9ce3b6fa041e58e"
+      },
+      "no_gate_or_native_coverage_weakened": true,
+      "same_test_names_counts_and_assertions": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": 6,
+        "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": 15
+      },
+      "new_native_validation_still_required": true
     }
   ],
-  "native_fixture_lint_correction": "docs/jrc_contact_center/ending_operational_A_native_correction_20261124.json"
+  "native_fixture_lint_correction": "docs/jrc_contact_center/ending_operational_A_native_correction_20261124.json",
+  "selected_pending_spacing_correction": "docs/jrc_contact_center/ending_operational_A_pending_spacing_correction_20261125.json",
+  "remaining_spec_lint_correction": "docs/jrc_contact_center/ending_operational_A_remaining_lint_correction_20261125.json"
 }

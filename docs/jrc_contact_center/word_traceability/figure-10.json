@@ -6118,5 +6118,24 @@
     "new_Ruby_offenses_corrected_pending_native_confirmation": 16,
     "declared_native_examples_preserved": 49,
     "whole_figure10_or_Part1_accepted": false
+  },
+  "operational_A_pending_spacing_correction": {
+    "parent": "feaca47bfe4790f0fd2ba216256f1f2e22de64d3",
+    "document": "docs/jrc_contact_center/ending_operational_A_pending_spacing_correction_20261125.json",
+    "document_sha256": "aea60118a15349b61d6d6b9e098bcd66abde5b647f08168c900d6fbb952c1a24",
+    "only_blank_lines_changed": true,
+    "selected_15_cases_still_require_execution": true,
+    "whole_figure10_or_Part1_accepted": false
+  },
+  "operational_A_remaining_spec_lint_correction": {
+    "parent": "feaca47bfe4790f0fd2ba216256f1f2e22de64d3",
+    "document": "docs/jrc_contact_center/ending_operational_A_remaining_lint_correction_20261125.json",
+    "document_sha256": "20d6b847e62ead4b0657e122aba4dbe71541cd5b807a240f4e15d927763b6b37",
+    "all_seven_new_offenses_accounted_for": true,
+    "same_test_names_counts_and_assertions": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": 6,
+      "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": 15
+    },
+    "whole_figure10_or_Part1_accepted": false
   }
 }

@@ -1,0 +1,41 @@
+{
+  "parent": "feaca47bfe4790f0fd2ba216256f1f2e22de64d3",
+  "status": "pending_gate_spacing_correction_prepared_not_validated",
+  "source_correction": {
+    "diagnostic_run": 45534964667,
+    "failed_product_sha": "feaca47bfe4790f0fd2ba216256f1f2e22de64d3",
+    "diagnostic_artifact_sha256": "0a135c168537207744f22b0689dc5cc30baa63f2cb7ee400d849280138a39478",
+    "parent_sources": {
+      "app/services/jrc_contact_center/ending_actions/pending_project_action.rb": "9a184373806bd6f4e83b0dfa14ab41828a306a5e1e17e47ec70dccda2c541b4e"
+    },
+    "source_sha256": {
+      "app/services/jrc_contact_center/ending_actions/pending_project_action.rb": "be6f97764b53041a6e7cb855f67b34b973be9a3a15cbc89376dee6bbfc1e9e3f"
+    },
+    "no_gate_or_native_coverage_weakened": true,
+    "only_blank_lines_changed": true,
+    "all_tests_and_nonblank_source_lines_unchanged": true,
+    "new_native_validation_still_required": true
+  },
+  "observed_native_reports_at_parent": {
+    "call-center-rspec.json": {
+      "duration": 528.783165606,
+      "example_count": 2925,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-pabx-rspec.json": {
+      "duration": 93.308142939,
+      "example_count": 241,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    }
+  },
+  "selected_15_cases_not_started_because_focused_lint_failed": true,
+  "cause": "The prior change left two blank lines after the action guard and none after the trigger guard.",
+  "correction": "Move one blank line between the two observed locations without changing any nonblank line.",
+  "native_execution_of_fix": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

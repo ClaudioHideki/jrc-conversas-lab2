@@ -160,7 +160,7 @@ RSpec.describe JrcContactCenter::EndingActions::CrmLeadDestination do
       ApplicationRecord.transaction(requires_new: true) do
         described_class.new(account: account, member: operator).call(origin: row)
       end
-    end.to raise_error { |error| failure = error }
+    end.to(raise_error { |error| failure = error })
     expect([failure.class.name, failure.code]).to eq(['JrcContactCenter::OperationError', 'ending_crm_native_audit_missing'])
     expect(account.jrc_crm_leads.where(contact: contact)).to be_empty
     expect(JrcCrm::AuditEvent.where(account: account, event_type: 'lead_created')).to be_empty
@@ -203,8 +203,9 @@ RSpec.describe JrcContactCenter::EndingActions::CrmLeadDestination do
       account: account, operating_company: issuer,
       name: 'SYNTHETIC hidden CRM unit', code: 'CRM_HIDDEN', active: true
     )
-    lead = account.jrc_crm_leads.create!(owner: operator.user, contact: contact, business_unit_id: other.id,
-                                        name: 'SYNTHETIC hidden owned native Lead')
+    lead = account.jrc_crm_leads.create!(
+      owner: operator.user, contact: contact, business_unit_id: other.id, name: 'SYNTHETIC hidden owned native Lead'
+    )
     policy = JrcCrm::LeadPolicy.new({ account: account, account_user: operator, user: operator.user }, lead)
     expect(policy.show?).to be true
     visible = JrcCrm::OrganizationalVisibility.new(account: account, user: operator.user, relation: account.jrc_crm_leads).call

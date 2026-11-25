@@ -1,0 +1,31 @@
+{
+  "parent": "feaca47bfe4790f0fd2ba216256f1f2e22de64d3",
+  "status": "remaining_spec_lint_correction_prepared_not_validated",
+  "source_correction": {
+    "diagnostic_run": 45534964667,
+    "failed_product_sha": "feaca47bfe4790f0fd2ba216256f1f2e22de64d3",
+    "diagnostic_artifact_sha256": "affb7eeb2b4189903a27935a9de53924e8e45a0188bb3a7b70796df3fcb48ff5",
+    "parent_sources": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": "98aeeb2fa90be8e91a61ea790015ffcb2c5de53626b3bbccef4b1e592c95072b",
+      "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": "3ebc9814c181224985f2d8e2b38f0ed2272e32b63b038037381674721f019e33"
+    },
+    "source_sha256": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": "38483548d1ce5bc9ea5d1d708ac34607e09331e94ce301a8c987400ca6430f08",
+      "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": "67e0a352ca5401e23ead9f126a3385ec75ca9414f7c96a7bf9ce3b6fa041e58e"
+    },
+    "no_gate_or_native_coverage_weakened": true,
+    "same_test_names_counts_and_assertions": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb": 6,
+      "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb": 15
+    },
+    "new_native_validation_still_required": true
+  },
+  "corrections": [
+    "Use the canonical multiline argument form for two existing Lead fixtures (four layout offenses).",
+    "Parenthesize the existing raise_error matcher to resolve ambiguous Ruby block association (one offense)."
+  ],
+  "all_seven_new_offenses_accounted_for_including_separate_two_blank_line_correction": true,
+  "native_execution_of_fix": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

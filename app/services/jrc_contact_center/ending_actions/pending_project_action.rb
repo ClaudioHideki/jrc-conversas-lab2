@@ -56,9 +56,9 @@ class JrcContactCenter::EndingActions::PendingProjectAction
     unless JrcContactCenter::EndingActions::NativeTrigger.new(origin: origin).call(rule)
       raise JrcContactCenter::OperationError, 'ending_action_trigger_pending'
     end
+
     action = rule.fetch('actions').find { |entry| entry.fetch('kind') == 'project_task' }
     raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action
-
 
     JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: @member).call(action.fetch('parameters'))
   end
