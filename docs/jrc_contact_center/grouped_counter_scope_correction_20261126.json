@@ -1,0 +1,25 @@
+{
+  "parent": "be4622749b927a3dade8317eedd987a888cd86f3",
+  "CI": 45779989752,
+  "job": 139772829134,
+  "source_path": "script/jrc_call_center_chrome_counter_test.py",
+  "parent_source_sha256": "f1938238f83e32b00be5c00bdb63b5c7680ff46f2105fef0e032cd4c85a0da1c",
+  "corrected_source_sha256": "9b72cf4b054bbe66f7b7dc4519579878d8682c1aa170ad6427ede0ae2ef4b6e5",
+  "existing_tests_preserved": 12,
+  "new_counter_tests": 4,
+  "actual_Chrome_count_or_assertions_changed": false,
+  "native_application_tests_in_failed_run": 0,
+  "upload_missing_files_is_consequence_of_early_failure": true,
+  "parent_sources": {
+    "script/jrc_call_center_chrome_counter_test.py": "f1938238f83e32b00be5c00bdb63b5c7680ff46f2105fef0e032cd4c85a0da1c"
+  },
+  "source_sha256": {
+    "script/jrc_call_center_chrome_counter_test.py": "9b72cf4b054bbe66f7b7dc4519579878d8682c1aa170ad6427ede0ae2ef4b6e5"
+  },
+  "light_cases_passed": 16,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "workflow_sha256": "787003fba5deda75a1cdb2a8848d21f5d6c5b660d166510949cb3238ba1a247e",
+  "all_existing_workflow_280_count_and_zero_error_assertions_unchanged": true
+}

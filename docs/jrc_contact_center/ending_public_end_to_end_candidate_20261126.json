@@ -219,6 +219,15 @@
       "parent_sources": {
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_completion_projection_commit_spec.rb": "7d5ea2d4fd31a77c4301938bd4a88208a51e92baf1407a940e634ddf037f1f1b"
       }
+    },
+    {
+      "name": "exact_executed_Chrome_stats_scope_with_unrelated_Vitest_and_disabled_guard_regressions",
+      "source_sha256": {
+        "script/jrc_call_center_chrome_counter_test.py": "9b72cf4b054bbe66f7b7dc4519579878d8682c1aa170ad6427ede0ae2ef4b6e5"
+      },
+      "parent_sources": {
+        "script/jrc_call_center_chrome_counter_test.py": "f1938238f83e32b00be5c00bdb63b5c7680ff46f2105fef0e032cd4c85a0da1c"
+      }
     }
   ],
   "Lead_recovery_regression": {
@@ -286,5 +295,14 @@
     "offenses": 5,
     "cases_and_assertions_unchanged": 4,
     "native_execution_pending": true
+  },
+  "counter_executed_stats_scope_correction": {
+    "parent": "be4622749b927a3dade8317eedd987a888cd86f3",
+    "failed_run": 45779989752,
+    "cause": "The generic report variable from an unrelated early Vitest block was incorrectly counted as a Chrome assertion.",
+    "light_guard_cases": 16,
+    "actual_Chrome_count": 280,
+    "workflow_and_product_code_unchanged": true,
+    "native_or_Chrome_approval_for_this_followup": false
   }
 }
