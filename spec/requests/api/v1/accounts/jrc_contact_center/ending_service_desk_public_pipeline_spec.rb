@@ -42,7 +42,6 @@ RSpec.describe 'Original-agent authenticated Service Desk ending admission and n
     post path, headers: headers, params: { private_rule: input, expected_revision: expected }, as: :json
   end
 
-
   around do |example|
     config = ApplicationRecord.connection_db_config
     owned = Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
@@ -80,7 +79,7 @@ RSpec.describe 'Original-agent authenticated Service Desk ending admission and n
       current_unit: queue.unit, current_queue: queue
     )
     JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: member, queue: queue,
-                                     direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
+                                      direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
     call.update!(status: 'ended', ended_at: Time.current)
     JrcContactCenter::Qualification.find_by!(account: account, account_user: member, call_session: call)
   end
@@ -95,17 +94,21 @@ RSpec.describe 'Original-agent authenticated Service Desk ending admission and n
     "#{endpoint}/ending_destinations"
   end
 
+  def native_sd_admission_payload(choice)
+    {
+      origin_id: choice.fetch('origin_id'), rule_code: choice.fetch('rule_code'), destination_kind: 'service_desk',
+      request_key: SecureRandom.uuid, review: { confirmed: true, expected_readiness_id: choice.fetch('readiness_id'),
+                                                expected_version_id: choice.fetch('version_id'), expected_rule_sha256: choice.fetch('rule_sha256') }
+    }
+  end
+
   def request_native_sd_destination(row)
     endpoint = confirmed_native_sd_endpoint(row)
     get endpoint, headers: headers
     expect(response).to have_http_status(:ok)
     choice = response.parsed_body.fetch('items').sole
     expect(choice.fetch('destination_kind')).to eq('service_desk')
-    post endpoint, headers: headers, as: :json, params: {
-      origin_id: choice.fetch('origin_id'), rule_code: choice.fetch('rule_code'), destination_kind: 'service_desk',
-      request_key: SecureRandom.uuid, review: { confirmed: true, expected_readiness_id: choice.fetch('readiness_id'),
-                                              expected_version_id: choice.fetch('version_id'), expected_rule_sha256: choice.fetch('rule_sha256') }
-    }
+    post endpoint, headers: headers, as: :json, params: native_sd_admission_payload(choice)
     expect(response).to have_http_status(:accepted)
     JrcContactCenter::EndingDestinationAttempt.where(account: account).find(response.parsed_body.fetch('attempt_id'))
   end
@@ -119,9 +122,11 @@ RSpec.describe 'Original-agent authenticated Service Desk ending admission and n
     ticket = JrcServiceDesk::Ticket.where(account: account).sole
     expect(member.reload).to be_agent
     expect(ticket).to have_attributes(unit_id: sd_unit.id, requester_id: row.call_session.contact_id,
-                                     created_by_membership_id: sd_membership.id)
-    expect(attempt.reload.outcome).to have_attributes(outcome: 'succeeded', result_code: 'completed')
-    expect(attempt.execution).to have_attributes(target_type: 'JrcServiceDesk::Ticket', target_id: ticket.id)
+                                      created_by_membership_id: sd_membership.id)
+    expect(attempt.reload).to have_attributes(
+      outcome: have_attributes(outcome: 'succeeded', result_code: 'completed'),
+      execution: have_attributes(target_type: 'JrcServiceDesk::Ticket', target_id: ticket.id)
+    )
     expect(ticket.ticket_events.where(event_type: 'ticket_created').count).to eq(1)
     expect(JrcContactCenter::EndingDestinationExecution.where(account: account).count).to eq(1)
     expect(row.reload.completed_at).to be_nil

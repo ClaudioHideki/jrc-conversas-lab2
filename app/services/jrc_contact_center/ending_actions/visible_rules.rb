@@ -38,8 +38,8 @@ class JrcContactCenter::EndingActions::VisibleRules
     true
   rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
     false
-  rescue JrcContactCenter::OperationError => error
-    raise unless %w[ending_service_desk_mapping_required ending_service_desk_mapping_changed].include?(error.code)
+  rescue JrcContactCenter::OperationError => e
+    raise unless %w[ending_service_desk_mapping_required ending_service_desk_mapping_changed].include?(e.code)
 
     false
   end

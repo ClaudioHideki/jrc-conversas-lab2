@@ -1,0 +1,26 @@
+{
+  "parent": "090357daeef72ed43b12e347b5c5ed9139c16966",
+  "failed_run": 45782755661,
+  "offenses_addressed": 12,
+  "files": 4,
+  "parent_sources": {
+    "app/services/jrc_contact_center/ending_actions/manual_destination_preview.rb": "f0546b0e019129a841d829ae4930b7dc45b4b99820f27ec43536706024f7d98a",
+    "app/services/jrc_contact_center/ending_actions/visible_rules.rb": "8d3ba1af87ceea333b9506097f1245892d37f9e4e0a52217b0fa87cb4c16e5c2",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_public_pipeline_spec.rb": "67abfe5796be6044bd58392731e9f4b505c6e00c28fe36e6ab721835e9269cf1",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb": "6a316d355bd854225a480e161e84e1ee318b94f38d1d6413c046ffa3458aea91"
+  },
+  "source_sha256": {
+    "app/services/jrc_contact_center/ending_actions/manual_destination_preview.rb": "54b5b97a875482372becee44de3d35bd0ad0dbdf1874f4be8b0e3e2cd3b73d0a",
+    "app/services/jrc_contact_center/ending_actions/visible_rules.rb": "f9a61df49d665be2497870ee11fa0bcb8e34a961c15bcc8b6a471733fb33187d",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_public_pipeline_spec.rb": "d1d803e4750749de07c51feb3ed2900f4ac699479ce6a818d697a74088edf579",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb": "740733c3b1f33012e9678aad902ba282eb25f75c6ffd8fb3aeed45711947bd6c"
+  },
+  "failed_lint_report_sha256": "b21a4a3d8806936eb3fa9f4c1c68867229521755baca00f3fbeefb327b8e3342",
+  "cases_assertions_native_guards_and_lint_configuration_preserved": true,
+  "cases": {
+    "ending_service_desk_configuration_spec.rb": 17,
+    "ending_service_desk_public_pipeline_spec.rb": 3
+  },
+  "native_revalidation_pending": true,
+  "secondary_formatter_failure_did_not_modify_product": true
+}

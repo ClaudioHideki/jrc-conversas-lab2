@@ -85,8 +85,7 @@ RSpec.describe 'Native Service Desk templates in the existing private ending rul
     expect(response).to have_http_status(:ok)
     save_service_desk_rule
     expect(response).to have_http_status(:unprocessable_entity)
-    expect(JrcContactCenter::EndingActionVersion.where(account: account).count).to eq(2)
-    expect(old.reload.private_definition).to eq(snapshot)
+    expect([JrcContactCenter::EndingActionVersion.where(account: account).count, old.reload.private_definition]).to eq([2, snapshot])
     expect(JrcServiceDesk::Ticket.where(account: account)).to be_empty
   end
 

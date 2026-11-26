@@ -54,6 +54,16 @@ class JrcContactCenter::EndingActions::ManualDestinationPreview
     []
   end
 
+  def destination_context(code, kind, readiness)
+    input = [
+      'SELECT cc_ending_destination_context(?, ?, ?, ?, ?)::text', @account.id, @origin.id, readiness.id, code, kind
+    ]
+    input = ApplicationRecord.sanitize_sql_array(input)
+    metadata = JSON.parse(ApplicationRecord.connection.select_value(input))
+    metadata.slice('origin_id', 'readiness_id', 'version_id', 'rule_code', 'destination_kind', 'operation', 'rule_sha256')
+            .transform_values(&:to_s)
+  end
+
   def preview(action, code, readiness, source_scope)
     kind = action.fetch('kind')
     recorded = JrcContactCenter::EndingDestinationAttempt.exists?(account: @account, origin: @origin, rule_code: code, destination_kind: kind)
@@ -65,13 +75,7 @@ class JrcContactCenter::EndingActions::ManualDestinationPreview
     if %w[crm service_desk].include?(kind)
       JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: @member, origin: @origin).call
     end
-    input = [
-      'SELECT cc_ending_destination_context(?, ?, ?, ?, ?)::text', @account.id, @origin.id, readiness.id, code, kind
-    ]
-    input = ApplicationRecord.sanitize_sql_array(input)
-    metadata = JSON.parse(ApplicationRecord.connection.select_value(input))
-    metadata.slice('origin_id', 'readiness_id', 'version_id', 'rule_code', 'destination_kind', 'operation', 'rule_sha256')
-            .transform_values(&:to_s)
+    destination_context(code, kind, readiness)
   rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
     nil
   rescue JrcContactCenter::OperationError => e

@@ -112,6 +112,21 @@
         "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.spec.js": "a18d1b2230260f5ad58941494e232d3bbf16fe2db14caf63001cb9eb1a0ab681",
         "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.spec.js": "3bb58b55e0eca55067efeab44f62c79e26528cd09845913f8d2020d29c041e9f"
       }
+    },
+    {
+      "name": "exact_native_SD_focused_lint_preserves_all_cases_and_guarded_transactions",
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/manual_destination_preview.rb": "54b5b97a875482372becee44de3d35bd0ad0dbdf1874f4be8b0e3e2cd3b73d0a",
+        "app/services/jrc_contact_center/ending_actions/visible_rules.rb": "f9a61df49d665be2497870ee11fa0bcb8e34a961c15bcc8b6a471733fb33187d",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_public_pipeline_spec.rb": "d1d803e4750749de07c51feb3ed2900f4ac699479ce6a818d697a74088edf579",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb": "740733c3b1f33012e9678aad902ba282eb25f75c6ffd8fb3aeed45711947bd6c"
+      },
+      "parent_sources": {
+        "app/services/jrc_contact_center/ending_actions/manual_destination_preview.rb": "f0546b0e019129a841d829ae4930b7dc45b4b99820f27ec43536706024f7d98a",
+        "app/services/jrc_contact_center/ending_actions/visible_rules.rb": "8d3ba1af87ceea333b9506097f1245892d37f9e4e0a52217b0fa87cb4c16e5c2",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_public_pipeline_spec.rb": "67abfe5796be6044bd58392731e9f4b505c6e00c28fe36e6ab721835e9269cf1",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb": "6a316d355bd854225a480e161e84e1ee318b94f38d1d6413c046ffa3458aea91"
+      }
     }
   ],
   "early_Vue_failure_correction": {
@@ -121,6 +136,13 @@
     "failed": 11,
     "actual_optional_selection_bug_fixed": true,
     "incomplete_parent_fixtures_corrected": true,
+    "native_and_Chrome_execution_pending": true
+  },
+  "native_focused_lint_correction": {
+    "run": 45782755661,
+    "offenses": 12,
+    "Vue_passed": 81,
+    "preserved_native_cases": 20,
     "native_and_Chrome_execution_pending": true
   }
 }
