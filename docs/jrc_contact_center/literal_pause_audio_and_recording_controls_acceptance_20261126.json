@@ -1,0 +1,74 @@
+{
+  "source_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+  "run": 45843151860,
+  "artifact_sha256": "2c9be62b65dd2730408a2b44c809e011357c18df457d34c951087220563d2500",
+  "parent_native_acceptance": "docs/jrc_contact_center/recordings_and_closed_source_native_acceptance_20261126.json",
+  "actual_recordings_review_sha256": "a66951330b0d6f4afc57bafbeb92a45fd0f30b84061ef8b6b0139e3a8a1b588b",
+  "existing_pause_audio_review": {
+    "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+    "run": 45816973780,
+    "artifact": 15124576245,
+    "artifact_sha256": "61100149aea7d498eef708bf01f4d46c676b82e21ab290f72494cd6391418d4b",
+    "private_review_not_staged": true,
+    "no_test_rerun_required_for_unchanged_feature_paths": true,
+    "requirements": {
+      "7": [
+        "D2-P0177-C02"
+      ],
+      "16": [
+        "D2-P0337-C03"
+      ]
+    },
+    "pause_popup_case": [
+      {
+        "title": "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts",
+        "project": "desktop-light",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "title": "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts",
+        "project": "desktop-dark",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "title": "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts",
+        "project": "mobile-light",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "title": "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts",
+        "project": "mobile-dark",
+        "results": [
+          "passed"
+        ]
+      }
+    ],
+    "pause_image_review_sha256": "6fe34b88040acfab5fdd75729ab399cc7af8a07394199f2dee77f33c86da8b16",
+    "audio_image_review_sha256": "c355b985c1726f31063cec81c38e241889af135848cbd43ee60c793ed60f1d9b",
+    "limits": "Only opening the native pause reason popup and previewing institutional audio are reviewed. No whole-figure, legal pause regime, PABX distribution, recording policy or Nico approval.",
+    "proposed_formal_unique_count": 45,
+    "currently_committed_formal_unique_count": 43
+  },
+  "unique_literal_IDs": [
+    "D2-P0177-C02",
+    "D2-P0337-C03",
+    "D2-P0348-C02",
+    "D2-P0348-C04",
+    "D2-P0353-C01"
+  ],
+  "expected_text_sha256": {
+    "D2-P0177-C02": "bbf9797a8166477048478d5b3e8d5bbf0a68319b3e94e98d04ffa420473b7ef2",
+    "D2-P0337-C03": "81d192eeccf7a143ee46e41a924767d690a1f8e364d04b31deef9f1b1469b68d",
+    "D2-P0348-C02": "e0a99f7d396919862392b6758acb7fb7dcac38d6520e0c21591ff8b4e8d67617",
+    "D2-P0348-C04": "402876cbfbadf619a4ec82b7d8f97c63ec974cfa366af1c346f0175534754d55",
+    "D2-P0353-C01": "86879a78813f44db9b646b44186876f4bfc1fe1d710a3ba7e648be615e447688"
+  },
+  "F17_A_limit": "Download API is denied without the separate download right; playback still requires its independent listen right.",
+  "whole_Part1_accepted": false
+}

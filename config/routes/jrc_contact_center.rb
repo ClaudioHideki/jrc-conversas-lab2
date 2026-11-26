@@ -100,6 +100,7 @@ namespace :api, defaults: { format: 'json' } do
         resources :recordings, only: %i[index show] do
           get :playback, on: :member
           get :download, on: :member
+          post :reproduce, on: :member
         end
         resource :deferred_pause_request, only: %i[create destroy], controller: 'deferred_pause_requests' do
           post :preview

@@ -129,27 +129,27 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-ending-sd-public-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 108
+          assert report['numTotalTests'] == report['numPassedTests'] == 110
           assert report['numFailedTests'] == report['numPendingTests'] == 0
           assert len(report['testResults']) == 5
           assert all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useEndingAutomationEditor.spec.js': 27, 'AudioAssetLibrary.spec.js': 51, 'AudioLibraryPreview.spec.js': 10, 'EndingAutomationEditor.spec.js': 8, 'EndingServiceDeskConfiguration.spec.js': 12}
+          expected = {'useEndingAutomationEditor.spec.js': 27, 'AudioAssetLibrary.spec.js': 51, 'AudioLibraryPreview.spec.js': 10, 'EndingAutomationEditor.spec.js': 10, 'EndingServiceDeskConfiguration.spec.js': 12}
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           PY
       - name: Focused native recordings selection, shared player and retained ACW target controls
         run: |
-          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.spec.js \
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/call-center-recordings-preflight-vitest.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 29
+          assert report['numTotalTests'] == report['numPassedTests'] == 40
           assert report['numFailedTests'] == report['numPendingTests'] == 0
-          assert len(report['testResults']) == 3 and all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useScopedRecordings.spec.js': 17, 'ScopedNativeRecordingPlayer.spec.js': 5, 'AcwRuleTarget.spec.js': 7}
+          assert len(report['testResults']) == 4 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'useScopedRecordings.spec.js': 22, 'ScopedNativeRecordingPlayer.spec.js': 8, 'AcwRuleTarget.spec.js': 7, 'RecordingDetailsDialog.spec.js': 3}
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           PY
@@ -157,6 +157,9 @@ jobs:
         run: |
           python3 -B script/jrc_call_center_lint_server_probe_test.py
           python3 -B script/jrc_call_center_lint_server_probe.py
+      - name: Focused native mixed CRM and Service Desk fixture guards
+        run: |
+          bundle exec rubocop script/jrc_call_center_mixed_ending_control.rb script/jrc_call_center_mixed_ending_seed.rb spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb --format json --out /tmp/call-center-mixed-ending-lint.json
       - name: Focused public ending editor and selected destination lint
         id: ending_public_lint
         run: |
@@ -166,7 +169,7 @@ jobs:
           bundle exec rubocop app/jobs/jrc_contact_center/ending_actions_job.rb app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb --format json --out /tmp/call-center-typed-original-event-lint.json
       - name: Focused native recording source lint before legacy overlap
         run: |
-          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb app/services/jrc_contact_center/recorded_calls.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb script/jrc_call_center_recordings_seed.rb script/jrc_call_center_recordings_evidence.rb spec/integration/jrc_contact_center/owned_recording_media.rb spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb --format json --out /tmp/call-center-recordings-lint.json
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb app/services/jrc_contact_center/recorded_calls.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb script/jrc_call_center_recordings_seed.rb script/jrc_call_center_recordings_evidence.rb spec/integration/jrc_contact_center/owned_recording_media.rb spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb spec/integration/jrc_contact_center/owned_recording_reproduction_failure.rb script/jrc_call_center_recording_reproduction_failure.rb --format json --out /tmp/call-center-recordings-lint.json
       - name: Focused lint of new private ending version sources
         id: ending_version_lint
         run: |
@@ -223,6 +226,18 @@ jobs:
           assert len({row['id'] for row in report['examples']}) == 18
           assert all(row['status'] == 'passed' and row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb' for row in report['examples'])
           PY
+      - name: Native mixed fixture refuses unowned preparation and constraint release
+        run: |
+          bundle exec rspec spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb --format progress --format json --out /tmp/call-center-mixed-ending-preflight.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-mixed-ending-preflight.json').read_text())
+          assert report['summary']['example_count'] == 2
+          assert report['summary']['failure_count'] == report['summary']['pending_count'] == report['summary']['errors_outside_of_examples_count'] == 0
+          assert len(report['examples']) == 2 and all(row['status'] == 'passed' for row in report['examples'])
+          assert {row['file_path'].removeprefix('./') for row in report['examples']} == {'spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb'}
+          PY
       - name: Focused real recording scopes and private provider byte boundary
         run: |
           bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb --format progress --format json --out /tmp/call-center-recordings-preflight.json
@@ -230,12 +245,12 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight.json').read_text())
-          assert report['summary']['example_count'] == len(report['examples']) == 20
+          assert report['summary']['example_count'] == len(report['examples']) == 25
           assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
-          assert len({row['id'] for row in report['examples']}) == 20
+          assert len({row['id'] for row in report['examples']}) == 25
           from collections import Counter
           assert all(row['status'] == 'passed' for row in report['examples'])
-          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb': 18, 'spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb': 2}
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb': 22, 'spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb': 3}
           PY
       - name: Focused public source and CRM authorization before full regressions
         run: |
@@ -1144,7 +1159,7 @@ jobs:
           matrix = json.loads(source.read_text())
           assert sorted(row['figure'] for row in matrix['figures']) == list(range(1, 24))
           summaries = {}
-          for name in ['call-center-ending-sd-public-pipeline-rspec.json', 'call-center-ending-completion-projection-rspec.json', 'call-center-ending-sd-public-preflight.json', 'call-center-ending-sd-configuration-preflight.json', 'call-center-ending-public-committed-rspec.json', 'call-center-typed-original-event-rspec.json', 'call-center-typed-delivery-transaction-rspec.json', 'call-center-ending-typed-actual-broker-rspec.json', 'call-center-typed-destination-upgrade-rspec.json', 'call-center-typed-destination-concurrency-rspec.json', 'call-center-typed-destination-reload-rspec.json', 'call-center-ending-fixture-core-preflight.json', 'call-center-ending-fixture-contention-preflight.json', 'call-center-nico-native-regressions-rspec.json', 'call-center-nico-preserved-contention-rspec.json', 'call-center-nico-intent-fresh-rspec.json', 'call-center-nico-intent-reload-rspec.json', 'call-center-nico-intent-upgrade-rspec.json', 'call-center-ending-nico-queue-rspec.json', 'call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
+          for name in ['call-center-mixed-ending-preflight.json', 'call-center-ending-sd-public-pipeline-rspec.json', 'call-center-ending-completion-projection-rspec.json', 'call-center-ending-sd-public-preflight.json', 'call-center-ending-sd-configuration-preflight.json', 'call-center-ending-public-committed-rspec.json', 'call-center-typed-original-event-rspec.json', 'call-center-typed-delivery-transaction-rspec.json', 'call-center-ending-typed-actual-broker-rspec.json', 'call-center-typed-destination-upgrade-rspec.json', 'call-center-typed-destination-concurrency-rspec.json', 'call-center-typed-destination-reload-rspec.json', 'call-center-ending-fixture-core-preflight.json', 'call-center-ending-fixture-contention-preflight.json', 'call-center-nico-native-regressions-rspec.json', 'call-center-nico-preserved-contention-rspec.json', 'call-center-nico-intent-fresh-rspec.json', 'call-center-nico-intent-reload-rspec.json', 'call-center-nico-intent-upgrade-rspec.json', 'call-center-ending-nico-queue-rspec.json', 'call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
               summary = json.loads(Path('/tmp', name).read_text())['summary']
               assert summary['example_count'] > 0
               assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0
@@ -1198,6 +1213,26 @@ jobs:
               assert set(worker['real_Sidekiq_produced']) == set(worker['real_Sidekiq_acknowledgements'])
               assert worker['real_Sidekiq_produced']
               assert not flow['public_CRM_or_Service_Desk_flow_accepted'] and not flow['whole_figure10_accepted']
+          mixed_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-mixed-native.json')]
+          assert len(mixed_flows) == 4 and {flow['project'] for flow in mixed_flows} == expected_projects
+          assert len({str(flow['account_id']) for flow in mixed_flows}) == 4
+          for flow in mixed_flows:
+              assert flow['sha'] == os.environ['GITHUB_SHA'] and flow['synthetic'] is True
+              assert flow['actual_dark_theme'] == flow['project'].endswith('dark') and flow['contrast']['ratio'] >= 4.5
+              assert all(flow[key] is True for key in ['explicit_reason_before_automatic_actions', 'original_operator_nonadministrator', 'current_native_permissions_and_unit_scope', 'CRM_reused_existing_unit_mapped_Lead', 'unscoped_new_Lead_creation_not_claimed', 'independent_CRM_success_and_native_SD_rollback', 'selected_SD_only_retry', 'successful_CRM_and_failed_SD_receipts_preserved', 'independent_open_ACW'])
+              assert flow['errors'] == flow['prohibited'] == [] and len(flow['commands']) == 1
+              assert len(flow['screenshots']) == 3 and all(Path(path).is_file() for path in flow['screenshots'])
+              before, final = flow['before'], flow['final']
+              assert before['source_sha'] == final['source_sha'] == os.environ['GITHUB_SHA']
+              assert before['native_ticket_count'] == 0 and final['native_ticket_count'] == 1
+              assert before['native_lead_count'] == final['native_lead_count'] == 1
+              assert before['native_Project_task_count_preserved'] == final['native_Project_task_count_preserved'] == 2
+              assert final['original_actor_role'] == 'agent' and final['original_corporate_unit_scope_preserved'] is True
+              assert final['ACW_completed'] is False and len(before['attempts']) == 2 and len(final['attempts']) == 3
+              assert final['existing_unit_mapped_Lead_unchanged'] is True
+              worker = final['real_worker']
+              assert worker['produced'] and set(worker['produced']) == set(worker['acknowledgements'])
+              assert not flow['whole_figure10_accepted'] and not flow['external_homologation']
           ending_editor_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-editor-native.json')]
           assert len(ending_editor_flows) == 4 and {flow['project'] for flow in ending_editor_flows} == expected_projects
           assert len({flow['account_id'] for flow in ending_editor_flows}) == 4

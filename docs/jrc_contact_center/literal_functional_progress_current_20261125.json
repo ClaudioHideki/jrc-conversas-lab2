@@ -4,20 +4,20 @@
   "new_bounded_acceptance": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
   "new_bounded_acceptance_sha256": "dc6466fe913b916c65c8b4d8b1823afa72e4c132023ece222870bee47f61906d",
   "Word_requirements_unique": 554,
-  "formal_literal_reviews_closed": 43,
-  "Parte1_proven_lower_bound_percentage": 7.76,
+  "formal_literal_reviews_closed": 48,
+  "Parte1_proven_lower_bound_percentage": 8.66,
   "not_an_estimated_implementation_percentage": true,
   "canonical_statuses": {
-    "concluido_com_aceite": 43,
+    "concluido_com_aceite": 48,
     "implementado_sem_aceite": 0,
-    "parcial": 443,
+    "parcial": 438,
     "pendente": 44,
     "bloqueado": 24
   },
   "triage_466_preserved_as_historical_snapshot": true,
   "remaining_partial_triage": {
-    "implemented_pending_homologation": 120,
-    "small_adjustments": 101,
+    "implemented_pending_homologation": 117,
+    "small_adjustments": 99,
     "significant_development": 166,
     "documental_not_autonomous_functions": 56
   },
@@ -89,10 +89,15 @@
     "D2-P0225-C01",
     "D2-P0228-C01"
   ],
-  "current_bounded_triage_change_note": "Per-file audio Play closed from awaiting homologation; two literal idempotence requirements closed from small adjustments. No whole-figure acceptance or implementation percentage inferred from test counts.",
+  "current_bounded_triage_change_note": "Three reviewed literal clauses closed from awaiting homologation and two from small adjustments; no whole-figure or functional implementation percentage inferred.",
   "latest_audio_and_idempotence_acceptance": {
     "document": "docs/jrc_contact_center/literal_audio_row_and_destination_idempotence_acceptance_20261126.json",
     "sha256": "57e477a6b31e3e3f836c68b2abed2e962e8db3f2559d0625e90f79c10edd63fa",
     "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8"
+  },
+  "latest_pause_audio_and_recording_acceptance": {
+    "document": "docs/jrc_contact_center/literal_pause_audio_and_recording_controls_acceptance_20261126.json",
+    "sha256": "aceea403f7f9844107546d5adae7dc859adf8cb28902316da8d8e3cbdca771c3",
+    "source_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b"
   }
 }

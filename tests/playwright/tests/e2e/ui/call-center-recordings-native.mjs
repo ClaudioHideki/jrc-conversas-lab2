@@ -16,6 +16,62 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
   const prohibited = [];
   const screenshots = [];
   const observations = [];
+  const auditRequests = [];
+  const auditResponses = [];
+  const reproductionPath = `${new URL(root).pathname}/${expected.id}/reproduce`;
+  const auditFault = operation => {
+    const raw = execFileSync(
+      'bundle',
+      [
+        'exec',
+        'rails',
+        'runner',
+        'script/jrc_call_center_recording_reproduction_failure.rb',
+        account,
+        operation,
+      ],
+      {
+        cwd: process.env.GITHUB_WORKSPACE,
+        env: process.env,
+        timeout: 45000,
+        maxBuffer: 256 * 1024,
+        encoding: 'utf8',
+      }
+    );
+    const receipt = JSON.parse(raw.trim().split('\n').at(-1));
+    expect(receipt).toMatchObject({
+      source_sha: process.env.GITHUB_SHA,
+      account_id: Number(account),
+      operation,
+      own_constraint_only: true,
+      business_records_changed: false,
+    });
+    return receipt;
+  };
+  const startAuditedPlayback = async (selected, expectedStatus) => {
+    const response = page.waitForResponse(
+      item =>
+        item.request().method() === 'POST' &&
+        new URL(item.url()).pathname === reproductionPath
+    );
+    await selected.locator('[data-native-recording-play]').click();
+    const completed = await response;
+    expect(completed.status()).toBe(expectedStatus);
+    const request = completed.request().postDataJSON();
+    const receipt = expectedStatus === 200 ? await completed.json() : null;
+    if (receipt)
+      expect(receipt).toMatchObject({
+        account_id: account,
+        recording_id: expected.id,
+        request_id: request.request_id,
+        logged: true,
+      });
+    auditResponses.push({
+      status: completed.status(),
+      request_id: request.request_id,
+      receipt,
+    });
+  };
   page.on('pageerror', error => errors.push(error.message));
   await page.route('**/*', route => {
     const request = route.request();
@@ -23,7 +79,27 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     const outside =
       ['http:', 'https:'].includes(url.protocol) &&
       !['http://127.0.0.1:5386', 'http://127.0.0.1:5387'].includes(url.origin);
-    if (outside || !['GET', 'HEAD'].includes(request.method())) {
+    const recordingAudit =
+      request.method() === 'POST' &&
+      url.origin === 'http://127.0.0.1:5387' &&
+      url.pathname === reproductionPath;
+    if (recordingAudit) {
+      const payload = request.postDataJSON();
+      expect(Object.keys(payload).sort()).toEqual([
+        'request_id',
+        'source_revision',
+      ]);
+      expect(payload.request_id).toMatch(/^[0-9a-f-]{36}$/i);
+      expect(payload.source_revision).toMatch(/^[0-9a-f]{64}$/);
+      auditRequests.push({
+        path: url.pathname,
+        request_id: payload.request_id,
+      });
+    }
+    if (
+      outside ||
+      (!['GET', 'HEAD'].includes(request.method()) && !recordingAudit)
+    ) {
       prohibited.push(`${request.method()} ${url.origin}${url.pathname}`);
       return route.abort('blockedbyclient');
     }
@@ -155,9 +231,21 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     await expect(page.locator('[data-recordings-period]')).toContainText(
       listed.period.timezone
     );
+    const table = page.locator('[data-recordings-table]');
+    await expect(table).toBeVisible();
+    await expect(table.locator('thead th[scope="col"]')).toHaveCount(7);
+    await expect(table.locator('[data-recording-row]')).toHaveCount(1);
+    if (page.viewportSize().width >= 768)
+      await expect(table.locator('thead')).toBeVisible();
+    else await expect(table.locator('thead')).toBeHidden();
+    await capture('table-results');
     const selected = page.locator('[data-recording-selected]');
     await page.locator(`[data-recording-details="${expected.id}"]`).click();
     await expect(selected).toBeVisible();
+    await expect(selected.locator('xpath=ancestor::dialog')).toBeVisible();
+    await expect(selected).toContainText(expected.call_id);
+    await expect(selected).toContainText('Identificador da gravação');
+    await expect(selected).toContainText('Política, retenção, bloqueio legal');
     await expect(selected.locator('audio')).toHaveCount(0);
     const [contrast] = await page
       .locator('[data-scoped-recordings] h1')
@@ -180,7 +268,29 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     await expect
       .poll(() => audio.evaluate(element => element.duration))
       .toBe(3);
-    await selected.locator('[data-native-recording-play]').click();
+    // The owned PostgreSQL CHECK is installed before any reproduction audit exists.
+    // Actual Rails insert rejection must stop and remove the real player, without losing metadata.
+    const installedFault = auditFault('install');
+    await startAuditedPlayback(selected, 500);
+    await expect(selected.getByRole('alert')).toContainText(
+      /não foi possível registrar/i
+    );
+    await expect(selected.locator('audio')).toHaveCount(0);
+    await expect(selected).toContainText(expected.call_id);
+    await capture('audit-failure');
+    expect(auditRequests).toHaveLength(1);
+    const removedFault = auditFault('remove');
+    // Removing the fault never resends anything: recovery requires explicit user actions.
+    expect(auditRequests).toHaveLength(1);
+    const recoveredBytes = page.waitForResponse(response =>
+      new URL(response.url()).pathname.endsWith(`/${expected.id}/playback`)
+    );
+    await selected.locator('[data-recording-listen]').click();
+    expect((await recoveredBytes).status()).toBe(200);
+    await expect
+      .poll(() => audio.evaluate(element => element.duration))
+      .toBe(3);
+    await startAuditedPlayback(selected, 200);
     await expect
       .poll(() => audio.evaluate(element => element.currentTime))
       .toBeGreaterThan(0);
@@ -195,6 +305,12 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     await expect
       .poll(() => audio.evaluate(element => element.currentTime))
       .toBe(1);
+    // Resuming the same private Blob is a new reproduction and gets a distinct native audit.
+    await startAuditedPlayback(selected, 200);
+    await selected.locator('[data-native-recording-play]').click();
+    await expect
+      .poll(() => audio.evaluate(element => element.paused))
+      .toBe(true);
     await selected.scrollIntoViewIfNeeded();
     await capture('actual-player');
     const download = page.waitForEvent('download');
@@ -206,6 +322,9 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     expect((await download).suggestedFilename()).toBe(
       `call-${expected.id}.wav`
     );
+    await selected.locator('[data-recording-close]').click();
+    await expect(selected).toHaveCount(0);
+    await expect(page.locator('dialog[open]')).toHaveCount(0);
     await page
       .getByRole('button', { name: 'Limpar filtros', exact: true })
       .click();
@@ -263,7 +382,7 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     await expect
       .poll(() => viewerAudio.evaluate(element => element.duration))
       .toBe(3);
-    await selected.locator('[data-native-recording-play]').click();
+    await startAuditedPlayback(selected, 200);
     await expect
       .poll(() => viewerAudio.evaluate(element => element.currentTime))
       .toBeGreaterThan(0);
@@ -307,7 +426,7 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     );
     expect(
       operations.filter(row => row.changes.operation === 'listen')
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     expect(
       operations.filter(row => row.changes.operation === 'download')
     ).toHaveLength(1);
@@ -318,6 +437,34 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
           .map(row => String(row.user_id))
       )
     ).toEqual(new Set([String(profile.id), String(viewerProfile.id)]));
+    const currentDetails = await read(`${root}/${expected.id}`);
+    expect(currentDetails.status()).toBe(200);
+    const currentCall = (await currentDetails.json()).item.call_session_id;
+    const reproductions = operations.filter(
+      row => row.changes.operation === 'reproduce'
+    );
+    expect(reproductions).toHaveLength(3);
+    expect(
+      reproductions.filter(row => String(row.user_id) === String(profile.id))
+    ).toHaveLength(2);
+    expect(
+      reproductions.filter(
+        row => String(row.user_id) === String(viewerProfile.id)
+      )
+    ).toHaveLength(1);
+    for (const row of reproductions) {
+      expect(row.action).toBe('read');
+      expect(row.changes).toMatchObject({
+        schema_version: 1,
+        operation: 'reproduce',
+        call_session_id: currentCall,
+        unit_id: String(target.unit_id),
+        queue_id: String(target.queue_id),
+      });
+    }
+    expect(auditRequests).toHaveLength(4);
+    expect(new Set(auditRequests.map(row => row.request_id)).size).toBe(4);
+    expect(auditResponses.map(row => row.status)).toEqual([500, 200, 200, 200]);
     expect(errors).toEqual([]);
     expect(prohibited).toEqual([]);
     fs.writeFileSync(
@@ -342,7 +489,19 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
           separate_listen_download_authority: true,
           actual_viewer_without_download_reproduced_audio: true,
           actual_pause_and_position_seek: true,
+          actual_native_table_desktop_and_stacked_mobile: true,
+          actual_native_details_popup_and_explicit_close: true,
+          authorized_metadata_and_unconfirmed_storage_honestly_presented: true,
           native_read_audit: receipt,
+          every_actual_play_and_resume_audited: true,
+          real_PostgreSQL_rejection_removed_player_and_preserved_metadata: true,
+          explicit_recovery_without_automatic_resend: true,
+          owned_audit_failure: {
+            installed: installedFault,
+            removed: removedFault,
+          },
+          reproduction_requests: auditRequests,
+          reproduction_responses: auditResponses,
           contrast,
           screenshots,
           page_errors: errors,

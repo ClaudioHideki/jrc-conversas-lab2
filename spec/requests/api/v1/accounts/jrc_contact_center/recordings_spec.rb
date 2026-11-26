@@ -235,4 +235,53 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
     expect(response.body.b).not_to eq(audio)
     expect(Audited.audit_class.where(auditable: record, comment: 'jrc_contact_center_recording_access_v1')).to be_empty
   end
+
+  def playable_source_revision
+    provider = instance_double(Pabx::Provider)
+    expect(provider).to receive(:recording).once.and_return(body: audio, content_type: 'audio/wav')
+    allow(Pabx::Provider).to receive(:new).with(integration).and_return(provider)
+    get "#{path}/#{record.id}/playback", headers: headers
+    response.headers.fetch('X-Jrc-Recording-Revision')
+  end
+
+  it 'records each native reproduction with current authority and reuses one receipt for an explicit retry key' do
+    revision = playable_source_revision
+    input = { source_revision: revision, request_id: SecureRandom.uuid }
+    post "#{path}/#{record.id}/reproduce", headers: headers, params: input
+    expect(response).to have_http_status(:ok)
+    first = response.parsed_body
+    post "#{path}/#{record.id}/reproduce", headers: headers, params: input
+    expect(response.parsed_body).to eq(first)
+    audits = Audited.audit_class.where(auditable: record, comment: 'jrc_contact_center_recording_reproduction_v1')
+    expect(audits.count).to eq(1)
+    audit = audits.sole
+    expect(audit.user).to eq(actor)
+    expect(audit.audited_changes).to include('operation' => 'reproduce', 'call_session_id' => source_call.id.to_s)
+    expect(audit.audited_changes.to_json).not_to include('/var/spool', '551100000001', 'synthetic-password')
+  end
+
+  it 'refuses a malformed reproduction key without creating a successful audit' do
+    input = { source_revision: playable_source_revision, request_id: 'SYNTHETIC invalid audit key' }
+    post "#{path}/#{record.id}/reproduce", headers: headers, params: input
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.fetch('error')).to eq('invalid_recording_request')
+    expect(Audited.audit_class.where(auditable: record, comment: 'jrc_contact_center_recording_reproduction_v1')).to be_empty
+  end
+
+  it 'refuses to log an old media source after its recording reference changed' do
+    input = { source_revision: playable_source_revision, request_id: SecureRandom.uuid }
+    record.update!(recording_reference: 'SYNTHETIC changed recording source')
+    post "#{path}/#{record.id}/reproduce", headers: headers, params: input
+    expect(response).to have_http_status(:conflict)
+    expect(response.parsed_body.fetch('error')).to eq('recording_source_changed')
+    expect(Audited.audit_class.where(auditable: record, comment: 'jrc_contact_center_recording_reproduction_v1')).to be_empty
+  end
+
+  it 'rechecks current listening authority for every reproduction instead of treating prior bytes as a grant' do
+    input = { source_revision: playable_source_revision, request_id: SecureRandom.uuid }
+    role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_recordings_view])
+    post "#{path}/#{record.id}/reproduce", headers: headers, params: input
+    expect(response).to have_http_status(:unauthorized)
+    expect(Audited.audit_class.where(auditable: record, comment: 'jrc_contact_center_recording_reproduction_v1')).to be_empty
+  end
 end

@@ -24,6 +24,7 @@ export const useScopedRecordings = ({
   let mediaGeneration = 0;
   let controller;
   let downloadUrl = '';
+  let mediaRevision = '';
   const clearMedia = () => {
     mediaGeneration += 1;
     controller?.abort();
@@ -31,6 +32,7 @@ export const useScopedRecordings = ({
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     url.value = '';
     downloadUrl = '';
+    mediaRevision = '';
     mediaLoading.value = false;
     mediaError.value = '';
   };
@@ -151,7 +153,8 @@ export const useScopedRecordings = ({
         headers['x-jrc-recording-call'] !== current.call_session_id ||
         !(response.data instanceof Blob) ||
         response.data.size <= 0 ||
-        !response.data.type.startsWith('audio/')
+        !response.data.type.startsWith('audio/') ||
+        !/^[0-9a-f]{64}$/.test(headers['x-jrc-recording-revision'] || '')
       )
         throw new Error('Invalid private recording bytes');
       const disposition = headers['content-disposition'] || '';
@@ -168,6 +171,7 @@ export const useScopedRecordings = ({
       const created = URL.createObjectURL(response.data);
       if (action === 'playback') {
         if (url.value) URL.revokeObjectURL(url.value);
+        mediaRevision = headers['x-jrc-recording-revision'];
         url.value = created;
       } else {
         if (downloadUrl) URL.revokeObjectURL(downloadUrl);
@@ -185,6 +189,40 @@ export const useScopedRecordings = ({
       } else mediaError.value = 'MEDIA_ERROR';
     } finally {
       if (version === mediaGeneration) mediaLoading.value = false;
+    }
+  };
+  const authorizePlayback = async () => {
+    if (!url.value || !selected.value || !capabilities.value.recordings_listen)
+      return false;
+    const version = mediaGeneration;
+    const account = String(accountId.value);
+    const recording = String(selected.value.id);
+    try {
+      const request = crypto.randomUUID();
+      const response = await API.recordingReproduction(account, recording, {
+        request_id: request,
+        source_revision: mediaRevision,
+      });
+      if (version !== mediaGeneration) return false;
+      const data = response.data;
+      if (
+        String(data.account_id) !== account ||
+        data.recording_id !== recording ||
+        data.request_id !== request ||
+        data.logged !== true
+      )
+        throw new Error('Invalid current recording reproduction receipt');
+      return true;
+    } catch (failure) {
+      if (version !== mediaGeneration) return false;
+      if (denied(failure)) {
+        withdraw();
+        error.value = 'DENIED';
+      } else {
+        clearMedia();
+        mediaError.value = 'MEDIA_AUDIT_ERROR';
+      }
+      return false;
     }
   };
   const ownKeys = ['from', 'to', 'q', 'unit_id', 'queue_id'];
@@ -272,5 +310,6 @@ export const useScopedRecordings = ({
     close,
     bytes,
     playbackFailed,
+    authorizePlayback,
   };
 };

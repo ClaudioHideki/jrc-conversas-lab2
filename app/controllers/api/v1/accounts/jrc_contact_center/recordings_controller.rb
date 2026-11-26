@@ -36,6 +36,15 @@ class Api::V1::Accounts::JrcContactCenter::RecordingsController < Api::V1::Accou
     end
   end
 
+  def reproduce
+    with_recording_authority do
+      record, call = current_reader.find(params[:id], action: :listen)
+      require_current_revision!(record, call)
+      audit = record_reproduction!(record, call, reproduction_key!)
+      render json: base_payload.merge(recording_id: record.id.to_s, request_id: audit.request_uuid, logged: true)
+    end
+  end
+
   def playback
     transmit(:listen, 'inline')
   end
@@ -88,7 +97,43 @@ class Api::V1::Accounts::JrcContactCenter::RecordingsController < Api::V1::Accou
     response.headers['X-Jrc-Recording-Account'] = Current.account.id.to_s
     response.headers['X-Jrc-Recording-Id'] = current.id.to_s
     response.headers['X-Jrc-Recording-Call'] = call.id.to_s
+    response.headers['X-Jrc-Recording-Revision'] = recording_revision(current, call)
     send_data result.fetch(:body), type: type, filename: "call-#{current.id}.#{MEDIA_EXTENSIONS.fetch(type)}", disposition: disposition
+  end
+
+  def recording_revision(record, call)
+    fields = %w[external_unique_id recording_reference synced_at provider external_tenant extension]
+    source = Current.account.telephony_integration
+    values = [record.id, record.attributes.slice(*fields), call.id, call.current_unit_id, call.current_queue_id,
+              source.id, Pabx::Settings.new(source).fingerprint]
+    key = Rails.application.key_generator.generate_key('jrc_cc_recording_source', 32)
+    OpenSSL::HMAC.hexdigest('SHA256', key, values.to_json)
+  end
+
+  def require_current_revision!(record, call)
+    value = params[:source_revision]
+    valid = value.is_a?(String) && value.match?(/\A[0-9a-f]{64}\z/)
+    valid &&= ActiveSupport::SecurityUtils.secure_compare(value, recording_revision(record, call))
+    raise JrcContactCenter::OperationError.new('recording_source_changed', status: :conflict) unless valid
+  end
+
+  def reproduction_key!
+    key = params[:request_id]
+    pattern = /\A[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/i
+    raise JrcContactCenter::OperationError, 'invalid_recording_request' unless key.is_a?(String) && key.match?(pattern)
+
+    key
+  end
+
+  def record_reproduction!(record, call, key)
+    Audited.audit_class.find_or_create_by!(
+      auditable: record, associated: Current.account, user: Current.user, request_uuid: key,
+      comment: 'jrc_contact_center_recording_reproduction_v1'
+    ) do |row|
+      row.action = 'read'
+      row.audited_changes = { 'schema_version' => 1, 'operation' => 'reproduce', 'call_session_id' => call.id.to_s,
+                              'unit_id' => call.current_unit_id&.to_s, 'queue_id' => call.current_queue_id&.to_s }
+    end
   end
 
   def media_content_type(result)

@@ -76,4 +76,45 @@ describe('reuse of the native recording player without implicit download authori
     wrapper.unmount();
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledOnce();
   });
+  it('waits for explicit current authorization before starting sound and prevents duplicate pending requests', async () => {
+    let resolve;
+    const beforePlayback = vi.fn(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const wrapper = fixture({ canDownload: false, beforePlayback });
+    await wrapper.get('[data-native-recording-play]').trigger('click');
+    await wrapper.get('[data-native-recording-play]').trigger('click');
+    expect(beforePlayback).toHaveBeenCalledOnce();
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    resolve(true);
+    await flushPromises();
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalledOnce();
+    await wrapper.get('[data-native-recording-play]').trigger('click');
+    expect(beforePlayback).toHaveBeenCalledOnce();
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledOnce();
+  });
+  it('does not play when the current reproduction audit or authorization is rejected', async () => {
+    const beforePlayback = vi.fn().mockResolvedValue(false);
+    const wrapper = fixture({ canDownload: false, beforePlayback });
+    await wrapper.get('[data-native-recording-play]').trigger('click');
+    await flushPromises();
+    expect(beforePlayback).toHaveBeenCalledOnce();
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
+  it('cannot play a removed selection after a delayed authorization response', async () => {
+    let resolve;
+    const beforePlayback = () =>
+      new Promise(done => {
+        resolve = done;
+      });
+    const wrapper = fixture({ canDownload: false, beforePlayback });
+    await wrapper.get('[data-native-recording-play]').trigger('click');
+    wrapper.unmount();
+    resolve(true);
+    await flushPromises();
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
 });

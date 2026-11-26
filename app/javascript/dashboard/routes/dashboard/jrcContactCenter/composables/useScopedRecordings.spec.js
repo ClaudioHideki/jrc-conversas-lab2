@@ -7,6 +7,7 @@ import RecordingsPage from '../views/RecordingsPage.vue';
 
 const nativeStore = vi.hoisted(() => ({
   user: undefined,
+  routeReplacements: [],
   route: { params: { accountId: '1' }, query: {} },
 }));
 vi.mock('dashboard/composables/store', () => ({
@@ -14,7 +15,9 @@ vi.mock('dashboard/composables/store', () => ({
 }));
 vi.mock('vue-router', () => ({
   useRoute: () => nativeStore.route,
-  useRouter: () => ({ replace: vi.fn() }),
+  useRouter: () => ({
+    replace: vi.fn(value => nativeStore.routeReplacements.push(value)),
+  }),
 }));
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 
@@ -24,6 +27,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
     recordings: vi.fn(),
     recording: vi.fn(),
     recordingBytes: vi.fn(),
+    recordingReproduction: vi.fn(),
     units: vi.fn(),
     queues: vi.fn(),
   },
@@ -63,6 +67,7 @@ const bytes = () => ({
     'x-jrc-recording-account': '1',
     'x-jrc-recording-id': '11',
     'x-jrc-recording-call': '7',
+    'x-jrc-recording-revision': 'a'.repeat(64),
   },
 });
 const fixture = (initialQuery = {}) => {
@@ -91,12 +96,26 @@ const fixture = (initialQuery = {}) => {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  nativeStore.routeReplacements = [];
   API.context.mockResolvedValue(context());
   API.recordings.mockResolvedValue(page());
   API.recording.mockResolvedValue({
     data: { account_id: '1', item: { ...row } },
   });
   API.recordingBytes.mockResolvedValue(bytes());
+  vi.stubGlobal('crypto', {
+    randomUUID: vi.fn(() => '11111111-1111-4111-8111-111111111111'),
+  });
+  API.recordingReproduction.mockImplementation(
+    async (account, recording, body) => ({
+      data: {
+        account_id: account,
+        recording_id: recording,
+        request_id: body.request_id,
+        logged: true,
+      },
+    })
+  );
   const Original = URL;
   vi.stubGlobal(
     'URL',
@@ -445,5 +464,111 @@ describe('current-scope recording browser state', () => {
         .findAll('[data-acw-rule-target] select option')
         .map(option => option.attributes('value'))
     ).toEqual(['', '']);
+  });
+  it('keeps a usable previous-page action when authorized results shrink below the bookmarked page', async () => {
+    nativeStore.user = ref({ id: 7, accounts: [] });
+    nativeStore.route = {
+      params: { accountId: '1' },
+      query: { recordings_page: '2' },
+    };
+    const empty = page([]);
+    empty.data.meta = { page: 2, pages: 1, per_page: 20, total: 20 };
+    API.recordings.mockResolvedValue(empty);
+    API.units.mockResolvedValue({ data: { items: [], meta: { pages: 1 } } });
+    API.queues.mockResolvedValue({ data: { items: [], meta: { pages: 1 } } });
+    const wrapper = mount(RecordingsPage, {
+      global: { stubs: { Icon: true } },
+    });
+    wrappers.push(wrapper);
+    await flushPromises();
+    const navigation = wrapper.get('nav');
+    const buttons = navigation.findAll('button');
+    expect(buttons[0].text()).toBe('JRC_CONTACT_CENTER.RECORDINGS.PREVIOUS');
+    expect(buttons[0].element.disabled).toBe(false);
+    expect(buttons[1].element.disabled).toBe(true);
+    await buttons[0].trigger('click');
+    expect(nativeStore.routeReplacements).toEqual([{ query: {} }]);
+  });
+  it('records each actual playback start with a distinct key and the current media source revision', async () => {
+    const { state } = fixture();
+    await flushPromises();
+    await state.select(row);
+    await state.bytes('playback');
+    crypto.randomUUID.mockReturnValueOnce(
+      '11111111-1111-4111-8111-111111111111'
+    );
+    crypto.randomUUID.mockReturnValueOnce(
+      '22222222-2222-4222-8222-222222222222'
+    );
+    await state.authorizePlayback();
+    await state.authorizePlayback();
+    expect(API.recordingReproduction).toHaveBeenCalledTimes(2);
+    expect(
+      API.recordingReproduction.mock.calls.map(call => call[2].request_id)
+    ).toEqual([
+      '11111111-1111-4111-8111-111111111111',
+      '22222222-2222-4222-8222-222222222222',
+    ]);
+    expect(
+      API.recordingReproduction.mock.calls.every(
+        call =>
+          call[0] === '1' &&
+          call[1] === '11' &&
+          call[2].source_revision === 'a'.repeat(64)
+      )
+    ).toBe(true);
+    expect(state.url.value).toBe('blob:synthetic-recording');
+  });
+
+  it('withdraws playable bytes and shows an explicit error when the required audit cannot be persisted', async () => {
+    const { state } = fixture();
+    await flushPromises();
+    await state.select(row);
+    await state.bytes('playback');
+    API.recordingReproduction.mockRejectedValueOnce({
+      response: { status: 500 },
+    });
+    await state.authorizePlayback();
+    expect(state.url.value).toBe('');
+    expect(state.selected.value).toEqual(row);
+    expect(state.mediaError.value).toBe('MEDIA_AUDIT_ERROR');
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith(
+      'blob:synthetic-recording'
+    );
+  });
+
+  it('withdraws the former recording and metadata when listening authorization is revoked after byte delivery', async () => {
+    const { state } = fixture();
+    await flushPromises();
+    await state.select(row);
+    await state.bytes('playback');
+    API.recordingReproduction.mockRejectedValueOnce({
+      response: { status: 401 },
+    });
+    await state.authorizePlayback();
+    expect(state.url.value).toBe('');
+    expect(state.selected.value).toBeNull();
+    expect(state.items.value).toEqual([]);
+    expect(state.error.value).toBe('DENIED');
+  });
+  it('renders one semantic recording table with the native authorized rows and explicit metadata columns', async () => {
+    nativeStore.user = ref({ id: 7, accounts: [] });
+    nativeStore.route = { params: { accountId: '1' }, query: {} };
+    API.units.mockResolvedValue({ data: { items: [], meta: { pages: 1 } } });
+    API.queues.mockResolvedValue({ data: { items: [], meta: { pages: 1 } } });
+    const wrapper = mount(RecordingsPage, {
+      global: { stubs: { Icon: true } },
+    });
+    wrappers.push(wrapper);
+    await flushPromises();
+    const table = wrapper.get('[data-recordings-table]');
+    expect(table.element.tagName).toBe('TABLE');
+    expect(table.findAll('thead th[scope="col"]')).toHaveLength(7);
+    expect(table.findAll('[data-recording-row]')).toHaveLength(1);
+    expect(
+      table.get('[data-recording-row]').attributes('data-recording-row')
+    ).toBe(String(row.id));
+    expect(table.text()).not.toContain('recording_reference');
+    expect(API.recordingBytes).not.toHaveBeenCalled();
   });
 });

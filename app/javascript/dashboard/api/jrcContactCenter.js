@@ -502,6 +502,8 @@ export default {
       responseType: 'blob',
       signal,
     }),
+  recordingReproduction: (accountId, id, data) =>
+    axios.post(`${base(accountId)}/recordings/${id}/reproduce`, data),
   reportSummary: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/reports/summary`, { params }),
   integrationCapabilities: accountId =>

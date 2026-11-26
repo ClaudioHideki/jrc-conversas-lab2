@@ -238,3 +238,40 @@ describe('native Service Desk rule configuration', () => {
     expect(state.editor.save).not.toHaveBeenCalled();
   });
 });
+
+describe('current native destination guidance', () => {
+  it('uses destination wording for all configured native actions without mutating or executing them', () => {
+    state.editor.draft.value.actions.push({ kind: 'crm', parameters: {} });
+    state.editor.draft.value.actions.push({
+      kind: 'service_desk',
+      parameters: { unit_id: '11' },
+    });
+    const original = JSON.stringify(state.editor.draft.value.actions);
+    const wrapper = create();
+    ['crm', 'service_desk', 'project_task'].forEach(kind => {
+      expect(
+        wrapper.get(`[data-ending-destination-description="${kind}"]`).text()
+      ).toBe('JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.DESTINATION_CONFIGURED');
+    });
+    expect(JSON.stringify(state.editor.draft.value.actions)).toBe(original);
+    expect(state.editor.save).not.toHaveBeenCalled();
+  });
+
+  it('distinguishes an available editor, a denied native context and an unimplemented destination', async () => {
+    state.editor.draft.value.actions = [];
+    const wrapper = create();
+    const description = kind =>
+      wrapper.get(`[data-ending-destination-description="${kind}"]`).text();
+    const key = suffix =>
+      `JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.DESTINATION_${suffix}`;
+    expect(description('project_task')).toBe(key('AVAILABLE'));
+    expect(description('crm')).toBe(key('UNAVAILABLE'));
+    expect(description('service_desk')).toBe(key('UNAVAILABLE'));
+    expect(description('notifications')).toBe(key('PENDING'));
+    expect(description('nico')).toBe(key('PENDING'));
+    state.editor.crmOptions.value.configuration_available = true;
+    await wrapper.vm.$nextTick();
+    expect(description('crm')).toBe(key('AVAILABLE'));
+    expect(state.editor.save).not.toHaveBeenCalled();
+  });
+});

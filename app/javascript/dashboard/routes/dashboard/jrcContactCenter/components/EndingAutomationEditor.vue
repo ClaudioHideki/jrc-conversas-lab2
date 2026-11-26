@@ -72,6 +72,13 @@ const destinationAllowed = kind =>
   kind === 'project_task' ||
   (kind === 'crm' && crmOptions.value.configuration_available) ||
   (kind === 'service_desk' && serviceDeskOptions.value.configuration_available);
+const destinationDescription = kind => {
+  if (configured(kind)) return 'DESTINATION_CONFIGURED';
+  if (destinationAllowed(kind)) return 'DESTINATION_AVAILABLE';
+  return ['crm', 'service_desk', 'project_task'].includes(kind)
+    ? 'DESTINATION_UNAVAILABLE'
+    : 'DESTINATION_PENDING';
+};
 const configureDestination = kind => {
   if (kind === 'project_task') taskConfiguration.value = true;
   if (
@@ -374,14 +381,11 @@ const destinations = [
             <h4 class="break-words text-sm font-semibold">
               {{ text(`DESTINATIONS.${kind}`) }}
             </h4>
-            <p class="my-2 break-words text-xs text-n-slate-11">
-              {{
-                text(
-                  configured(kind)
-                    ? 'DESTINATION_CONFIGURED'
-                    : 'DESTINATION_PENDING'
-                )
-              }}
+            <p
+              class="my-2 break-words text-xs text-n-slate-11"
+              :data-ending-destination-description="kind"
+            >
+              {{ text(destinationDescription(kind)) }}
             </p>
             <button
               type="button"

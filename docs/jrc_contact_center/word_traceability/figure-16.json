@@ -1460,8 +1460,12 @@
       "figures": [
         16
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "status": "implementado",
+      "verification": {
+        "document": "docs/jrc_contact_center/literal_pause_audio_and_recording_controls_acceptance_20261126.json",
+        "source_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+        "run": 45843151860
+      },
       "code_reference_ids": [
         0,
         1,
@@ -1519,9 +1523,20 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
-        "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
+        "Remaining whole-figure controls and external provider homologation retain separate acceptance."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_review_recoverable_at_checkpoint": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "whole_figure_accepted": false,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_pause_audio_and_recording_controls_acceptance_20261126.json",
+          "source_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+          "run": 45843151860
+        }
+      }
     },
     {
       "id": "D2-P0337-C04",

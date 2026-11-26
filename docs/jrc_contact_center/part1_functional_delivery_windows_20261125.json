@@ -21,13 +21,20 @@
         10
       ],
       "delivery": "Pause field failure/recovery in the real popup and original-event durable ending delivery.",
-      "status": "candidate_requires_native_and_Chrome_acceptance",
+      "status": "bounded_user_flows_accepted_other_figure_clauses_remain",
       "acceptance": [
         "Native original-agent authority",
         "No classified reason reused as action consent",
         "No duplicate destinations",
         "Real API 422 retains fields and can save after correction in four Chrome modes"
-      ]
+      ],
+      "prior_status_preserved": "candidate_requires_native_and_Chrome_acceptance",
+      "evidence_source": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+      "accepted_parts": [
+        "Actual pause 422, field correction and persistence in the existing popup",
+        "Original-event native worker and independent immutable destination receipts"
+      ],
+      "whole_figures_accepted": false
     },
     {
       "order": 2,
@@ -38,13 +45,17 @@
         22
       ],
       "delivery": "Scoped rule editor, native destination configuration, selected action and typed history in the existing inbox.",
-      "status": "private_increment_in_progress_not_homologated",
+      "status": "native_editor_and_Project_worker_accepted_mixed_CRM_SD_public_flow_candidate",
       "acceptance": [
         "Current original-agent permission per attempt",
         "Explicit manual review",
         "Independent CRM/SD/Projects receipts",
         "Real complete UI flow, partial failure and selected retry without replay of success"
-      ]
+      ],
+      "prior_status_preserved": "private_increment_in_progress_not_homologated",
+      "evidence_source": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+      "next_candidate": "docs/jrc_contact_center/mixed_ending_and_recording_popup_candidate_20261126.json",
+      "whole_figures_accepted": false
     },
     {
       "order": 3,
@@ -59,7 +70,8 @@
         14
       ],
       "delivery": "Close bounded administrative gaps and literal acceptance using existing queue/team/profile/pause/calendar/audit workflows.",
-      "status": "reuse_approved_checkpoints_and_target_only_real_remaining_gaps"
+      "status": "reuse_approved_checkpoints_and_target_only_real_remaining_gaps",
+      "prior_status_preserved": "reuse_approved_checkpoints_and_target_only_real_remaining_gaps"
     },
     {
       "order": 4,
@@ -76,7 +88,11 @@
         23
       ],
       "delivery": "Reuse institutional audio and native recording/quality sources; complete internal analysis/review/context surfaces.",
-      "status": "internal_work_independent_of_external_provider_homologation"
+      "status": "institutional_audio_and_bounded_personal_recordings_accepted_popup_and_reproduction_audit_candidate",
+      "prior_status_preserved": "internal_work_independent_of_external_provider_homologation",
+      "evidence_source": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+      "next_candidate": "docs/jrc_contact_center/mixed_ending_and_recording_popup_candidate_20261126.json",
+      "whole_figures_accepted": false
     }
   ],
   "external_dependencies": [
@@ -98,17 +114,14 @@
     "accepted_after_new_native_and_four_mode_Chrome_only": true
   },
   "current_verified_delivery": {
-    "document": "docs/jrc_contact_center/SD_editor_and_audio_row_native_acceptance_20261126.json",
-    "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
-    "run": 45816973780,
+    "document": "docs/jrc_contact_center/recordings_and_closed_source_native_acceptance_20261126.json",
+    "source_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+    "run": 45843151860,
     "usable_functions": [
-      "Native SD rule editor, review, persistence and immutable edit",
-      "Institutional audio per-row playback"
-    ],
-    "literal_requirements_newly_closed": [
-      "D2-P0154-C04",
-      "D2-P0224-C02",
-      "D2-P0227-C01"
+      "Current authorized personal recordings: native filters, real pagination and URL reload, explicit playback/pause/seek and separately authorized download.",
+      "An ordinary second viewer plays authorized audio while the native download endpoint denies its missing download permission.",
+      "Role changes withdraw old recording/media/lookup state; source/account/unit/tenant and exact call origin are checked on the server.",
+      "Historical Service Desk rule deactivation persists under an inactive source queue; UI and API block reactivation without changing prior versions."
     ]
   },
   "next_grouped_delivery": {
@@ -125,12 +138,13 @@
     "targeted_composable_functional_regressions_passed": 3
   },
   "next_grouped_increment": {
-    "document": "docs/jrc_contact_center/recordings_and_inactive_SD_candidate_20261126.json",
+    "document": "docs/jrc_contact_center/mixed_ending_and_recording_popup_candidate_20261126.json",
     "figures": [
       10,
       17
     ],
     "native_or_browser_accepted": false
   },
-  "effective_hours_not_measured_not_fabricated": true
+  "effective_hours_not_measured_not_fabricated": true,
+  "grouped_delivery_status_is_bounded_not_whole_figure_acceptance": true
 }

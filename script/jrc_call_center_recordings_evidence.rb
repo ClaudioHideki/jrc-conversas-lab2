@@ -4,7 +4,8 @@
 require Rails.root.join('spec/integration/jrc_contact_center/owned_recording_media')
 account = Account.find(ARGV.fetch(0))
 control = SyntheticRecordedCallMedia.control!(account)
-audits = Audited.audit_class.where(associated: account, comment: 'jrc_contact_center_recording_access_v1').order(:id)
+comments = %w[jrc_contact_center_recording_access_v1 jrc_contact_center_recording_reproduction_v1]
+audits = Audited.audit_class.where(associated: account, comment: comments).order(:id)
 rows = audits.map do |audit|
   { id: audit.id, user_id: audit.user_id, record_id: audit.auditable_id,
     auditable_type: audit.auditable_type, action: audit.action, changes: audit.audited_changes }

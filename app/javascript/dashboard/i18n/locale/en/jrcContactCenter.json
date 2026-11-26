@@ -2952,7 +2952,7 @@
     "ENDING_AUTOMATIONS": {
       "SEPARATOR": "·",
       "TITLE": "Configurar automações e integrações",
-      "CONFIGURATION_ONLY": "Salvar só altera a configuração. A execução de tarefas em Projetos exige habilitação explícita para novas chamadas; os demais destinos continuam pendentes. Nenhum comando é publicado no PABX.",
+      "CONFIGURATION_ONLY": "Salvar altera a configuração e não executa ações. CRM, Service Desk e Projetos exigem parâmetros, habilitação operacional e as permissões atuais do agente em cada execução. Nenhum comando é publicado no PABX.",
       "LOADING": "Carregando configuração autorizada…",
       "LOAD_FAILED": "Não foi possível carregar uma configuração consistente. Recarregue antes de editar.",
       "DENIED": "O acesso atual não permite esta configuração. Os dados privados foram retirados da tela.",
@@ -2989,7 +2989,7 @@
       },
       "CONFIGURE": "Configurar",
       "DESTINATION_PENDING": "Integração operacional pendente; não haverá execução simulada.",
-      "DESTINATION_CONFIGURED": "Parâmetros da tarefa configurados. Confira abaixo o modo e a habilitação operacional da regra.",
+      "DESTINATION_CONFIGURED": "Parâmetros do destino configurados. Confira abaixo o modo e a habilitação operacional da regra.",
       "PREVIEW": "Revisar parâmetros e contexto da regra",
       "REVIEW": "Revisei fila, unidade, motivo, condições, modo de execução e parâmetros privados do destino. Confirmo esta alteração.",
       "SAVED": "Versão salva. Nenhum destino foi executado por esta gravação.",
@@ -3066,7 +3066,9 @@
         "REVIEW": "Revisei os parâmetros do chamado e a nova versão prospectiva da regra. Os registros, as versões e as ações anteriores serão preservados.",
         "ASSIGNMENT_REQUIRED": "Este destino usa uma fila ou um responsável. É necessária permissão de atribuição no Service Desk para configurá-lo. Nenhuma permissão será concedida automaticamente.",
         "INITIAL_STATUS_REQUIRED": "A unidade precisa ter uma situação inicial ativa no Service Desk. Configure-a no módulo de origem e revise os dados antes de continuar."
-      }
+      },
+      "DESTINATION_AVAILABLE": "Configure os parâmetros autorizados deste destino. Salvar não executa a ação; a habilitação e as permissões serão verificadas na execução.",
+      "DESTINATION_UNAVAILABLE": "Configuração indisponível no contexto ou nas permissões atuais. Os parâmetros históricos são preservados."
     },
     "ENDING_ACTIVATION": {
       "TITLE": "Habilitação operacional da regra",
@@ -3224,7 +3226,12 @@
       "NO_MEASUREMENT": "Sem medição",
       "PERIOD": "{from} a {to} · {timezone} · {count} gravação(ões) autorizada(s)",
       "PAGE": "Página {page} de {pages}",
-      "INVALID_RANGE": "Informe datas válidas, em ordem, com um período de até 31 dias."
+      "INVALID_RANGE": "Informe datas válidas, em ordem, com um período de até 31 dias.",
+      "CALL_ID": "Identificador da chamada",
+      "RECORDING_ID": "Identificador da gravação",
+      "EXTENSION": "Ramal",
+      "STORAGE_NOT_CONFIRMED": "Política, retenção, bloqueio legal e capacidade de armazenamento não confirmados nesta consulta. Nenhum prazo foi presumido; esta tela não permite excluir o original.",
+      "MEDIA_AUDIT_ERROR": "A reprodução foi interrompida porque não foi possível registrar a auditoria. Selecione Ouvir para tentar novamente com sua autorização atual."
     }
   }
 }

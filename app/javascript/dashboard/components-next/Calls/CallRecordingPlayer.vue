@@ -21,6 +21,7 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  beforePlayback: { type: Function, default: null },
   fallbackDuration: {
     type: Number,
     default: 0,
@@ -34,6 +35,7 @@ const audioPlayer = useTemplateRef('audioPlayer');
 const { uid } = getCurrentInstance();
 
 const isPlaying = ref(false);
+const playbackPending = ref(false);
 const currentTime = ref(0);
 const duration = ref(props.fallbackDuration);
 const playbackSpeed = ref(1);
@@ -73,16 +75,26 @@ const playbackFailed = () => {
 onBeforeUnmount(() => audioPlayer.value?.pause());
 
 const playOrPause = async () => {
+  if (playbackPending.value) return;
   if (isPlaying.value) {
     audioPlayer.value.pause();
     isPlaying.value = false;
   } else {
-    emitter.emit('pause_playing_audio', uid);
+    playbackPending.value = true;
+    const player = audioPlayer.value;
+    const source = props.src;
     try {
-      await audioPlayer.value.play();
+      if (props.beforePlayback && (await props.beforePlayback()) !== true)
+        return;
+      if (!player || player !== audioPlayer.value || source !== props.src)
+        return;
+      emitter.emit('pause_playing_audio', uid);
+      await player.play();
       isPlaying.value = true;
     } catch {
       playbackFailed();
+    } finally {
+      playbackPending.value = false;
     }
   }
 };
@@ -137,6 +149,7 @@ const downloadRecording = () => {
       size="xs"
       class="!w-6 !p-0 text-n-slate-12"
       data-native-recording-play
+      :disabled="playbackPending"
       @click="playOrPause"
     >
       <template #icon>

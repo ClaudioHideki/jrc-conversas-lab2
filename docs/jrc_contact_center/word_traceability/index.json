@@ -1,8 +1,8 @@
 {
   "format_version": 1,
   "review_at": "2026-11-23T20:15:50.371122+00:00",
-  "validated_base_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
-  "candidate_source_parent_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+  "validated_base_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+  "candidate_source_parent_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
   "candidate_not_yet_validated": true,
   "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
@@ -4238,7 +4238,7 @@
     "not_full_global_implementation_estimate": true
   },
   "figure10_proven_literal_percentage": 36.0,
-  "Parte1_proven_formal_lower_bound_percentage": 7.76,
+  "Parte1_proven_formal_lower_bound_percentage": 8.66,
   "full_global_reaudit_complete": false,
   "typed_durable_delivery_candidate": {
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
@@ -4289,8 +4289,8 @@
   },
   "latest_literal_functional_progress": {
     "document": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
-    "sha256": "034b44b41e20b578212b703c12ffa36c15a0d8ce447c936f179a98ed30ec02c8",
-    "unique_closed": 43,
+    "sha256": "8e4b1b575ef508855be02e44066d524291d27fa2c3800e4783e40c8a13d1824a",
+    "unique_closed": 48,
     "total_unique": 554,
     "whole_Part1_accepted": false
   },
@@ -4343,5 +4343,10 @@
       10,
       17
     ]
+  },
+  "next_mixed_worker_and_recording_popup_group": {
+    "document": "docs/jrc_contact_center/mixed_ending_and_recording_popup_candidate_20261126.json",
+    "sha256": "9ca537238b4086e9632ffa8ecdb2c492102fdfa5f655cdeaaaef21c8ab7c3a8c",
+    "accepted": false
   }
 }

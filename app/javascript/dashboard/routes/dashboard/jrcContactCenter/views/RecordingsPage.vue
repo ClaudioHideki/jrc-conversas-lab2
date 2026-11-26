@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useMapGetter } from 'dashboard/composables/store';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
-import CallRecordingPlayer from 'dashboard/components-next/Calls/CallRecordingPlayer.vue';
+import RecordingDetailsDialog from '../components/RecordingDetailsDialog.vue';
 import AcwRuleTarget from '../components/AcwRuleTarget.vue';
 import { useScopedRecordings } from '../composables/useScopedRecordings';
 
@@ -71,6 +71,7 @@ const labels = computed(() => ({
   INVALID_RANGE: t('JRC_CONTACT_CENTER.RECORDINGS.INVALID_RANGE'),
   DENIED: t('JRC_CONTACT_CENTER.RECORDINGS.DENIED'),
   MEDIA_ERROR: t('JRC_CONTACT_CENTER.RECORDINGS.MEDIA_ERROR'),
+  MEDIA_AUDIT_ERROR: t('JRC_CONTACT_CENTER.RECORDINGS.MEDIA_AUDIT_ERROR'),
   PENDING: t('JRC_CONTACT_CENTER.RECORDINGS.PENDING'),
   AVAILABLE: t('JRC_CONTACT_CENTER.RECORDINGS.AVAILABLE'),
   PREVIOUS: t('JRC_CONTACT_CENTER.RECORDINGS.PREVIOUS'),
@@ -203,53 +204,76 @@ const duration = value =>
       <p v-if="!items.length" class="rounded-lg border border-n-weak p-4">
         {{ copy('EMPTY') }}
       </p>
-      <div v-else class="space-y-3" role="list">
-        <article
-          v-for="row in items"
-          :key="row.id"
-          class="grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
-          role="listitem"
-          :data-recording-row="row.id"
-        >
-          <div class="min-w-0">
-            <p class="break-all font-medium">
-              {{ copy('CALL') }} {{ row.unique_id }}
-            </p>
-            <p class="break-words text-sm text-n-slate-11">
-              {{ copy('NUMBER') }} {{ row.external_number }}
-            </p>
-          </div>
-          <dl class="min-w-0 text-sm">
-            <div class="flex flex-wrap gap-2">
-              <dt>{{ copy('STARTED') }}</dt>
-              <dd class="break-all">{{ row.started_at }}</dd>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <dt>{{ copy('DURATION') }}</dt>
-              <dd>{{ duration(row.talk_duration_seconds) }}</dd>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <dt>{{ copy('UNIT') }}</dt>
-              <dd class="break-words">{{ row.unit_name }}</dd>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <dt>{{ copy('QUEUE') }}</dt>
-              <dd class="break-words">{{ row.queue_name }}</dd>
-            </div>
-          </dl>
-          <button
-            type="button"
-            :disabled="mediaLoading"
-            class="self-center rounded-lg border border-n-violet-6 px-3 py-2 text-n-violet-11"
-            :data-recording-details="row.id"
-            @click="state.select(row)"
+      <table
+        v-else
+        class="block w-full border-separate border-spacing-y-2 text-left md:table md:table-fixed md:border-spacing-y-0"
+        data-recordings-table
+      >
+        <caption class="sr-only">
+          {{
+            copy('TITLE')
+          }}
+        </caption>
+        <thead class="hidden text-xs text-n-slate-11 md:table-header-group">
+          <tr>
+            <th
+              v-for="key in [
+                'CALL',
+                'NUMBER',
+                'STARTED',
+                'DURATION',
+                'UNIT',
+                'QUEUE',
+                'DETAILS',
+              ]"
+              :key="key"
+              scope="col"
+              class="p-3"
+            >
+              {{ copy(key) }}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="block space-y-3 md:table-row-group md:space-y-0">
+          <tr
+            v-for="row in items"
+            :key="row.id"
+            class="block min-w-0 rounded-xl border border-n-weak bg-n-solid-1 p-3 md:table-row md:rounded-none md:p-0"
+            :data-recording-row="row.id"
           >
-            {{ copy('DETAILS') }}
-          </button>
-        </article>
-      </div>
+            <td
+              v-for="[key, value] in [
+                ['CALL', row.unique_id],
+                ['NUMBER', row.external_number],
+                ['STARTED', row.started_at],
+                ['DURATION', duration(row.talk_duration_seconds)],
+                ['UNIT', row.unit_name],
+                ['QUEUE', row.queue_name],
+              ]"
+              :key="key"
+              class="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] gap-2 py-2 text-sm md:table-cell md:p-3"
+            >
+              <span class="text-n-slate-11 md:hidden">{{ copy(key) }}</span>
+              <span class="break-all">{{
+                value || copy('NO_MEASUREMENT')
+              }}</span>
+            </td>
+            <td class="py-2 md:p-3">
+              <button
+                type="button"
+                :disabled="mediaLoading"
+                class="rounded-lg border border-n-violet-6 px-3 py-2 text-n-violet-11"
+                :data-recording-details="row.id"
+                @click="state.select(row)"
+              >
+                {{ copy('DETAILS') }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <nav
-        v-if="meta.pages > 1"
+        v-if="meta.pages > 1 || page > 1"
         class="flex flex-wrap items-center justify-between gap-3"
         :aria-label="copy('TITLE')"
       >
@@ -276,59 +300,27 @@ const duration = value =>
         </button>
       </nav>
     </template>
-    <p v-if="mediaError" role="alert" class="text-sm text-n-ruby-11">
+    <p
+      v-if="mediaError && !selected"
+      role="alert"
+      class="text-sm text-n-ruby-11"
+    >
       {{ copy(mediaError) }}
     </p>
-    <aside
+    <RecordingDetailsDialog
       v-if="selected"
-      class="min-w-0 space-y-3 rounded-xl border border-n-violet-6 bg-n-solid-1 p-4"
-      data-recording-selected
-    >
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <h2 class="break-all font-semibold">
-          {{ copy('DETAILS') }} {{ selected.unique_id }}
-        </h2>
-        <button type="button" class="text-n-blue-11" @click="state.close">
-          {{ copy('CLOSE') }}
-        </button>
-      </div>
-      <p class="text-sm text-n-slate-11">
-        {{
-          selected.recording_state === 'requestable'
-            ? copy('AVAILABLE')
-            : copy('PENDING')
-        }}
-      </p>
-      <div class="flex flex-wrap gap-2">
-        <button
-          v-if="capabilities.recordings_listen"
-          type="button"
-          :disabled="mediaLoading || selected.recording_state !== 'requestable'"
-          class="rounded-lg border border-n-violet-6 px-3 py-2 text-n-violet-11"
-          data-recording-listen
-          @click="state.bytes('playback')"
-        >
-          {{ copy('LISTEN') }}
-        </button>
-        <button
-          v-if="capabilities.recordings_download"
-          type="button"
-          :disabled="mediaLoading || selected.recording_state !== 'requestable'"
-          class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
-          data-recording-download
-          @click="state.bytes('download')"
-        >
-          {{ copy('DOWNLOAD') }}
-        </button>
-      </div>
-      <CallRecordingPlayer
-        v-if="url"
-        :key="url"
-        :src="url"
-        :fallback-duration="selected.talk_duration_seconds || 0"
-        :can-download="false"
-        @error="state.playbackFailed"
-      />
-    </aside>
+      :key="`${accountId}-${actorScope}-${selected.id}`"
+      :item="selected"
+      :formatted-duration="duration(selected.talk_duration_seconds)"
+      :capabilities="capabilities"
+      :url="url"
+      :loading="mediaLoading"
+      :error="mediaError"
+      :authorize-playback="state.authorizePlayback"
+      @close="state.close"
+      @playback="state.bytes('playback')"
+      @download="state.bytes('download')"
+      @playback-error="state.playbackFailed"
+    />
   </section>
 </template>

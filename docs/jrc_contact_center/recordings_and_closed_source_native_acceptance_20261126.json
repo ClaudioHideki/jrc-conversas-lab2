@@ -1,0 +1,29 @@
+{
+  "source_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+  "run": 45843151860,
+  "artifact": 15138397916,
+  "artifact_sha256": "2c9be62b65dd2730408a2b44c809e011357c18df457d34c951087220563d2500",
+  "independent_evidence_sha256": "62747c4cf104cf0a36cbdc85265608f623591760b88c63d4177c066c45eb92b0",
+  "native_distinct_Rails": 3792,
+  "main_Vue": 1971,
+  "SD_targeted_Vue": 108,
+  "recordings_targeted_Vue": 29,
+  "Chrome": 284,
+  "PNG_hashes_verified": 708,
+  "actual_image_review_sha256": "a66951330b0d6f4afc57bafbeb92a45fd0f30b84061ef8b6b0139e3a8a1b588b",
+  "accepted_user_behavior": [
+    "Current authorized personal recordings: native filters, real pagination and URL reload, explicit playback/pause/seek and separately authorized download.",
+    "An ordinary second viewer plays authorized audio while the native download endpoint denies its missing download permission.",
+    "Role changes withdraw old recording/media/lookup state; source/account/unit/tenant and exact call origin are checked on the server.",
+    "Historical Service Desk rule deactivation persists under an inactive source queue; UI and API block reactivation without changing prior versions."
+  ],
+  "remaining": [
+    "Native personal SIP history only; no inferred jrc_pabx/pabx_v1 identity mapping.",
+    "Full storage/retention/legal hold, sharing and administration remain pending.",
+    "New details popup and mixed CRM/SD public worker flow are separate candidates, not approved here."
+  ],
+  "provider_boundary": "synthetic_in_memory_wav_not_external_homologation",
+  "whole_figure10_accepted": false,
+  "whole_figure17_accepted": false,
+  "whole_Part1_accepted": false
+}
