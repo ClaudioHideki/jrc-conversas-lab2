@@ -3,7 +3,7 @@ require 'timeout'
 
 # Prepared domain cases using committed native PostgreSQL. Technical failed
 # outcomes below exercise retry admission, not a fabricated operational failure.
-RSpec.describe JrcContactCenter::EndingActions::RequestDestinationRetry do
+RSpec.describe 'Native selected ending retry request boundary' do
   self.use_transactional_tests = false
   include_context 'with native typed ending schema evidence'
   include_context 'with native ending attempt operators'
@@ -40,8 +40,10 @@ RSpec.describe JrcContactCenter::EndingActions::RequestDestinationRetry do
   end
 
   def retry_command(row = previous, key: retry_key, caller: operator, review: retry_review(row))
-    described_class.new(account: account, member: caller, qualification_id: typed_origin.source_qualification_id,
-                        attempt_id: row.id, request_key: key, review: review)
+    JrcContactCenter::EndingActions::RequestDestinationRetry.new(
+      account: account, member: caller, qualification_id: typed_origin.source_qualification_id,
+      attempt_id: row.id, request_key: key, review: review
+    )
   end
 
   def retry_counts
@@ -150,8 +152,10 @@ RSpec.describe JrcContactCenter::EndingActions::RequestDestinationRetry do
           connection.execute("SET lock_timeout = '5s'")
           ready << connection.raw_connection.backend_pid
           Timeout.timeout(10) { start.pop }
-          described_class.new(account: Account.find(input[0]), member: AccountUser.find(input[1]), qualification_id: input[2],
-                              attempt_id: input[3], request_key: input[4], review: input[5]).call.id
+          JrcContactCenter::EndingActions::RequestDestinationRetry.new(
+            account: Account.find(input[0]), member: AccountUser.find(input[1]), qualification_id: input[2],
+            attempt_id: input[3], request_key: input[4], review: input[5]
+          ).call.id
         ensure
           connection.execute('RESET lock_timeout')
         end

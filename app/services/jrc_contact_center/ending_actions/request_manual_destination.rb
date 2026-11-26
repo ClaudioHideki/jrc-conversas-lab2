@@ -4,17 +4,20 @@
 # Root consent is separate from classification and ACW, and conveys no grant.
 # A controller/presenter and selected terminal retry remain a separate boundary.
 class JrcContactCenter::EndingActions::RequestManualDestination
+  NATIVE_OPTIONS = %i[destination_kind origin_id request_key review rule_code].freeze
   REVIEW_FIELDS = %w[confirmed expected_readiness_id expected_rule_sha256 expected_version_id].freeze
 
-  def initialize(account:, member:, qualification_id:, origin_id:, rule_code:, destination_kind:, request_key:, review:)
+  def initialize(account:, member:, qualification_id:, **options)
+    raise ArgumentError, 'Exact native destination options required' unless options.keys.sort == NATIVE_OPTIONS
+
     @account = account
     @member = member
     @qualification_id = qualification_id
-    @origin_id = origin_id
-    @code = rule_code
-    @kind = destination_kind
-    @key = request_key
-    @review = review
+    @origin_id = options.fetch(:origin_id)
+    @code = options.fetch(:rule_code)
+    @kind = options.fetch(:destination_kind)
+    @key = options.fetch(:request_key)
+    @review = options.fetch(:review)
   end
 
   def call
@@ -32,15 +35,7 @@ class JrcContactCenter::EndingActions::RequestManualDestination
   private
 
   def reviewed_intent
-    context = JrcContactCenter::EndingActions::HistoryContext.new(
-      account: @account, member: @member, qualification_id: @qualification_id
-    )
-    origin_id, caller_id, caller_user_id = context.call do |caller, qualification|
-      origin = JrcContactCenter::EndingActionOrigin.where(account: @account, source_qualification_id: qualification.id).find(@origin_id)
-      raise Pundit::NotAuthorizedError unless origin.actor_account_user_id == caller.id && origin.actor_user_id == caller.user_id
-
-      [origin.id, caller.id, caller.user_id]
-    end
+    origin_id, caller_id, caller_user_id = reviewed_source_identity
     # Close the read boundary first; the native independent transaction performs
     # current source/role checks again and cannot borrow the earlier read grant.
     JrcContactCenter::EndingActions::OriginalActorContext.new(account: @account, origin_id: origin_id).call do |member, origin|
@@ -48,6 +43,18 @@ class JrcContactCenter::EndingActions::RequestManualDestination
       raise Pundit::NotAuthorizedError unless same
 
       persist_reviewed_intent(member, origin)
+    end
+  end
+
+  def reviewed_source_identity
+    context = JrcContactCenter::EndingActions::HistoryContext.new(
+      account: @account, member: @member, qualification_id: @qualification_id
+    )
+    context.call do |caller, qualification|
+      origin = JrcContactCenter::EndingActionOrigin.where(account: @account, source_qualification_id: qualification.id).find(@origin_id)
+      raise Pundit::NotAuthorizedError unless origin.actor_account_user_id == caller.id && origin.actor_user_id == caller.user_id
+
+      [origin.id, caller.id, caller.user_id]
     end
   end
 
@@ -128,12 +135,9 @@ class JrcContactCenter::EndingActions::RequestManualDestination
   end
 
   def validate_review!
-    valid = @review.is_a?(Hash) && @review.keys.sort == REVIEW_FIELDS && @review['confirmed'] == true
-    valid &&= @key.is_a?(String) && @key.match?(/\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/)
-    valid &&= @review.values_at('expected_readiness_id', 'expected_version_id').all? do |value|
-      value.is_a?(String) && value.match?(/\A[1-9][0-9]*\z/)
-    end
-    valid &&= @review['expected_rule_sha256'].is_a?(String) && @review['expected_rule_sha256'].match?(/\A[a-f0-9]{64}\z/)
+    JrcContactCenter::EndingActions::DestinationSelectionReview.new(@review, request_id: false).validate!
+    valid = @key.is_a?(String) && @key.match?(/\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/)
     raise JrcContactCenter::OperationError, 'invalid_ending_pending_review' unless valid
   end
+
 end

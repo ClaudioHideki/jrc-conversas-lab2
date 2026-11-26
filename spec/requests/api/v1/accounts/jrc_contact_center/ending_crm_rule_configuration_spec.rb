@@ -30,11 +30,9 @@ RSpec.describe 'Explicit CRM ending configuration through the native private rul
     get path, headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').sole.fetch('actions')).to eq(crm_rule.fetch('actions'))
-    expect(account.contacts.count).to eq(contacts)
-    expect(account.jrc_crm_leads).to be_empty
-    expect(account.jrc_crm_activities).to be_empty
-    expect(JrcContactCenter::EndingDestinationAttempt.where(account: account)).to be_empty
-    expect(JrcProjects::Task.where(account: account)).to be_empty
+    native_counts = [account.contacts.count, account.jrc_crm_leads.count, account.jrc_crm_activities.count,
+                     JrcContactCenter::EndingDestinationAttempt.where(account: account).count, JrcProjects::Task.where(account: account).count]
+    expect(native_counts).to eq([contacts, 0, 0, 0, 0])
   end
 
   it 'does not silently convert a legacy project-only request into the new destination grammar' do

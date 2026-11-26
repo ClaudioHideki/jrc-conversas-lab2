@@ -45,11 +45,15 @@ class Api::V1::Accounts::JrcContactCenter::EndingDestinationsController < Api::V
   def validate_manual_action!(input)
     input['origin_id'] = JrcServiceDesk::Input.id(input.fetch('origin_id'))
     code = input.fetch('rule_code')
-    valid = code.is_a?(String) && code.valid_encoding? && code.exclude?("\u0000") && code.strip.present? && code.length <= 100
+    valid = valid_rule_code?(code)
     valid &&= %w[project_task crm service_desk].include?(input.fetch('destination_kind'))
     raise JrcContactCenter::OperationError, 'invalid_ending_pending_review' unless valid
   rescue ArgumentError
     raise JrcContactCenter::OperationError, 'invalid_ending_pending_review'
+  end
+
+  def valid_rule_code?(code)
+    code.is_a?(String) && code.valid_encoding? && code.exclude?("\u0000") && code.strip.present? && code.length <= 100
   end
 
   def attempt_identity

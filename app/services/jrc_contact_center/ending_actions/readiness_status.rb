@@ -64,18 +64,25 @@ class JrcContactCenter::EndingActions::ReadinessStatus
     rule = document.fetch('entries').find { |entry| entry.fetch('code') == @code }
     raise ActiveRecord::RecordNotFound unless rule
 
-    # Historical v1 activation retains its native whole-account restriction.
-    # Only the explicit v2 contract uses the already authorized per-rule scope.
-    if rule.fetch('destination_schema_version', 1) != 2
-      coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: member.user)
-      raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
-    end
+    authorize_legacy_coverage!(member, rule)
 
+    verify_current_binding!(member, rule)
+
+    [version, rule]
+  end
+
+  def authorize_legacy_coverage!(member, rule)
+    return if rule.fetch('destination_schema_version', 1) == 2
+
+    coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: member.user)
+    raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
+  end
+
+  def verify_current_binding!(member, rule)
     input = rule.except('scope').merge('scope_revision' => rule.fetch('scope').fetch('integrity_sha256'))
     checked = JrcContactCenter::EndingActions::RuleInput.new(account: @account, member: member).call(input)
     raise JrcContactCenter::OperationError, 'ending_action_source_scope_changed' unless checked == rule
 
-    [version, rule]
   end
 
   def present(receipt)

@@ -17,7 +17,7 @@ class JrcContactCenter::EndingActions::DestinationOperationAvailability
     JrcContactCenter::EndingActions::SelectedDestinationAuthority.new(
       account: @account, member: @member, origin: origin, attempt: @attempt
     ).call
-    { can_resume_pending: outcome.nil?, can_retry_selected: outcome && %w[failed blocked].include?(outcome.outcome) ? true : false }
+    { can_resume_pending: outcome.nil?, can_retry_selected: %w[failed blocked].include?(outcome&.outcome) }
   rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError, JrcContactCenter::OperationError
     unavailable
   end

@@ -24,17 +24,21 @@ class JrcContactCenter::EndingActions::ManualDestinationPreview
     document.fetch('entries').flat_map { |rule| rule_previews(rule) }
   rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
     []
-  rescue JrcContactCenter::OperationError => error
-    raise unless REFUSALS.include?(error.code)
+  rescue JrcContactCenter::OperationError => e
+    raise unless REFUSALS.include?(e.code)
 
     []
   end
 
   private
 
+  def eligible_rule?(definition)
+    definition['destination_schema_version'] == 2 && definition['execution_mode'] == 'agent_confirmation' &&
+      definition.fetch('active') && definition.fetch('queue_id') == @origin.queue_id.to_s
+  end
+
   def rule_previews(definition)
-    return [] unless definition['destination_schema_version'] == 2 && definition['execution_mode'] == 'agent_confirmation'
-    return [] unless definition.fetch('active') && definition.fetch('queue_id') == @origin.queue_id.to_s
+    return [] unless eligible_rule?(definition)
 
     code = definition.fetch('code')
     rule = JrcContactCenter::EndingActions::PinnedRule.new(account: @account, origin: @origin).call(code)
@@ -44,8 +48,8 @@ class JrcContactCenter::EndingActions::ManualDestinationPreview
     rule.fetch('actions').filter_map { |action| preview(action, code, ready) }
   rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
     []
-  rescue JrcContactCenter::OperationError => error
-    raise unless REFUSALS.include?(error.code)
+  rescue JrcContactCenter::OperationError => e
+    raise unless REFUSALS.include?(e.code)
 
     []
   end
@@ -56,9 +60,7 @@ class JrcContactCenter::EndingActions::ManualDestinationPreview
     return if recorded
 
     JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member).call(action, active: true)
-    if kind == 'crm'
-      JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: @member, origin: @origin).call
-    end
+    JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: @member, origin: @origin).call if kind == 'crm'
     input = ApplicationRecord.sanitize_sql_array([
       'SELECT cc_ending_destination_context(?, ?, ?, ?, ?)::text', @account.id, @origin.id, readiness.id, code, kind
     ])
@@ -67,8 +69,8 @@ class JrcContactCenter::EndingActions::ManualDestinationPreview
             .transform_values(&:to_s)
   rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
     nil
-  rescue JrcContactCenter::OperationError => error
-    raise unless REFUSALS.include?(error.code)
+  rescue JrcContactCenter::OperationError => e
+    raise unless REFUSALS.include?(e.code)
 
     nil
   end

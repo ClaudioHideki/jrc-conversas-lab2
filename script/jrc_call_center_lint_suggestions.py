@@ -9,10 +9,15 @@ if os.environ.get('GITHUB_ACTIONS') != 'true' or os.environ.get('RUNNER_ENVIRONM
     raise SystemExit('Owned disposable CI required')
 
 suggestions = []
-report = pathlib.Path('/tmp/call-center-rubocop.json')
+report = pathlib.Path(os.environ.get('JRC_CC_LINT_REPORT', '/tmp/call-center-rubocop.json'))
+if str(report) not in {'/tmp/call-center-rubocop.json', '/tmp/call-center-ending-public-lint.json'}:
+    raise SystemExit('Exact owned lint report required')
 if report.is_file():
-    for row in json.loads(report.read_text()):
-        cops = sorted({offense['cop_name'] for offense in row['new_offenses'] if offense.get('correctable')})
+    data = json.loads(report.read_text())
+    rows = data['files'] if isinstance(data, dict) else data
+    for row in rows:
+        offenses = row['offenses'] if isinstance(data, dict) else row['new_offenses']
+        cops = sorted({offense['cop_name'] for offense in offenses if offense.get('correctable')})
         if not cops:
             continue
         path = row['path']

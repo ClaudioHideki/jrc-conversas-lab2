@@ -5,7 +5,7 @@ require 'timeout'
 
 # Domain proof with real committed PostgreSQL. This does not prove a public
 # controller, consent UI, selected terminal retry or actual worker dequeue.
-RSpec.describe JrcContactCenter::EndingActions::RequestManualDestination do
+RSpec.describe 'Native manual ending intent request boundary' do
   self.use_transactional_tests = false
   include_context 'with native typed ending schema evidence'
 
@@ -31,9 +31,10 @@ RSpec.describe JrcContactCenter::EndingActions::RequestManualDestination do
   end
 
   def command(review: native_review, key: typed_key, caller: member)
-    described_class.new(account: account, member: caller, qualification_id: typed_origin.source_qualification_id,
-                        origin_id: typed_origin.id, rule_code: 'SYNTHETIC_ORIGIN_RULE', destination_kind: 'project_task',
-                        request_key: key, review: review)
+    JrcContactCenter::EndingActions::RequestManualDestination.new(
+      account: account, member: caller, qualification_id: typed_origin.source_qualification_id,
+      origin_id: typed_origin.id, rule_code: 'SYNTHETIC_ORIGIN_RULE', destination_kind: 'project_task', request_key: key, review: review
+    )
   end
 
   def intent_counts
@@ -73,8 +74,7 @@ RSpec.describe JrcContactCenter::EndingActions::RequestManualDestination do
 
       result = command.call
 
-      expect(result.origin_id).to eq(original.id)
-      expect(result.consent.actor_account_user_id).to eq(member.id)
+      expect([result.origin_id, result.consent.actor_account_user_id]).to eq([original.id, member.id])
       expect(intent_counts).to eq([1, 1, 0])
       expect(qualification.reload.completed_at).to be_nil
       expect(result.outcome).to be_nil
@@ -190,7 +190,7 @@ RSpec.describe JrcContactCenter::EndingActions::RequestManualDestination do
           connection.execute("SET lock_timeout = '5s'")
           jobs << connection.select_value('SELECT pg_backend_pid()')
           Timeout.timeout(10) { start.pop }
-          described_class.new(account: Account.find(account_id), member: AccountUser.find(member_id),
+          JrcContactCenter::EndingActions::RequestManualDestination.new(account: Account.find(account_id), member: AccountUser.find(member_id),
                               qualification_id: source.source_qualification_id, origin_id: source.id,
                               rule_code: readiness.rule_code, destination_kind: 'project_task', request_key: key, review: review).call.id
         ensure

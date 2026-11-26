@@ -5,13 +5,15 @@
 class JrcContactCenter::EndingActions::RequestDestinationRetry
   FIELDS = %w[confirmed expected_readiness_id expected_request_id expected_rule_sha256 expected_version_id].freeze
 
-  def initialize(account:, member:, qualification_id:, attempt_id:, request_key:, review:)
+  def initialize(account:, member:, qualification_id:, **options)
+    raise ArgumentError, 'Exact native destination options required' unless options.keys.sort == %i[attempt_id request_key review]
+
     @account = account
     @member = member
     @qualification_id = qualification_id
-    @attempt_id = attempt_id
-    @key = request_key
-    @review = review
+    @attempt_id = options.fetch(:attempt_id)
+    @key = options.fetch(:request_key)
+    @review = options.fetch(:review)
   end
 
   def call
@@ -79,8 +81,7 @@ class JrcContactCenter::EndingActions::RequestDestinationRetry
   end
 
   def reviewed_consent(member, origin, readiness, previous)
-    return unless origin.version.definition.fetch('entries').find { |row| row.fetch('code') == previous.rule_code }
-                        .fetch('execution_mode') == 'agent_confirmation'
+    return unless manual_consent_required?(origin, previous.rule_code)
 
     scope = JrcContactCenter::EndingDestinationConsent.where(account: @account)
     consent = scope.find_by(request_key: @key)
@@ -96,14 +97,15 @@ class JrcContactCenter::EndingActions::RequestDestinationRetry
                   rule_code: previous.rule_code, destination_kind: previous.destination_kind, request_key: @key).reload
   end
 
+  def manual_consent_required?(origin, code)
+    origin.version.definition.fetch('entries').find { |row| row.fetch('code') == code }
+                        .fetch('execution_mode') == 'agent_confirmation'
+  end
+
   def validate_review!
-    valid = @review.is_a?(Hash) && @review.keys.sort == FIELDS && @review['confirmed'] == true
-    valid &&= @key.is_a?(String) && @key.match?(/\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/)
-    valid &&= @review.values_at('expected_readiness_id', 'expected_version_id').all? do |value|
-      value.is_a?(String) && value.match?(/\A[1-9][0-9]*\z/)
-    end
-    valid &&= @review['expected_request_id'].is_a?(String) && @review['expected_request_id'].match?(/\A[0-9a-f-]{36}\z/)
-    valid &&= @review['expected_rule_sha256'].is_a?(String) && @review['expected_rule_sha256'].match?(/\A[a-f0-9]{64}\z/)
+    JrcContactCenter::EndingActions::DestinationSelectionReview.new(@review).validate!
+    valid = @key.is_a?(String) && @key.match?(/\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/)
     raise JrcContactCenter::OperationError, 'invalid_ending_pending_review' unless valid
   end
+
 end

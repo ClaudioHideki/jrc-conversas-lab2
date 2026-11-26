@@ -74,9 +74,8 @@ RSpec.describe 'Selected original-agent ending destination commands', type: :req
     expect(row.keys).to match_array(%w[origin_id readiness_id version_id rule_code destination_kind operation rule_sha256])
     expect(row).to include('origin_id' => typed_origin.id.to_s, 'destination_kind' => 'project_task')
     expect(response.body).not_to include('SYNTHETIC unarmed original evidence', 'board_column_id', 'actor_user_id')
-    expect(counts).to eq([0, 0, 0])
-    expect(qualification.reload.completed_at).to be_nil
-    expect(JrcContactCenter::EndingDestinationJob.queue_adapter.enqueued_jobs).to be_empty
+    untouched = [counts, qualification.reload.completed_at, JrcContactCenter::EndingDestinationJob.queue_adapter.enqueued_jobs]
+    expect(untouched).to eq([[0, 0, 0], nil, []])
   end
 
   it 'registers distinct action consent and a durable intent through the real API while native ACW remains open' do

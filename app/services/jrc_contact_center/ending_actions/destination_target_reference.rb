@@ -11,6 +11,15 @@ class JrcContactCenter::EndingActions::DestinationTargetReference
   def call(execution)
     return unless execution && execution.account_id == @account.id
 
+    target_reference(execution)
+
+  rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
+    nil
+  end
+
+  private
+
+  def target_reference(execution)
     case [execution.destination_kind, execution.operation, execution.target_type]
     when ['project_task', 'create_task', 'JrcProjects::Task'] then project_task(execution.target_id)
     when ['crm', 'create_lead', 'JrcCrm::Lead'] then crm_record(execution.target_id, :lead)
@@ -18,11 +27,7 @@ class JrcContactCenter::EndingActions::DestinationTargetReference
     when ['service_desk', 'create_ticket', 'JrcServiceDesk::Ticket'], ['service_desk', 'update_ticket', 'JrcServiceDesk::Ticket']
       service_desk_ticket(execution.target_id)
     end
-  rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
-    nil
   end
-
-  private
 
   def project_task(identifier)
     task = JrcProjects::Task.where(account: @account).find(identifier)

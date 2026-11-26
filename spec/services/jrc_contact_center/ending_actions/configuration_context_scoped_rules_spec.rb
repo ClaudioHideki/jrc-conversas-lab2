@@ -39,21 +39,21 @@ RSpec.describe JrcContactCenter::EndingActions::ConfigurationContext do
   it 'does not treat business coverage as native configure permission' do
     command = described_class.new(account: account, member: member, for_rule: true)
     member.update!(custom_role: create(:custom_role, account: account, permissions: %w[jrc_contact_center_view]))
-    expect { command.call {} }.to raise_error(Pundit::NotAuthorizedError)
+    expect { command.call { :unreachable } }.to raise_error(Pundit::NotAuthorizedError)
     expect(JrcContactCenter::EndingActionVersion.where(account: account)).to be_empty
   end
 
   it 'revalidates current coverage rather than trusting the membership supplied at construction' do
     command = described_class.new(account: account, member: member, for_rule: true)
     JrcCrm::UserBusinessUnit.where(account: account, user: actor, active: true).find_each { |row| row.update!(active: false) }
-    expect { command.call {} }.to raise_error(Pundit::NotAuthorizedError)
+    expect { command.call { :unreachable } }.to raise_error(Pundit::NotAuthorizedError)
     expect(JrcContactCenter::EndingActionVersion.where(account: account)).to be_empty
   end
 
   it 'requires an enabled native Call Center independently of scoped corporate access' do
     command = described_class.new(account: account, member: member, for_rule: true)
     account.disable_features!('jrc_contact_center')
-    expect { command.call {} }.to raise_error(Pundit::NotAuthorizedError)
+    expect { command.call { :unreachable } }.to raise_error(Pundit::NotAuthorizedError)
     expect(JrcProjects::Task.where(account: account)).to be_empty
   end
 end
