@@ -87,5 +87,14 @@
   ],
   "no_new_modules_or_general_frameworks": true,
   "validation": "Focused changed-source lint and targeted native/Vue cases before full affected regressions; one own CI at a time.",
-  "no_scope_reduction_or_simulated_operational_success": true
+  "no_scope_reduction_or_simulated_operational_success": true,
+  "current_bounded_delivery": {
+    "parent": "bc891b35846827907c4f86bc41002b928258979d",
+    "CI": 45758049908,
+    "native_3747_and_Vue_1914_passed": true,
+    "276_Chrome_passed_4_failed": true,
+    "blocking_functional_issue": "ACW completion projection cleared the writer saved_changes before its after-update-commit delivery callback.",
+    "correction_scope": "Fresh scoped reader, unchanged callback/authorization; four new committed regressions.",
+    "accepted_after_new_native_and_four_mode_Chrome_only": true
+  }
 }

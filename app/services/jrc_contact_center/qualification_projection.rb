@@ -18,7 +18,9 @@ class JrcContactCenter::QualificationProjection
       allowed = @member.user.reload.active_for_authentication? && JrcContactCenter::ModulePolicy.new(context, :contact_center).access?
       raise Pundit::NotAuthorizedError unless allowed
 
-      record.with_lock { scoped_payload(record, forms) }
+      # Keep the writer instance's saved_changes intact for its native after_update_commit callback.
+      current = JrcContactCenter::Qualification.where(account_id: @account.id).find(record.id)
+      current.with_lock { scoped_payload(current, JrcContactCenter::QualificationForms.new(current)) }
     end
   end
 
