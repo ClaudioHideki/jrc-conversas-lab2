@@ -147,6 +147,19 @@
       "parent_sources": {
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "115f10a75d22ef4bda01f4cec86e732071e5c3fdc73b9309146798ae8bbceeab"
       }
+    },
+    {
+      "name": "exact_typed_SD_parent_validity_and_current_authority_composable_regressions",
+      "source_sha256": {
+        ".github/workflows/call-center-administration.yml": "554930a291261988adddf197de26b47b2036193b0f52a1c6039fe5401d51dbe8",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js": "41d79172835c2e713d6123aa481988309d5b2cd8fd230ac8ad30c10a01b98f0d",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": "f0e6c46aae37d8d73b7b396f0bbb602082b88dea2089af83065ea39c54004823"
+      },
+      "parent_sources": {
+        ".github/workflows/call-center-administration.yml": "787003fba5deda75a1cdb2a8848d21f5d6c5b660d166510949cb3238ba1a247e",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js": "fc3996c5298651a75b480e0e27b045ad705945cf6caedd1284c74d2b70f9cbb5",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": "b4b4f87d5f4ab366b6afbb1c603570ad977c6f2d4c38efdc2c7c32af1a28debd"
+      }
     }
   ],
   "early_Vue_failure_correction": {
@@ -179,5 +192,11 @@
     "product_unchanged": true,
     "additional_no_native_Ticket_check": true,
     "native_revalidation_pending": true
+  },
+  "parent_composable_save_correction": {
+    "document": "docs/jrc_contact_center/SD_parent_save_validity_correction_20261126.json",
+    "sha256": "3e07af63852117616ea4fd07912b0c3dfa9837a92daa49b8a11a51e4c820aac7",
+    "native_and_Chrome_acceptance_pending": true,
+    "three_new_real_composable_cases": true
   }
 }

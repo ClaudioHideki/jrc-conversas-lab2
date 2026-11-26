@@ -121,6 +121,113 @@ beforeEach(() => {
 });
 
 describe('authorized operational ending-rule editor', () => {
+  it('allows an explicitly reviewed typed Service Desk action through the real editor state without replacing its Project sibling', async () => {
+    const native = source();
+    native.data.item.service_desk = {
+      configuration_available: true,
+      unit: { id: '11', name: 'SYNTHETIC authorized native unit' },
+    };
+    API.endingRuleSourceContext.mockResolvedValue(native);
+    const { editor } = mountEditor();
+    await flushPromises();
+    await editor.edit(editor.items.value[0]);
+    const previous = JSON.parse(JSON.stringify(editor.draft.value.actions));
+    const action = {
+      kind: 'service_desk',
+      parameters: {
+        unit_id: '11',
+        service_id: null,
+        attributes: { title: 'SYNTHETIC reviewed ticket' },
+      },
+    };
+    editor.draft.value.destination_schema_version = 2;
+    editor.draft.value.actions.push(action);
+    await flushPromises();
+    expect(editor.canSave.value).toBe(false);
+    editor.reviewed.value = true;
+    expect(editor.canSave.value).toBe(true);
+    API.saveEndingRule.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        revision: refreshed,
+        item: {
+          ...stored(),
+          destination_schema_version: 2,
+          actions: [...previous, action],
+        },
+      },
+    });
+    await editor.save();
+    expect(API.saveEndingRule).toHaveBeenCalledTimes(1);
+    expect(API.saveEndingRule.mock.calls[0][1]).toMatchObject({
+      destination_schema_version: 2,
+      actions: [...previous, action],
+    });
+    expect(API.acwPolicy).not.toHaveBeenCalled();
+  });
+
+  it('blocks the reviewed Service Desk action as soon as current native availability is withdrawn and retains the draft', async () => {
+    const native = source();
+    native.data.item.service_desk = {
+      configuration_available: true,
+      unit: { id: '11', name: 'SYNTHETIC authorized native unit' },
+    };
+    API.endingRuleSourceContext.mockResolvedValue(native);
+    const { editor } = mountEditor();
+    await flushPromises();
+    await editor.edit(editor.items.value[0]);
+    editor.draft.value.destination_schema_version = 2;
+    editor.draft.value.actions.push({
+      kind: 'service_desk',
+      parameters: { unit_id: '11' },
+    });
+    await flushPromises();
+    editor.reviewed.value = true;
+    expect(editor.canSave.value).toBe(true);
+    editor.source.value.service_desk.configuration_available = false;
+    expect(editor.canSave.value).toBe(false);
+    await editor.save();
+    expect(API.saveEndingRule).not.toHaveBeenCalled();
+    expect(
+      editor.draft.value.actions.find(action => action.kind === 'service_desk')
+        .parameters
+    ).toEqual({ unit_id: '11' });
+  });
+
+  it('does not extend the Service Desk admission to a v1 payload or unimplemented notification and Nico actions', async () => {
+    const native = source();
+    native.data.item.service_desk = {
+      configuration_available: true,
+      unit: { id: '11', name: 'SYNTHETIC authorized native unit' },
+    };
+    API.endingRuleSourceContext.mockResolvedValue(native);
+    const { editor } = mountEditor();
+    await flushPromises();
+    await editor.edit(editor.items.value[0]);
+    editor.draft.value.actions.push({
+      kind: 'service_desk',
+      parameters: { unit_id: '11' },
+    });
+    await flushPromises();
+    editor.reviewed.value = true;
+    expect(editor.canSave.value).toBe(false);
+    editor.draft.value.destination_schema_version = 2;
+    await flushPromises();
+    editor.reviewed.value = true;
+    expect(editor.canSave.value).toBe(true);
+    const rejectUnknownDestination = async kind => {
+      editor.draft.value.actions.push({ kind, parameters: {} });
+      await flushPromises();
+      editor.reviewed.value = true;
+      expect(editor.canSave.value).toBe(false);
+      await editor.save();
+      editor.draft.value.actions.pop();
+    };
+    await rejectUnknownDestination('notifications');
+    await rejectUnknownDestination('nico');
+    expect(API.saveEndingRule).not.toHaveBeenCalled();
+  });
+
   it('keeps explicit native CRM grammar and sibling Project parameters through a reviewed save', async () => {
     const row = stored();
     row.destination_schema_version = 2;

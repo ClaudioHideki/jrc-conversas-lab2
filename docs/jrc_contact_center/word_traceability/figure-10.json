@@ -6952,5 +6952,6 @@
    "D2-P0222-C05",
    "D2-P0224-C04"
   ]
- }
+ },
+  "current_SD_parent_save_validation_gap": {"document": "docs/jrc_contact_center/SD_parent_save_validity_correction_20261126.json", "sha256": "3e07af63852117616ea4fd07912b0c3dfa9837a92daa49b8a11a51e4c820aac7", "status": "correction_prepared_requires_real_save_reload_and_full_CI", "failed_four_modes": true, "formal_clause_statuses_unchanged": true}
 }

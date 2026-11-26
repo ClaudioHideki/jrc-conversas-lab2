@@ -1,0 +1,46 @@
+{
+  "parent": "a009b76385d92c77cbb91f558f3d03e91d5f99c4",
+  "failed_run": 45785974424,
+  "artifact": 15106526494,
+  "artifact_sha256": "619c33d36680155e96ecd0a54e69b9bc8a8c51f07d68a50ff464505b94db4289",
+  "exact_correction_stage": {
+    "name": "exact_typed_SD_parent_validity_and_current_authority_composable_regressions",
+    "source_sha256": {
+      ".github/workflows/call-center-administration.yml": "554930a291261988adddf197de26b47b2036193b0f52a1c6039fe5401d51dbe8",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js": "41d79172835c2e713d6123aa481988309d5b2cd8fd230ac8ad30c10a01b98f0d",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": "f0e6c46aae37d8d73b7b396f0bbb602082b88dea2089af83065ea39c54004823"
+    },
+    "parent_sources": {
+      ".github/workflows/call-center-administration.yml": "787003fba5deda75a1cdb2a8848d21f5d6c5b660d166510949cb3238ba1a247e",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js": "fc3996c5298651a75b480e0e27b045ad705945cf6caedd1284c74d2b70f9cbb5",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": "b4b4f87d5f4ab366b6afbb1c603570ad977c6f2d4c38efdc2c7c32af1a28debd"
+    }
+  },
+  "cause": "The production parent composable rejected all service_desk actions in valid even after authorized child configuration. The parent component tests mocked that composable and missed this functional integration error.",
+  "minimal_correction": "Accept the native service_desk kind only in destination schema v2 and with the currently available authorized Service Desk source options. Preserve required source hash, explicit review, dirty state, conflict checks and current API authorization.",
+  "validation_before_correction": {
+    "main_Rails": 3181,
+    "concurrency_Rails": 253,
+    "native_SD_committed_API_and_job": 3,
+    "main_Vue": 1942,
+    "Chrome_passed": 276,
+    "Chrome_failed": 4,
+    "whole_CI_accepted": false
+  },
+  "new_tests": [
+    "Real composable save retains the Project sibling and exact reviewed native Service Desk parameters.",
+    "Current native availability withdrawal immediately blocks save and preserves the draft.",
+    "v1 payloads and unsupported notifications/Nico destinations remain blocked."
+  ],
+  "next_CI_expected": {
+    "native_distinct_Rails_unchanged": 3771,
+    "targeted_Vue": 104,
+    "main_Vue": 1945,
+    "Chrome": 280,
+    "screenshots": 692
+  },
+  "actual_native_and_Chrome_acceptance_pending": true,
+  "no_backend_authorization_or_quality_gate_reduced": true,
+  "current_external_and_visual_gaps_remain_separate": true,
+  "Part1_complete": false
+}

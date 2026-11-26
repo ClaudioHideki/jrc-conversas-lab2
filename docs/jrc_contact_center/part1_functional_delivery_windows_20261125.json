@@ -109,7 +109,10 @@
       10
     ],
     "document": "docs/jrc_contact_center/ending_service_desk_operational_form_candidate_20261126.json",
-    "sha256": "1c8d345d77e8af642e7d415b63d0e91b6e1734b6616ff971ab2294ac5ea463c4",
-    "native_and_browser_approval_pending": true
+    "sha256": "5cc0e467aa1a148bc3d25dae56062e7f43e5ebeb3f26da049567655f9e637db3",
+    "native_and_browser_approval_pending": true,
+    "current_block": "Parent editor valid predicate omitted typed native Service Desk. Minimal correction plus three real-composable regressions prepared.",
+    "source_group_native_Rails_and_audio_four_modes_verified_individually": true,
+    "candidate_complete_accepted": false
   }
 }

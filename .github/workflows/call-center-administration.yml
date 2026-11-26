@@ -122,16 +122,16 @@ jobs:
             --reporter=default --reporter=json --outputFile=/tmp/call-center-native-lead-vitest.json
       - name: Focused Service Desk and direct audio preview controls with retained editor cases
         run: |
-          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioLibraryPreview.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioAssetLibrary.spec.js \
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioLibraryPreview.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioAssetLibrary.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/call-center-ending-sd-public-vitest.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-ending-sd-public-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 81
+          assert report['numTotalTests'] == report['numPassedTests'] == 104
           assert report['numFailedTests'] == report['numPendingTests'] == 0
-          assert len(report['testResults']) == 4
+          assert len(report['testResults']) == 5
           assert all(row['status'] == 'passed' for row in report['testResults'])
           PY
       - name: Official RuboCop server parity without reducing inspected coverage

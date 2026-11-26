@@ -272,7 +272,10 @@ export const useEndingAutomationEditor = ({ accountId }) => {
           action.kind === 'project_task' ||
           (row.destination_schema_version === 2 &&
             action.kind === 'crm' &&
-            crmOptions.value.configuration_available)
+            crmOptions.value.configuration_available) ||
+          (row.destination_schema_version === 2 &&
+            action.kind === 'service_desk' &&
+            serviceDeskOptions.value.configuration_available)
       ) &&
       (!row.active ||
         (source.value?.configuration_available &&
