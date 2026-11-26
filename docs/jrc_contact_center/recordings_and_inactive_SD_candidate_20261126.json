@@ -91,5 +91,20 @@
   ],
   "whole_figure10_accepted": false,
   "whole_figure17_accepted": false,
-  "whole_Part1_accepted": false
+  "whole_Part1_accepted": false,
+  "functional_corrections": [
+    {
+      "name": "exact_recordings_seed_length_and_bounded_additive_route_lint_correction",
+      "source_sha256": {
+        "script/jrc_call_center_pause_seed.rb": "2f05e388879aec06cf66ebdf47aac01de572ccb7fa4d365f4070e3ca7123aef3",
+        "config/routes/jrc_contact_center.rb": "7735d045fa7a7c99a89da0af552776391e3e8ad50ee2eb7569956988b17c85ec",
+        ".github/workflows/call-center-administration.yml": "ef363a6e959e0f1283298768f6597a947640cdcc870b3746eeb142fbb4f7b89e"
+      },
+      "parent_sources": {
+        "script/jrc_call_center_pause_seed.rb": "f43ef4908c42525f8fa8d92a5d91d3f3d2175a6121cc3ed0bbc580e20db4eb12",
+        "config/routes/jrc_contact_center.rb": "514c77d484cb415a9c69596816fb9db20503a8effd25f2c7bf8acf9e1c8321dc",
+        ".github/workflows/call-center-administration.yml": "90ece7971810abd3291e123fa0c43e9349436ae8dfa3db223da05a69fdec5290"
+      }
+    }
+  ]
 }

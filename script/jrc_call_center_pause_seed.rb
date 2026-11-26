@@ -64,14 +64,18 @@ class JrcContactCenter::SyntheticPauseSeed
     if @project.end_with?('-audio_folders')
       payload.merge!(JrcContactCenter::SyntheticAudioFolderSeed.call(account: @account, queues: queues, member: admin))
     end
-    if @project.end_with?('-recordings')
-      payload.merge!(JrcContactCenter::SyntheticRecordingsSeed.call(account: @account, operator: operator, viewer: scoped, queues: queues))
-    end
+    prepare_recordings(payload, queues, operator, scoped)
     prepare_pause_sources(payload, queues, admin, operator)
     payload
   end
 
   private
+
+  def prepare_recordings(payload, queues, operator, viewer)
+    return unless @project.end_with?('-recordings')
+
+    payload.merge!(JrcContactCenter::SyntheticRecordingsSeed.call(account: @account, operator: operator, viewer: viewer, queues: queues))
+  end
 
   def prepare_pause_sources(payload, queues, admin, operator)
     prepare_selected_ending_sources(payload, queues.first, admin, operator)

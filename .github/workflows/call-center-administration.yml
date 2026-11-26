@@ -164,6 +164,9 @@ jobs:
       - name: Focused original-event source and legacy compatibility lint
         run: |
           bundle exec rubocop app/jobs/jrc_contact_center/ending_actions_job.rb app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb --format json --out /tmp/call-center-typed-original-event-lint.json
+      - name: Focused native recording source lint before legacy overlap
+        run: |
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb app/services/jrc_contact_center/recorded_calls.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb script/jrc_call_center_recordings_seed.rb script/jrc_call_center_recordings_evidence.rb spec/integration/jrc_contact_center/owned_recording_media.rb spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb --format json --out /tmp/call-center-recordings-lint.json
       - name: Focused lint of new private ending version sources
         id: ending_version_lint
         run: |
@@ -222,7 +225,6 @@ jobs:
           PY
       - name: Focused real recording scopes and private provider byte boundary
         run: |
-          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb app/services/jrc_contact_center/recorded_calls.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb script/jrc_call_center_recordings_seed.rb script/jrc_call_center_recordings_evidence.rb spec/integration/jrc_contact_center/owned_recording_media.rb spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb --format json --out /tmp/call-center-recordings-lint.json
           bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb --format progress --format json --out /tmp/call-center-recordings-preflight.json
           python3 -B - <<'PY'
           import json

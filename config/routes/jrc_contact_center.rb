@@ -16,10 +16,6 @@ namespace :api, defaults: { format: 'json' } do
         resources :units, only: %i[index show create update]
         resources :queues, only: %i[index show create update]
         resources :queue_memberships, only: %i[index show create update]
-        resources :recordings, only: %i[index show] do
-          get :playback, on: :member
-          get :download, on: :member
-        end
         resources :call_sessions, only: %i[index show] do
           patch :observations, on: :member
           get :observations, on: :member, to: 'call_observations#index'
@@ -96,11 +92,15 @@ namespace :api, defaults: { format: 'json' } do
   end
 end
 
-# Same canonical pause routes; separate bounded additive namespace, with no URL or controller change.
+# Bounded additive recording and canonical pause routes; no URL, controller or authority change.
 namespace :api, defaults: { format: 'json' } do
   namespace :v1 do
     resources :accounts, only: [] do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
+        resources :recordings, only: %i[index show] do
+          get :playback, on: :member
+          get :download, on: :member
+        end
         resource :deferred_pause_request, only: %i[create destroy], controller: 'deferred_pause_requests' do
           post :preview
           post :apply
