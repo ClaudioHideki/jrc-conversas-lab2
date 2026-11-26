@@ -8,7 +8,7 @@ class SyntheticPublicEndingProcessEvidence
   def self.with_job(job, arguments, name)
     previous = Thread.current[THREAD_KEY]
     Thread.current[THREAD_KEY] = { 'jid' => job.fetch('jid'), 'job_class' => name,
-                                  'account_id' => arguments.first, 'record_id' => arguments.last }.freeze
+                                   'account_id' => arguments.first, 'record_id' => arguments.last }.freeze
     yield
   ensure
     Thread.current[THREAD_KEY] = previous

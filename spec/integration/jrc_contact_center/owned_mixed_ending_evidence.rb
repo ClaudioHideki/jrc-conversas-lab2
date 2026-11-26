@@ -152,7 +152,7 @@ class SyntheticMixedEndingEvidence
   def self.destination_source_ids(account, produced)
     ids = produced.values.select { |row| row.fetch('job_class') == 'JrcContactCenter::EndingDestinationJob' }.pluck('record_id')
     JrcContactCenter::EndingDestinationAttempt.where(account: account, id: ids).includes(:origin)
-                                            .to_h { |attempt| [attempt.id, attempt.origin.source_qualification_id] }
+                                              .to_h { |attempt| [attempt.id, attempt.origin.source_qualification_id] }
   end
 
   def self.verify_current_origin_jobs!(produced, origin, rows)
@@ -179,7 +179,7 @@ class SyntheticMixedEndingEvidence
 
       verify_worker_context!(output, configuration)
       SyntheticPublicEndingProcessEvidence.verify!(input, output, produced: produced, acks: acks,
-                                                 expected_qualification_id: native_qualification_id(input))
+                                                                  expected_qualification_id: native_qualification_id(input))
     end
   end
 
@@ -194,6 +194,6 @@ class SyntheticMixedEndingEvidence
     return unless input.fetch('job_class') == 'JrcContactCenter::EndingDestinationJob'
 
     JrcContactCenter::EndingDestinationAttempt.where(account_id: input.fetch('account_id'))
-                                            .find(input.fetch('record_id')).origin.source_qualification_id
+                                              .find(input.fetch('record_id')).origin.source_qualification_id
   end
 end

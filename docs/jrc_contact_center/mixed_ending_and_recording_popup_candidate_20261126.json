@@ -130,6 +130,19 @@
         "spec/integration/jrc_contact_center/owned_public_ending_process_evidence.rb": null,
         "spec/services/jrc_contact_center/synthetic_public_ending_process_evidence_spec.rb": null
       }
+    },
+    {
+      "name": "exact_owned_worker_native_layout_and_explicit_block_forwarding",
+      "source_sha256": {
+        "spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb": "ea2a3723828ce669dfd8ba3e5f8c851ba25902544fba58237fd673be8e3bb49d",
+        "spec/integration/jrc_contact_center/owned_public_ending_worker_boot.rb": "a16e00d13a846c5e6bf8e710cdb8417471fbac3dd16ed29d90725b710729f2a7",
+        "spec/integration/jrc_contact_center/owned_public_ending_process_evidence.rb": "3839c15b1c556a58ce4ce84483e56c172e0ac34156356abdebc0af966694676a"
+      },
+      "parent_sources": {
+        "spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb": "1fc67706b2ca1c3b440422a8f0ca0eb7dcb4028e25b7e8cd2daf883b8a952b01",
+        "spec/integration/jrc_contact_center/owned_public_ending_worker_boot.rb": "fb6acb178447682a5ab2fe8a7a69e73417c113f40530944c3229ddad35074e78",
+        "spec/integration/jrc_contact_center/owned_public_ending_process_evidence.rb": "f1af3a6f92c16019c068050c0e9a94026a6c590776c1e4e0ad57e20a578e3d03"
+      }
     }
   ],
   "first_native_validation": {
@@ -172,5 +185,11 @@
     "no_product_or_CORS_or_permission_change": true,
     "no_Chrome_case_removed": true,
     "native_or_Chrome_acceptance": false
+  },
+  "native_witness_lint_followup": {
+    "run": 45881046182,
+    "offenses": 5,
+    "only_layout_and_explicit_block_forwarding": true,
+    "accepted": false
   }
 }
