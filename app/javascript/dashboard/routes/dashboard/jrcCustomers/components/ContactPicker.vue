@@ -35,19 +35,19 @@ const search = async (append = false) => {
   generation += 1;
   const version = generation;
   const page = append ? Math.floor(results.value.length / pageSize) + 1 : 1;
+  const filters = {
+    q: props.browseCompany ? query.value.trim() : query.value,
+    company_id: props.companyId || undefined,
+    per_page: pageSize,
+  };
+  const directoryArgs = props.browseCompany
+    ? [{ ...filters, page }, { accountId: accountId.value }]
+    : [filters];
   busy.value = true;
   error.value = '';
   try {
     const { data } = enabled.value
-      ? await API.contacts(
-          {
-            q: query.value.trim(),
-            company_id: props.companyId || undefined,
-            per_page: pageSize,
-            page,
-          },
-          { accountId: accountId.value }
-        )
+      ? await API.contacts(...directoryArgs)
       : await ContactsAPI.search(query.value, 1);
     if (version === generation) {
       const matches = data.payload || [];
@@ -112,8 +112,11 @@ watch(
       return;
     }
     try {
+      const directoryArgs = props.browseCompany
+        ? [props.modelValue, { accountId: accountId.value }]
+        : [props.modelValue];
       const { data } = enabled.value
-        ? await API.contact(props.modelValue, { accountId: accountId.value })
+        ? await API.contact(...directoryArgs)
         : await ContactsAPI.show(props.modelValue);
       if (version !== selectedGeneration) return;
       const contact = data.payload || data;
