@@ -43,10 +43,11 @@ test('real engine/HTTP boundary retries before returning an action, reports cont
     assert.deepEqual(await invalid.json(), { error: 'tool_arguments_invalid', accounting: {
       version: 1, complete: true, attempts: 2, model: 'test-model', mode: 'provider', account_id: 1,
       request_id: input.request_id, usage: { input_tokens: 20, output_tokens: 10, total_tokens: 30 },
-    } });
+    }, provider_observation: { http_status: 200, headers: {}, account_id: 1, request_id: input.request_id } });
     const limited = await fetch(`${url}/v1/operate`, { method: 'POST', headers, body: JSON.stringify({ ...input, message: 'rate_limit' }) });
     assert.equal(limited.status, 429);
-    assert.deepEqual(await limited.json(), { error: 'provider_rate_limited' });
+    assert.deepEqual(await limited.json(), { error: 'provider_rate_limited',
+      provider_observation: { http_status: 429, headers: {}, account_id: 1, request_id: input.request_id } });
     const denied = await fetch(`${url}/v1/operate`, { method: 'POST', headers, body: JSON.stringify({ ...input, account_id: 2 }) });
     assert.equal(denied.status, 403);
     assert.deepEqual(await denied.json(), { error: 'account_not_configured' });

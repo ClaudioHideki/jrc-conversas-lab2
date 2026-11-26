@@ -14,6 +14,13 @@ test('requires bounded public message projection with an exact account and conve
   assert.throws(() => validateSentimentInput({ ...input, messages: [input.messages[0], input.messages[0]] }));
 });
 
+test('counts Unicode characters consistently with the Rails public text projection', () => {
+  const message = { ...input.messages[0], content: 'a'.repeat(999) + '😀' };
+  const projected = { ...input, messages: [message] };
+  assert.deepEqual(validateSentimentInput(projected), projected);
+  assert.throws(() => validateSentimentInput({ ...input, messages: [{ ...message, content: message.content + 'a' }] }));
+});
+
 test('rejects evidence from messages outside the supplied conversation', () => {
   assert.deepEqual(validateSentimentReport(report, input), report);
   assert.throws(() => validateSentimentReport({ ...report, evidence: [{ message_id: 999, observation: 'invented' }] }, input));
@@ -39,4 +46,55 @@ test('uses the selected tenant model and never includes its credential in the pr
   const result = await analyzeSentiment(input, { apiKey: 'test-account-one-key', model: 'account-one-model', baseUrl: 'https://api.openai.com/v1' });
   assert.deepEqual(result.report, report);
   assert.equal(result.usage.total_tokens, 30);
+});
+
+const resource = { request_id: input.request_id, account_id: 1,
+  source: { system: 'helpdesk', resource_type: 'Ticket', resource_id: '45' },
+  messages: [{ id: 'Ticket/45', role: 'customer', content: 'Obrigado' },
+    { id: 'ITILFollowup/45', role: 'operator', content: 'Resolvido' }] };
+test('resource history preserves qualified source identifiers and rejects mixed contracts', () => {
+  assert.deepEqual(validateSentimentInput(resource), resource);
+  for (const invalid of [
+    { ...resource, conversation_id: 45 },
+    { ...resource, source: { ...resource.source, account_id: 2 } },
+    { ...resource, source: { ...resource.source, resource_id: '0' } },
+    { ...resource, messages: [{ ...resource.messages[0], id: 45 }] },
+    { ...resource, messages: [resource.messages[0], resource.messages[0]] },
+  ]) assert.throws(() => validateSentimentInput(invalid));
+  const result = { ...report, agent_sentiment: 'positive', quality_score: 90,
+    evidence: [{ message_id: 'ITILFollowup/45', observation: 'Solução informada' }] };
+  assert.deepEqual(validateSentimentReport(result, resource), result);
+  assert.throws(() => validateSentimentReport({ ...result, evidence: [{ message_id: 'Ticket/99', observation: 'Inventado' }] }, resource));
+  assert.throws(() => validateSentimentReport({ ...result, evidence: [{ message_id: 45, observation: 'Ambíguo' }] }, resource));
+});
+test('resource inference uses string evidence schema and records actual provider usage', async t => {
+  const result = { ...report, evidence: [{ message_id: 'Ticket/45', observation: 'Agradecimento' }] };
+  t.mock.method(globalThis, 'fetch', async (_url, init: any) => {
+    const body = JSON.parse(init.body);
+    assert.equal(body.response_format.json_schema.schema.properties.evidence.items.properties.message_id.type, 'string');
+    assert.deepEqual(JSON.parse(body.messages[1].content).source, resource.source);
+    return Response.json({ choices: [{ message: { content: JSON.stringify(result) } }],
+      usage: { prompt_tokens: 12, completion_tokens: 9, total_tokens: 21 } });
+  });
+  const response = await analyzeSentiment(resource, { apiKey: 'test', model: 'test', baseUrl: 'https://api.openai.com/v1' });
+  assert.equal(response.usage.total_tokens, 21);
+  assert.deepEqual(response.report.evidence, result.evidence);
+});
+
+test('generation cannot assign sentiment or quality to an unproven human author', async t => {
+  const unknown = { ...resource, messages: resource.messages.map(message => ({ ...message, role: 'unknown' })) };
+  const result = { ...report, customer_sentiment: 'insufficient_data', agent_sentiment: 'insufficient_data',
+    quality_score: null, evidence: [{ message_id: 'Ticket/45', observation: 'Autoria não comprovada' }] };
+  t.mock.method(globalThis, 'fetch', async (_url, init: any) => {
+    const properties = JSON.parse(init.body).response_format.json_schema.schema.properties;
+    assert.deepEqual(properties.customer_sentiment.enum, ['insufficient_data']);
+    assert.deepEqual(properties.agent_sentiment.enum, ['insufficient_data']);
+    assert.deepEqual(properties.quality_score, { type: 'null' });
+    assert.deepEqual(properties.evidence.items.properties.message_id.enum, ['Ticket/45', 'ITILFollowup/45']);
+    return Response.json({ choices: [{ message: { content: JSON.stringify(result) } }],
+      usage: { prompt_tokens: 23, completion_tokens: 11, total_tokens: 34 } });
+  });
+  const response = await analyzeSentiment(unknown, { apiKey: 'test', model: 'test', baseUrl: 'https://api.groq.com/openai/v1' });
+  assert.equal(response.usage.total_tokens, 34);
+  assert.equal(response.report.quality_score, null);
 });

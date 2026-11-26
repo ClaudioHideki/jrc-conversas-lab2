@@ -14,10 +14,12 @@ const number = value =>
   >
     <summary class="cursor-pointer text-n-slate-12">
       {{
-        t('JRC_NICO.CAPACITY.SUMMARY', {
-          remaining: number(capacity.remaining_tokens),
-          limit: number(capacity.token_limit),
-        })
+        capacity.limit_source === 'provider'
+          ? t('JRC_NICO.CAPACITY.PROVIDER_MANAGED')
+          : t('JRC_NICO.CAPACITY.SUMMARY', {
+              remaining: number(capacity.remaining_tokens),
+              limit: number(capacity.token_limit),
+            })
       }}
     </summary>
     <dl class="mt-2 grid grid-cols-2 gap-1">
@@ -30,10 +32,12 @@ const number = value =>
       <dt>{{ t('JRC_NICO.CAPACITY.EXECUTIONS') }}</dt>
       <dd>
         {{
-          t('JRC_NICO.CAPACITY.RATIO', {
-            value: number(capacity.executions),
-            limit: number(capacity.execution_limit),
-          })
+          capacity.execution_limit == null
+            ? number(capacity.executions)
+            : t('JRC_NICO.CAPACITY.RATIO', {
+                value: number(capacity.executions),
+                limit: number(capacity.execution_limit),
+              })
         }}
       </dd>
       <dt>{{ t('JRC_NICO.CAPACITY.CONCURRENCY') }}</dt>
@@ -46,6 +50,7 @@ const number = value =>
         }}
       </dd>
     </dl>
+    <p class="mt-2">{{ t('JRC_NICO.CAPACITY.ACCOUNTING_NOTE') }}</p>
   </details>
   <template v-else />
 </template>

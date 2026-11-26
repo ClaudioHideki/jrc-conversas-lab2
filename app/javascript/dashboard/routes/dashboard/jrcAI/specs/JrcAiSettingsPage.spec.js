@@ -12,9 +12,12 @@ vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
 vi.mock('dashboard/api/jrcAi', () => ({
   default: {
     providers: vi.fn(),
+    providerModels: vi.fn(),
     usage: vi.fn(),
     makeDefault: vi.fn(),
     deleteProvider: vi.fn(),
+    createProvider: vi.fn(),
+    updateProvider: vi.fn(),
   },
 }));
 
@@ -23,6 +26,9 @@ describe('AI provider actions', () => {
   const originalPlugins = config.global.plugins;
   beforeEach(() => {
     role = ref('administrator');
+    api.providerModels.mockResolvedValue({
+      data: { models: [{ id: 'test-model', name: 'Test model' }] },
+    });
     api.providers.mockResolvedValue({
       data: [{ id: 7, name: 'Local test', status: 'configured' }],
     });
@@ -55,7 +61,7 @@ describe('AI provider actions', () => {
             id: 7,
             name: 'Teste',
             status: 'configured',
-            masked_api_key: '••••1234',
+            api_key_configured: true,
           },
         ],
       });
@@ -64,8 +70,8 @@ describe('AI provider actions', () => {
       expect(wrapper.get('header').classes()).toContain('text-white');
       expect(wrapper.get('header h1').classes()).toContain('text-inherit');
       expect(wrapper.get('header p').classes()).toContain('text-blue-50/90');
-      expect(wrapper.text()).toContain('Chave da API');
-      expect(wrapper.text()).toContain('••••1234');
+      expect(wrapper.text()).toContain('Chave cadastrada');
+      expect(wrapper.text()).toContain('Chave cadastrada');
       expect(wrapper.text()).not.toContain('API Key');
       await wrapper
         .findAll('button')
@@ -134,5 +140,62 @@ describe('AI provider actions', () => {
     );
     await form.get('button[aria-label="Close"]').trigger('click');
     expect(wrapper.find('form').exists()).toBe(false);
+  });
+
+  it('configures a new connection with provider-managed usage without monthly values', async () => {
+    api.createProvider.mockResolvedValueOnce({ data: {} });
+    wrapper = mount(JrcAiSettingsPage);
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Novo provedor')
+      .trigger('click');
+    const form = wrapper.get('form');
+    expect(form.findAll('select').at(-1).element.value).toBe('provider');
+    expect(form.findAll('input[type="number"]')).toHaveLength(0);
+    await form.get('input[type="password"]').setValue('test-only-key');
+    await flushPromises();
+    await form
+      .findAll('label')
+      .find(label => label.text().includes('Modelo padrão'))
+      .get('select')
+      .setValue('test-model');
+    await form.trigger('submit');
+    await flushPromises();
+    expect(api.createProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        default_model: 'test-model',
+        monthly_token_limit: null,
+        monthly_budget_cents: null,
+        settings: { usage_policy: 'provider' },
+      })
+    );
+  });
+
+  it('shows only confirmed token usage without estimates or uncertain capacity', async () => {
+    api.usage.mockResolvedValueOnce({
+      data: {
+        totals: {
+          tokens_today: 109,
+          total_tokens: 109,
+          input_tokens: 77,
+          output_tokens: 32,
+          executions: 1,
+        },
+        by_agent: [],
+        by_model: [],
+        by_user: [],
+        recent: [],
+      },
+    });
+    wrapper = mount(JrcAiSettingsPage, { props: { initialTab: 'usage' } });
+    await flushPromises();
+    expect(wrapper.text()).toContain('Tokens confirmados no mês');
+    expect(wrapper.text()).toContain('109');
+    expect(wrapper.text()).toContain('77');
+    expect(wrapper.text()).toContain('32');
+    expect(wrapper.text()).not.toMatch(
+      /Tokens estimados|Histórico sem classificação|Custo estimado|reservados|incerto/i
+    );
   });
 });

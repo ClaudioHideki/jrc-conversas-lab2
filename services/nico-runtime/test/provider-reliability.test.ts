@@ -113,7 +113,8 @@ test('complete error receipts are scoped by the validated request and omitted fr
     assert.deepEqual(result.body, { error: 'tool_arguments_invalid', accounting: {
       version: 1, complete: true, attempts: 2, model: 'test-model', mode: 'provider', account_id: 7,
       request_id: 'a56905c4-9a03-4c21-a886-b5d18a3e4c57', usage: { input_tokens: 20, output_tokens: 10, total_tokens: 30 },
-    } });
+    }, provider_observation: { http_status: 200, headers: {}, account_id: 7,
+      request_id: 'a56905c4-9a03-4c21-a886-b5d18a3e4c57' } });
     assert.deepEqual(result.log, { event: 'nico_request_failed', route: '/v1/operate', code: 'tool_arguments_invalid' });
     assert.deepEqual(errorResponse(error, '/v1/operate').body, { error: 'tool_arguments_invalid' });
     assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
@@ -195,4 +196,45 @@ test('repeated read requests preserve count/list without query and real conversa
       assert.deepEqual(parseToolArguments(response.result.arguments), args);
     }
   }
+});
+
+
+test('records actual provider limits on success without treating them as usage or exposing other headers', async t => {
+  t.mock.method(globalThis, 'fetch', async () => {
+    const response = envelope(valid);
+    response.headers.set('x-ratelimit-limit-tokens', '8000');
+    response.headers.set('x-ratelimit-remaining-tokens', '7985');
+    response.headers.set('x-ratelimit-reset-tokens', '1.2s');
+    response.headers.set('authorization', 'PRIVATE_SECRET');
+    response.headers.set('set-cookie', 'PRIVATE_COOKIE');
+    return response;
+  });
+  const result = await structuredResponse(options);
+  assert.deepEqual(result.providerObservation, { http_status: 200, headers: {
+    'x-ratelimit-limit-tokens': '8000', 'x-ratelimit-remaining-tokens': '7985', 'x-ratelimit-reset-tokens': '1.2s',
+  } });
+  assert.equal(result.usage.total_tokens, 15);
+  assert.equal(JSON.stringify(result.providerObservation).includes('PRIVATE'), false);
+});
+
+test('preserves Retry-After on provider 429 without retrying or inventing a usage receipt', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', async () => Response.json({ error: { code: 'rate_limit_exceeded' } }, {
+    status: 429, headers: { 'retry-after': '12', 'x-ratelimit-limit-tokens': '8000' },
+  }));
+  await assert.rejects(structuredResponse(options), error => {
+    const failure = errorResponse(error, '/v1/operate', { account_id: 7, request_id: 'test-request' });
+    assert.equal(error.code, 'provider_rate_limited');
+    assert.equal(error.accounting, undefined);
+    assert.deepEqual(failure.body.provider_observation, { http_status: 429, account_id: 7, request_id: 'test-request',
+      headers: { 'x-ratelimit-limit-tokens': '8000', 'retry-after': '12' } });
+    return true;
+  });
+  assert.equal(fetch.mock.callCount(), 1);
+});
+
+
+test('distinguishes the Groq spending cap response from a temporary rate limit', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', async () => Response.json({ error: { code: 'blocked_api_access' } }, { status: 400 }));
+  await assert.rejects(structuredResponse(options), { code: 'provider_quota_exceeded' });
+  assert.equal(fetch.mock.callCount(), 1);
 });

@@ -56,6 +56,8 @@ module JrcAi
     validates :monthly_token_limit, :monthly_budget_cents,
               numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
+    validate :valid_usage_policy
+
     scope :enabled, -> { where(active: true) }
     scope :preferred_first, -> { order(default_provider: :desc, active: :desc, name: :asc) }
 
@@ -73,13 +75,18 @@ module JrcAi
       "#{'*' * 12}#{suffix}"
     end
 
+    def runtime_supported?
+      %w[openai custom anthropic google_gemini].include?(provider_type)
+    end
+
     def openai_compatible?
       OPENAI_COMPATIBLE_TYPES.include?(provider_type)
     end
 
     def request_base_url
       value = base_url.to_s.strip
-      value = 'https://api.openai.com' if value.blank? && provider_type == 'openai'
+      value = JrcAi::ModelCatalogue::BASES[provider_type].to_s if value.blank?
+      return value.chomp('/') if provider_type == 'google_gemini'
       value = value.chomp('/')
       return value if value.end_with?('/v1')
 
@@ -87,6 +94,11 @@ module JrcAi
     end
 
     private
+
+    def valid_usage_policy
+      policy = settings['usage_policy']
+      errors.add(:settings, 'invalid usage policy') unless policy.nil? || %w[provider local].include?(policy)
+    end
 
     def normalize_fields
       self.name = name.to_s.strip

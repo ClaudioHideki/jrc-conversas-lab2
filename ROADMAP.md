@@ -63,3 +63,7 @@ Concluído: produto `c8efa1d6`, CI `43941168985` aprovada e imagem publicada por
 Respostas rápidas contextuais e configuração/importação da Central de Aprovações evoluem os módulos existentes. Aceite exige testes nativos e interface real em desktop/celular, claro/escuro. A importação não ativa regras, não cria aprovadores por nome e mantém integrações não mapeadas como pendências explícitas.
 
 Release funcional `5c3fb7f` publicada e implantada no Grupo JRC após CI 49/49, Chrome 13/13 e testes integrados privados. Runtime, API, migrations e interface foram conferidos. O aceite operacional de histórico, autoridade e mídias continua parcial; a validação física foi adiada pelo usuário. Detalhes e evidências em `CONTINUE-AQUI.md` e `docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`.
+
+### Consumo NICO — 23/11/2026
+
+Candidata isolada sobre LAB2 e6bd4cc9: registro confirmado e estimado separado, limite local opcional e observação dos limites da API. Histórico incerto preservado; sem alteração de outros ambientes. CI e implantação continuam gates próprios. Ver ADR0007.

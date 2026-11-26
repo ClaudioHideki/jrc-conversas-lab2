@@ -369,11 +369,13 @@
       "SUMMARY": "NICO da conta: {remaining} de {limit} tokens disponíveis no mês",
       "USED": "Consumo registrado",
       "RESERVED": "Reservas pendentes",
-      "UNCERTAIN": "Consumo incerto",
+      "UNCERTAIN": "Usage without receipt (upper estimate)",
       "EXECUTIONS": "Execuções no mês",
       "CONCURRENCY": "Em andamento",
-      "PROVIDER_LIMIT": "Limite mensal do provedor",
-      "RATIO": "{value} / {limit}"
+      "PROVIDER_LIMIT": "Optional local monthly token limit",
+      "RATIO": "{value} / {limit}",
+      "PROVIDER_MANAGED": "NICO: provider-managed limits; no local monthly ceiling",
+      "ACCOUNTING_NOTE": "Uncertain usage is an audit estimate, not provider credit or confirmed token consumption."
     }
   }
 }

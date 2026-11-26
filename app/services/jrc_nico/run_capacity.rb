@@ -24,10 +24,10 @@ class JrcNico::RunCapacity
     JrcNico::ReservationReconciler.new(account: account).call(dry_run: false)
     capacity = snapshot(account)
     reservation = ENV['NICO_MODE'] == 'provider' ? reservation_tokens.clamp(1, 270_000) : 0
-    raise Exceeded, 'monthly_execution_limit' if capacity[:executions] >= capacity[:execution_limit]
+    raise Exceeded, 'monthly_execution_limit' if capacity[:execution_limit] && capacity[:executions] >= capacity[:execution_limit]
     raise Exceeded, 'concurrency_limit' if capacity[:active_operations] >= capacity[:concurrency_limit]
     raise Exceeded, 'conversation_busy' if conversation && live_runs(account).where(conversation: conversation).exists?
-    if capacity[:used_tokens] + capacity[:reserved_tokens] + reservation > capacity[:token_limit]
+    if capacity[:token_limit] && capacity[:used_tokens] + capacity[:reserved_tokens] + reservation > capacity[:token_limit]
       code = capacity[:uncertain_tokens].positive? && capacity[:used_tokens] + reservation <= capacity[:token_limit] ?
                'reservation_reconciliation_required' : 'monthly_token_limit'
       raise Exceeded, code
@@ -48,13 +48,17 @@ class JrcNico::RunCapacity
     reserved = run_holds.sum(:reserved_tokens) + operation_holds.sum(:reserved_tokens)
     used = account.jrc_ai_usage_events.current_month.where(agent_key: JrcNico::AgentCatalog::KEYS).sum(:total_tokens)
     live = live_runs(account).count + live_inferences(account).count
-    token_limit = account.custom_attributes.fetch('nico_monthly_token_limit', 1_000_000).to_i
+    provider = account.jrc_ai_providers.enabled.preferred_first.find(&:api_key_configured?)
+    provider_managed = provider&.settings&.fetch('usage_policy', nil) == 'provider'
+    token_limit = provider&.monthly_token_limit || account.custom_attributes.fetch('nico_monthly_token_limit', 1_000_000).to_i
+    execution_limit = account.custom_attributes.fetch('nico_monthly_run_limit', 1000).to_i
+    token_limit = execution_limit = nil if provider_managed
     active_tokens = without_receipt(live_runs(account).merge(runs)).sum(:reserved_tokens) +
                     without_receipt(live_inferences(account).merge(operations)).sum(:reserved_tokens)
-    { token_limit: token_limit, execution_limit: account.custom_attributes.fetch('nico_monthly_run_limit', 1000).to_i,
+    { token_limit: token_limit, execution_limit: execution_limit, limit_source: provider_managed ? 'provider' : 'local',
       concurrency_limit: account.custom_attributes.fetch('nico_concurrency', 3).to_i.clamp(1, 8),
       used_tokens: used, reserved_tokens: reserved, uncertain_tokens: reserved - active_tokens,
-      remaining_tokens: [token_limit - used - reserved, 0].max, active_operations: live,
+      remaining_tokens: token_limit ? [token_limit - used - reserved, 0].max : nil, active_operations: live,
       executions: [runs, operations].sum { |scope| scope.where("COALESCE(accounting ->> 'basis', '') <> 'not_executed'").count } }
   end
 

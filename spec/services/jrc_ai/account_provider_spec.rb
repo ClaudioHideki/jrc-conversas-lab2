@@ -24,7 +24,7 @@ RSpec.describe JrcAi::AccountProvider do
   end
 
   it 'does not choose another compatible provider behind an explicitly preferred unsupported provider' do
-    provider.update!(provider_type: 'anthropic')
+    provider.update!(provider_type: 'azure_openai')
     expect { described_class.resolve(account) }.to raise_error(JrcNico::RuntimeClient::Error, 'provider_adapter_unavailable')
   end
 

@@ -16,6 +16,7 @@ module Api
 
           def create
             provider = Current.account.jrc_ai_providers.new(provider_params)
+            provider.settings = { 'usage_policy' => 'provider' }.merge(provider.settings)
             provider.created_by = Current.user
 
             if provider.save
@@ -44,8 +45,31 @@ module Api
             head :no_content
           end
 
+          def model_catalogue
+            provider = params[:id].present? ? Current.account.jrc_ai_providers.find(params[:id]) : Current.account.jrc_ai_providers.new
+            attributes = provider_params.to_h
+            if provider.persisted? && provider.provider_type != attributes['provider_type'] && attributes['api_key'].blank?
+              raise ::JrcAi::ModelCatalogue::Error, 'Informe a chave do novo provedor.'
+            end
+            attributes.delete('api_key') if attributes['api_key'].blank?
+            provider.assign_attributes(attributes)
+            render json: ::JrcAi::ModelCatalogue.fetch(provider)
+          rescue ::JrcAi::ModelCatalogue::Error => e
+            render json: { message: e.message }, status: :unprocessable_entity
+          end
+
           def validate_configuration
             error = validation_error(@provider)
+            unless error
+              begin
+                catalogue = ::JrcAi::ModelCatalogue.fetch(@provider)
+                ids = catalogue[:models].pluck(:id)
+                error = 'Selecione modelos disponíveis no catálogo deste provedor.' unless
+                  [@provider.default_model, @provider.fast_model, @provider.advanced_model].compact.all? { |id| ids.include?(id) }
+              rescue ::JrcAi::ModelCatalogue::Error => e
+                error = e.message
+              end
+            end
             if error.present?
               @provider.update(status: 'error', last_error: error, last_validated_at: Time.current)
               render json: serialize(@provider).merge(message: error), status: :unprocessable_entity
@@ -54,8 +78,8 @@ module Api
 
             @provider.update!(status: 'configured', last_error: nil, last_validated_at: Time.current)
             render json: serialize(@provider).merge(
-              message: 'Configuracao validada localmente. A autenticacao real sera confirmada na primeira chamada de IA.',
-              live_test_performed: false
+              message: 'Chave e modelos confirmados pela API. A geração será verificada na próxima chamada do NICO.',
+              live_test_performed: true, inference_performed: false
             )
           end
 
@@ -71,17 +95,22 @@ module Api
           end
 
           def provider_params
-            params.require(:provider).permit(
+            attributes = params.require(:provider).permit(
               :provider_type, :name, :api_key, :base_url, :default_model,
               :fast_model, :advanced_model, :monthly_token_limit,
               :monthly_budget_cents, :active, :default_provider, settings: {}
             )
+            if attributes.key?(:settings)
+              settings = attributes[:settings].to_h.except('provider_observation')
+              attributes[:settings] = (@provider&.settings || {}).merge(settings)
+            end
+            attributes
           end
 
           def validation_error(provider)
             return 'Informe uma API Key.' unless provider.api_key_configured?
             return 'Informe o modelo padrao.' if provider.default_model.blank?
-            return 'Informe a URL base para este provedor.' if provider.base_url.blank? && provider.provider_type != 'openai'
+            return 'Informe a URL base para este provedor.' if provider.request_base_url.blank?
 
             nil
           end
@@ -103,9 +132,11 @@ module Api
               api_key_configured: provider.api_key_configured?,
               masked_api_key: provider.masked_api_key,
               openai_compatible: provider.openai_compatible?,
+              runtime_supported: provider.runtime_supported?,
               last_validated_at: provider.last_validated_at,
               last_error: provider.last_error,
-              settings: provider.settings,
+              settings: provider.settings.except('provider_observation'),
+              provider_observation: provider.settings['provider_observation'],
               created_at: provider.created_at,
               updated_at: provider.updated_at
             }

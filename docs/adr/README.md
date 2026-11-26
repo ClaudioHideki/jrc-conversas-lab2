@@ -26,3 +26,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [0003-protecao-exclusao-historico-broker](0003-protecao-exclusao-historico-broker.md): proteção de exclusão anterior aos efeitos, preservando a custódia; autorização posterior de release e seus gates.
 - [0004-chamados-destinatarios-projetos-escopo](0004-chamados-destinatarios-projetos-escopo.md): escolha de destinatário, projetos por responsável/participante e chamados encerrados em popup.
 - [0005-encerramento-manual-sem-bloqueio-sla](0005-encerramento-manual-sem-bloqueio-sla.md): encerramento manual por usuários com acesso, sem requisitos extras e com tempos/SLA reais preservados.
+
+- [0007-nico-consumo-confirmado-limites-provedor](0007-nico-consumo-confirmado-limites-provedor.md): controle pelo provedor, teto local opcional e consumo incerto preservado.

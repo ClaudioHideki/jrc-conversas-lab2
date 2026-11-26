@@ -6,15 +6,12 @@ module Api
           before_action :ensure_ai_administrator!
 
           def index
-            month = Current.account.jrc_ai_usage_events.current_month
-            today = Current.account.jrc_ai_usage_events.today
+            confirmed = Current.account.jrc_ai_usage_events.where('metadata @> ?', { usage_estimated: false }.to_json)
+            month = confirmed.current_month
+            today = confirmed.today
 
             render json: {
-              nico_capacity: ::JrcNico::RunCapacity.snapshot(Current.account),
-              totals: totals(month).merge(
-                tokens_today: today.sum(:total_tokens),
-                cost_today_cents: known_cost(today)
-              ),
+              totals: totals(month).merge(tokens_today: today.sum(:total_tokens)),
               by_agent: grouped(month, :agent_key),
               by_model: grouped(month, :model),
               by_user: grouped_users(month),
@@ -29,19 +26,12 @@ module Api
               input_tokens: scope.sum(:input_tokens),
               output_tokens: scope.sum(:output_tokens),
               total_tokens: scope.sum(:total_tokens),
-              estimated_cost_cents: known_cost(scope),
               executions: scope.count
             }
           end
 
           def grouped(scope, column)
             scope.group(column).sum(:total_tokens).map { |key, value| { key: key.presence || 'nao_informado', tokens: value } }
-          end
-
-          def known_cost(scope)
-            return nil if scope.where('metadata @> ?', { cost_available: false }.to_json).exists?
-
-            scope.sum(:estimated_cost_cents)
           end
 
           def grouped_users(scope)
@@ -60,7 +50,6 @@ module Api
               input_tokens: event.input_tokens,
               output_tokens: event.output_tokens,
               total_tokens: event.total_tokens,
-              estimated_cost_cents: event.metadata['cost_available'] == false ? nil : event.estimated_cost_cents,
               user_id: event.user_id,
               provider_id: event.provider_id,
               created_at: event.created_at
