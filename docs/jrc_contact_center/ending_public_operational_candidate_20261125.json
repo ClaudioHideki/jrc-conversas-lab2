@@ -261,6 +261,17 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_rule_configuration_spec.rb": "e286e41f88d442a64da9b0c66d69a3416f5dd95bb738d648a173d1a4ea63e205",
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "616a693fbb6c5b0459a77264225db83c741e5cc1240b73082b74bd6a3bb09573"
       }
+    },
+    {
+      "name": "exact_historical_ACW_read_contract_and_earlier_identical_preflight",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb": "832faf49db3d2974d7af3f0f882e6669af56664e3661803fca2c910c29cda5c1",
+        ".github/workflows/call-center-administration.yml": "2fd6922a544072fe4850cb53e117886640837c74054fe2d67e47bbcaad011405"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb": "8c6d1fd9cae868c3f47efdf7221ed892114e3dbb543b8b52fd89aed513aafe3a",
+        ".github/workflows/call-center-administration.yml": "9359b4dcbaf40265a6786548fedffa54748e6e22c8d15e85790ab0081966c9f2"
+      }
     }
   ],
   "lint_parent": {
@@ -292,6 +303,19 @@
     "preflight_failures": 5,
     "production_permission_or_ACW_behavior_changed": false,
     "existing_ACW_read_redaction_and_global_write_denial_explicitly_tested": true,
+    "all_quality_gates_still_required": true,
+    "new_native_or_browser_acceptance": false
+  },
+  "historical_editor_preflight_parent": {
+    "sha": "b6f5ace65edb42f7752d3ae4ce0a68277ad4b15b",
+    "run": 45739309158,
+    "conclusion": "failure",
+    "focused_lint_offenses": 0,
+    "public_authorization_examples_passed": 44,
+    "historical_editor_examples": 20,
+    "historical_editor_failures": 1,
+    "production_permission_or_ACW_behavior_changed": false,
+    "every_workflow_step_block_preserved_only_focused_test_order_changed": true,
     "all_quality_gates_still_required": true,
     "new_native_or_browser_acceptance": false
   }

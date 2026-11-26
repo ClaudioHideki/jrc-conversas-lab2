@@ -168,21 +168,21 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
     expect(JrcContactCenter::EndingActionVersion.where(account: account).count).to eq(1)
   end
 
-  it 'keeps global ACW denied while allowing an owned rule under actual unit coverage and destination permission' do
+  it 'hides private global ACW configuration while allowing an owned rule under actual unit coverage and destination permission' do
     configure_native_ending_rule
     JrcCrm::UserBusinessUnit.where(account: account, user: actor, scope: 'GROUP').find_each { |row| row.update!(active: false) }
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: issuer,
                                      business_unit: business, active: true, structure_managed: true)
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy", headers: headers
-    expect(response).to have_http_status(:unauthorized)
-    expect(response.body).not_to include('SYNTHETIC_PRIVATE_TEMPLATE_7f19')
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('item').keys.sort).to eq(%w[enabled id limits require_reason require_result revision voice_required])
+    expect(response.body).not_to include('SYNTHETIC_PRIVATE_TEMPLATE_7f19', 'voice_reason_catalog', 'voice_rules', 'voice_form_bindings')
     get ending_rules_path, headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').pluck('code')).to eq([rule_input.fetch('code')])
     create_ending_rule_document(rule_input.merge('name' => 'SYNTHETIC owned unit edit'))
     expect(response).to have_http_status(:ok)
-    expect(JrcContactCenter::EndingActionVersion.where(account: account).count).to eq(2)
-    expect(JrcProjects::Task.where(account: account)).to be_empty
+    expect([JrcContactCenter::EndingActionVersion.where(account: account).count, JrcProjects::Task.where(account: account).count]).to eq([2, 0])
   end
 
   it 'does not overwrite an unseen private rule by replacing its destination with an accessible project' do
