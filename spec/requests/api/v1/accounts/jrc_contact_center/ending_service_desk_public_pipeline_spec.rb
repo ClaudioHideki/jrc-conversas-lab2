@@ -102,12 +102,17 @@ RSpec.describe 'Original-agent authenticated Service Desk ending admission and n
     }
   end
 
-  def request_native_sd_destination(row)
+  def native_sd_destination_choice(row)
     endpoint = confirmed_native_sd_endpoint(row)
     get endpoint, headers: headers
     expect(response).to have_http_status(:ok)
     choice = response.parsed_body.fetch('items').sole
     expect(choice.fetch('destination_kind')).to eq('service_desk')
+    [endpoint, choice]
+  end
+
+  def request_native_sd_destination(row)
+    endpoint, choice = native_sd_destination_choice(row)
     post endpoint, headers: headers, as: :json, params: native_sd_admission_payload(choice)
     expect(response).to have_http_status(:accepted)
     JrcContactCenter::EndingDestinationAttempt.where(account: account).find(response.parsed_body.fetch('attempt_id'))

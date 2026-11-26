@@ -113,7 +113,7 @@ RSpec.describe 'Native Service Desk templates in the existing private ending rul
 
   it 'requires current native Service Desk rights independently of the Call Center configure permission' do
     member.update!(custom_role: create(:custom_role, account: account,
-                                       permissions: %w[jrc_contact_center_view jrc_contact_center_configure]))
+                                                     permissions: %w[jrc_contact_center_view jrc_contact_center_configure]))
     save_service_desk_rule
     expect(response).to have_http_status(:unauthorized)
     expect(JrcContactCenter::EndingActionVersion.where(account: account)).to be_empty

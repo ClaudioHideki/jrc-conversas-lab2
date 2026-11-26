@@ -127,6 +127,17 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_public_pipeline_spec.rb": "67abfe5796be6044bd58392731e9f4b505c6e00c28fe36e6ab721835e9269cf1",
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb": "6a316d355bd854225a480e161e84e1ee318b94f38d1d6413c046ffa3458aea91"
       }
+    },
+    {
+      "name": "exact_native_SD_lint_helper_split_and_existing_keyword_alignment",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_public_pipeline_spec.rb": "255f055fc00158923456b94d7bb1e77e12d924b933cacea801346d6c36fc2135",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb": "648cb3d9a4b73c9a22a2f040005d92ef0ad33a2be8e3f3b75d24edd17ffb2e98"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_public_pipeline_spec.rb": "d1d803e4750749de07c51feb3ed2900f4ac699479ce6a818d697a74088edf579",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb": "740733c3b1f33012e9678aad902ba282eb25f75c6ffd8fb3aeed45711947bd6c"
+      }
     }
   ],
   "early_Vue_failure_correction": {
@@ -144,5 +155,12 @@
     "Vue_passed": 81,
     "preserved_native_cases": 20,
     "native_and_Chrome_execution_pending": true
+  },
+  "native_lint_remaining_followup": {
+    "run": 45783830622,
+    "remaining_before": 2,
+    "original_resolved": 10,
+    "retained_new_native_cases": 20,
+    "native_or_Chrome_approval_pending": true
   }
 }
