@@ -58,13 +58,13 @@ class CreateContactCenterQualityReviews < ActiveRecord::Migration[7.1]
     add_check_constraint TABLE, fields.map { |field| "#{field} > 0" }.join(' AND '), name: 'cc_quality_review_identity'
     add_check_constraint TABLE, "source_sha256 ~ '^[0-9a-f]{64}$' AND input_sha256 ~ '^[0-9a-f]{64}$'", name: 'cc_quality_review_fingerprints'
     add_check_constraint TABLE, "jsonb_typeof(original_analysis) = 'object' AND jsonb_typeof(reviewed_values) = 'object' AND " \
-                         "jsonb_typeof(scope_snapshot) = 'object'",
+                                "jsonb_typeof(scope_snapshot) = 'object'",
                          name: 'cc_quality_review_objects'
     add_check_constraint TABLE, "COALESCE(reviewed_values ->> 'classification' IN ('positive', 'neutral', 'negative') AND " \
-                               "jsonb_typeof(reviewed_values -> 'justification') = 'string' AND " \
-                         "btrim(reviewed_values ->> 'justification') <> '', false)", name: 'cc_quality_review_reason'
+                                "jsonb_typeof(reviewed_values -> 'justification') = 'string' AND " \
+                                "btrim(reviewed_values ->> 'justification') <> '', false)", name: 'cc_quality_review_reason'
     add_check_constraint TABLE, "COALESCE(jsonb_typeof(reviewed_values -> 'adjusted_themes') = 'array' AND " \
-                               "jsonb_typeof(reviewed_values -> 'recommendation_ids') = 'array' AND " \
-                         "jsonb_typeof(reviewed_values -> 'adjusted_summary') = 'string', false)", name: 'cc_quality_review_content'
+                                "jsonb_typeof(reviewed_values -> 'recommendation_ids') = 'array' AND " \
+                                "jsonb_typeof(reviewed_values -> 'adjusted_summary') = 'string', false)", name: 'cc_quality_review_content'
   end
 end

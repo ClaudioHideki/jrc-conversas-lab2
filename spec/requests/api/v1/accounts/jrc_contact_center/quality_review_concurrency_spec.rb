@@ -29,7 +29,9 @@ RSpec.describe 'Native human quality review contention', :pabx do
   let(:state) { { ready: Queue.new, results: Queue.new } }
 
   def quality_worker(input)
-    account_id, member_id, recording_id = account.id, member.id, record.id
+    account_id = account.id
+    member_id = member.id
+    recording_id = record.id
     Thread.new do
       ApplicationRecord.connection_pool.with_connection do |connection|
         state[:ready] << connection.raw_connection.backend_pid

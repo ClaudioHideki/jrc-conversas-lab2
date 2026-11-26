@@ -1,0 +1,109 @@
+{
+  "parent": "22103ecdd7e59bd8bc313a557d65036a6d990f09",
+  "failed_run": 45903896083,
+  "failed_job": 140195937589,
+  "native_report_sha256": "9a55fb9bdfcfcf9ddf8648ea74d0f32478a2c04151f4324d7bff4cdec9e2da9b",
+  "native_offenses_before": 13,
+  "parent_sources": {
+    "db/migrate/20261126193000_create_contact_center_quality_reviews.rb": "9339bc41d60442fe5df5f76c458b1e9ae4926a11305c4ac3e26e22301301a544",
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb": "eadd1ac17916e7a1f17e20a01254a418696c3ba2c584a8a74351ac140f8fbed8",
+    "spec/services/jrc_contact_center/quality_review_write_spec.rb": "be7d7068d99a072fa03af1195398fba54ffac965968da3db2d761ab3c8455943",
+    "spec/services/jrc_contact_center/synthetic_quality_source_scope_spec.rb": "39b83a93903b785b7f93d6a14758fd186a3e7e18e03fd9f01a4dc8b84aac69d4",
+    "script/validate_cc_quality_review_migration.mjs": "dde9932b7fa37c1f778aff25c01b0e8a683682cd0ca1e1c9b4089ef62cda9efc",
+    ".github/workflows/call-center-administration.yml": "257ef09f04d821b6cce599e9e8e9110d47e86b7a19dc3585bc2828eba27f9057"
+  },
+  "source_sha256": {
+    "db/migrate/20261126193000_create_contact_center_quality_reviews.rb": "e66b4484857bbc078741efae5a45de176f2db4c2a8a5572cc5664d12e9a803be",
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb": "1ad2db10da5bcf9fc7b29c65df1224fc0abd6fface86969691e058b50b5899d4",
+    "spec/services/jrc_contact_center/quality_review_write_spec.rb": "95f2d846c7b0ba5bc177d047a059a889f25e5c485cfdfddeda9538d0f4ba0d2b",
+    "spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb": "3bf91bfcd0556192a8a6fbfc57fc0557f9f86e05da16c7f91dafdef27c6b9136",
+    "script/validate_cc_quality_review_migration.mjs": "2120fbcd8d01b048939dfa1dd200506a9d87e67e3db41cdca371f9d5147fa8da",
+    ".github/workflows/call-center-administration.yml": "4d65507548c13ee31ab4c00e1242d301f47f696f8febf239b647563760c777f0"
+  },
+  "renamed_specs": {
+    "spec/services/jrc_contact_center/synthetic_quality_source_scope_spec.rb": "spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb"
+  },
+  "literal_replacements": {
+    "db/migrate/20261126193000_create_contact_center_quality_reviews.rb": [
+      [
+        "                         \"jsonb_typeof(scope_snapshot) = 'object'\",\n",
+        "                                \"jsonb_typeof(scope_snapshot) = 'object'\",\n",
+        1
+      ],
+      [
+        "                               \"jsonb_typeof(reviewed_values -> 'justification') = 'string' AND \" \\\n",
+        "                                \"jsonb_typeof(reviewed_values -> 'justification') = 'string' AND \" \\\n",
+        1
+      ],
+      [
+        "                         \"btrim(reviewed_values ->> 'justification') <> '', false)\", name: 'cc_quality_review_reason'\n",
+        "                                \"btrim(reviewed_values ->> 'justification') <> '', false)\", name: 'cc_quality_review_reason'\n",
+        1
+      ],
+      [
+        "                               \"jsonb_typeof(reviewed_values -> 'recommendation_ids') = 'array' AND \" \\\n",
+        "                                \"jsonb_typeof(reviewed_values -> 'recommendation_ids') = 'array' AND \" \\\n",
+        1
+      ],
+      [
+        "                         \"jsonb_typeof(reviewed_values -> 'adjusted_summary') = 'string', false)\", name: 'cc_quality_review_content'\n",
+        "                                \"jsonb_typeof(reviewed_values -> 'adjusted_summary') = 'string', false)\", name: 'cc_quality_review_content'\n",
+        1
+      ]
+    ],
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb": [
+      [
+        "    account_id, member_id, recording_id = account.id, member.id, record.id",
+        "    account_id = account.id\n    member_id = member.id\n    recording_id = record.id",
+        1
+      ]
+    ],
+    "spec/services/jrc_contact_center/quality_review_write_spec.rb": [
+      [
+        "                                           'nota_final' => 0, 'model' => nil, 'sentiment_confidence' => nil)",
+        "                                             'nota_final' => 0, 'model' => nil, 'sentiment_confidence' => nil)",
+        1
+      ]
+    ],
+    "spec/services/jrc_contact_center/synthetic_quality_source_scope_spec.rb": [
+      [
+        "SyntheticRecordedCallQuality.install!",
+        "described_class.install!",
+        1
+      ],
+      [
+        "SyntheticRecordedCallQuality.analysis(1,",
+        "described_class.analysis(1,",
+        1
+      ],
+      [
+        "                'call_id' => 'call', 'chamada_id' => 'source' }",
+        "                 'call_id' => 'call', 'chamada_id' => 'source' }",
+        1
+      ],
+      [
+        "    row = instance_double(JrcContactCenter::QualityReviewRevision, revision: 2,\n                          original_analysis: JrcContactCenter::QualityReviewPresentation.original(snapshot), source_sha256: snapshot.sha256)\n",
+        "    row = instance_double(\n      JrcContactCenter::QualityReviewRevision,\n      revision: 2, original_analysis: JrcContactCenter::QualityReviewPresentation.original(snapshot), source_sha256: snapshot.sha256\n    )\n",
+        1
+      ]
+    ],
+    "script/validate_cc_quality_review_migration.mjs": [
+      [
+        "9339bc41d60442fe5df5f76c458b1e9ae4926a11305c4ac3e26e22301301a544",
+        "e66b4484857bbc078741efae5a45de176f2db4c2a8a5572cc5664d12e9a803be",
+        1
+      ]
+    ],
+    ".github/workflows/call-center-administration.yml": [
+      [
+        "spec/services/jrc_contact_center/synthetic_quality_source_scope_spec.rb",
+        "spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb",
+        3
+      ]
+    ]
+  },
+  "all_four_renamed_spec_examples_and_other_case_counts_preserved": true,
+  "no_RuboCop_rule_disabled_or_test_excluded": true,
+  "SQL_constraints_migration_timestamp_and_receipt_unchanged": true,
+  "native_or_Chrome_acceptance": false
+}
