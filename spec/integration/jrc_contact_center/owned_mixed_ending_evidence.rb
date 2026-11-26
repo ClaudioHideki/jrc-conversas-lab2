@@ -145,7 +145,14 @@ class SyntheticMixedEndingEvidence
     verify_worker_rows!(produced, acks, configuration)
     verify_current_origin_jobs!(produced, origin, rows)
     { produced: produced, acknowledgements: acks, current_origin_dequeued: true,
-      current_qualification_id: origin.source_qualification_id, destination_attempt_ids: rows.map(&:id) }
+      current_qualification_id: origin.source_qualification_id, destination_attempt_ids: rows.map(&:id),
+      destination_qualification_ids: destination_source_ids(account, produced) }
+  end
+
+  def self.destination_source_ids(account, produced)
+    ids = produced.values.select { |row| row.fetch('job_class') == 'JrcContactCenter::EndingDestinationJob' }.pluck('record_id')
+    JrcContactCenter::EndingDestinationAttempt.where(account: account, id: ids).includes(:origin)
+                                            .to_h { |attempt| [attempt.id, attempt.origin.source_qualification_id] }
   end
 
   def self.verify_current_origin_jobs!(produced, origin, rows)
@@ -171,7 +178,8 @@ class SyntheticMixedEndingEvidence
       raise 'Native isolated PostgreSQL/Redis worker evidence missing' unless valid
 
       verify_worker_context!(output, configuration)
-      verify_worker_processes!(input, output)
+      SyntheticPublicEndingProcessEvidence.verify!(input, output, produced: produced, acks: acks,
+                                                 expected_qualification_id: native_qualification_id(input))
     end
   end
 
@@ -182,9 +190,10 @@ class SyntheticMixedEndingEvidence
     raise 'Native isolated PostgreSQL/Redis worker evidence missing' unless valid
   end
 
-  def self.verify_worker_processes!(input, output)
-    valid = output.fetch('postgres_backend_pid').positive? && output.fetch('worker_pid').positive?
-    valid &&= input.fetch('producer_pid').positive? && input.fetch('producer_pid') != output.fetch('worker_pid')
-    raise 'Native isolated PostgreSQL/Redis worker evidence missing' unless valid
+  def self.native_qualification_id(input)
+    return unless input.fetch('job_class') == 'JrcContactCenter::EndingDestinationJob'
+
+    JrcContactCenter::EndingDestinationAttempt.where(account_id: input.fetch('account_id'))
+                                            .find(input.fetch('record_id')).origin.source_qualification_id
   end
 end

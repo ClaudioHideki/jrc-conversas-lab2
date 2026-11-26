@@ -81,7 +81,7 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
       !['http://127.0.0.1:5386', 'http://127.0.0.1:5387'].includes(url.origin);
     const recordingAudit =
       request.method() === 'POST' &&
-      url.origin === 'http://127.0.0.1:5387' &&
+      ['http://127.0.0.1:5386', 'http://127.0.0.1:5387'].includes(url.origin) &&
       url.pathname === reproductionPath;
     if (recordingAudit) {
       const payload = request.postDataJSON();

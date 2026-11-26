@@ -65,7 +65,13 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   let editor = page.locator('[data-ending-automation-editor]');
   await expect(
     editor.locator('[data-ending-configuration-only]')
-  ).toContainText('Salvar só altera a configuração');
+  ).toContainText('Salvar altera a configuração e não executa ações.');
+  await expect(
+    editor.locator('[data-ending-configuration-only]')
+  ).toContainText('as permissões atuais do agente em cada execução');
+  await expect(
+    editor.locator('[data-ending-configuration-only]')
+  ).toContainText('Nenhum comando é publicado no PABX');
   await editor.locator('[data-ending-rule-new]').click();
   await expect(editor.locator('[data-ending-rule-save]')).toBeDisabled();
   await editor

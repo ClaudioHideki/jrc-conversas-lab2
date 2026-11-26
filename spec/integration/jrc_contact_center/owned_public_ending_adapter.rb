@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'owned_public_ending_process_evidence'
+
 # Native test-adapter delegation for the explicit nonce queue only.
 class SyntheticPublicEndingQueue::Adapter
   def initialize(previous, configuration)
@@ -33,7 +35,8 @@ class SyntheticPublicEndingQueue::Adapter
     raise 'Native Sidekiq job ID required' unless job.provider_job_id.to_s.match?(/\A[0-9a-f]{24}\z/)
 
     receipt = { jid: job.provider_job_id, job_class: job.class.name, account_id: job.arguments.first,
-                record_id: job.arguments.last, producer_pid: Process.pid, source_sha: @configuration.fetch('source_sha'),
+                record_id: job.arguments.last, producer_pid: Process.pid, parent_job: SyntheticPublicEndingProcessEvidence.parent_job,
+                source_sha: @configuration.fetch('source_sha'),
                 queue: job.queue_name, witness_sha256: Digest::SHA256.file(__FILE__).hexdigest }
     Redis.new(url: ENV.fetch('REDIS_URL')).hset("jrc_cc_public:#{@configuration.fetch('nonce')}:produced", job.provider_job_id, receipt.to_json)
   end

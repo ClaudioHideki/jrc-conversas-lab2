@@ -159,7 +159,7 @@ jobs:
           python3 -B script/jrc_call_center_lint_server_probe.py
       - name: Focused native mixed CRM and Service Desk fixture guards
         run: |
-          bundle exec rubocop script/jrc_call_center_mixed_ending_control.rb script/jrc_call_center_mixed_ending_seed.rb spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb --format json --out /tmp/call-center-mixed-ending-lint.json
+          bundle exec rubocop script/jrc_call_center_mixed_ending_control.rb script/jrc_call_center_mixed_ending_seed.rb spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb spec/integration/jrc_contact_center/owned_public_ending_adapter.rb spec/integration/jrc_contact_center/owned_public_ending_worker_boot.rb spec/integration/jrc_contact_center/owned_public_ending_process_evidence.rb spec/services/jrc_contact_center/synthetic_public_ending_process_evidence_spec.rb --format json --out /tmp/call-center-mixed-ending-lint.json
       - name: Focused public ending editor and selected destination lint
         id: ending_public_lint
         run: |
@@ -228,15 +228,15 @@ jobs:
           PY
       - name: Native mixed fixture refuses unowned preparation and constraint release
         run: |
-          bundle exec rspec spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb --format progress --format json --out /tmp/call-center-mixed-ending-preflight.json
+          bundle exec rspec spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb spec/services/jrc_contact_center/synthetic_public_ending_process_evidence_spec.rb --format progress --format json --out /tmp/call-center-mixed-ending-preflight.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-mixed-ending-preflight.json').read_text())
-          assert report['summary']['example_count'] == 2
+          assert report['summary']['example_count'] == 8
           assert report['summary']['failure_count'] == report['summary']['pending_count'] == report['summary']['errors_outside_of_examples_count'] == 0
-          assert len(report['examples']) == 2 and all(row['status'] == 'passed' for row in report['examples'])
-          assert {row['file_path'].removeprefix('./') for row in report['examples']} == {'spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb'}
+          assert len(report['examples']) == 8 and all(row['status'] == 'passed' for row in report['examples'])
+          assert {row['file_path'].removeprefix('./') for row in report['examples']} == {'spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb', 'spec/services/jrc_contact_center/synthetic_public_ending_process_evidence_spec.rb'}
           PY
       - name: Focused real recording scopes and private provider byte boundary
         run: |
