@@ -151,6 +151,15 @@
       "parent_sources": {
         "app/javascript/dashboard/routes/dashboard/crm/views/leads/LeadsIndex.vue": "391ead6ed62e8aa6f36631a7d183bb3e197df3605e3dd1e179f8f80e0ce86753"
       }
+    },
+    {
+      "name": "exact_synthetic_seed_method_split_preserves_all_existing_branches",
+      "source_sha256": {
+        "script/jrc_call_center_pause_seed.rb": "6de7e93d33b0463c449bfd9ec51eca8715e7894dc4763a53d121a1bbfbf7b58f"
+      },
+      "parent_sources": {
+        "script/jrc_call_center_pause_seed.rb": "08b9cd237ec811a4fcf4f659d0d89f01a2cc80a3227239391db2822a29cbe06f"
+      }
     }
   ],
   "Lead_recovery_regression": {
@@ -164,5 +173,17 @@
       "new_navigation_passed": 9
     },
     "current_SHA_native_or_Chrome_approved": false
+  },
+  "latest_targeted_result": {
+    "sha": "b718fe1d19a1b5833bd750f133bf2eb7735e6d19",
+    "run": 45755749825,
+    "Lead_Vue_passed": 37,
+    "Lead_Vue_failed_pending": [
+      0,
+      0
+    ],
+    "native_Rails_or_Chrome_run": false,
+    "only_seed_method_complexity_blocked_later_gate": true,
+    "report_sha256": "ca6e28b9e2647a01a739bafcbaab7686a7f5814f651090b2d120f1b869cb8356"
   }
 }

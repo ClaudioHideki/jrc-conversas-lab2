@@ -69,12 +69,7 @@ class JrcContactCenter::SyntheticPauseSeed
   private
 
   def prepare_pause_sources(payload, queues, admin, operator)
-    if @project.end_with?('-ending_operational')
-      payload.merge!(JrcContactCenter::SyntheticEndingPublicSeed.call(account: @account, admin: admin, operator: operator, queue: queues.first))
-    end
-    if @project.end_with?('-ending_pending')
-      payload.merge!(JrcContactCenter::SyntheticEndingPendingSeed.call(account: @account, admin: admin, operator: operator, queue: queues.first))
-    end
+    prepare_selected_ending_sources(payload, queues.first, admin, operator)
     if @project.end_with?('-ending_history')
       payload.merge!(JrcContactCenter::SyntheticEndingAttemptHistorySeed.call(account: @account, admin: admin, queue: queues.first))
     end
@@ -89,6 +84,15 @@ class JrcContactCenter::SyntheticPauseSeed
       payload.merge!(JrcContactCenter::SyntheticPauseApprovalSeed.call(account: @account, admin: admin, operator: operator, queues: queues))
     end
     payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
+  end
+
+  def prepare_selected_ending_sources(payload, queue, admin, operator)
+    if @project.end_with?('-ending_operational')
+      payload.merge!(JrcContactCenter::SyntheticEndingPublicSeed.call(account: @account, admin: admin, operator: operator, queue: queue))
+    end
+    if @project.end_with?('-ending_pending')
+      payload.merge!(JrcContactCenter::SyntheticEndingPendingSeed.call(account: @account, admin: admin, operator: operator, queue: queue))
+    end
   end
 
   def prepare_special_sources(payload, queue, admin, operator)
