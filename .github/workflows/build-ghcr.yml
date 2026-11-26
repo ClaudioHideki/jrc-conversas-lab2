@@ -413,7 +413,7 @@ jobs:
           PUBLISH: ${{ inputs.publish }}
         run: |
           case "$GITHUB_REF_NAME" in
-            main|codex/diagnostico-latencia-ramal-20261126|codex/crm-backoffice-servicedesk-visual-20261101|codex/release-integrada-specs-20261102|codex/lab2-integral-20261102|codex/shared-inbox-history-20261104|codex/ura-padrao-lab2-*|codex/consolidacao-*|codex/lab2-ag-consolidada-20261110) ;;
+            main|codex/crm-backoffice-servicedesk-visual-20261101|codex/release-integrada-specs-20261102|codex/lab2-integral-20261102|codex/shared-inbox-history-20261104|codex/ura-padrao-lab2-*|codex/consolidacao-*|codex/lab2-ag-consolidada-20261110|codex/diagnostico-latencia-ramal-20261126) ;;
             *) echo 'Branch candidata nao autorizada para este gate' >&2; exit 1 ;;
           esac
           test "$COMPONENT" = app
