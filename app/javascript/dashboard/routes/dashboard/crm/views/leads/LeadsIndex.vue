@@ -124,7 +124,10 @@ const detailError = ref(false);
 const loadSelectedLead = async () => {
   const id = String(route.query.leadId || '');
   const listed = leads.value.some(item => String(item.id) === id);
-  if (!/^[1-9]\d{0,18}$/.test(id) || listed) return;
+  if (!/^[1-9]\d{0,18}$/.test(id) || listed) {
+    detailError.value = false;
+    return;
+  }
   const context = captureContext();
   await store.dispatch('jrcCrm/leads/fetchLead', id);
   if (!isCurrent(context) || String(route.query.leadId) !== id) return;

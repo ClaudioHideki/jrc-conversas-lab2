@@ -141,5 +141,28 @@
     "product_workflow_or_permissions_changed": false,
     "all_280_browser_cases_still_required": true,
     "full_CI_approved": false
+  },
+  "functional_corrections": [
+    {
+      "name": "exact_native_Lead_list_recovery_clears_previous_detail_error",
+      "source_sha256": {
+        "app/javascript/dashboard/routes/dashboard/crm/views/leads/LeadsIndex.vue": "d1ae27f468db4c46d46cf25695e411b45a3c5de70d6463cb45ba3ae5bbc08f7c"
+      },
+      "parent_sources": {
+        "app/javascript/dashboard/routes/dashboard/crm/views/leads/LeadsIndex.vue": "391ead6ed62e8aa6f36631a7d183bb3e197df3605e3dd1e179f8f80e0ce86753"
+      }
+    }
+  ],
+  "Lead_recovery_regression": {
+    "parent": "721d7c8a7603d089376c2e3171d45793c47e12a7",
+    "run": 45754454729,
+    "native_report_sha256": "34eef29fba4a1b59957da1f931eb9f7926e3c679f98e893e4b0ee827d17a8da7",
+    "existing_regression_unchanged": true,
+    "before": {
+      "passed": 36,
+      "failed": 1,
+      "new_navigation_passed": 9
+    },
+    "current_SHA_native_or_Chrome_approved": false
   }
 }
