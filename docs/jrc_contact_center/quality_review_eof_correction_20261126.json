@@ -1,0 +1,13 @@
+{
+  "parent": "96fcf3e89c10f5beaf10b6674a29fcbe63977c73",
+  "failed_run": 45900633077,
+  "failed_job": 140185248894,
+  "cause": "git diff --check reports owned_quality_evidence.rb:41 new blank line at EOF",
+  "path": "spec/integration/jrc_contact_center/owned_quality_evidence.rb",
+  "before_sha256": "5dea5f63dbbadaf4ff7128335aa6b7547bcaa8b7e78ec59d64b53588b765f281",
+  "after_sha256": "4142e23ba66323bef34b11c48196abac4788e8dd847b46b2cf0fcd2cf9e7dc18",
+  "removed_bytes": 1,
+  "all_71_published_paths_checked_for_trailing_whitespace_and_extra_EOF": true,
+  "runtime_behavior_tests_permissions_and_workflow_unchanged": true,
+  "native_or_Chrome_acceptance": false
+}

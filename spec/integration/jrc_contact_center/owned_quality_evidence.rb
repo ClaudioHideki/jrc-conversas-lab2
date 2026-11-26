@@ -38,4 +38,3 @@ module JrcContactCenter::SyntheticQualityReviewEvidence
     end
   end
 end
-
