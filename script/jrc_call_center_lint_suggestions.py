@@ -22,11 +22,13 @@ if report.is_file():
             continue
         path = row['path']
         source = pathlib.Path(path).read_text()
-        check = subprocess.run(['bundle', 'exec', 'rubocop', '--stdin', path, '--autocorrect', '--stderr',
+        check = subprocess.run(['bundle', 'exec', 'rubocop', '--no-server', '--stdin', path, '--autocorrect', '--stderr',
                                 '--format', 'json', '--only', ','.join(cops)], input=source, capture_output=True, text=True)
         if check.returncode not in (0, 1):
             raise RuntimeError(f'Safe RuboCop suggestion failed: {path}')
         corrected = check.stdout
+        if not corrected:
+            raise RuntimeError(f'Native formatter returned no source: {path}')
         if corrected and corrected != source:
             syntax = subprocess.run(['ruby', '-c'], input=corrected, capture_output=True, text=True)
             if syntax.returncode:

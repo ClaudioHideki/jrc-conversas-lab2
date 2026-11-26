@@ -9,7 +9,7 @@ RSpec.describe 'Native per-rule ending configuration within existing corporate c
   let(:path) { "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy/ending_rules" }
   let(:second_business) do
     JrcCrm::BusinessUnit.create!(account: account, operating_company: issuer, code: 'SYNTHETIC_SCOPED_EDITOR_OTHER',
-                                  name: 'SYNTHETIC other rule source', active: true)
+                                 name: 'SYNTHETIC other rule source', active: true)
   end
   let(:second_unit) do
     JrcContactCenter::Unit.create!(account: account, code: 'SYNTHETIC_SCOPED_EDITOR_OTHER', name: 'SYNTHETIC other operational source', kind: 'sac',

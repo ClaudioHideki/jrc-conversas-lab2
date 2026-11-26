@@ -91,9 +91,7 @@ class JrcContactCenter::EndingActions::RuleInput
   end
 
   def action!(input, active:, schema:)
-    if schema == 2
-      return JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member).call(input, active: active)
-    end
+    return JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member).call(input, active: active) if schema == 2
 
     invalid! unless input.is_a?(Hash)
     entry = input.deep_stringify_keys

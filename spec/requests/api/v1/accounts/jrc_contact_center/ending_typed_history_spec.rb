@@ -44,7 +44,7 @@ RSpec.describe 'Current native multi-destination ending history', type: :request
 
   def history_actions
     project = JrcContactCenter::EndingActions::Catalogue.new(account: account).call.fetch('entries')
-                                                     .find { |row| row.fetch('code') == 'SYNTHETIC_ORIGIN_RULE' }.fetch('actions').first
+                                                        .find { |row| row.fetch('code') == 'SYNTHETIC_ORIGIN_RULE' }.fetch('actions').first
     [project, crm_history_action,
      { 'kind' => 'service_desk', 'parameters' => {
        'unit_id' => sd_unit.id.to_s, 'service_id' => nil,
@@ -57,7 +57,7 @@ RSpec.describe 'Current native multi-destination ending history', type: :request
     call = new_origin_source_call
     call.update!(contact_id: contact.id, company_id: customer.id)
     JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: operator, queue: queue,
-                                    direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
+                                      direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
     call.update!(status: 'ended', ended_at: Time.current)
     row = JrcContactCenter::Qualification.find_by!(account: account, account_user: operator, call_session: call)
     JrcContactCenter::QualificationManager.new(account: account, member: operator).complete!(
@@ -69,7 +69,10 @@ RSpec.describe 'Current native multi-destination ending history', type: :request
   def history_attempt(kind = 'project_task', retry_of: nil)
     attributes = { account: account, origin: typed_origin, readiness: typed_readiness,
                    rule_code: 'SYNTHETIC_ORIGIN_RULE', destination_kind: kind, request_key: SecureRandom.uuid }
-    attributes.merge!(retry_of: retry_of, retry_requested_by_account_user_id: operator.id) if retry_of
+    if retry_of
+      attributes[:retry_of] = retry_of
+      attributes[:retry_requested_by_account_user_id] = operator.id
+    end
     JrcContactCenter::EndingDestinationAttempt.create!(**attributes).reload
   end
 

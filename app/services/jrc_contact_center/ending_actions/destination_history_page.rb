@@ -37,8 +37,8 @@ class JrcContactCenter::EndingActions::DestinationHistoryPage
     legacy = @legacy.select("id, created_at, 'legacy' AS history_ledger").to_sql
     typed = @typed.select("id, created_at, 'typed' AS history_ledger").to_sql
     JrcContactCenter::EndingActionAttempt.unscoped.from("(#{legacy} UNION ALL #{typed}) ending_history")
-                                       .select('id, created_at, history_ledger')
-                                       .order(Arel.sql('created_at DESC, id DESC, history_ledger ASC'))
-                                       .offset((@page - 1) * 20).limit(20).to_a
+                                         .select('id, created_at, history_ledger')
+                                         .order(Arel.sql('created_at DESC, id DESC, history_ledger ASC'))
+                                         .offset((@page - 1) * 20).limit(20).to_a
   end
 end

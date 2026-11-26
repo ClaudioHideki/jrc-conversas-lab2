@@ -14,7 +14,7 @@ RSpec.describe JrcContactCenter::EndingActions::RuleSourceAuthority do
   let(:authority) { described_class.new(account: account, member: member) }
   let(:second_business) do
     JrcCrm::BusinessUnit.create!(account: account, operating_company: issuer, code: 'SYNTHETIC_EDITOR_OTHER',
-                                  name: 'SYNTHETIC separate configuration scope', active: true)
+                                 name: 'SYNTHETIC separate configuration scope', active: true)
   end
 
   before { saved_rule }

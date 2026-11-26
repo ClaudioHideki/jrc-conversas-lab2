@@ -16,7 +16,7 @@ RSpec.describe 'Selected original-agent ending destination commands', type: :req
     original = origin
     JrcContactCenter::ConfirmEndingReason.new(account: account, member: member).call(
       qualification, attributes: { reason_code: 'SYNTHETIC_ORIGIN_REASON' },
-      expected_revision: JrcContactCenter::QualificationDraftRevision.token(qualification), request_key: SecureRandom.uuid
+                     expected_revision: JrcContactCenter::QualificationDraftRevision.token(qualification), request_key: SecureRandom.uuid
     )
     original.reload
   end
@@ -196,7 +196,7 @@ RSpec.describe 'Selected original-agent ending destination commands', type: :req
   it 'does not reinterpret a still-pending destination as a failed attempt eligible for a new retry' do
     row = recorded_root
     post "#{endpoint}/#{row.id}/retry", headers: headers,
-                                       params: { request_key: SecureRandom.uuid, review: selected_review(row) }, as: :json
+                                        params: { request_key: SecureRandom.uuid, review: selected_review(row) }, as: :json
     expect(response).to have_http_status(:conflict)
     expect(counts).to eq([1, 1, 0])
   end
@@ -206,7 +206,7 @@ RSpec.describe 'Selected original-agent ending destination commands', type: :req
     result = JrcContactCenter::EndingActions::ExecuteDestinationAttempt.new(account: account, attempt_id: row.id).call
     expect(result.outcome).to eq('succeeded')
     post "#{endpoint}/#{row.id}/retry", headers: headers,
-                                       params: { request_key: SecureRandom.uuid, review: selected_review(row) }, as: :json
+                                        params: { request_key: SecureRandom.uuid, review: selected_review(row) }, as: :json
     expect(response).to have_http_status(:conflict)
     expect(counts).to eq([1, 1, 1])
     expect(qualification.reload.completed_at).to be_nil

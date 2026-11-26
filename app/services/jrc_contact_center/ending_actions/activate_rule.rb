@@ -49,7 +49,6 @@ class JrcContactCenter::EndingActions::ActivateRule
     input = rule.except('scope').merge('scope_revision' => rule.fetch('scope').fetch('integrity_sha256'))
     checked = JrcContactCenter::EndingActions::RuleInput.new(account: @account, member: member).call(input)
     raise JrcContactCenter::OperationError, 'ending_action_source_scope_changed' unless checked == rule
-
   end
 
   def persist!(member, version, rule)

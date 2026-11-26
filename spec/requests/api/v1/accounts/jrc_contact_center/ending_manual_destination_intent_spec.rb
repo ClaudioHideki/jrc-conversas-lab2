@@ -61,7 +61,7 @@ RSpec.describe 'Native manual ending intent request boundary' do
       original = origin
       JrcContactCenter::ConfirmEndingReason.new(account: account, member: member).call(
         qualification, attributes: { reason_code: 'SYNTHETIC_ORIGIN_REASON' },
-        expected_revision: JrcContactCenter::QualificationDraftRevision.token(qualification), request_key: SecureRandom.uuid
+                       expected_revision: JrcContactCenter::QualificationDraftRevision.token(qualification), request_key: SecureRandom.uuid
       )
       original.reload
     end
@@ -105,7 +105,7 @@ RSpec.describe 'Native manual ending intent request boundary' do
     JrcServiceDesk::NativeExecutionContext.with(account: account, account_user: member, user: actor) do
       account.with_lock do
         JrcContactCenter::EndingActionReadiness.create!(account: account, version: typed_version, actor_account_user_id: member.id,
-                                                      rule_code: 'SYNTHETIC_ORIGIN_RULE', request_key: SecureRandom.uuid)
+                                                        rule_code: 'SYNTHETIC_ORIGIN_RULE', request_key: SecureRandom.uuid)
       end
     end
     repeated = command(review: review).call
@@ -184,21 +184,23 @@ RSpec.describe 'Native manual ending intent request boundary' do
     member_id = member.id
     jobs = Queue.new
     start = Queue.new
-    threads = 2.times.map do
+    threads = Array.new(2) do
       Thread.new do
         ApplicationRecord.connection_pool.with_connection do |connection|
           connection.execute("SET lock_timeout = '5s'")
           jobs << connection.select_value('SELECT pg_backend_pid()')
           Timeout.timeout(10) { start.pop }
-          JrcContactCenter::EndingActions::RequestManualDestination.new(account: Account.find(account_id), member: AccountUser.find(member_id),
-                              qualification_id: source.source_qualification_id, origin_id: source.id,
-                              rule_code: readiness.rule_code, destination_kind: 'project_task', request_key: key, review: review).call.id
+          JrcContactCenter::EndingActions::RequestManualDestination.new(
+            account: Account.find(account_id), member: AccountUser.find(member_id),
+            qualification_id: source.source_qualification_id, origin_id: source.id,
+            rule_code: readiness.rule_code, destination_kind: 'project_task', request_key: key, review: review
+          ).call.id
         ensure
           connection.execute('RESET lock_timeout')
         end
       end
     end
-    pids = Timeout.timeout(10) { 2.times.map { jobs.pop } }
+    pids = Timeout.timeout(10) { Array.new(2) { jobs.pop } }
     expect(pids.uniq.length).to eq(2)
     2.times { start << true }
     Timeout.timeout(20) { threads.each(&:join) }

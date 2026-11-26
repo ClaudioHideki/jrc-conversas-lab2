@@ -21,7 +21,7 @@ RSpec.describe 'Explicit scoped preparation of v2 ending destinations', type: :r
   def own_unit_coverage
     JrcCrm::UserBusinessUnit.where(account: account, user: actor, scope: 'GROUP').find_each { |row| row.update!(active: false) }
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: issuer,
-                                   business_unit: business, active: true, structure_managed: true)
+                                     business_unit: business, active: true, structure_managed: true)
   end
 
   def native_effect_counts
@@ -77,12 +77,12 @@ RSpec.describe 'Explicit scoped preparation of v2 ending destinations', type: :r
   it 'does not reveal a foreign-unit inactive rule through a distinguishable readiness-state error' do
     publish_typed_schema_definition('active' => false)
     other = JrcCrm::BusinessUnit.create!(account: account, operating_company: issuer,
-                                       code: 'SYNTHETIC_READY_OTHER', name: 'SYNTHETIC other covered unit')
+                                         code: 'SYNTHETIC_READY_OTHER', name: 'SYNTHETIC other covered unit')
     JrcContactCenter::Unit.create!(account: account, code: 'SYNTHETIC_READY_OTHER', name: 'SYNTHETIC other allowed source', kind: 'sac',
-                                  settings: { 'issuer_company_id' => issuer.id.to_s, 'business_unit_id' => other.id.to_s })
+                                   settings: { 'issuer_company_id' => issuer.id.to_s, 'business_unit_id' => other.id.to_s })
     JrcCrm::UserBusinessUnit.where(account: account, user: actor, scope: 'GROUP').find_each { |row| row.update!(active: false) }
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: issuer,
-                                   business_unit: other, active: true, structure_managed: true)
+                                     business_unit: other, active: true, structure_managed: true)
     count = JrcContactCenter::EndingActionReadiness.where(account: account).count
     prepare_rule
     expect(response).to have_http_status(:not_found)
@@ -134,9 +134,11 @@ RSpec.describe 'Explicit scoped preparation of v2 ending destinations', type: :r
 
   context 'with a destination whose native configuration authority remains unavailable' do
     let(:typed_version) do
-      publish_typed_schema_definition('actions' => [{ 'kind' => 'service_desk', 'parameters' => {
+      parameters = {
         'unit_id' => '1', 'service_id' => nil, 'attributes' => { 'title' => 'SYNTHETIC unavailable destination' }
-      } }])
+      }
+      action = { 'kind' => 'service_desk', 'parameters' => parameters }
+      publish_typed_schema_definition('actions' => [action])
     end
 
     it 'refuses technical preparation instead of marking an unsupported Service Desk configuration operational' do

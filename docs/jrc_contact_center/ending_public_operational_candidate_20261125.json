@@ -205,6 +205,49 @@
         ".github/workflows/call-center-administration.yml": "46d5eb84620acf4dcbaf8a390311e6acff1f7f4c0b537bb2920a6fca72e6c23d",
         "script/jrc_call_center_lint_suggestions.py": "05186dbb003a9b960ab862f0c0a95d1fd44b849502d1e534ee479b79ceae51c1"
       }
+    },
+    {
+      "name": "exact_public_native_style_from_verified_65_offense_report",
+      "source_sha256": {
+        "app/services/jrc_contact_center/ending_actions/activate_rule.rb": "3a8465c1e33dc319dd207069dabd692ba49405c4e540d90c6ed49c84e169cf0e",
+        "app/services/jrc_contact_center/ending_actions/destination_history_page.rb": "c43ed5680006587636987c5086aec10b5e00c8cdeea298a6ac805999e75bf2f4",
+        "app/services/jrc_contact_center/ending_actions/manual_destination_page.rb": "8fc0d9baaebcf977cbf4cca61c096cdd268284297ebba47a6a5e028c74d030c4",
+        "app/services/jrc_contact_center/ending_actions/manual_destination_preview.rb": "0283e6bac81aa04390985c4019b1ae6e0c8074a77a4a3417df766e04c4ced50d",
+        "app/services/jrc_contact_center/ending_actions/readiness_status.rb": "e79440a6daaf345c383297d894a9b172c980bc58f72db00572e631d1c675ecd8",
+        "app/services/jrc_contact_center/ending_actions/request_destination_retry.rb": "85c8d0c9ead85bb6fe1f03d68fc33f451b7c23fecc7ae5ca067facff209fe12e",
+        "app/services/jrc_contact_center/ending_actions/request_manual_destination.rb": "2b286a2df0c69e1230d5e98d5d579c01e14062437643b9b5074b3451396ff396",
+        "app/services/jrc_contact_center/ending_actions/rule_input.rb": "7643247e0e697b0f5cfd6df7a5e5d029605c1f8d8e6292329aed74b7d6ac48ea",
+        "app/services/jrc_contact_center/ending_actions/selected_destination_authority.rb": "64ac21a05951e2f3102e96ac0fa7b5affc82e481a416ccf0c799b2c6c4e2872a",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_crm_rule_configuration_spec.rb": "0cd9472d2266bbc9ce4351abc52c2972758b1d1659c9a9ca3142073c8ba2151a",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_destination_commands_spec.rb": "6ad16b2f3f4d70564b6ed326da35a0bb6bed71748c2d129fba480cb89873c76d",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb": "d298e92c255cf20ead6f4a569da52d6898e0a73c2e61b7ed5f56d580c32a6e9f",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_rule_configuration_spec.rb": "e286e41f88d442a64da9b0c66d69a3416f5dd95bb738d648a173d1a4ea63e205",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "616a693fbb6c5b0459a77264225db83c741e5cc1240b73082b74bd6a3bb09573",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_selected_destination_retry_spec.rb": "5cff2559a58d78adae91e47cbf9cfc43e978eab4eee37867dee97613ce63a1a2",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_history_spec.rb": "1f30905597aa919d3021292c3f8abc2babf2b942fcd549bbecf954bb7d16cc99",
+        "spec/services/jrc_contact_center/ending_actions/rule_source_authority_spec.rb": "9d6da952ede49a637a181eb0851a833ba8dc5495b58b6a33d7128c2761600f0f",
+        "script/jrc_call_center_lint_suggestions.py": "d3683f61d515e222c62a120b877c545189aaaf12ae41c60402f4aa6bccb33449"
+      },
+      "parent_sources": {
+        "app/services/jrc_contact_center/ending_actions/activate_rule.rb": "9555e55ae36e60d68409e57ee6402bdeda2e314a7783e93d5317fd01995bd4ad",
+        "app/services/jrc_contact_center/ending_actions/destination_history_page.rb": "5751e4a84c8d5a188fb3b415c9b665a7fa18796b4e064fa361eae63a0136dbfb",
+        "app/services/jrc_contact_center/ending_actions/manual_destination_page.rb": "79b6bdfa876c22af9395bd998b26cc42ed51fde765317b8dfff54770c2c94de5",
+        "app/services/jrc_contact_center/ending_actions/manual_destination_preview.rb": "5288e50503e43b26d88df4789995de19085d8ba65a52b81b15c2535592f3257a",
+        "app/services/jrc_contact_center/ending_actions/readiness_status.rb": "4a88fd527ac9d446fdedb2d2e65a53a75bc1ee57aa98129b0bb812a645a90bd2",
+        "app/services/jrc_contact_center/ending_actions/request_destination_retry.rb": "8cea4214ee32a7650256e27c230bbbfa3dcee03db1ccb160ba6e785ea6dce4fe",
+        "app/services/jrc_contact_center/ending_actions/request_manual_destination.rb": "679fd707efbf12dbf1486ae4601c9402ba854363e7c46dd3c4900453f81d0e8f",
+        "app/services/jrc_contact_center/ending_actions/rule_input.rb": "d124fd32fb906d4be7d8331d08d944493b9b94edc45773643aac265a5967c47a",
+        "app/services/jrc_contact_center/ending_actions/selected_destination_authority.rb": "2ba9266c7af60c423ec6ece74da0f85d8514e7fd84b8909f56f06f8198ee57ee",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_crm_rule_configuration_spec.rb": "d90d1577ed82d147b7d77cbecc057f8e01ffd3ac1e3b090c08b12bf3b513feb9",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_destination_commands_spec.rb": "a3d785346957ae15e5c72683ba20206fe420022bf8ce67618980b3d839ede383",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb": "df7c66c77a674edc738837c597dd2cbb833e3e1bee17bcb57bc98095ab3fd669",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_rule_configuration_spec.rb": "8d051dce8bd768beb0234f1b63a23f301fb43c2df095e24ea7cac82fff6580c7",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "49123e4e142acb1ae5af5c20cfd67b7dd95fb0d1a7e2a561c81a9fd6e4aff996",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_selected_destination_retry_spec.rb": "e613d5962a58c5b33aeda20ff07119eae8e09f67aa67a3afaa95881c93f4664a",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_history_spec.rb": "22cbcf2b7285eb3823ef2486d7777accfc0cd499e4382c454d0904f3d5e5e060",
+        "spec/services/jrc_contact_center/ending_actions/rule_source_authority_spec.rb": "1099bfabf0fce83a86b6ea8b36fb99d3d86aa90fae42fc6a57cd82f9bf46e42b",
+        "script/jrc_call_center_lint_suggestions.py": "6254d733b5201692ed53f080dbcb6b01e80a5905a8ecbfc9a25e2f02bfdaf05e"
+      }
     }
   ],
   "lint_parent": {
@@ -212,6 +255,16 @@
     "run": 45735034255,
     "conclusion": "failure",
     "offenses": 92,
+    "affected_Ruby_files_inspected": 34,
+    "all_quality_gates_still_required": true,
+    "safe_formatter_output_is_a_review_suggestion_not_a_pass": true,
+    "new_native_or_browser_acceptance": false
+  },
+  "lint_style_parent": {
+    "sha": "8127c22cf4e9a0e0ed91f8b6787a6694236fc501",
+    "run": 45736994715,
+    "conclusion": "failure",
+    "offenses": 65,
     "affected_Ruby_files_inspected": 34,
     "all_quality_gates_still_required": true,
     "safe_formatter_output_is_a_review_suggestion_not_a_pass": true,

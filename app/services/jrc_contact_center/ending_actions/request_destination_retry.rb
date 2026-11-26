@@ -69,9 +69,7 @@ class JrcContactCenter::EndingActions::RequestDestinationRetry
   def persist_retry(member, origin, readiness, previous)
     attempts = JrcContactCenter::EndingDestinationAttempt.where(account: @account)
     child = attempts.find_by(retry_of_id: previous.id)
-    if child && child.request_key != @key
-      raise JrcContactCenter::OperationError.new('ending_attempt_request_conflict', status: :conflict)
-    end
+    raise JrcContactCenter::OperationError.new('ending_attempt_request_conflict', status: :conflict) if child && child.request_key != @key
 
     consent = reviewed_consent(member, origin, readiness, previous)
     result = JrcContactCenter::EndingActions::RecordDestinationAttempt.new(
@@ -99,7 +97,7 @@ class JrcContactCenter::EndingActions::RequestDestinationRetry
 
   def manual_consent_required?(origin, code)
     origin.version.definition.fetch('entries').find { |row| row.fetch('code') == code }
-                        .fetch('execution_mode') == 'agent_confirmation'
+          .fetch('execution_mode') == 'agent_confirmation'
   end
 
   def validate_review!
@@ -107,5 +105,4 @@ class JrcContactCenter::EndingActions::RequestDestinationRetry
     valid = @key.is_a?(String) && @key.match?(/\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/)
     raise JrcContactCenter::OperationError, 'invalid_ending_pending_review' unless valid
   end
-
 end

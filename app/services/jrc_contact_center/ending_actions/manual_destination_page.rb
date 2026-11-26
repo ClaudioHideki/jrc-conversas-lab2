@@ -17,7 +17,7 @@ class JrcContactCenter::EndingActions::ManualDestinationPage
       account: @account, member: @member, qualification_id: @qualification_id
     ).call do |member, qualification|
       origins = JrcContactCenter::EndingActionOrigin.where(account: @account, source_qualification_id: qualification.id,
-                                                         actor_account_user_id: member.id, actor_user_id: member.user_id).order(:id)
+                                                           actor_account_user_id: member.id, actor_user_id: member.user_id).order(:id)
       items = origins.flat_map do |origin|
         JrcContactCenter::EndingActions::ManualDestinationPreview.new(account: @account, member: member, origin: origin).call
       end

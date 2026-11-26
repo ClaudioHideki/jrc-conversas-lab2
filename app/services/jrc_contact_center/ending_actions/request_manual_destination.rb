@@ -69,9 +69,7 @@ class JrcContactCenter::EndingActions::RequestManualDestination
     # This is the same native destination authority as the editor, independent
     # of configure permission. CRM additionally requires the original customer.
     JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: member).call(action, active: true)
-    if @kind == 'crm'
-      JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: member, origin: origin).call
-    end
+    JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: member, origin: origin).call if @kind == 'crm'
     readiness = readiness_for_existing_or_new_root(origin)
     triggered = JrcContactCenter::EndingActions::NativeTrigger.new(origin: origin).call(rule)
     raise JrcContactCenter::OperationError, 'ending_action_trigger_pending' unless triggered
@@ -82,7 +80,7 @@ class JrcContactCenter::EndingActions::RequestManualDestination
 
   def readiness_for_existing_or_new_root(origin)
     root = JrcContactCenter::EndingDestinationAttempt.where(account: @account, origin: origin, rule_code: @code,
-                                                           destination_kind: @kind, retry_of_id: nil).first
+                                                            destination_kind: @kind, retry_of_id: nil).first
     return JrcContactCenter::EndingActions::ExecutionReadiness.new(account: @account, origin: origin).call(@code) unless root
 
     raise JrcContactCenter::OperationError.new('ending_attempt_request_conflict', status: :conflict) unless root.request_key == @key
@@ -96,10 +94,11 @@ class JrcContactCenter::EndingActions::RequestManualDestination
   end
 
   def verify_metadata!(origin, readiness)
-    query = ApplicationRecord.sanitize_sql_array([
+    query = [
       "SELECT cc_ending_destination_context(?, ?, ?, ?, ?) ->> 'rule_sha256'",
       @account.id, origin.id, readiness.id, @code, @kind
-    ])
+    ]
+    query = ApplicationRecord.sanitize_sql_array(query)
     digest = ApplicationRecord.connection.select_value(query)
     actual = [readiness.id.to_s, origin.version_id.to_s, digest]
     expected = @review.values_at('expected_readiness_id', 'expected_version_id', 'expected_rule_sha256')
@@ -108,11 +107,10 @@ class JrcContactCenter::EndingActions::RequestManualDestination
 
   def record_root(member, origin, readiness)
     roots = JrcContactCenter::EndingDestinationAttempt.where(account: @account, origin: origin, rule_code: @code,
-                                                            destination_kind: @kind, retry_of_id: nil)
+                                                             destination_kind: @kind, retry_of_id: nil)
     previous = roots.first
-    if previous && previous.request_key != @key
-      raise JrcContactCenter::OperationError.new('ending_attempt_request_conflict', status: :conflict)
-    end
+    raise JrcContactCenter::OperationError.new('ending_attempt_request_conflict', status: :conflict) if previous && previous.request_key != @key
+
     consent = reviewed_consent(member, origin, readiness)
     attempt = JrcContactCenter::EndingActions::RecordDestinationAttempt.new(
       account: @account, origin: origin, readiness: readiness, rule_code: @code, destination_kind: @kind
@@ -139,5 +137,4 @@ class JrcContactCenter::EndingActions::RequestManualDestination
     valid = @key.is_a?(String) && @key.match?(/\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/)
     raise JrcContactCenter::OperationError, 'invalid_ending_pending_review' unless valid
   end
-
 end

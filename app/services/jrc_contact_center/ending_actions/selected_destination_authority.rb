@@ -32,16 +32,17 @@ class JrcContactCenter::EndingActions::SelectedDestinationAuthority
     raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action
 
     JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member).call(action, active: true)
-    if %w[crm service_desk].include?(@attempt.destination_kind)
-      JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: @member, origin: @origin).call
-    end
+    return unless %w[crm service_desk].include?(@attempt.destination_kind)
+
+    JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: @member, origin: @origin).call
   end
 
   def verify_exact_readiness!(readiness)
-    sql = ApplicationRecord.sanitize_sql_array([
+    sql = [
       'SELECT cc_ending_destination_context(?, ?, ?, ?, ?)::text',
       @account.id, @origin.id, readiness.id, @attempt.rule_code, @attempt.destination_kind
-    ])
+    ]
+    sql = ApplicationRecord.sanitize_sql_array(sql)
     actual = JSON.parse(ApplicationRecord.connection.select_value(sql))
     expected = @attempt.attributes.slice('origin_id', 'readiness_id', 'version_id', 'actor_account_user_id', 'actor_user_id',
                                          'rule_code', 'destination_kind', 'operation', 'rule_sha256')

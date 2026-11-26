@@ -61,9 +61,10 @@ class JrcContactCenter::EndingActions::ManualDestinationPreview
 
     JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member).call(action, active: true)
     JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: @member, origin: @origin).call if kind == 'crm'
-    input = ApplicationRecord.sanitize_sql_array([
+    input = [
       'SELECT cc_ending_destination_context(?, ?, ?, ?, ?)::text', @account.id, @origin.id, readiness.id, code, kind
-    ])
+    ]
+    input = ApplicationRecord.sanitize_sql_array(input)
     metadata = JSON.parse(ApplicationRecord.connection.select_value(input))
     metadata.slice('origin_id', 'readiness_id', 'version_id', 'rule_code', 'destination_kind', 'operation', 'rule_sha256')
             .transform_values(&:to_s)

@@ -58,8 +58,8 @@ RSpec.describe 'Native selected ending retry request boundary' do
     result = retry_command(row).call
     expect(operator.administrator?).to be false
     expect(result).to have_attributes(retry_of_id: row.id, effect_key: row.effect_key,
-                                     actor_account_user_id: operator.id, retry_requested_by_account_user_id: operator.id,
-                                     readiness_id: row.readiness_id, operation: row.operation)
+                                      actor_account_user_id: operator.id, retry_requested_by_account_user_id: operator.id,
+                                      readiness_id: row.readiness_id, operation: row.operation)
     expect(result.request_key).to eq(retry_key)
     expect(result.outcome).to be_nil
     expect(row.reload.outcome.outcome).to eq('failed')
@@ -146,7 +146,7 @@ RSpec.describe 'Native selected ending retry request boundary' do
     input = [account.id, operator.id, typed_origin.source_qualification_id, row.id, retry_key, retry_review(row)]
     ready = Queue.new
     start = Queue.new
-    threads = 2.times.map do
+    threads = Array.new(2) do
       Thread.new do
         ApplicationRecord.connection_pool.with_connection do |connection|
           connection.execute("SET lock_timeout = '5s'")
@@ -161,7 +161,7 @@ RSpec.describe 'Native selected ending retry request boundary' do
         end
       end
     end
-    pids = Timeout.timeout(10) { 2.times.map { ready.pop } }
+    pids = Timeout.timeout(10) { Array.new(2) { ready.pop } }
     expect(pids.uniq.length).to eq(2)
     2.times { start << true }
     Timeout.timeout(20) { threads.each(&:join) }

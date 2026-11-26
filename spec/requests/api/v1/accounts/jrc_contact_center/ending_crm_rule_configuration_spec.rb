@@ -116,7 +116,6 @@ RSpec.describe 'Explicit CRM ending configuration through the native private rul
     expect(JrcContactCenter::EndingActionVersion.where(account: account)).to be_empty
   end
 
-
   it 'edits an existing CRM rule through a new immutable version without changing its earlier snapshot' do
     save_crm_rule
     expect(response).to have_http_status(:ok)
@@ -152,9 +151,11 @@ RSpec.describe 'Explicit CRM ending configuration through the native private rul
   end
 
   it 'keeps Service Desk configuration blocked until all native mapping and reference checks are available' do
-    save_crm_rule(crm_rule.merge('actions' => [{ 'kind' => 'service_desk', 'parameters' => {
+    parameters = {
       'unit_id' => '1', 'service_id' => nil, 'attributes' => { 'title' => 'SYNTHETIC unavailable' }
-    } }]))
+    }
+    action = { 'kind' => 'service_desk', 'parameters' => parameters }
+    save_crm_rule(crm_rule.merge('actions' => [action]))
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcContactCenter::EndingActionVersion.where(account: account)).to be_empty
   end
