@@ -10,6 +10,16 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
   end
   let(:message) { build(:message, account: account, inbox: inbox, message_type: :outgoing) }
 
+  it 'captures the persisted public conversation number when the new association has not read it back yet' do
+    expected_id = message.conversation.reload.display_id
+    expect(expected_id).to be_positive
+    allow(message.conversation).to receive(:display_id).and_return(nil)
+    expect(message.webhook_data.dig(:conversation, :id)).to be_nil
+    message.save!
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    expect(obligation.payload.dig('conversation', 'id')).to eq(expected_id)
+  end
+
   it 'persists pending provider evidence before enqueueing the durable callback' do
     message.save!
     obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)

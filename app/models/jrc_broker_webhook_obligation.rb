@@ -13,8 +13,18 @@ class JrcBrokerWebhookObligation < ApplicationRecord
     mark_pending!(message, binding, identity)
     create!(delivery_id: identity, account_id: message.account_id, message_id: message.id, inbox_id: message.inbox_id, binding_id: binding.id,
             integration_id: binding.integration_id, instance_id: binding.instance_id, url: channel.webhook_url,
-            available_at: Time.current, payload: message.webhook_data.merge(event: 'message_created'))
+            available_at: Time.current, payload: callback_payload(message))
   end
+
+  def self.callback_payload(message)
+    payload = message.webhook_data.merge(event: 'message_created')
+    # A newly inserted conversation can still have a cached nil display_id
+    # until Rails reads back the value allocated by PostgreSQL.
+    payload[:conversation][:id] ||= Conversation.where(id: message.conversation_id, account_id: message.account_id, inbox_id: message.inbox_id)
+                                                .pick(:display_id)
+    payload
+  end
+  private_class_method :callback_payload
 
   def self.mark_pending!(message, binding, identity)
     outbound = { 'version' => 1, 'state' => 'PENDING', 'intent_id' => identity,
