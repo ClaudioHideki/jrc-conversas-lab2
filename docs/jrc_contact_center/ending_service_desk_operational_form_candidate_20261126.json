@@ -160,6 +160,15 @@
         "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js": "fc3996c5298651a75b480e0e27b045ad705945cf6caedd1284c74d2b70f9cbb5",
         "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": "b4b4f87d5f4ab366b6afbb1c603570ad977c6f2d4c38efdc2c7c32af1a28debd"
       }
+    },
+    {
+      "name": "exact_existing_parameterized_composable_count_with_stricter_suite_identity_guards",
+      "source_sha256": {
+        ".github/workflows/call-center-administration.yml": "432ee5c01d91174c14d1a4be7fd17da371364b23d5f715db2922d7286da467d3"
+      },
+      "parent_sources": {
+        ".github/workflows/call-center-administration.yml": "554930a291261988adddf197de26b47b2036193b0f52a1c6039fe5401d51dbe8"
+      }
     }
   ],
   "early_Vue_failure_correction": {
@@ -198,5 +207,11 @@
     "sha256": "3e07af63852117616ea4fd07912b0c3dfa9837a92daa49b8a11a51e4c820aac7",
     "native_and_Chrome_acceptance_pending": true,
     "three_new_real_composable_cases": true
+  },
+  "parameterized_preflight_identity_correction": {
+    "document": "docs/jrc_contact_center/SD_preflight_parameterized_count_20261126.json",
+    "sha256": "43a783155d3800128b6fc3731af022c19ee20b08a3f847f1c203d17a827e88e6",
+    "verified_targeted_Vue_examples": 107,
+    "native_and_Chrome_acceptance_pending": true
   }
 }

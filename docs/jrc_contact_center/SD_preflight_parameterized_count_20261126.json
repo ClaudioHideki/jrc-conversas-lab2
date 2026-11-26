@@ -1,0 +1,31 @@
+{
+  "parent": "dba4165fe242d720e4fccee487c49f8242dc663f",
+  "run": 45815799000,
+  "artifact": 15115757005,
+  "artifact_sha256": "69e57b07544a6f6bd2b9407f07089a5c65f1c1c5221ebb21b7894bb58a897c11",
+  "exact_correction_stage": {
+    "name": "exact_existing_parameterized_composable_count_with_stricter_suite_identity_guards",
+    "source_sha256": {
+      ".github/workflows/call-center-administration.yml": "432ee5c01d91174c14d1a4be7fd17da371364b23d5f715db2922d7286da467d3"
+    },
+    "parent_sources": {
+      ".github/workflows/call-center-administration.yml": "554930a291261988adddf197de26b47b2036193b0f52a1c6039fe5401d51dbe8"
+    }
+  },
+  "cause": "The declared104 expected count omitted three existing parameterized composable cases. The actual run passed all107 examples; no product/test failure occurred.",
+  "verified": {
+    "targeted_Vue": 107,
+    "composable_cases": 26,
+    "existing_composable_cases": 23,
+    "new_composable_regressions": 3,
+    "failures": 0,
+    "pending": 0,
+    "main_Vue_expected_unchanged": 1945,
+    "native_Rails_expected_unchanged": 3771,
+    "Chrome_expected_unchanged": 280
+  },
+  "correction": "Require exactly107 passed cases with exact five-suite identities and per-suite case counts. Preserve zero failures/pending and every original test.",
+  "product_code_and_tests_unchanged": true,
+  "whole_native_CI_and_Chrome_acceptance_pending": true,
+  "Part1_complete": false
+}

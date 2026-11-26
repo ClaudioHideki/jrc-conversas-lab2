@@ -129,10 +129,13 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-ending-sd-public-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 104
+          assert report['numTotalTests'] == report['numPassedTests'] == 107
           assert report['numFailedTests'] == report['numPendingTests'] == 0
           assert len(report['testResults']) == 5
           assert all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'useEndingAutomationEditor.spec.js': 26, 'AudioAssetLibrary.spec.js': 51, 'AudioLibraryPreview.spec.js': 10, 'EndingAutomationEditor.spec.js': 8, 'EndingServiceDeskConfiguration.spec.js': 12}
+          assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
+          assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           PY
       - name: Official RuboCop server parity without reducing inspected coverage
         run: |
