@@ -6,6 +6,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { INBOX_TYPES } from 'dashboard/helper/inbox';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import ConversationAPI from 'dashboard/api/conversations';
+import conversationStore from 'dashboard/store/modules/conversations';
 import InboxList from './InboxList.vue';
 import { routes as webphoneRoutes } from '../webphone/routes';
 import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
@@ -98,6 +99,108 @@ const mountInbox = () =>
   });
 
 describe('omnichannel inbox', () => {
+  it('reloads every previously loaded page from the current authorization after a reconnect', async () => {
+    store.state.filters = { inboxId: 99, teamId: 12, labels: ['other-view'] };
+    mocks.route.params = { accountId: '1', type: 'conversation', id: '701' };
+    mocks.route.query = { assignee: 'me', channel: 'whatsapp', status: 'all' };
+    const row = id => ({
+      id,
+      inbox_id: 11,
+      status: 'resolved',
+      meta: { assignee: { id: 5 } },
+    });
+    const requests = [];
+    let authorizedIds = [701, 702, 703];
+    store.subscribeAction(({ type }, state) => {
+      if (type === 'fetchAllConversations') {
+        requests.push({ ...state.filters });
+        state.conversationPayload = authorizedIds
+          .slice(0, 2 * state.filters.page)
+          .map(row);
+      }
+    });
+    const wrapper = mountInbox();
+    const visibleIds = () =>
+      wrapper.findAll('[data-testid="conversation"]').map(item => item.text());
+    await flushPromises();
+    wrapper.findComponent({ name: 'HoyaInboxWorkspace' }).vm.$emit('loadMore');
+    await flushPromises();
+    expect(visibleIds()).toEqual(['701', '702', '703']);
+
+    let resolveScope;
+    ConversationAPI.sharedContext.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveScope = resolve;
+        })
+    );
+    authorizedIds = [701, 704, 705];
+    const state = store.state.conversations;
+    conversationStore.actions.revokeConversationAccess({
+      state,
+      commit: (type, payload) =>
+        conversationStore.mutations[type](state, payload),
+      dispatch: vi.fn(),
+    });
+    await flushPromises();
+    expect(visibleIds()).toEqual([]);
+    resolveScope({
+      data: { meta: { shared_scope: store.state.sharedScopeResult } },
+    });
+    await flushPromises();
+    expect(visibleIds()).toEqual(['701', '704', '705']);
+    expect(requests.map(request => request.page)).toEqual([1, 2, 1, 2]);
+    requests.forEach(request => {
+      expect(request).not.toHaveProperty('inboxId');
+      expect(request).not.toHaveProperty('teamId');
+      expect(request).not.toHaveProperty('labels');
+    });
+    expect(store.state.filters).toMatchObject({
+      assigneeType: 'me',
+      status: 'all',
+      inboxScope: 'member',
+    });
+    expect(mocks.route.params.id).toBe('701');
+    expect(mocks.route.query.channel).toBe('whatsapp');
+  });
+
+  it('discards an old sharing grant when the account changes during a reconnect', async () => {
+    mocks.route.query.assignee = 'me';
+    const wrapper = mountInbox();
+    await flushPromises();
+    let resolveOldScope;
+    ConversationAPI.sharedContext.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveOldScope = resolve;
+        })
+    );
+    store.state.conversations.accessVersion += 1;
+    await flushPromises();
+    mocks.route.params.accountId = '2';
+    store.state.conversationPayload = [
+      { id: 881, inbox_id: 11, meta: { assignee: { id: 99 } } },
+      { id: 882, inbox_id: 11, meta: { assignee: { id: 5 } } },
+    ];
+    await flushPromises();
+    resolveOldScope({
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: true,
+            inbox_ids: [11],
+            member_inbox_ids: [11],
+          },
+        },
+      },
+    });
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toEqual(['882']);
+    expect(ConversationAPI.sharedContext).toHaveBeenCalledWith(2, 'member');
+  });
+
   it('shows only server-proven resolved history while remote live routing is unavailable', async () => {
     const scope = {
       enabled: false,
@@ -119,7 +222,7 @@ describe('omnichannel inbox', () => {
     expect(
       wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
     ).toEqual(['901']);
-    store.state.conversations.push({
+    store.state.conversations.allConversations.push({
       id: 999,
       inbox_id: 11,
       status: 'resolved',
@@ -129,7 +232,7 @@ describe('omnichannel inbox', () => {
     expect(
       wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
     ).toEqual(['901']);
-    store.state.conversations[0].status = 'open';
+    store.state.conversations.allConversations[0].status = 'open';
     await flushPromises();
     expect(wrapper.findAll('[data-testid="conversation"]')).toHaveLength(0);
   });
@@ -208,7 +311,7 @@ describe('omnichannel inbox', () => {
       ];
       const wrapper = mountInbox();
       await flushPromises();
-      store.state.conversations.push({
+      store.state.conversations.allConversations.push({
         id: 999,
         inbox_id: 12,
         meta: { assignee: { id: 5 } },
@@ -426,7 +529,7 @@ describe('omnichannel inbox', () => {
     expect(
       wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
     ).toEqual(['101']);
-    store.state.conversations.push({
+    store.state.conversations.allConversations.push({
       id: 102,
       inbox_id: 11,
       status: 'open',
@@ -436,7 +539,7 @@ describe('omnichannel inbox', () => {
     expect(
       wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
     ).toEqual(['101']);
-    store.state.conversations[0].status = 'resolved';
+    store.state.conversations.allConversations[0].status = 'resolved';
     await flushPromises();
     expect(wrapper.findAll('[data-testid="conversation"]')).toHaveLength(0);
   });
@@ -627,7 +730,7 @@ describe('omnichannel inbox', () => {
           resolveScope = resolve;
         })
     );
-    store.state.conversations[0].meta.assignee.id = 98;
+    store.state.conversations.allConversations[0].meta.assignee.id = 98;
     await flushPromises();
     expect(
       wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
@@ -716,7 +819,7 @@ describe('omnichannel inbox', () => {
           resolveScope = resolve;
         })
     );
-    store.state.conversations.push({
+    store.state.conversations.allConversations.push({
       id: 999,
       inbox_id: 11,
       meta: { assignee: { id: 99 }, assignee_type: 'User' },
@@ -973,7 +1076,7 @@ describe('omnichannel inbox', () => {
           { id: 12, channel_type: INBOX_TYPES.EMAIL },
           { id: 13, channel_type: INBOX_TYPES.INSTAGRAM },
         ],
-        conversations: [],
+        conversations: { accessVersion: 0, allConversations: [] },
         conversationError: false,
         loading: false,
         ended: false,
@@ -1002,7 +1105,7 @@ describe('omnichannel inbox', () => {
           state.inboxes.find(inbox => inbox.id === id),
         'accounts/isFeatureEnabledonAccount': state => () => state.feature,
         getAllStatusChats: state => filters =>
-          state.conversations.filter(
+          state.conversations.allConversations.filter(
             conversation =>
               !conversation.status ||
               !filters.status ||
@@ -1019,14 +1122,17 @@ describe('omnichannel inbox', () => {
         },
         clearSelectedState: vi.fn(),
         emptyAllConversations: ({ state }) => {
-          state.conversations = [];
+          state.conversations.allConversations = [];
+        },
+        setChatListFilters: ({ state }, filters) => {
+          state.filters = filters;
         },
         updateChatListFilters: ({ state }, filters) => {
-          state.filters = filters;
+          state.filters = { ...state.filters, ...filters };
         },
         fetchAllConversations: ({ state }) => {
           state.conversationError = false;
-          state.conversations = [...state.conversationPayload];
+          state.conversations.allConversations = [...state.conversationPayload];
           return { meta: { shared_scope: state.sharedScopeResult } };
         },
       },

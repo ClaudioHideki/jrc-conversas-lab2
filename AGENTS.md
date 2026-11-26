@@ -135,3 +135,10 @@ Practical checklist for any change impacting core logic or public APIs
 5. Ao fechar um incremento, atualize tarefas, evidências e limites reais. Confira o estado do repositório e preserve alterações concorrentes.
 
 Esta adição organiza o contexto e não revoga instruções anteriores. Não concede autorização de publicação, deploy, alteração de credenciais, envio real, pareamento ou migração. Nesta tarefa não executar backup, dump, restore ou comandos agregados que os acionem; preservar os mecanismos existentes.
+
+## Regressões de atendimento e entrega
+
+Registre cada bug confirmado com o sintoma, a causa demonstrada, a mudança, o teste de regressão reproduzível e os resultados de CI e implantação. Preserve os casos nas atualizações do mesmo fluxo. Use dados sintéticos. Registre separadamente o aceite observado na caixa ou no aparelho.
+
+- **Callback de saída sem número público de conversa, corrigido em `91ca7ca0`.** Ao criar a conversa, a associação Rails podia ainda ter `display_id` vazio. A obrigação de envio lê o número público persistido. Execute `bundle exec rspec spec/models/jrc_broker_webhook_obligation_spec.rb`. A auditoria de 26/11 confirmou o SHA nos processos Rails e Sidekiq e o aceite de quatro callbacks em duas caixas. [Imagem e CI](https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/45858920091)
+- Ao alterar o painel de Atendimento, teste a reconexão com conversa selecionada, as respostas concorrentes e as mudanças de filtros e permissões. A lista deve recuperar as conversas autorizadas sem recarregar a página e deve abandonar dados que saíram do escopo de acesso.

@@ -114,12 +114,18 @@ jobs:
         with:
           run_install: false
       - run: pnpm install --frozen-lockfile
-      - name: Retry store and component regressions
+      - name: WhatsApp delivery and inbox reconnect regressions
         run: >-
           pnpm exec vitest run
           app/javascript/dashboard/store/modules/specs/conversations/actions.spec.js
           app/javascript/dashboard/store/modules/specs/conversations/whatsappRetry.spec.js
           app/javascript/dashboard/components-next/message/specs/MessageError.spec.js
+          app/javascript/dashboard/routes/dashboard/inbox/InboxList.spec.js
+          app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js
+          app/javascript/dashboard/routes/dashboard/inbox/InboxView.spec.js
+          app/javascript/dashboard/helper/specs/ReconnectService.spec.js
+          app/javascript/dashboard/store/modules/specs/conversations/listLoading.spec.js
+          app/javascript/dashboard/store/modules/conversations/specs/accessRevocation.spec.js
           --maxWorkers=2 --no-file-parallelism
           --reporter=default --reporter=json --outputFile=/tmp/whatsapp-ui-results.json
       - name: Lint dos arquivos frontend do retry

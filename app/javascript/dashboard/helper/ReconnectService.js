@@ -135,6 +135,7 @@ class ReconnectService {
   };
 
   onReconnect = async () => {
+    this.disconnectTime = null;
     await this.store.dispatch('revokeConversationAccess');
     await this.handleRouteSpecificFetch();
     await this.revalidateCaches();

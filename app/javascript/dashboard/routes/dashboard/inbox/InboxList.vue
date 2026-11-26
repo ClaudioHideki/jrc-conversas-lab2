@@ -407,11 +407,25 @@ const fetchConversations = async ({ reset = false } = {}) => {
     ) {
       acceptSharedScope(data?.meta?.shared_scope);
     }
+    return data;
   } finally {
     if (generation === accountGeneration) {
       listRequests.value -= 1;
       if (!listRequests.value && sharingDirty) refreshSharedScope();
     }
+  }
+};
+
+const restoreConversationPages = async (lastPage, generation) => {
+  let data = await fetchConversations();
+  while (
+    data &&
+    generation === accountGeneration &&
+    page.value < lastPage &&
+    !hasEndReached.value(assigneeFilter.value)
+  ) {
+    page.value += 1;
+    data = await fetchConversations();
   }
 };
 
@@ -517,7 +531,7 @@ const openVoiceCall = call => {
 };
 
 const loadMore = async () => {
-  if (!canLoadMore.value || listRequests.value) return;
+  if (isInitializing.value || !canLoadMore.value || listRequests.value) return;
   page.value += 1;
   await fetchConversations();
 };
@@ -564,7 +578,9 @@ onMounted(() => {
 
 watch(
   [
+    () => store.state.conversations?.accessVersion,
     accountId,
+    () => currentUser.value?.id,
     () => route.query.assignee,
     () => route.query.status,
     canManageAssignments,
@@ -572,7 +588,12 @@ watch(
     () => accountPermissions.value.join(','),
     hasContactCenter,
   ],
-  async () => {
+  async ([, ...scope], [, ...previousScope]) => {
+    // Revocation purges cached rows. Re-read the pages the agent had loaded
+    // only when the account, identity and filters still describe the same view.
+    const lastPage = scope.every((value, i) => value === previousScope[i])
+      ? page.value
+      : 1;
     accountGeneration += 1;
     listRequests.value = 0;
     sharingGeneration += 1;
@@ -582,8 +603,9 @@ watch(
     voiceGeneration += 1;
     page.value = 1;
     statusFilter.value = resolveStatus(route.query.status);
-    // Invalidate the previous request key and end marker before awaiting routing metadata.
-    store.dispatch('updateChatListFilters', conversationFilters.value);
+    // Another dashboard can leave team, label or inbox filters in the store.
+    // Replace that query before loading this workspace's authorized rows.
+    store.dispatch('setChatListFilters', conversationFilters.value);
     store.dispatch('conversationPage/reset');
     voiceCalls.value = [];
     contactCenterContext.value = null;
@@ -620,7 +642,7 @@ watch(
       : 'all';
 
     await Promise.all([
-      fetchConversations({ reset: true }).finally(() => {
+      restoreConversationPages(lastPage, version).finally(() => {
         if (version === accountGeneration) isInitializing.value = false;
       }),
       fetchVoiceCalls(),

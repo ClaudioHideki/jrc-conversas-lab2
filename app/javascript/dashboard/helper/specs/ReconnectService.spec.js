@@ -122,6 +122,16 @@ describe('ReconnectService', () => {
   });
 
   describe('handleOnlineEvent', () => {
+    it('does not reload on a later online event after connectivity was restored', async () => {
+      vi.spyOn(reconnectService, 'handleRouteSpecificFetch').mockResolvedValue();
+      vi.spyOn(reconnectService, 'revalidateCaches').mockResolvedValue();
+      reconnectService.onDisconnect();
+      await reconnectService.onReconnect();
+      differenceInSeconds.mockReturnValue(10801);
+      reconnectService.handleOnlineEvent();
+      expect(window.location.reload).not.toHaveBeenCalled();
+    });
+
     it('should reload the page if disconnected for more than 3 hours', () => {
       reconnectService.getSecondsSinceDisconnect = vi
         .fn()
