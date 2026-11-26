@@ -81,7 +81,8 @@ const savedCampaign = {
 
 describe('campaign direct audience and captioned image module flow', () => {
   beforeEach(() => {
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+    vi.setSystemTime(new Date('2026-10-27T15:00:00Z'));
     vi.clearAllMocks();
     api.get.mockResolvedValue({ data: [] });
     api.metadata.mockResolvedValue({
