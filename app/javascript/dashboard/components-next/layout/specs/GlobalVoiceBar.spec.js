@@ -88,15 +88,19 @@ describe('persistent global voice bar', () => {
     wrapper.unmount();
   });
 
-  it('opens the dial pad without starting a call and swaps it for active controls', async () => {
+  it('opens the dialer and keeps the active controls accessible when it closes', async () => {
     const wrapper = mount(GlobalVoiceBar, options);
     await wrapper.get('[data-voice-dialpad]').trigger('click');
     expect(wrapper.get('[data-voice-dialer]').exists()).toBe(true);
     state.sip.hasCall.value = true;
     state.sip.established.value = true;
     await flushPromises();
-    expect(wrapper.find('[data-voice-dialpad]').exists()).toBe(false);
+    expect(wrapper.find('[data-active-voice-controls]').exists()).toBe(false);
+    wrapper.getComponent({ name: 'OutboundVoiceDialog' }).vm.$emit('close');
+    await flushPromises();
     expect(wrapper.get('[data-active-voice-controls]').exists()).toBe(true);
+    await wrapper.get('[data-voice-dialpad]').trigger('click');
+    expect(wrapper.get('[data-voice-dialer]').exists()).toBe(true);
     wrapper.unmount();
   });
 

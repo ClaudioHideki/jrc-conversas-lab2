@@ -56,6 +56,41 @@ describe('SipClient call lifecycle', () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
+  it('records preparation and PBX response timings without destination data', async () => {
+    client.transportConnected = true;
+    client.registerer = { state: 'Registered' };
+    client.configuration = { sip_domain: 'pbx.example.test', extension: '100' };
+    const onLog = vi.fn();
+    client.callbacks.onLog = onLog;
+
+    const clock = vi.spyOn(performance, 'now').mockReturnValue(100);
+    try {
+      const dialing = client.call('15550000001');
+      clock.mockReturnValue(8100);
+      await dialing;
+      const { requestDelegate } = client.session;
+      clock.mockReturnValue(8150);
+      requestDelegate.onTrying();
+      clock.mockReturnValue(8400);
+      requestDelegate.onProgress({ message: { statusCode: 183 } });
+      clock.mockReturnValue(9200);
+      requestDelegate.onProgress({ message: { statusCode: 180 } });
+
+      const timings = onLog.mock.calls
+        .map(([event]) => event)
+        .filter(event => event.category === 'LATÊNCIA SIP')
+        .map(event => event.message);
+      expect(timings).toEqual([
+        'Latência SIP · Preparação e envio do INVITE · 8000 ms',
+        'Latência SIP · INVITE até SIP 100 · 50 ms',
+        'Latência SIP · INVITE até SIP 183 · 300 ms',
+        'Latência SIP · INVITE até SIP 180 · 1100 ms',
+      ]);
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
   it('preserves the SIP rejection code after termination instead of replacing it with a generic failure', async () => {
     const onError = vi.fn();
     client.callbacks.onError = onError;

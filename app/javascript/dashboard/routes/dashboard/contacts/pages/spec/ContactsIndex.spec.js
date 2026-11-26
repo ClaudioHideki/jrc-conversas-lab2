@@ -48,7 +48,19 @@ describe('Relationship center pagination', () => {
   const page = stubs =>
     shallowMount(ContactsIndex, {
       global: {
-        stubs,
+        stubs: {
+          Dialog: {
+            name: 'Dialog',
+            template: '<div><slot /></div>',
+            methods: {
+              open: vi.fn(),
+              close() {
+                this.$emit('close');
+              },
+            },
+          },
+          ...stubs,
+        },
         directives: { 'on-clickaway': onClickaway },
         plugins: [
           {
@@ -584,6 +596,7 @@ describe('Relationship center pagination', () => {
         wrapper.get(`[data-contact-view="${view}"]`).element.disabled
       ).toBe(false);
     });
+    await wrapper.get('tbody tr').trigger('click');
     expect(button(contactLabels.CALENDAR).element.disabled).toBe(true);
     expect(button(contactLabels.CALENDAR).attributes('title')).toBe(
       'This action is not available in this view.'
@@ -593,19 +606,32 @@ describe('Relationship center pagination', () => {
     );
   });
 
-  it('closes contact details and reopens them only when a row is selected', async () => {
+  it('opens contact options and edits in one dialog without leaving the list', async () => {
     wrapper = page();
     await flushPromises();
-    await wrapper
-      .get('button[aria-label="Close contact details"]')
-      .trigger('click');
-    expect(wrapper.findComponent({ name: 'ContactLeadAction' }).exists()).toBe(
-      false
-    );
+    expect(wrapper.find('[data-contact-dialog]').exists()).toBe(false);
     await wrapper.get('tbody tr').trigger('click');
-    expect(wrapper.findComponent({ name: 'ContactLeadAction' }).exists()).toBe(
-      true
-    );
+    expect(
+      wrapper.getComponent({ name: 'ContactLeadAction' }).props('contact')
+    ).toMatchObject({ id: 42, name: 'Cliente' });
+    wrapper
+      .getComponent({ name: 'TabBar' })
+      .vm.$emit('tabChanged', { value: 1 });
+    await flushPromises();
+    const editor = wrapper.getComponent({ name: 'ContactDetails' });
+    expect(editor.props('selectedContact')).toMatchObject({ id: 42 });
+    editor.vm.$emit('deleteContact');
+    await flushPromises();
+    expect(store.dispatch).not.toHaveBeenCalledWith('contacts/delete', 42);
+    const confirmation = wrapper
+      .findAllComponents(Dialog)
+      .find(dialog => 'data-single-contact-delete' in dialog.attributes());
+    expect(confirmation.attributes('description')).toContain('Cliente');
+    confirmation.vm.$emit('confirm');
+    await flushPromises();
+    expect(store.dispatch).toHaveBeenCalledWith('contacts/delete', 42);
+    expect(wrapper.find('[data-contact-dialog]').exists()).toBe(false);
+    expect(useRouter().push).not.toHaveBeenCalled();
   });
 
   it('opens company and contact dialogs without changing the list route, filters or page', async () => {
@@ -625,6 +651,7 @@ describe('Relationship center pagination', () => {
     wrapper.getComponent({ name: 'CompanyDetailsDialog' }).vm.$emit('close');
     await flushPromises();
     await wrapper.get('tbody tr').trigger('click');
+    await button(contactLabels.FULL_PROFILE).trigger('click');
     expect(
       wrapper.getComponent({ name: 'ContactDetailsDialog' }).props('contactId')
     ).toBe(42);
@@ -648,6 +675,7 @@ describe('Relationship center pagination', () => {
     ) => feature !== 'jrc_customer_master';
     wrapper = page();
     await flushPromises();
+    await wrapper.get('tbody tr').trigger('click');
     await button(contactLabels.FULL_PROFILE).trigger('click');
     expect(
       wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()

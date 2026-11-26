@@ -54,6 +54,10 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 
 ## Concluído (Done)
 
+- A barra de voz posiciona “Nenhuma ligação ativa” ao lado do Teclado, no lado direito. A saída `Latência SIP` no console do navegador mede a validação do pós-atendimento, a preparação do INVITE e as respostas do PABX. O SIP.js enviou o INVITE após 8,04 s em laboratório, com transporte em memória e coleta ICE simulada sem conclusão. A validação local passou em 191 testes Vue e SIP, com 24 cenários no Chrome em seis larguras. A origem da demora entre ramais em produção depende de uma medição real.
+
+- Na lista de Contatos, o nome e a ação de perfil abrem a janela com opções, edição e confirmação de exclusão para administradores. O relatório de Agentes ordena as métricas pelo valor numérico e mantém registros sem medição ao final. O discador usa os controles da sessão SIP local durante a ligação. Validação local com 144 testes Vue e 24 cenários Voz V4 no Chrome, com chamadas simuladas. A ordenação, a edição e a exclusão com confirmação também foram validadas no Chrome com dados fictícios.
+
 - Contatos exibe os atalhos de conversa no WhatsApp, ligação pelo softphone, perfil e exclusão individual. A confirmação de exclusão usa a permissão nativa da conta. A barra superior usa o discador e os controles da sessão SIP, com espera e transferência conforme o provedor.
 
 - O HTML do relatório gerencial usa a capa JRC de Operações & Relacionamento, com a origem da exportação e a data da extração, cartões coloridos e grades responsivas. A média de SLA aceita segundos decimais serializados como texto e considera relógios concluídos. Validação offline em Chrome e Edge entre 320 e 1.907 px, com filtros, CSV, temas e média de resolução.

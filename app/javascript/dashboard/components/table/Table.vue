@@ -18,6 +18,14 @@ const props = defineProps({
   },
 });
 
+const sortDirection = column => {
+  if (!column.getCanSort()) return undefined;
+  const direction = column.getIsSorted();
+  if (direction === 'asc') return 'ascending';
+  if (direction === 'desc') return 'descending';
+  return 'none';
+};
+
 const isRelaxed = computed(() => props.type === 'relaxed');
 const headerClass = computed(() =>
   isRelaxed.value
@@ -42,17 +50,34 @@ const headerClass = computed(() =>
           }"
           class="text-left py-3 px-5 font-medium text-sm text-n-slate-12"
           :class="headerClass"
+          :aria-sort="sortDirection(header.column)"
           @click="header.column.getCanSort() && header.column.toggleSorting()"
         >
           <div
             v-if="!header.isPlaceholder"
             class="flex place-items-center gap-1"
           >
+            <button
+              v-if="header.column.getCanSort()"
+              type="button"
+              class="inline-flex items-center gap-2 rounded text-start hover:text-n-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand"
+              @click.stop="header.column.toggleSorting()"
+            >
+              <FlexRender
+                :render="header.column.columnDef.header"
+                :props="header.getContext()"
+              />
+              <SortButton
+                :header="header"
+                class="size-4 shrink-0"
+                aria-hidden="true"
+              />
+            </button>
             <FlexRender
+              v-else
               :render="header.column.columnDef.header"
               :props="header.getContext()"
             />
-            <SortButton v-if="header.column.getCanSort()" :header="header" />
           </div>
         </th>
       </tr>

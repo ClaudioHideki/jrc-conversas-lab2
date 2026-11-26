@@ -147,7 +147,7 @@ const openOutbound = number => {
     useAlert(t('VOICE_V4.DIAL_RESTRICTED'));
     return;
   }
-  if (sip.hasCall.value || qualificationPending.value) {
+  if (sip.hasCall.value ? Boolean(number) : qualificationPending.value) {
     useAlert(
       t(
         sip.hasCall.value
@@ -225,70 +225,83 @@ const openAttendance = () => {
           :user-id="Number(userId)"
         />
       </div>
-      <span
-        class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-teal-3 text-n-teal-11"
+      <div
+        :class="active ? 'contents' : 'ms-auto flex min-w-0 items-center gap-3'"
       >
-        <span class="i-lucide-phone size-4" aria-hidden="true" />
-      </span>
-      <div class="min-w-0 flex-1 text-xs sm:flex-none sm:max-w-72">
         <div
-          class="flex flex-wrap items-center gap-2 font-semibold"
-          role="status"
+          class="flex min-w-0 items-center gap-2"
+          :class="{ 'flex-1 sm:max-w-80 sm:flex-none': active }"
         >
-          <span>{{ t(`VOICE_V4.${statusKey}`) }}</span>
-          <span v-if="active && sip.established.value" class="tabular-nums">{{
-            sip.duration.value
-          }}</span>
-        </div>
-        <div
-          v-if="active"
-          class="flex flex-wrap gap-x-3 text-xs text-n-slate-11"
-        >
-          <span>{{
-            sip.remoteNumber.value || t('SOFTPHONE.CENTRAL.UNKNOWN_CUSTOMER')
-          }}</span>
-          <span v-if="attendance?.record?.queue?.name">{{
-            attendance.record.queue.name
-          }}</span>
-          <span v-if="attendance?.record?.protocol">{{
-            attendance.record.protocol
-          }}</span>
-          <button
-            v-if="attendance?.status === 'linked'"
-            type="button"
-            class="underline focus-visible:outline focus-visible:outline-2"
-            @click="openAttendance"
+          <span
+            class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-teal-3 text-n-teal-11"
           >
-            {{ t('VOICE_V4.OPEN_ATTENDANCE') }}
-          </button>
+            <span class="i-lucide-phone size-4" aria-hidden="true" />
+          </span>
+          <div class="min-w-0 text-xs">
+            <div
+              class="flex flex-wrap items-center gap-2 font-semibold"
+              role="status"
+              data-voice-status
+            >
+              <span>{{ t(`VOICE_V4.${statusKey}`) }}</span>
+              <span
+                v-if="active && sip.established.value"
+                class="tabular-nums"
+                >{{ sip.duration.value }}</span
+              >
+            </div>
+            <div
+              v-if="active"
+              class="flex flex-wrap gap-x-3 text-xs text-n-slate-11"
+            >
+              <span>{{
+                sip.remoteNumber.value ||
+                t('SOFTPHONE.CENTRAL.UNKNOWN_CUSTOMER')
+              }}</span>
+              <span v-if="attendance?.record?.queue?.name">{{
+                attendance.record.queue.name
+              }}</span>
+              <span v-if="attendance?.record?.protocol">{{
+                attendance.record.protocol
+              }}</span>
+              <button
+                v-if="attendance?.status === 'linked'"
+                type="button"
+                class="underline focus-visible:outline focus-visible:outline-2"
+                @click="openAttendance"
+              >
+                {{ t('VOICE_V4.OPEN_ATTENDANCE') }}
+              </button>
+            </div>
+            <span
+              v-if="active && lookupEnabled && attendance?.status !== 'linked'"
+              class="text-xs text-n-slate-11"
+              >{{ t('VOICE_V4.ATTENDANCE_PENDING') }}</span
+            >
+          </div>
         </div>
-        <span
-          v-if="active && lookupEnabled && attendance?.status !== 'linked'"
-          class="text-xs text-n-slate-11"
-          >{{ t('VOICE_V4.ATTENDANCE_PENDING') }}</span
+        <button
+          type="button"
+          data-voice-dialpad
+          :title="t(active ? 'VOICE_V4.BAR_LABEL' : 'VOICE_V4.NEW_CALL')"
+          :aria-label="t(active ? 'VOICE_V4.BAR_LABEL' : 'VOICE_V4.NEW_CALL')"
+          class="inline-flex min-h-9 items-center gap-2 rounded-lg border border-n-blue-6 bg-n-blue-3 px-3 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-4 focus-visible:ring-2 focus-visible:ring-n-brand disabled:opacity-40"
+          :class="active ? 'ms-auto' : 'shrink-0'"
+          :disabled="!sameAccount || (!active && qualificationPending)"
+          @click="openOutbound()"
         >
+          <span class="i-lucide-grid-3x3 size-4" aria-hidden="true" />
+          {{ t(active ? 'VOICE_V4.BAR_LABEL' : 'SOFTPHONE.CENTRAL.KEYPAD') }}
+        </button>
       </div>
-      <button
-        v-if="!active"
-        type="button"
-        data-voice-dialpad
-        :title="t('VOICE_V4.NEW_CALL')"
-        :aria-label="t('VOICE_V4.NEW_CALL')"
-        class="ml-auto inline-flex min-h-9 items-center gap-2 rounded-lg border border-n-blue-6 bg-n-blue-3 px-3 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-4 focus-visible:ring-2 focus-visible:ring-n-brand disabled:opacity-40"
-        :disabled="!sameAccount || qualificationPending"
-        @click="openOutbound()"
-      >
-        <span class="i-lucide-grid-3x3 size-4" aria-hidden="true" />
-        {{ t('SOFTPHONE.CENTRAL.KEYPAD') }}
-      </button>
       <InboxVoicePanel
-        v-if="active"
+        v-if="active && !outboundOpen"
         :account-id="Number(accountId)"
         :allowed="allowed"
         :qualification-pending="qualificationPending"
         session-view
         controls-only
-        class="basis-full sm:ml-auto sm:w-auto sm:flex-1 sm:basis-auto"
+        class="basis-full sm:w-auto sm:basis-auto"
       />
     </div>
     <p

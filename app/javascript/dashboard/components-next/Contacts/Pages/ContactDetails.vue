@@ -15,13 +15,14 @@ import ConfirmContactDeleteDialog from 'dashboard/components-next/Contacts/Conta
 import Policy from 'dashboard/components/policy.vue';
 
 const props = defineProps({
+  embedded: { type: Boolean, default: false },
   selectedContact: {
     type: Object,
     required: true,
   },
 });
 
-const emit = defineEmits(['goToContactsList']);
+const emit = defineEmits(['goToContactsList', 'deleteContact']);
 
 const { t } = useI18n();
 const store = useStore();
@@ -99,7 +100,8 @@ const updateContact = async () => {
 };
 
 const openConfirmDeleteContactDialog = () => {
-  confirmDeleteContactDialogRef.value?.dialogRef.open();
+  if (props.embedded) emit('deleteContact');
+  else confirmDeleteContactDialogRef.value?.dialogRef.open();
 };
 
 const handleAvatarUpload = async ({ file, url }) => {
@@ -150,7 +152,7 @@ const handleAvatarDelete = async () => {
           @delete="handleAvatarDelete"
         />
         <Button
-          v-if="contactPhoneNumber"
+          v-if="contactPhoneNumber && !embedded"
           icon="i-lucide-phone"
           size="sm"
           color="blue"
@@ -221,6 +223,7 @@ const handleAvatarDelete = async () => {
         />
       </div>
       <ConfirmContactDeleteDialog
+        v-if="!embedded"
         ref="confirmDeleteContactDialogRef"
         :selected-contact="selectedContact"
         @go-to-contacts-list="emit('goToContactsList')"
