@@ -160,6 +160,15 @@
       "parent_sources": {
         "script/jrc_call_center_pause_seed.rb": "08b9cd237ec811a4fcf4f659d0d89f01a2cc80a3227239391db2822a29cbe06f"
       }
+    },
+    {
+      "name": "exact_native_guard_clause_preserves_synthetic_ending_fixture",
+      "source_sha256": {
+        "script/jrc_call_center_pause_seed.rb": "a110ad67d69a8915ad5c9f8f9aff93ae846c099cdf2ff45529f2e5b0da3db120"
+      },
+      "parent_sources": {
+        "script/jrc_call_center_pause_seed.rb": "6de7e93d33b0463c449bfd9ec51eca8715e7894dc4763a53d121a1bbfbf7b58f"
+      }
     }
   ],
   "Lead_recovery_regression": {
@@ -185,5 +194,13 @@
     "native_Rails_or_Chrome_run": false,
     "only_seed_method_complexity_blocked_later_gate": true,
     "report_sha256": "ca6e28b9e2647a01a739bafcbaab7686a7f5814f651090b2d120f1b869cb8356"
+  },
+  "seed_lint_native_progress": {
+    "run": 45756332881,
+    "Lead_passed": 37,
+    "remaining_offenses": 1,
+    "previous_offenses": 3,
+    "exact_remaining_rule": "Style/GuardClause",
+    "no_gate_removed": true
   }
 }

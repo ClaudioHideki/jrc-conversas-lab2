@@ -90,9 +90,9 @@ class JrcContactCenter::SyntheticPauseSeed
     if @project.end_with?('-ending_operational')
       payload.merge!(JrcContactCenter::SyntheticEndingPublicSeed.call(account: @account, admin: admin, operator: operator, queue: queue))
     end
-    if @project.end_with?('-ending_pending')
-      payload.merge!(JrcContactCenter::SyntheticEndingPendingSeed.call(account: @account, admin: admin, operator: operator, queue: queue))
-    end
+    return unless @project.end_with?('-ending_pending')
+
+    payload.merge!(JrcContactCenter::SyntheticEndingPendingSeed.call(account: @account, admin: admin, operator: operator, queue: queue))
   end
 
   def prepare_special_sources(payload, queue, admin, operator)
