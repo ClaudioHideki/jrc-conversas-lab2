@@ -1,0 +1,82 @@
+{
+  "parent": "f096f4bacadd9a8e8a1c34273f4defc2d32b52c0",
+  "failed_run": 45902066922,
+  "failed_job": 140189973028,
+  "native_recording_lint_report_sha256": "7857ba5720e128a9ea285ed6ccd9eccafb16d459094203deb3b5a319376c41c9",
+  "native_recording_offenses": 2,
+  "source_sha256": {
+    "app/services/jrc_contact_center/recording_audit.rb": "592cfe2053940014951af49bef6b48dc254d84dc9262db7d0428414cb2ab5a48",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "3ec0279d6149bbb8b4160097cd4066717fef02dc0f5514d64e1031e8c12abfe6",
+    "spec/services/jrc_contact_center/quality_review_source_spec.rb": "62ead2efa21ad5baacb1bddb8cf38b34a59c0947662bb6deada226edd0b176f3",
+    "spec/services/jrc_contact_center/quality_review_write_spec.rb": "149a1c53a47efa66947303b35b8e87daae9b7ccc58f72559973ccec5bced3fb3",
+    "spec/support/contact_center_quality_review.rb": "615675cb92c94d1884eaac04502f7466a3b0263b7601d50a59045123f440a97d",
+    "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "bbe2c3e2d828f3fd371b3274e3ffab9ceb4602e3863a0bace6b7b4b0eb640f54"
+  },
+  "parent_sources": {
+    "app/services/jrc_contact_center/recording_audit.rb": "7a751b79eb13fa3bf3b2f69d190c567379cb802dfcdaf4833b7afdfdc0c8a4de",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "5f1ab4d4711a00166f64912f6fe8d2aa4e0e3a1eb0c4be13967e029861c50393",
+    "spec/services/jrc_contact_center/quality_review_source_spec.rb": "3b99ea21a0eabbeba6c46150c792cc23eb54d2ecce5004f81d8d3d81589ff72f",
+    "spec/services/jrc_contact_center/quality_review_write_spec.rb": "545c83bfe5892ca4b624d76b88d913ef2a088d090523913648f4a7fdd59b4c03",
+    "spec/support/contact_center_quality_review.rb": "9560a0ab8a8912aff284367302cbabef318104a9da7179e26e054ad2947a4896",
+    "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "7297bc08247b6d4e8fcbb96b9b5ba8ca18c37726554aa57c8cdcf4b4942c24f4"
+  },
+  "literal_replacements": {
+    "app/services/jrc_contact_center/recording_audit.rb": [
+      [
+        "    allowed = @policy.audit? && @policy.recordings_view? && @account.feature_enabled?('audit_logs')\n    return @relation.none unless allowed && @account.telephony_integration\n",
+        "    return @relation.none unless history_available?\n"
+      ],
+      [
+        "  def self.scope_fields(call)\n",
+        "  def history_available?\n    @policy.audit? && @policy.recordings_view? && @account.feature_enabled?('audit_logs') && @account.telephony_integration.present?\n  end\n  private :history_available?\n\n  def self.scope_fields(call)\n"
+      ]
+    ],
+    "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": [
+      [
+        "      expect(audits.count).to eq(2)\n      expect(audits.last.audited_changes.dig('cc_scope', 'after', 'business_unit_id')).to eq(business.id.to_s)\n",
+        "      expect([audits.count, audits.last.audited_changes.dig('cc_scope', 'after', 'business_unit_id')]).to eq([2, business.id.to_s])\n"
+      ],
+      [
+        "      expect(first).to include('account_id' => account.id.to_s, 'recording_id' => record.id.to_s, 'timezone' => 'America/Sao_Paulo')\n      expect(first.fetch('meta')).to include('page' => 1, 'total' => 2, 'pages' => 2, 'per_page' => 1)\n",
+        "      expect(first).to include('account_id' => account.id.to_s, 'recording_id' => record.id.to_s, 'timezone' => 'America/Sao_Paulo',\n                               'meta' => include('page' => 1, 'total' => 2, 'pages' => 2, 'per_page' => 1))\n"
+      ],
+      [
+        "      expect(first.fetch('items').sole.keys).to match_array(%w[id created_at actor_id operation request_id])\n      expect(first.fetch('items').sole).to include('actor_id' => actor.id.to_s, 'operation' => 'view')\n",
+        "      item = first.fetch('items').sole\n      expect([item.keys.sort, item.slice('actor_id', 'operation')])\n        .to eq([%w[id created_at actor_id operation request_id].sort, { 'actor_id' => actor.id.to_s, 'operation' => 'view' }])\n"
+      ]
+    ],
+    "spec/services/jrc_contact_center/quality_review_source_spec.rb": [
+      [
+        "      expect(current.id).to eq(record.id)\n      expect(call.id).to eq(source_call.id)\n",
+        "      expect([current.id, call.id]).to eq([record.id, source_call.id])\n"
+      ]
+    ],
+    "spec/services/jrc_contact_center/quality_review_write_spec.rb": [
+      [
+        "    expect(row.original_analysis).to include('sentimento_cliente' => 'positivo', 'classificacao_ligacao' => 'excelente', 'nota_final' => 0)\n    expect(row.original_analysis).to include('model' => nil, 'sentiment_confidence' => nil)\n",
+        "    expect(row.original_analysis).to include('sentimento_cliente' => 'positivo', 'classificacao_ligacao' => 'excelente',\n                                            'nota_final' => 0, 'model' => nil, 'sentiment_confidence' => nil)\n"
+      ],
+      [
+        "    expect(record.reload.attributes).to eq(original_record)\n    expect(analysis).to eq(original_analysis)\n",
+        "    expect([record.reload.attributes, analysis]).to eq([original_record, original_analysis])\n"
+      ]
+    ],
+    "spec/support/contact_center_quality_review.rb": [
+      [
+        "  end\n\nend\n",
+        "  end\nend\n"
+      ]
+    ],
+    "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": [
+      [
+        "    screenshots.push(filename.split('/').at(-1));",
+        "    screenshots.push(filename);"
+      ]
+    ]
+  },
+  "all_asserted_fields_identity_values_privacy_checks_and_example_counts_preserved": true,
+  "same_four_authorization_conditions_only_factored": true,
+  "capture_receipts_now_use_the_actual_written_relative_path": true,
+  "whole_Part1_accepted": false,
+  "native_execution_after_correction": false
+}

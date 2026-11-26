@@ -11,8 +11,7 @@ RSpec.describe JrcContactCenter::QualityReviewSource, :pabx do
   it 'binds only the current native exact recording/call and returns the existing immutable original value inside fresh authority' do
     expect(provider).to receive(:find_analysis).with(account_id: account.id, call_id: record.external_unique_id).and_return(analysis)
     result = service.call(record.id) do |current, call, snapshot|
-      expect(current.id).to eq(record.id)
-      expect(call.id).to eq(source_call.id)
+      expect([current.id, call.id]).to eq([record.id, source_call.id])
       expect(snapshot.data).to include('sentimento_cliente' => 'positivo', 'classificacao_ligacao' => 'excelente', 'nota_final' => 0)
       expect(snapshot.data.fetch('confianca_transcricao')).to be_nil
       expect(snapshot.data).to be_frozen

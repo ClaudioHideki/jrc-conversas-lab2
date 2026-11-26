@@ -292,15 +292,15 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
       account.update!(reporting_timezone: 'America/Sao_Paulo')
       2.times { get "#{path}/#{record.id}", headers: headers }
       audits = Audited.audit_class.where(auditable: record, comment: JrcContactCenter::RecordingAudit::COMMENTS)
-      expect(audits.count).to eq(2)
-      expect(audits.last.audited_changes.dig('cc_scope', 'after', 'business_unit_id')).to eq(business.id.to_s)
+      expect([audits.count, audits.last.audited_changes.dig('cc_scope', 'after', 'business_unit_id')]).to eq([2, business.id.to_s])
       get "#{path}/#{record.id}/access_history", headers: headers, params: { per_page: 1 }
       expect(response).to have_http_status(:ok)
       first = response.parsed_body
-      expect(first).to include('account_id' => account.id.to_s, 'recording_id' => record.id.to_s, 'timezone' => 'America/Sao_Paulo')
-      expect(first.fetch('meta')).to include('page' => 1, 'total' => 2, 'pages' => 2, 'per_page' => 1)
-      expect(first.fetch('items').sole.keys).to match_array(%w[id created_at actor_id operation request_id])
-      expect(first.fetch('items').sole).to include('actor_id' => actor.id.to_s, 'operation' => 'view')
+      expect(first).to include('account_id' => account.id.to_s, 'recording_id' => record.id.to_s, 'timezone' => 'America/Sao_Paulo',
+                               'meta' => include('page' => 1, 'total' => 2, 'pages' => 2, 'per_page' => 1))
+      item = first.fetch('items').sole
+      expect([item.keys.sort, item.slice('actor_id', 'operation')])
+        .to eq([%w[id created_at actor_id operation request_id].sort, { 'actor_id' => actor.id.to_s, 'operation' => 'view' }])
       expect(response.body).not_to include(actor.email, record.caller, 'recording_reference', '/var/spool', 'audited_changes')
       get "#{path}/#{record.id}/access_history", headers: headers, params: { page: 2, per_page: 1 }
       expect(response.parsed_body.fetch('items').sole.fetch('id')).not_to eq(first.fetch('items').sole.fetch('id'))

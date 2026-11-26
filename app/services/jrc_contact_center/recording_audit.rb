@@ -7,8 +7,7 @@ class JrcContactCenter::RecordingAudit < JrcContactCenter::ConfigurationAuditSco
   OPERATIONS = %w[view listen download reproduce].freeze
 
   def call
-    allowed = @policy.audit? && @policy.recordings_view? && @account.feature_enabled?('audit_logs')
-    return @relation.none unless allowed && @account.telephony_integration
+    return @relation.none unless history_available?
 
     reader = JrcContactCenter::RecordedCalls.new(account: @account, member: @member)
     rows = @relation.where(associated_type: 'Account', associated_id: @account.id, comment: COMMENTS,
@@ -22,6 +21,11 @@ class JrcContactCenter::RecordingAudit < JrcContactCenter::ConfigurationAuditSco
     # Keep ordinary audit records available; database errors still propagate.
     @relation.none
   end
+
+  def history_available?
+    @policy.audit? && @policy.recordings_view? && @account.feature_enabled?('audit_logs') && @account.telephony_integration.present?
+  end
+  private :history_available?
 
   def self.scope_fields(call)
     target = call.current_queue || call.current_unit

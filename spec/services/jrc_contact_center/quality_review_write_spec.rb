@@ -20,13 +20,12 @@ RSpec.describe JrcContactCenter::QualityReviewWrite, :pabx do
     original_analysis = analysis.deep_dup
     row = service.call(record.id, values).reload
     expect(row.reviewed_values).to include('classification' => 'negative', 'justification' => values.fetch('justification'))
-    expect(row.original_analysis).to include('sentimento_cliente' => 'positivo', 'classificacao_ligacao' => 'excelente', 'nota_final' => 0)
-    expect(row.original_analysis).to include('model' => nil, 'sentiment_confidence' => nil)
+    expect(row.original_analysis).to include('sentimento_cliente' => 'positivo', 'classificacao_ligacao' => 'excelente',
+                                            'nota_final' => 0, 'model' => nil, 'sentiment_confidence' => nil)
     expect(row.original_analysis).not_to have_key('texto_transcrito')
     expect(row).to have_attributes(revision: 1, actor_user_id: actor.id, actor_account_user_id: member.id)
     expect(row.scope_snapshot.fetch('business_unit_id')).to eq(business.id.to_s)
-    expect(record.reload.attributes).to eq(original_record)
-    expect(analysis).to eq(original_analysis)
+    expect([record.reload.attributes, analysis]).to eq([original_record, original_analysis])
     expect(Audited.audit_class.where(auditable: row, action: 'create').count).to eq(1)
   end
 

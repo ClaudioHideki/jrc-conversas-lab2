@@ -53,5 +53,4 @@ RSpec.shared_context 'with native authorized quality review source' do
     allow(Pabx::Client).to receive(:new) { raise 'External PABX client forbidden in quality source tests' }
     allow(JrcVoiceQuality::SupabaseClient).to receive(:new).and_return(provider)
   end
-
 end

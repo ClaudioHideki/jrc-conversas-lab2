@@ -84,7 +84,7 @@ export async function verifyNativeQualityReview(parent, info, target) {
     ).toBe(true);
     const filename = `.codex/call-center-native-e2e/${info.project.name}-quality-${name}.png`;
     await page.screenshot({ path: filename, fullPage: true });
-    screenshots.push(filename.split('/').at(-1));
+    screenshots.push(filename);
   };
   const submit = async (page, status) => {
     const response = page.waitForResponse(
