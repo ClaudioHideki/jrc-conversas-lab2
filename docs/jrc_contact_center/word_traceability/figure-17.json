@@ -27,6 +27,26 @@
       "git_blob_at_validated_base": "b9c189e16b635244abf984b192dd6ee783d2c8d5",
       "state": "presente_na_base_validada",
       "current_sha256": null
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb",
+      "state": "candidate_not_native_or_browser_validated",
+      "candidate_sha256": "a20132101dd7f6bfe1bcac0b965fdd8b31643ea4ac500a1df8c0c454c5eac40b"
+    },
+    {
+      "path": "app/services/jrc_contact_center/recorded_calls.rb",
+      "state": "candidate_not_native_or_browser_validated",
+      "candidate_sha256": "e99d4524a23c754ebd30e50aed62c846561eaaa14025f4e7acc3de87d34c0da3"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/RecordingsPage.vue",
+      "state": "candidate_not_native_or_browser_validated",
+      "candidate_sha256": "3282cb0f9122a67656e4d9c13c95cdd898e219946d7bada95e1982838b193f6c"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.js",
+      "state": "candidate_not_native_or_browser_validated",
+      "candidate_sha256": "3aaeb72eb2d37f72001db88d4f3f148442fdd59e041aabcb045c7d5f70f26454"
     }
   ],
   "planned_not_present": [],
@@ -923,5 +943,32 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb",
+      "cases_prepared_not_passed": 18
+    },
+    {
+      "path": "spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb",
+      "cases_prepared_not_passed": 2
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js",
+      "cases_prepared_not_passed": 17
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js",
+      "cases_prepared_not_passed": 5
+    },
+    {
+      "path": "tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts",
+      "four_modes_prepared_not_passed": 4
+    }
+  ],
+  "native_recordings_operational_candidate": {
+    "document": "docs/jrc_contact_center/recordings_and_inactive_SD_candidate_20261126.json",
+    "source_sha256": "2d3344109e11600c240f3728483a3fb6379847466c0a250d2527506d0d9fdad6",
+    "native_or_Chrome_approval": false,
+    "whole_figure_accepted": false
+  }
 }

@@ -16,6 +16,10 @@ namespace :api, defaults: { format: 'json' } do
         resources :units, only: %i[index show create update]
         resources :queues, only: %i[index show create update]
         resources :queue_memberships, only: %i[index show create update]
+        resources :recordings, only: %i[index show] do
+          get :playback, on: :member
+          get :download, on: :member
+        end
         resources :call_sessions, only: %i[index show] do
           patch :observations, on: :member
           get :observations, on: :member, to: 'call_observations#index'

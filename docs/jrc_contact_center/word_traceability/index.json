@@ -1,8 +1,8 @@
 {
   "format_version": 1,
   "review_at": "2026-11-23T20:15:50.371122+00:00",
-  "validated_base_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
-  "candidate_source_parent_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
+  "validated_base_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+  "candidate_source_parent_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
   "candidate_not_yet_validated": true,
   "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
@@ -745,6 +745,34 @@
       ],
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
+      ],
+      "candidate_code_paths_not_validated": [
+        "app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb",
+        "app/services/jrc_contact_center/recorded_calls.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/RecordingsPage.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.js"
+      ],
+      "candidate_tests_not_validated": [
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb",
+          "cases_prepared_not_passed": 18
+        },
+        {
+          "path": "spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb",
+          "cases_prepared_not_passed": 2
+        },
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js",
+          "cases_prepared_not_passed": 17
+        },
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js",
+          "cases_prepared_not_passed": 5
+        },
+        {
+          "path": "tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts",
+          "four_modes_prepared_not_passed": 4
+        }
       ]
     },
     {
@@ -4209,8 +4237,8 @@
     "closed_unique_literal_clauses": 18,
     "not_full_global_implementation_estimate": true
   },
-  "figure10_proven_literal_percentage": 28.0,
-  "Parte1_proven_formal_lower_bound_percentage": 7.22,
+  "figure10_proven_literal_percentage": 36.0,
+  "Parte1_proven_formal_lower_bound_percentage": 7.76,
   "full_global_reaudit_complete": false,
   "typed_durable_delivery_candidate": {
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
@@ -4261,8 +4289,8 @@
   },
   "latest_literal_functional_progress": {
     "document": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
-    "sha256": "852e78586ae807f51e9d8a8a7d8b1aae0b07906ca6c4f006b84a49330e0bb4a3",
-    "unique_closed": 40,
+    "sha256": "034b44b41e20b578212b703c12ffa36c15a0d8ce447c936f179a98ed30ec02c8",
+    "unique_closed": 43,
     "total_unique": 554,
     "whole_Part1_accepted": false
   },
@@ -4300,5 +4328,20 @@
     "document": "docs/jrc_contact_center/ending_service_desk_operational_form_candidate_20261126.json",
     "sha256": "1c8d345d77e8af642e7d415b63d0e91b6e1734b6616ff971ab2294ac5ea463c4",
     "native_or_Chrome_approval": false
+  },
+  "latest_SD_audio_native_acceptance": {
+    "document": "docs/jrc_contact_center/SD_editor_and_audio_row_native_acceptance_20261126.json",
+    "sha256": "20e60c978285088deee2eddbe8fb4a645cd45cf7cafcbd9134e3f0037839eb0a",
+    "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+    "run": 45816973780
+  },
+  "next_grouped_recordings_candidate": {
+    "document": "docs/jrc_contact_center/recordings_and_inactive_SD_candidate_20261126.json",
+    "sha256": "2d3344109e11600c240f3728483a3fb6379847466c0a250d2527506d0d9fdad6",
+    "native_or_Chrome_approval": false,
+    "figures": [
+      10,
+      17
+    ]
   }
 }

@@ -89,6 +89,25 @@ RSpec.describe 'Native Service Desk templates in the existing private ending rul
     expect(JrcServiceDesk::Ticket.where(account: account)).to be_empty
   end
 
+  it 'deactivates an authorized native template after source closure without rewriting history or allowing reactivation' do
+    save_service_desk_rule
+    expect(response).to have_http_status(:ok)
+    previous = JrcContactCenter::EndingActionVersion.where(account: account).sole
+    snapshot = previous.private_definition.deep_dup
+    queue.update!(status: 'inactive')
+    get "#{path}/source_context", headers: headers, params: { queue_id: queue.id.to_s }
+    expect(response).to have_http_status(:ok)
+    source = response.parsed_body.fetch('item')
+    expect(source).to include('configuration_available' => false, 'service_desk' => include('configuration_available' => true))
+    input = sd_rule.merge('scope_revision' => source.fetch('scope_revision'), 'active' => false)
+    save_service_desk_rule(input)
+    expect(response).to have_http_status(:ok)
+    save_service_desk_rule(input.merge('active' => true))
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect([JrcContactCenter::EndingActionVersion.where(account: account).count, previous.reload.private_definition]).to eq([2, snapshot])
+    expect(JrcServiceDesk::Ticket.where(account: account)).to be_empty
+  end
+
   it 'permits reviewing and correcting a stale required catalogue field without rewriting the previous version' do
     category = create(:jrc_sd_category, unit: sd_unit)
     input = sd_rule.deep_dup

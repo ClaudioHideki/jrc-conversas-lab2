@@ -1572,8 +1572,12 @@
       "figures": [
         6
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "status": "implementado",
+      "verification": {
+        "document": "docs/jrc_contact_center/literal_audio_row_and_destination_idempotence_acceptance_20261126.json",
+        "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+        "run": 45816973780
+      },
       "code_reference_ids": [
         0,
         1,
@@ -1633,9 +1637,20 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
-        "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
+        "Whole figure and separately specified controls remain subject to their own acceptance."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_review_recoverable_at_checkpoint": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+      "direct_functional_review": {
+        "status": "implementado",
+        "literal_clause_only": true,
+        "whole_figure_accepted": false,
+        "review": {
+          "document": "docs/jrc_contact_center/literal_audio_row_and_destination_idempotence_acceptance_20261126.json",
+          "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+          "run": 45816973780
+        }
+      }
     },
     {
       "id": "D2-P0154-C05",
@@ -2587,5 +2602,12 @@
     "new_Vue_cases": 13,
     "native_and_real_Chrome_pending": true,
     "whole_figure_accepted": false
+  },
+  "latest_bounded_native_acceptance": {
+    "document": "docs/jrc_contact_center/SD_editor_and_audio_row_native_acceptance_20261126.json",
+    "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+    "unique_literal_IDs": [
+      "D2-P0154-C04"
+    ]
   }
 }

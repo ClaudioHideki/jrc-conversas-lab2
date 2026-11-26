@@ -10,6 +10,7 @@ export default defineConfig({
     'call-center-ending-attempt-history-native.spec.ts',
     'call-center-ending-pending-native.spec.ts',
     'call-center-ending-public-native.spec.ts',
+    'call-center-recordings-native.spec.ts',
   ],
   workers: 1,
   retries: 0,

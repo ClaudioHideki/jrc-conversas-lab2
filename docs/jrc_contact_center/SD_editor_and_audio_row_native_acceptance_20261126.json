@@ -1,0 +1,163 @@
+{
+  "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+  "run": 45816973780,
+  "artifact": 15124576245,
+  "artifact_sha256": "61100149aea7d498eef708bf01f4d46c676b82e21ab290f72494cd6391418d4b",
+  "independent_evidence_sha256": "e0215a8a9e467569716a9bbb55c8e3f638cd53463a060e3de68f5a2498657547",
+  "native_distinct_Rails": 3771,
+  "main_Vue": 1945,
+  "targeted_Vue": 107,
+  "separate_Lead_Vue_not_added_to_main": 37,
+  "Chrome": 280,
+  "PNG_hashes_verified": 692,
+  "actual_image_review_sha256": "c355b985c1726f31063cec81c38e241889af135848cbd43ee60c793ed60f1d9b",
+  "original_images_reviewed": {
+    "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+    "run": 45816973780,
+    "artifact": 15124576245,
+    "artifact_sha256": "61100149aea7d498eef708bf01f4d46c676b82e21ab290f72494cd6391418d4b",
+    "images": [
+      {
+        "project": "desktop-light",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-ending-sd-saved.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\desktop-light-ending-sd-saved.png",
+        "sha256": "e7813f0c78462515b0c614f7d0ac8aa9f632d8f7c8f54915da40b6c36bbf8708",
+        "width": 1440,
+        "height": 1000,
+        "actually_opened": true,
+        "visual_observation": "Saved feedback, wrapped review and modal controls visible; body scrolls within viewport; correct theme."
+      },
+      {
+        "project": "desktop-light",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-ending-sd-reloaded.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\desktop-light-ending-sd-reloaded.png",
+        "sha256": "e7813f0c78462515b0c614f7d0ac8aa9f632d8f7c8f54915da40b6c36bbf8708",
+        "width": 1440,
+        "height": 1000,
+        "actually_opened": true,
+        "visual_observation": "Saved feedback, wrapped review and modal controls visible; body scrolls within viewport; correct theme."
+      },
+      {
+        "project": "desktop-light",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-audio-row-native-preview.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\desktop-light-audio-row-native-preview.png",
+        "sha256": "c12de099f987b24af16846d71c8fb71a124aaad58b05f8375effcf8c0941ac56",
+        "width": 1440,
+        "height": 1000,
+        "actually_opened": true,
+        "visual_observation": "Native preview readable within viewport, appropriate theme; no overflow visible."
+      },
+      {
+        "project": "desktop-dark",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-ending-sd-saved.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\desktop-dark-ending-sd-saved.png",
+        "sha256": "a1818457645eeb903ceac494bb1da84c0f522422b51fcb3fc1a79c6e9f7f08b3",
+        "width": 1440,
+        "height": 1000,
+        "actually_opened": true,
+        "visual_observation": "Saved feedback, wrapped review and modal controls visible; body scrolls within viewport; correct theme."
+      },
+      {
+        "project": "desktop-dark",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-ending-sd-reloaded.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\desktop-dark-ending-sd-reloaded.png",
+        "sha256": "a1818457645eeb903ceac494bb1da84c0f522422b51fcb3fc1a79c6e9f7f08b3",
+        "width": 1440,
+        "height": 1000,
+        "actually_opened": true,
+        "visual_observation": "Saved feedback, wrapped review and modal controls visible; body scrolls within viewport; correct theme."
+      },
+      {
+        "project": "desktop-dark",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-audio-row-native-preview.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\desktop-dark-audio-row-native-preview.png",
+        "sha256": "e2464b3004dbc67bd388fa848d6d27790caa80570e6c2820aad676267116f5ff",
+        "width": 1440,
+        "height": 1000,
+        "actually_opened": true,
+        "visual_observation": "Native preview readable within viewport, appropriate theme; no overflow visible."
+      },
+      {
+        "project": "mobile-light",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-ending-sd-saved.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\mobile-light-ending-sd-saved.png",
+        "sha256": "78fa4bc536143084f121b83c187049c74fedfd2d06c7d3e7c8ad6319c61afbf2",
+        "width": 390,
+        "height": 844,
+        "actually_opened": true,
+        "visual_observation": "Saved feedback, wrapped review and modal controls visible; body scrolls within viewport; correct theme."
+      },
+      {
+        "project": "mobile-light",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-ending-sd-reloaded.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\mobile-light-ending-sd-reloaded.png",
+        "sha256": "708754c0db3f057330f3ea959c343aafac453f6c135d314f564ce9926cbb1677",
+        "width": 390,
+        "height": 844,
+        "actually_opened": true,
+        "visual_observation": "Saved feedback, wrapped review and modal controls visible; body scrolls within viewport; correct theme."
+      },
+      {
+        "project": "mobile-light",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-audio-row-native-preview.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\mobile-light-audio-row-native-preview.png",
+        "sha256": "b0805e07170b6942e8bf04142253a42bc5f6b965466937c75a54f8b66ac5783c",
+        "width": 390,
+        "height": 844,
+        "actually_opened": true,
+        "visual_observation": "Native preview readable within viewport, appropriate theme; no overflow visible."
+      },
+      {
+        "project": "mobile-dark",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-ending-sd-saved.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\mobile-dark-ending-sd-saved.png",
+        "sha256": "3e9747f677fb73382ec0cca633cfa651b869c4a870ec077911ec190bd0a98c7e",
+        "width": 390,
+        "height": 844,
+        "actually_opened": true,
+        "visual_observation": "Saved feedback, wrapped review and modal controls visible; body scrolls within viewport; correct theme."
+      },
+      {
+        "project": "mobile-dark",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-ending-sd-reloaded.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\mobile-dark-ending-sd-reloaded.png",
+        "sha256": "abfe4340f660a3e6a41fb46164060f5ed10255c735ce311dbc676aca3a31a030",
+        "width": 390,
+        "height": 844,
+        "actually_opened": true,
+        "visual_observation": "Saved feedback, wrapped review and modal controls visible; body scrolls within viewport; correct theme."
+      },
+      {
+        "project": "mobile-dark",
+        "original_archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-audio-row-native-preview.png",
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\actual-SD-audio-images-5ca5550f-20261126\\mobile-dark-audio-row-native-preview.png",
+        "sha256": "54a820f214a346fbf0e9b1bb7019dba185d1934f899c5b6b05d75ed96c592f29",
+        "width": 390,
+        "height": 844,
+        "actually_opened": true,
+        "visual_observation": "Native preview readable within viewport, appropriate theme; no overflow visible."
+      }
+    ],
+    "actual_visual_review_not_yet_done": true,
+    "all_twelve_original_images_actually_opened": true,
+    "new_SD_saved_and_reloaded_in_all_four_modes": true,
+    "native_audio_preview_in_all_four_modes": true,
+    "whole_figure10_visual_acceptance": false,
+    "remaining_copy_divergences": [
+      "Service Desk configured card uses generic task wording instead of destination/call wording.",
+      "Operational Projects destination still shows an integration-pending description; CRM card conflates unavailable permission with pending implementation.",
+      "Saved/reloaded captures are scrolled to feedback; they do not independently show the complete initial form layout."
+    ]
+  },
+  "accepted_user_behavior": [
+    "Service Desk parameters use current native catalogue/unit permissions, explicit review and two immutable saved versions in four real Chrome modes.",
+    "Institutional audio row Play opens the existing authorized preview and closing it preserves the list in four modes.",
+    "Authenticated ordinary-agent Service Desk admission and the native job create exactly one native Ticket for duplicate job deliveries and keep ACW open.",
+    "Current destination rights or native unit membership withdrawn after admission block the native job without creating a Ticket."
+  ],
+  "SDK_actual_Redis_dequeue_claimed": false,
+  "external_PABX_or_Nico_homologation": false,
+  "whole_figure6_accepted": false,
+  "whole_figure10_accepted": false,
+  "whole_Part1_accepted": false
+}

@@ -1,0 +1,26 @@
+{
+  "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+  "run": 45816973780,
+  "artifact": 15124576245,
+  "artifact_sha256": "61100149aea7d498eef708bf01f4d46c676b82e21ab290f72494cd6391418d4b",
+  "native_acceptance_document": "docs/jrc_contact_center/SD_editor_and_audio_row_native_acceptance_20261126.json",
+  "native_acceptance_sha256": "20e60c978285088deee2eddbe8fb4a645cd45cf7cafcbd9134e3f0037839eb0a",
+  "unique_literal_IDs": [
+    "D2-P0154-C04",
+    "D2-P0224-C02",
+    "D2-P0227-C01"
+  ],
+  "literal_limits": "Only per-file playback and duplicate event/destination idempotence are closed. Independent mixed CRM/SD browser retry, remaining destinations and whole figures retain their separate pending acceptance.",
+  "native_tests": [
+    "spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_public_pipeline_spec.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb"
+  ],
+  "expected_text_sha256": {
+    "D2-P0154-C04": "fe6e2dd87132aadceaee1b39e9c0642c2ddfaa50a586f8212d804acd07fc7c13",
+    "D2-P0224-C02": "8395290aff8c507b27e0290cfd8a4cd71b8e0086d3b998f27f2475c94e8f3d03",
+    "D2-P0227-C01": "19e0d60ad3b976ce9180b1c6cc41debbe13adb274822e22d37cb0bf557093113"
+  },
+  "whole_Part1_accepted": false
+}

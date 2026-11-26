@@ -1,3 +1,4 @@
+import { verifyInactiveServiceDeskSource } from './call-center-ending-service-desk-inactive-native.mjs';
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -221,6 +222,18 @@ export async function verifyEndingServiceDesk(
     .evaluate(measureTextContrast);
   expect(contrast.ratio).toBeGreaterThanOrEqual(4.5);
   await capture('reloaded', editor.locator('[data-ending-rule-saved]'));
+  const closedSource = await verifyInactiveServiceDeskSource({
+    page,
+    target,
+    prefix,
+    endpoint,
+    openEditor,
+    persist,
+    proof,
+    capture,
+    writes,
+    previous: final,
+  });
   expect(errors).toEqual([]);
   expect(forbidden).toEqual([]);
   fs.writeFileSync(
@@ -240,6 +253,7 @@ export async function verifyEndingServiceDesk(
       previous_version_preserved: true,
       first,
       final,
+      closed_source_deactivation: closedSource,
       contrast,
       screenshots,
       no_ticket_task_or_attempt_created: true,

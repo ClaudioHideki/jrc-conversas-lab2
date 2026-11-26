@@ -1,5 +1,11 @@
 <script setup>
-import { computed, getCurrentInstance, ref, useTemplateRef } from 'vue';
+import {
+  computed,
+  getCurrentInstance,
+  onBeforeUnmount,
+  ref,
+  useTemplateRef,
+} from 'vue';
 import { downloadFile } from '@chatwoot/utils';
 import { useEmitter } from 'dashboard/composables/emitter';
 import { emitter } from 'shared/helpers/mitt';
@@ -11,12 +17,17 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  canDownload: {
+    type: Boolean,
+    default: true,
+  },
   fallbackDuration: {
     type: Number,
     default: 0,
   },
 });
 
+const emit = defineEmits(['error']);
 const PLAYBACK_SPEEDS = [1, 1.5, 2];
 
 const audioPlayer = useTemplateRef('audioPlayer');
@@ -55,14 +66,24 @@ useEmitter('pause_playing_audio', currentPlayingId => {
   }
 });
 
-const playOrPause = () => {
+const playbackFailed = () => {
+  isPlaying.value = false;
+  emit('error');
+};
+onBeforeUnmount(() => audioPlayer.value?.pause());
+
+const playOrPause = async () => {
   if (isPlaying.value) {
     audioPlayer.value.pause();
     isPlaying.value = false;
   } else {
     emitter.emit('pause_playing_audio', uid);
-    audioPlayer.value.play();
-    isPlaying.value = true;
+    try {
+      await audioPlayer.value.play();
+      isPlaying.value = true;
+    } catch {
+      playbackFailed();
+    }
   }
 };
 
@@ -89,6 +110,7 @@ const changePlaybackSpeed = () => {
 };
 
 const downloadRecording = () => {
+  if (!props.canDownload) return;
   downloadFile({ url: props.src, type: 'audio' });
 };
 </script>
@@ -105,6 +127,7 @@ const downloadRecording = () => {
       @loadedmetadata="onLoadedMetadata"
       @timeupdate="onTimeUpdate"
       @ended="onEnd"
+      @error="playbackFailed"
     >
       <source :src="src" />
     </audio>
@@ -113,6 +136,7 @@ const downloadRecording = () => {
       color="slate"
       size="xs"
       class="!w-6 !p-0 text-n-slate-12"
+      data-native-recording-play
       @click="playOrPause"
     >
       <template #icon>
@@ -144,6 +168,8 @@ const downloadRecording = () => {
     />
     <div class="w-px h-3.5 bg-n-slate-6 shrink-0" />
     <Button
+      v-if="canDownload"
+      data-native-recording-download
       variant="ghost"
       color="slate"
       size="xs"

@@ -2859,9 +2859,11 @@
    "figures": [
     10
    ],
-   "status": "parcial",
+   "status": "implementado",
    "verification": {
-    "$ref": "#/shared_native_automation_texts/2523a6062d7a9350416c7e891c869980ed26ff2521967be35a82bf99682eddcb"
+    "document": "docs/jrc_contact_center/literal_audio_row_and_destination_idempotence_acceptance_20261126.json",
+    "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+    "run": 45816973780
    },
    "code_reference_ids": [
     28,
@@ -2870,71 +2872,17 @@
    "test_reference_ids": [],
    "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
    "divergences": [
-    "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
+    "Whole figure and separately specified controls remain subject to their own acceptance."
    ],
    "direct_functional_review": {
-    "status": "parcial",
-    "behavior": {
-     "$ref": "#/shared_native_automation_texts/2523a6062d7a9350416c7e891c869980ed26ff2521967be35a82bf99682eddcb"
-    },
-    "code": [
-     "app/services/jrc_contact_center/ending_actions/execute_attempt.rb",
-     "app/services/jrc_contact_center/ending_actions/project_task_destination.rb",
-     "app/services/jrc_contact_center/ending_actions/execution_transaction.rb",
-     "app/models/jrc_contact_center/ending_action_execution.rb",
-     "app/models/jrc_contact_center/ending_action_attempt_outcome.rb",
-     "app/jobs/jrc_contact_center/ending_actions_job.rb",
-     "app/services/jrc_contact_center/ending_actions/activate_rule.rb",
-     "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingRuleActivation.vue",
-     "app/services/jrc_contact_center/ending_actions/attempt_history.rb",
-     "app/javascript/dashboard/routes/dashboard/inbox/EndingAttemptHistory.vue",
-     "app/services/jrc_contact_center/ending_actions/run_pending_project_attempt.rb",
-     "app/javascript/dashboard/routes/dashboard/inbox/PendingEndingReview.vue",
-     "app/services/jrc_contact_center/ending_actions/original_customer_reference.rb",
-     "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb",
-     "app/services/jrc_contact_center/ending_actions/service_desk_ticket_destination.rb",
-     "app/services/jrc_contact_center/ending_actions/action_definition.rb",
-     "app/services/jrc_nico/helpdesk/event_dispatch.rb",
-     "app/models/jrc_nico/helpdesk/dispatch_intent.rb",
-     "app/services/jrc_contact_center/ending_actions/crm_activity_definition.rb",
-     "app/services/jrc_contact_center/ending_actions/crm_activity_destination.rb",
-     "app/services/jrc_contact_center/ending_actions/service_desk_update_definition.rb",
-     "app/services/jrc_contact_center/ending_actions/service_desk_ticket_update.rb",
-     "app/services/jrc_contact_center/ending_actions/destination_operation_definition.rb",
-     "app/services/jrc_contact_center/ending_actions/rule_definition.rb"
-    ],
-    "tests": [
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb",
-     "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb",
-     "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb",
-     "tests/playwright/tests/e2e/ui/call-center-ending-pending-native.spec.ts",
-     "spec/services/jrc_contact_center/ending_actions/original_customer_reference_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_destination_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/action_definition_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/crm_activity_definition_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/service_desk_update_definition_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/rule_definition_explicit_destination_schema_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb"
-    ],
-    "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
-    "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+    "status": "implementado",
+    "literal_clause_only": true,
+    "whole_figure_accepted": false,
+    "review": {
+     "document": "docs/jrc_contact_center/literal_audio_row_and_destination_idempotence_acceptance_20261126.json",
+     "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+     "run": 45816973780
+    }
    },
    "candidate_test_reference_ids_not_approval": [
     29,
@@ -2965,7 +2913,8 @@
     "evidence_ref": "native_automation_clause_reconciliation",
     "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
     "whole_requirement_accepted": false
-   }
+   },
+   "previous_review_recoverable_at_checkpoint": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8"
   },
   {
    "id": "D2-P0224-C03",
@@ -3335,9 +3284,11 @@
    "figures": [
     10
    ],
-   "status": "parcial",
+   "status": "implementado",
    "verification": {
-    "$ref": "#/shared_native_automation_texts/2523a6062d7a9350416c7e891c869980ed26ff2521967be35a82bf99682eddcb"
+    "document": "docs/jrc_contact_center/literal_audio_row_and_destination_idempotence_acceptance_20261126.json",
+    "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+    "run": 45816973780
    },
    "code_reference_ids": [
     28,
@@ -3346,71 +3297,17 @@
    "test_reference_ids": [],
    "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
    "divergences": [
-    "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
+    "Whole figure and separately specified controls remain subject to their own acceptance."
    ],
    "direct_functional_review": {
-    "status": "parcial",
-    "behavior": {
-     "$ref": "#/shared_native_automation_texts/2523a6062d7a9350416c7e891c869980ed26ff2521967be35a82bf99682eddcb"
-    },
-    "code": [
-     "app/services/jrc_contact_center/ending_actions/execute_attempt.rb",
-     "app/services/jrc_contact_center/ending_actions/project_task_destination.rb",
-     "app/services/jrc_contact_center/ending_actions/execution_transaction.rb",
-     "app/models/jrc_contact_center/ending_action_execution.rb",
-     "app/models/jrc_contact_center/ending_action_attempt_outcome.rb",
-     "app/jobs/jrc_contact_center/ending_actions_job.rb",
-     "app/services/jrc_contact_center/ending_actions/activate_rule.rb",
-     "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingRuleActivation.vue",
-     "app/services/jrc_contact_center/ending_actions/attempt_history.rb",
-     "app/javascript/dashboard/routes/dashboard/inbox/EndingAttemptHistory.vue",
-     "app/services/jrc_contact_center/ending_actions/run_pending_project_attempt.rb",
-     "app/javascript/dashboard/routes/dashboard/inbox/PendingEndingReview.vue",
-     "app/services/jrc_contact_center/ending_actions/original_customer_reference.rb",
-     "app/services/jrc_contact_center/ending_actions/crm_lead_destination.rb",
-     "app/services/jrc_contact_center/ending_actions/service_desk_ticket_destination.rb",
-     "app/services/jrc_contact_center/ending_actions/action_definition.rb",
-     "app/services/jrc_nico/helpdesk/event_dispatch.rb",
-     "app/models/jrc_nico/helpdesk/dispatch_intent.rb",
-     "app/services/jrc_contact_center/ending_actions/crm_activity_definition.rb",
-     "app/services/jrc_contact_center/ending_actions/crm_activity_destination.rb",
-     "app/services/jrc_contact_center/ending_actions/service_desk_update_definition.rb",
-     "app/services/jrc_contact_center/ending_actions/service_desk_ticket_update.rb",
-     "app/services/jrc_contact_center/ending_actions/destination_operation_definition.rb",
-     "app/services/jrc_contact_center/ending_actions/rule_definition.rb"
-    ],
-    "tests": [
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb",
-     "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb",
-     "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_project_run_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_pending_run_concurrency_spec.rb",
-     "tests/playwright/tests/e2e/ui/call-center-ending-pending-native.spec.ts",
-     "spec/services/jrc_contact_center/ending_actions/original_customer_reference_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/crm_lead_destination_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_destination_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/action_definition_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_nico_queue_transaction_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/crm_activity_definition_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/crm_activity_destination_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/service_desk_update_definition_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/service_desk_ticket_update_spec.rb",
-     "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/rule_definition_explicit_destination_schema_spec.rb",
-     "spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb"
-    ],
-    "visual_gap": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
-    "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+    "status": "implementado",
+    "literal_clause_only": true,
+    "whole_figure_accepted": false,
+    "review": {
+     "document": "docs/jrc_contact_center/literal_audio_row_and_destination_idempotence_acceptance_20261126.json",
+     "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+     "run": 45816973780
+    }
    },
    "candidate_test_reference_ids_not_approval": [
     29,
@@ -3441,7 +3338,8 @@
     "evidence_ref": "native_automation_clause_reconciliation",
     "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
     "whole_requirement_accepted": false
-   }
+   },
+   "previous_review_recoverable_at_checkpoint": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8"
   },
   {
    "id": "D2-P0228-C01",
@@ -6953,5 +6851,19 @@
    "D2-P0224-C04"
   ]
  },
-  "current_SD_parent_save_validation_gap": {"document": "docs/jrc_contact_center/SD_parent_save_validity_correction_20261126.json", "sha256": "3e07af63852117616ea4fd07912b0c3dfa9837a92daa49b8a11a51e4c820aac7", "status": "correction_prepared_requires_real_save_reload_and_full_CI", "failed_four_modes": true, "formal_clause_statuses_unchanged": true}
+ "current_SD_parent_save_validation_gap": {
+  "document": "docs/jrc_contact_center/SD_parent_save_validity_correction_20261126.json",
+  "sha256": "3e07af63852117616ea4fd07912b0c3dfa9837a92daa49b8a11a51e4c820aac7",
+  "status": "correction_prepared_requires_real_save_reload_and_full_CI",
+  "failed_four_modes": true,
+  "formal_clause_statuses_unchanged": true
+ },
+ "latest_bounded_native_acceptance": {
+  "document": "docs/jrc_contact_center/SD_editor_and_audio_row_native_acceptance_20261126.json",
+  "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+  "unique_literal_IDs": [
+   "D2-P0224-C02",
+   "D2-P0227-C01"
+  ]
+ }
 }

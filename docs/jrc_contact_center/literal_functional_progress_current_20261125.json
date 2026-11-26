@@ -4,20 +4,20 @@
   "new_bounded_acceptance": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
   "new_bounded_acceptance_sha256": "dc6466fe913b916c65c8b4d8b1823afa72e4c132023ece222870bee47f61906d",
   "Word_requirements_unique": 554,
-  "formal_literal_reviews_closed": 40,
-  "Parte1_proven_lower_bound_percentage": 7.22,
+  "formal_literal_reviews_closed": 43,
+  "Parte1_proven_lower_bound_percentage": 7.76,
   "not_an_estimated_implementation_percentage": true,
   "canonical_statuses": {
-    "concluido_com_aceite": 40,
+    "concluido_com_aceite": 43,
     "implementado_sem_aceite": 0,
-    "parcial": 446,
+    "parcial": 443,
     "pendente": 44,
     "bloqueado": 24
   },
   "triage_466_preserved_as_historical_snapshot": true,
   "remaining_partial_triage": {
-    "implemented_pending_homologation": 121,
-    "small_adjustments": 103,
+    "implemented_pending_homologation": 120,
+    "small_adjustments": 101,
     "significant_development": 166,
     "documental_not_autonomous_functions": 56
   },
@@ -26,10 +26,10 @@
   "evidence_reuse_requires_unchanged_source_hashes": true,
   "whole_figure14_or_Part1_accepted": false,
   "figure10_unchanged": {
-    "formally_closed": 7,
+    "formally_closed": 9,
     "total": 25,
-    "percentage": 28.0,
-    "changed_by_bounded_mode_timing_acceptance": true
+    "percentage": 36.0,
+    "changed_by_bounded_idempotence_acceptance": true
   },
   "internal_engineering_effort_estimate_hours": {
     "development": [
@@ -89,5 +89,10 @@
     "D2-P0225-C01",
     "D2-P0228-C01"
   ],
-  "current_bounded_triage_change_note": "C05 closed from significant work; C04 from awaiting acceptance. Two formerly pending mixed-destination clauses now partial/small UI gaps based on actual native proofs. Historical466 triage preserved."
+  "current_bounded_triage_change_note": "Per-file audio Play closed from awaiting homologation; two literal idempotence requirements closed from small adjustments. No whole-figure acceptance or implementation percentage inferred from test counts.",
+  "latest_audio_and_idempotence_acceptance": {
+    "document": "docs/jrc_contact_center/literal_audio_row_and_destination_idempotence_acceptance_20261126.json",
+    "sha256": "57e477a6b31e3e3f836c68b2abed2e962e8db3f2559d0625e90f79c10edd63fa",
+    "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8"
+  }
 }

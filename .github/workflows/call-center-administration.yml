@@ -129,11 +129,27 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-ending-sd-public-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 107
+          assert report['numTotalTests'] == report['numPassedTests'] == 108
           assert report['numFailedTests'] == report['numPendingTests'] == 0
           assert len(report['testResults']) == 5
           assert all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useEndingAutomationEditor.spec.js': 26, 'AudioAssetLibrary.spec.js': 51, 'AudioLibraryPreview.spec.js': 10, 'EndingAutomationEditor.spec.js': 8, 'EndingServiceDeskConfiguration.spec.js': 12}
+          expected = {'useEndingAutomationEditor.spec.js': 27, 'AudioAssetLibrary.spec.js': 51, 'AudioLibraryPreview.spec.js': 10, 'EndingAutomationEditor.spec.js': 8, 'EndingServiceDeskConfiguration.spec.js': 12}
+          assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
+          assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
+          PY
+      - name: Focused native recordings selection, shared player and retained ACW target controls
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.spec.js \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json --outputFile=/tmp/call-center-recordings-preflight-vitest.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
+          assert report['numTotalTests'] == report['numPassedTests'] == 29
+          assert report['numFailedTests'] == report['numPendingTests'] == 0
+          assert len(report['testResults']) == 3 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'useScopedRecordings.spec.js': 17, 'ScopedNativeRecordingPlayer.spec.js': 5, 'AcwRuleTarget.spec.js': 7}
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           PY
@@ -199,10 +215,25 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-ending-sd-public-preflight.json').read_text())
-          assert report['summary']['example_count'] == len(report['examples']) == 17
+          assert report['summary']['example_count'] == len(report['examples']) == 18
           assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
-          assert len({row['id'] for row in report['examples']}) == 17
+          assert len({row['id'] for row in report['examples']}) == 18
           assert all(row['status'] == 'passed' and row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb' for row in report['examples'])
+          PY
+      - name: Focused real recording scopes and private provider byte boundary
+        run: |
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb app/services/jrc_contact_center/recorded_calls.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb script/jrc_call_center_recordings_seed.rb script/jrc_call_center_recordings_evidence.rb spec/integration/jrc_contact_center/owned_recording_media.rb spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb --format json --out /tmp/call-center-recordings-lint.json
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb --format progress --format json --out /tmp/call-center-recordings-preflight.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-recordings-preflight.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) == 20
+          assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert len({row['id'] for row in report['examples']}) == 20
+          from collections import Counter
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb': 18, 'spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb': 2}
           PY
       - name: Focused public source and CRM authorization before full regressions
         run: |
@@ -1104,7 +1135,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 280
+          assert stats['expected'] == 284
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')

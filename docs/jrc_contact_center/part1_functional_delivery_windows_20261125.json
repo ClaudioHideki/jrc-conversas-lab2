@@ -98,10 +98,18 @@
     "accepted_after_new_native_and_four_mode_Chrome_only": true
   },
   "current_verified_delivery": {
-    "source_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
-    "document": "docs/jrc_contact_center/ending_public_Project_native_acceptance_20261126.json",
-    "sha256": "6a4b1e84ae127169c84dbc8bbb9850f2584cfc5e8c7a674141e66eda8419a12a",
-    "formal_literal_clauses_closed_total": 40
+    "document": "docs/jrc_contact_center/SD_editor_and_audio_row_native_acceptance_20261126.json",
+    "source_sha": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+    "run": 45816973780,
+    "usable_functions": [
+      "Native SD rule editor, review, persistence and immutable edit",
+      "Institutional audio per-row playback"
+    ],
+    "literal_requirements_newly_closed": [
+      "D2-P0154-C04",
+      "D2-P0224-C02",
+      "D2-P0227-C01"
+    ]
   },
   "next_grouped_delivery": {
     "figures": [
@@ -115,5 +123,14 @@
     "source_group_native_Rails_and_audio_four_modes_verified_individually": true,
     "candidate_complete_accepted": false,
     "targeted_composable_functional_regressions_passed": 3
-  }
+  },
+  "next_grouped_increment": {
+    "document": "docs/jrc_contact_center/recordings_and_inactive_SD_candidate_20261126.json",
+    "figures": [
+      10,
+      17
+    ],
+    "native_or_browser_accepted": false
+  },
+  "effective_hours_not_measured_not_fabricated": true
 }

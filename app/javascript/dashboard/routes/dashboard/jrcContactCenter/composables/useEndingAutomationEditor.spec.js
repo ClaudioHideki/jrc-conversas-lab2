@@ -194,6 +194,35 @@ describe('authorized operational ending-rule editor', () => {
     ).toEqual({ unit_id: '11' });
   });
 
+  it('permits authorized Service Desk deactivation for an inactive source while preserving the existing activation block', async () => {
+    const native = source();
+    native.data.item.configuration_available = false;
+    native.data.item.service_desk = {
+      configuration_available: true,
+      unit: { id: '11', name: 'SYNTHETIC authorized native unit' },
+    };
+    API.endingRuleSourceContext.mockResolvedValue(native);
+    const { editor } = mountEditor();
+    await flushPromises();
+    await editor.edit(editor.items.value[0]);
+    editor.draft.value.destination_schema_version = 2;
+    editor.draft.value.active = false;
+    editor.draft.value.actions.push({
+      kind: 'service_desk',
+      parameters: { unit_id: '11' },
+    });
+    await flushPromises();
+    editor.reviewed.value = true;
+    expect(editor.serviceDeskOptions.value.configuration_available).toBe(true);
+    expect(editor.canSave.value).toBe(true);
+    editor.draft.value.active = true;
+    await flushPromises();
+    editor.reviewed.value = true;
+    expect(editor.canSave.value).toBe(false);
+    await editor.save();
+    expect(API.saveEndingRule).not.toHaveBeenCalled();
+  });
+
   it('does not extend the Service Desk admission to a v1 payload or unimplemented notification and Nico actions', async () => {
     const native = source();
     native.data.item.service_desk = {

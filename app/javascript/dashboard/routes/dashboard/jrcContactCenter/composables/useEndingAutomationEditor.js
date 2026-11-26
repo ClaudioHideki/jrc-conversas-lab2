@@ -63,9 +63,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
   });
   const serviceDeskOptions = computed(() => {
     const value = source.value?.service_desk;
-    return source.value?.configuration_available === true &&
-      value?.configuration_available === true &&
-      value.unit
+    return value?.configuration_available === true && value.unit
       ? value
       : { configuration_available: false };
   });

@@ -7,6 +7,7 @@ require_relative 'jrc_call_center_ending_attempt_history_seed'
 require_relative 'jrc_call_center_ending_pending_seed'
 require_relative 'jrc_call_center_ending_public_seed'
 require_relative 'jrc_call_center_ending_service_desk_seed'
+require_relative 'jrc_call_center_recordings_seed'
 require_relative 'jrc_call_center_audio_folder_seed'
 require_relative 'jrc_call_center_team_supervision_seed'
 require_relative 'jrc_call_center_pause_approval_seed'
@@ -31,7 +32,7 @@ class JrcContactCenter::SyntheticPauseSeed
         editor operations withdrawal duration acw routing state_history
         team_withdrawal team_activity acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
         operational_forms form_bindings hoya_forms required_endings ending_confirmation membership_eligibility audio_folders team_supervision approval
-        ending_automations ending_activation ending_history ending_pending ending_operational ending_service_desk
+        ending_automations ending_activation ending_history ending_pending ending_operational ending_service_desk recordings
       ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
@@ -62,6 +63,9 @@ class JrcContactCenter::SyntheticPauseSeed
     end
     if @project.end_with?('-audio_folders')
       payload.merge!(JrcContactCenter::SyntheticAudioFolderSeed.call(account: @account, queues: queues, member: admin))
+    end
+    if @project.end_with?('-recordings')
+      payload.merge!(JrcContactCenter::SyntheticRecordingsSeed.call(account: @account, operator: operator, viewer: scoped, queues: queues))
     end
     prepare_pause_sources(payload, queues, admin, operator)
     payload

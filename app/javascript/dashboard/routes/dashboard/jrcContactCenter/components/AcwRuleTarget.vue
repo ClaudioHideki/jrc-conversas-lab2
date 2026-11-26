@@ -7,6 +7,7 @@ const props = defineProps({
   scope: { type: String, required: true },
   modelValue: { type: String, default: '' },
   disabled: { type: Boolean, default: false },
+  required: { type: Boolean, default: true },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -17,6 +18,11 @@ const items = ref([]);
 const loading = ref(false);
 const failed = ref(false);
 let generation = 0;
+const lookup = params => {
+  if (props.scope === 'queue') return API.queues(props.accountId, params);
+  if (props.scope === 'unit') return API.units(props.accountId, params);
+  return API.administrativeList(props.accountId, 'teams', params);
+};
 watch(
   () => [props.accountId, props.scope],
   () => {
@@ -38,10 +44,7 @@ watch(
     pages.value = 0;
     try {
       const params = { q: q.value, page: page.value, per_page: 20 };
-      const response =
-        props.scope === 'queue'
-          ? await API.queues(props.accountId, params)
-          : await API.administrativeList(props.accountId, 'teams', params);
+      const response = await lookup(params);
       if (generation !== version) return;
       items.value = response.data.items;
       pages.value = response.data.meta.pages;
@@ -75,7 +78,7 @@ onBeforeUnmount(() => {
       <select
         :value="modelValue"
         :disabled="disabled || loading"
-        required
+        :required="required"
         class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
         @change="emit('update:modelValue', $event.target.value)"
       >

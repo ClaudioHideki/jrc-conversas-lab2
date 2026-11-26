@@ -493,6 +493,15 @@ export default {
       : axios.post(`${base(accountId)}/routing_rules`, {
           routing_rule: routingRule,
         }),
+  recordings: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/recordings`, { params }),
+  recording: (accountId, id) =>
+    axios.get(`${base(accountId)}/recordings/${id}`),
+  recordingBytes: (accountId, id, action, signal) =>
+    axios.get(`${base(accountId)}/recordings/${id}/${action}`, {
+      responseType: 'blob',
+      signal,
+    }),
   reportSummary: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/reports/summary`, { params }),
   integrationCapabilities: accountId =>
