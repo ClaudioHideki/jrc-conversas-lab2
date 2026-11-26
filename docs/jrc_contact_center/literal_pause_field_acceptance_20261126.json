@@ -1,0 +1,40 @@
+{
+  "verified_source_sha": "7c317dbe997cbbd6c314f5dfdbb6fee9c107c056",
+  "run": 45743111635,
+  "artifact": 15085629243,
+  "artifact_sha256": "8083fdcbe2414f285850a5f75db34158a1aefc243ab25894b33e910b5e0fcf43",
+  "accepted_literal_clauses": {
+    "D2-P0191-C01": {
+      "expected_sha256": "aca6df107c0b098ec20adbdb94b11b526050f79895f0c4f5c5c386c7e82ce73c",
+      "evidence": "Real 422 keeps values and popup open; the invalid Code is focused and its adjacent error is visible. HH:MM range errors also retain the draft."
+    }
+  },
+  "code_sha256_unchanged_in_next_payload": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue": "56fa36af3fb6336ae449d3502f0fcf4af2ef293fb33c7f20535b56695029df73",
+    "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "1ef56c3274103bad8fb9be3a9572a17db20fb592d9519fefa0c0d12f42cd4e7d"
+  },
+  "actual_original_images_opened": 4,
+  "screenshots": [
+    {
+      "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-pause-catalog-popup.png",
+      "sha256": "960e782eb397fb1483d1d50012d6ce808e60579a5dacda6a6a8594afcd86ec0e"
+    },
+    {
+      "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-pause-catalog-popup.png",
+      "sha256": "f7b36a401c5c11344e89feda8b497c1462ade648896ae385afb2bc171898983b"
+    },
+    {
+      "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-pause-catalog-popup.png",
+      "sha256": "46bdd885415e4ac19e095f4f09def84d7a3d08989393d4573eab0b436e379b25"
+    },
+    {
+      "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-pause-catalog-popup.png",
+      "sha256": "6a2c85567b89275597592a3faeee26b429a071f28ebf75237bf6ad6c8806efc9"
+    }
+  ],
+  "desktop_and_mobile_light_and_dark_passed": true,
+  "existing_five_HHMM_literal_acceptances_preserved_not_counted_again": true,
+  "new_tests_executed_for_this_registration": 0,
+  "parent_full_CI_approved": false,
+  "whole_figure08_or_Part1_accepted": false
+}

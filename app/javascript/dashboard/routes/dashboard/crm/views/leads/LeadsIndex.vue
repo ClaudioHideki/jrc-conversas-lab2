@@ -43,6 +43,7 @@ const isCurrent = context =>
 onBeforeUnmount(() => {
   disposed = true;
   generation += 1;
+  store.dispatch('jrcCrm/leads/fetchLead', null);
 });
 const metadataError = ref('');
 const listError = computed(() => store.getters['jrcCrm/leads/error']);
@@ -109,12 +110,42 @@ const kanbanColumns = computed(() =>
     items: leads.value.filter(item => item.status === column.status),
   }))
 );
-const selectedLead = computed(() =>
-  leads.value.find(item => String(item.id) === String(route.query.leadId))
-);
+const selectedLead = computed(() => {
+  const selectedId = String(route.query.leadId || '');
+  const listed = leads.value.find(item => String(item.id) === selectedId);
+  if (listed) return listed;
+  const detail = store.getters['jrcCrm/leads/currentLead'];
+  return detail && String(detail.id) === selectedId ? detail : null;
+});
+// Reuse the native detail-request invalidation before the initial render.
+// A cached same-account detail is not a substitute for a current show request.
+if (route.query.leadId) store.dispatch('jrcCrm/leads/fetchLead', null);
+const detailError = ref(false);
+const loadSelectedLead = async () => {
+  const id = String(route.query.leadId || '');
+  const listed = leads.value.some(item => String(item.id) === id);
+  if (!/^[1-9]\d{0,18}$/.test(id) || listed) return;
+  const context = captureContext();
+  await store.dispatch('jrcCrm/leads/fetchLead', id);
+  if (!isCurrent(context) || String(route.query.leadId) !== id) return;
+  detailError.value = !selectedLead.value;
+};
 const { segmentParams, watchSegment } = useCustomerSegmentFilter();
-const load = () =>
-  store.dispatch('jrcCrm/leads/fetchLeads', segmentParams(filters));
+const load = async () => {
+  const context = captureContext();
+  await store.dispatch('jrcCrm/leads/fetchLeads', segmentParams(filters));
+  if (isCurrent(context)) await loadSelectedLead();
+};
+watch(
+  () => route.query.leadId,
+  () => {
+    detailError.value = false;
+    // Reuse the native request generation/authority guard. Clearing or changing
+    // a selection invalidates any older in-flight detail without resetting filters.
+    store.dispatch('jrcCrm/leads/fetchLead', null);
+    loadSelectedLead();
+  }
+);
 watchSegment(load);
 
 const openDetails = lead =>
@@ -125,7 +156,9 @@ const closeDetails = () => {
   router.replace({ query });
 };
 const replaceLead = updated => {
-  const lead = leads.value.find(item => item.id === updated.id);
+  const listed = leads.value.find(item => item.id === updated.id);
+  const lead =
+    listed || (selectedLead.value?.id === updated.id && selectedLead.value);
   if (lead) Object.assign(lead, updated);
 };
 
@@ -254,6 +287,7 @@ const initialize = async () => {
 };
 watch(identity, () => {
   generation += 1;
+  detailError.value = false;
   showForm.value = false;
   convertingLead.value = null;
   pipelines.value = [];
@@ -292,6 +326,14 @@ onMounted(() => {
         <i class="i-lucide-plus mr-2 inline size-4" />Novo lead
       </button>
     </header>
+    <p
+      v-if="detailError && route.query.leadId"
+      role="alert"
+      class="mb-3 rounded-lg bg-n-ruby-2 p-3 text-sm text-n-ruby-11"
+      data-lead-detail-unavailable
+    >
+      {{ t('CRM.LEAD_LIST.LOAD_ERROR') }}
+    </p>
     <section class="mb-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
       <article
         v-for="item in leadSummary"

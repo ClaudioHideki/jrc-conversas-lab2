@@ -37,7 +37,7 @@ export async function verifyScopedEndingEditor(parent, info, target) {
   });
   await page.addInitScript(
     ({ auth, isDark }) => {
-      window.__SYNTHETIC_AUTH__ = auth;
+      Reflect.set(window, '__SYNTHETIC_AUTH__', auth);
       document.addEventListener('DOMContentLoaded', () =>
         document.documentElement.classList.toggle('dark', isDark)
       );
@@ -60,11 +60,40 @@ export async function verifyScopedEndingEditor(parent, info, target) {
   const initial = await page.request.get(endpoint, { headers: target.scoped });
   expect(initial.status()).toBe(200);
   expect((await initial.json()).items).toEqual([]);
-  const global = await page.request.get(
-    `http://127.0.0.1:5387${prefix}/acw_policy`,
-    { headers: target.scoped }
+  const globalEndpoint = `http://127.0.0.1:5387${prefix}/acw_policy`;
+  const global = await page.request.get(globalEndpoint, {
+    headers: target.scoped,
+  });
+  expect(global.status()).toBe(200);
+  const publicPolicy = (await global.json()).item;
+  expect(Object.keys(publicPolicy).sort()).toEqual([
+    'enabled',
+    'id',
+    'limits',
+    'require_reason',
+    'require_result',
+    'revision',
+    'voice_required',
+  ]);
+  expect(JSON.stringify(publicPolicy)).not.toContain(
+    'SYNTHETIC private persisted title'
   );
-  expect([401, 403]).toContain(global.status());
+  const deniedGlobal = await page.request.patch(globalEndpoint, {
+    headers: target.scoped,
+    data: {
+      limits: {
+        voice: publicPolicy.limits.voice === 120 ? 121 : 120,
+        whatsapp: publicPolicy.limits.whatsapp,
+      },
+      expected_revision: publicPolicy.revision,
+    },
+  });
+  expect([401, 403]).toContain(deniedGlobal.status());
+  const afterDenied = await page.request.get(globalEndpoint, {
+    headers: target.scoped,
+  });
+  expect(afterDenied.status()).toBe(200);
+  expect((await afterDenied.json()).item).toEqual(publicPolicy);
   const other = await page.request.get(
     `${endpoint}/source_context?queue_id=${target.denied_queue_id}`,
     { headers: target.scoped }
@@ -162,7 +191,10 @@ export async function verifyScopedEndingEditor(parent, info, target) {
     scoped_rule_saved_and_reloaded: true,
     current_source_authorized: true,
     other_source_status: other.status(),
-    global_policy_status: global.status(),
+    global_policy_status: deniedGlobal.status(),
+    global_public_read_status: global.status(),
+    global_public_read_private_configuration_absent: true,
+    global_policy_unchanged_after_denied_write: true,
     private_project_status: privateProject.status(),
     private_template_unexposed: true,
     native_configure_not_group: true,
