@@ -24,28 +24,25 @@ const formatPercent = value => (value ? `${value}%` : '0%');
 
 <template>
   <div class="flex flex-col gap-4">
-    <div
-      class="flex sm:flex-row flex-col w-full gap-4 sm:gap-14 shadow outline-1 outline outline-n-container rounded-xl bg-n-solid-2 px-6 py-5"
-    >
+    <div class="grid gap-3 sm:grid-cols-3">
       <CsatMetricCard
+        class="bg-gradient-to-br from-n-blue-3 to-n-solid-1"
         :label="$t('CSAT_REPORTS.METRIC.TOTAL_RESPONSES.LABEL')"
         :tooltip="$t('CSAT_REPORTS.METRIC.TOTAL_RESPONSES.TOOLTIP')"
         :value="responseCount"
         :is-loading="isLoading"
       />
 
-      <div class="w-full sm:w-px bg-n-strong" />
-
       <CsatMetricCard
+        class="bg-gradient-to-br from-n-teal-3 to-n-solid-1"
         :label="$t('CSAT_REPORTS.METRIC.SATISFACTION_SCORE.LABEL')"
         :tooltip="$t('CSAT_REPORTS.METRIC.SATISFACTION_SCORE.TOOLTIP')"
         :value="formatPercent(satisfactionScore)"
         :is-loading="isLoading"
       />
 
-      <div class="w-full sm:w-px bg-n-strong" />
-
       <CsatMetricCard
+        class="bg-gradient-to-br from-n-violet-3 to-n-solid-1"
         :label="$t('CSAT_REPORTS.METRIC.RESPONSE_RATE.LABEL')"
         :tooltip="$t('CSAT_REPORTS.METRIC.RESPONSE_RATE.TOOLTIP')"
         :value="formatPercent(responseRate)"

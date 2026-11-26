@@ -1,5 +1,13 @@
 <script setup>
-import { computed, inject, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import {
+  computed,
+  defineAsyncComponent,
+  inject,
+  nextTick,
+  onBeforeUnmount,
+  ref,
+  watch,
+} from 'vue';
 import { useElementSize, useIntersectionObserver } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import {
@@ -26,6 +34,7 @@ import AgentStatePanel from 'dashboard/routes/dashboard/jrcContactCenter/views/A
 import InboxChannelGroups from './InboxChannelGroups.vue';
 import InboxOriginLabel from './InboxOriginLabel.vue';
 import InboxCustomerPanel from './InboxCustomerPanel.vue';
+import { useQuickActionContext } from 'dashboard/components-next/layout/useQuickActionAccess';
 import InboxContextContent from './InboxContextContent.vue';
 import InboxQuickActions from './InboxQuickActions.vue';
 import {
@@ -80,6 +89,10 @@ const emit = defineEmits([
   'refresh',
   'retryConversations',
 ]);
+const LeadCreateModal = defineAsyncComponent(
+  () => import('dashboard/routes/dashboard/crm/views/leads/LeadCreateModal.vue')
+);
+
 const { t } = useI18n();
 const store = useStore();
 const labels = computed(() => inbox360Labels(t));
@@ -316,6 +329,43 @@ const {
   failed: customerFailed,
   unavailable,
 } = useInboxCustomer360(identity, features);
+const { crmAllowed } = useQuickActionContext();
+const leadContact = computed(() => {
+  const person = contact.value;
+  if (
+    !features.value.crm ||
+    !crmAllowed.value ||
+    voiceView.value ||
+    customerLoading.value ||
+    !props.currentConversationId ||
+    !person?.id ||
+    Number(person.id) !== Number(contactId.value) ||
+    person.additional_attributes?.jrc_broker_recipient_kind === 'GROUP' ||
+    /^jrc-group-|@g\.us$/i.test(person.identifier || '')
+  )
+    return null;
+  const matchedCompany = company.value;
+  return {
+    ...person,
+    company_id: matchedCompany?.id || person.company_id,
+    company: matchedCompany || person.company,
+  };
+});
+const activeLead = ref(false);
+watch(
+  [
+    () => props.accountId,
+    () => props.currentConversationId,
+    currentUserId,
+    () => leadContact.value?.id,
+  ],
+  () => {
+    activeLead.value = false;
+  }
+);
+const openContactLead = () => {
+  if (leadContact.value) activeLead.value = true;
+};
 const whatsappTarget = computed(() => {
   const item = props.conversations.find(
     conversationItem =>
@@ -347,6 +397,7 @@ const customerProps = computed(() => ({
     (isVoice.value && callDetails.value?.customerStatus === 'error'),
   unavailable: unavailable.value,
   crmEnabled: features.value.crm,
+  canCreateLead: !!leadContact.value,
   interaction: isVoice.value
     ? { callSessionId: props.currentCallId }
     : { conversationId: props.currentConversationId },
@@ -1692,6 +1743,7 @@ onBeforeUnmount(() => {
           :key="`${accountId}-${identity.contactId}`"
           @show-tab="showTab"
           @more="detailsDialog.open()"
+          @create-lead="openContactLead"
         />
       </aside>
     </div>
@@ -1735,9 +1787,20 @@ onBeforeUnmount(() => {
           @close="customerDialog.close()"
           @show-tab="showTab"
           @more="detailsDialog.open()"
+          @create-lead="
+            customerDialog.close();
+            openContactLead();
+          "
         />
       </div>
     </Dialog>
+    <LeadCreateModal
+      v-if="activeLead && leadContact"
+      :contact="leadContact"
+      :source="channelKey"
+      @close="activeLead = false"
+      @created="activeLead = false"
+    />
     <Dialog
       ref="detailsDialog"
       :title="t('JRC_CONTACT_CENTER.INBOX_360.MORE')"

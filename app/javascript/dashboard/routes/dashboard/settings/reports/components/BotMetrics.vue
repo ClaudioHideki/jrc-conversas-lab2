@@ -37,32 +37,30 @@ onMounted(fetchMetrics);
 </script>
 
 <template>
-  <div
-    class="flex flex-wrap mx-0 shadow outline-1 outline outline-n-container rounded-xl bg-n-solid-2 px-6 py-5"
-  >
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
     <ReportMetricCard
       :label="$t('BOT_REPORTS.METRIC.TOTAL_CONVERSATIONS.LABEL')"
       :info-text="$t('BOT_REPORTS.METRIC.TOTAL_CONVERSATIONS.TOOLTIP')"
       :value="conversationCount"
-      class="flex-1"
+      class="bg-gradient-to-br from-n-violet-3 to-n-solid-1"
     />
     <ReportMetricCard
       :label="$t('BOT_REPORTS.METRIC.TOTAL_RESPONSES.LABEL')"
       :info-text="$t('BOT_REPORTS.METRIC.TOTAL_RESPONSES.TOOLTIP')"
       :value="messageCount"
-      class="flex-1"
+      class="bg-gradient-to-br from-n-blue-3 to-n-solid-1"
     />
     <ReportMetricCard
       :label="$t('BOT_REPORTS.METRIC.RESOLUTION_RATE.LABEL')"
       :info-text="$t('BOT_REPORTS.METRIC.RESOLUTION_RATE.TOOLTIP')"
       :value="formatToPercent(resolutionRate)"
-      class="flex-1"
+      class="bg-gradient-to-br from-n-teal-3 to-n-solid-1"
     />
     <ReportMetricCard
       :label="$t('BOT_REPORTS.METRIC.HANDOFF_RATE.LABEL')"
       :info-text="$t('BOT_REPORTS.METRIC.HANDOFF_RATE.TOOLTIP')"
       :value="formatToPercent(handoffRate)"
-      class="flex-1"
+      class="bg-gradient-to-br from-n-amber-3 to-n-solid-1"
     />
   </div>
 </template>

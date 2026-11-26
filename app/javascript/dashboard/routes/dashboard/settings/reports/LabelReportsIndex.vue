@@ -13,6 +13,8 @@ const onDownloadClick = () => {
 
 <template>
   <ReportHeader
+    accent="violet"
+    icon="i-lucide-tags"
     :header-title="$t('LABEL_REPORTS.HEADER')"
     :header-description="$t('LABEL_REPORTS.DESCRIPTION')"
   >

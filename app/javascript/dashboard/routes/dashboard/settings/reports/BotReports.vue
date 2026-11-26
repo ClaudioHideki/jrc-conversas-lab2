@@ -86,7 +86,11 @@ export default {
 </script>
 
 <template>
-  <ReportHeader :header-title="$t('BOT_REPORTS.HEADER')" />
+  <ReportHeader
+    accent="violet"
+    icon="i-lucide-bot"
+    :header-title="$t('BOT_REPORTS.HEADER')"
+  />
   <div class="flex flex-col gap-4">
     <ReportFilters
       :show-entity-filter="false"

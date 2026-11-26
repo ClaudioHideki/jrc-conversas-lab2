@@ -81,7 +81,11 @@ export default {
 </script>
 
 <template>
-  <ReportHeader :header-title="$t('SLA_REPORTS.HEADER')">
+  <ReportHeader
+    accent="amber"
+    icon="i-lucide-timer"
+    :header-title="$t('SLA_REPORTS.HEADER')"
+  >
     <V4Button
       :label="$t('SLA_REPORTS.DOWNLOAD_SLA_REPORTS')"
       icon="i-ph-download-simple"

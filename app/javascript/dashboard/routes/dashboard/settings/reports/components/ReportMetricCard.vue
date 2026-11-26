@@ -22,6 +22,7 @@ defineProps({
 <template>
   <div
     data-test-id="reportMetricContainer"
+    class="min-w-0 rounded-2xl border border-n-weak p-4 shadow-sm sm:p-5"
     :class="{
       'grayscale pointer-events-none opacity-30': disabled,
     }"
@@ -38,7 +39,7 @@ defineProps({
     </h3>
     <h4
       data-test-id="reportMetricValue"
-      class="mt-1 mb-0 text-2xl text-n-slate-12"
+      class="mb-0 mt-2 text-3xl font-semibold tracking-tight text-n-slate-12 tabular-nums"
     >
       {{ value }}
     </h4>

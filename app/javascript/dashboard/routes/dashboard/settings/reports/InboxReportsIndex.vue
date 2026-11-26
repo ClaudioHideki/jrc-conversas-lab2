@@ -13,6 +13,8 @@ const onDownloadClick = () => {
 
 <template>
   <ReportHeader
+    accent="blue"
+    icon="i-lucide-inbox"
     :header-title="$t('INBOX_REPORTS.HEADER')"
     :header-description="$t('INBOX_REPORTS.DESCRIPTION')"
   >

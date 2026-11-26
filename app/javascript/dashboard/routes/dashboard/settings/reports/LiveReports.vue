@@ -141,7 +141,6 @@ const groups = {
         {
           key: 'agents',
           view: defineAsyncComponent(() => import('./AgentReportsIndex.vue')),
-          props: { embedded: true },
         },
         {
           key: 'teams',

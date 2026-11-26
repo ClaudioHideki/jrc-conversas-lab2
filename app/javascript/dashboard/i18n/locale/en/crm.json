@@ -256,6 +256,11 @@
       "UNSAVED": "Salve as alterações antes de baixar o PDF. Se houve falha ao atualizar um produto, reabra a proposta e revise os dados primeiro."
     },
     "LEAD_FORM": {
+      "COMPANY_CONTACT": "Company contact",
+      "EXISTING_CONTACT": "Existing contact",
+      "MORE_CONTACTS": "Show more contacts",
+      "NO_CONTACTS": "No contacts found.",
+      "CONTACT_FALLBACK": "Contact #{id}",
       "TITLE": "Novo Lead",
       "CLOSE": "Fechar",
       "NAME": "Nome *",

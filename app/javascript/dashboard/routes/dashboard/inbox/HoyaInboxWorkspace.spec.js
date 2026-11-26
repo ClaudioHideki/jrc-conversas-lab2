@@ -4,11 +4,19 @@ import { createStore } from 'vuex';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { useSipWebphone } from 'dashboard/routes/dashboard/webphone/useSipWebphone';
 import CCAPI from 'dashboard/api/jrcContactCenter';
+import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+import ContactAPI from 'dashboard/api/contacts';
+import CustomerAPI from 'dashboard/api/jrcCustomers';
+import { customersAPI } from 'dashboard/api/crm/commercialCycle';
 import HoyaInboxWorkspace from './HoyaInboxWorkspace.vue';
 import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 import { CONVERSATION_TOOLS } from './conversationTools';
 import { GLOBAL_VOICE_SHELL } from '../webphone/voiceShell';
 const pagination = vi.hoisted(() => ({ observe: null }));
+const crmAccess = ref(false);
+vi.mock('dashboard/components-next/layout/useQuickActionAccess', () => ({
+  useQuickActionContext: () => ({ crmAllowed: crmAccess }),
+}));
 vi.mock('@vueuse/core', async importOriginal => ({
   ...(await importOriginal()),
   useIntersectionObserver: vi.fn((target, callback) => {
@@ -27,7 +35,7 @@ vi.mock('dashboard/composables/useWhatsappCallSession', () => ({
 }));
 vi.mock('vue-router', async importOriginal => ({
   ...(await importOriginal()),
-  useRoute: () => ({ query: {} }),
+  useRoute: () => ({ params: { accountId: '1' }, query: {} }),
 }));
 vi.mock('dashboard/routes/dashboard/webphone/useSipWebphone', () => ({
   useSipWebphone: vi.fn(),
@@ -38,6 +46,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
     qualifications: vi.fn(),
     startQualification: vi.fn(),
     completeQualification: vi.fn(),
+    cases: vi.fn(),
   },
 }));
 enableAutoUnmount(afterEach);
@@ -60,6 +69,7 @@ const pendingResponse = {
     policy: { limits: { voice: 40, whatsapp: 50 } },
   },
 };
+
 const props = {
   accountId: 1,
   softphoneAccess: true,
@@ -302,6 +312,95 @@ describe('inbox native SIP action guards', () => {
     });
   });
 
+  it('opens the selected conversation contact as a lead and closes it if CRM access changes', async () => {
+    const person = {
+      id: 9,
+      name: 'Pessoa Teste',
+      email: 'pessoa@example.test',
+    };
+    const company = { id: 42, name: 'Empresa Teste' };
+    const inboxConversation = {
+      id: 21,
+      account_id: 1,
+      inbox_id: 3,
+      meta: { sender: person },
+    };
+    const crmStore = createStore({
+      getters: {
+        getSelectedChat: () => ({}),
+        'accounts/isFeatureEnabledonAccount': () => (_id, flag) =>
+          [FEATURE_FLAGS.JRC_CRM, FEATURE_FLAGS.JRC_CUSTOMER_MASTER].includes(
+            flag
+          ),
+      },
+    });
+    const account = vi
+      .spyOn(ContactAPI, 'accountIdFromRoute', 'get')
+      .mockReturnValue('1');
+    const contact = vi
+      .spyOn(ContactAPI, 'show')
+      .mockResolvedValue({ data: { payload: person } });
+    const customer = vi
+      .spyOn(customersAPI, 'show')
+      .mockResolvedValue({ data: {} });
+    const master = vi
+      .spyOn(CustomerAPI, 'contact')
+      .mockResolvedValue({ data: { payload: { company_id: company.id } } });
+    const companyLookup = vi
+      .spyOn(CustomerAPI, 'company')
+      .mockResolvedValue({ data: { payload: company } });
+    CCAPI.cases.mockResolvedValue({ data: { items: [] } });
+    crmAccess.value = true;
+    try {
+      const wrapper = mount(HoyaInboxWorkspace, {
+        props: {
+          ...props,
+          currentCallId: null,
+          currentConversationId: inboxConversation.id,
+          conversations: [inboxConversation],
+          calls: [],
+          context: null,
+          inboxFor: () => ({ channel_type: 'Channel::Whatsapp' }),
+        },
+        global: {
+          ...global,
+          plugins: [crmStore],
+          stubs: {
+            ...global.stubs,
+            LeadCreateModal: {
+              name: 'LeadCreateModal',
+              props: ['contact', 'source'],
+              template: '<div />',
+            },
+          },
+        },
+      });
+      await flushPromises();
+      await wrapper
+        .get('[data-testid="create-conversation-lead"]')
+        .trigger('click');
+      await flushPromises();
+      expect(
+        wrapper.getComponent({ name: 'LeadCreateModal' }).props()
+      ).toMatchObject({
+        contact: { ...person, company_id: company.id, company },
+        source: 'whatsapp',
+      });
+      crmAccess.value = false;
+      await flushPromises();
+      expect(wrapper.findComponent({ name: 'LeadCreateModal' }).exists()).toBe(
+        false
+      );
+      expect(
+        wrapper.find('[data-testid="create-conversation-lead"]').exists()
+      ).toBe(false);
+    } finally {
+      crmAccess.value = false;
+      [account, contact, customer, master, companyLookup].forEach(mock =>
+        mock.mockRestore()
+      );
+    }
+  });
   it('places the native tools after Tasks and passes only the selected Account conversation to them', async () => {
     const wrapper = mount(HoyaInboxWorkspace, {
       props: {

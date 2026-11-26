@@ -42,11 +42,11 @@ const getRatingCount = value => {
 
 <template>
   <div
-    class="shadow outline-1 outline outline-n-container rounded-xl bg-n-solid-2 px-6 py-5"
+    class="rounded-2xl border border-n-teal-5 bg-n-solid-1 px-4 py-5 shadow-sm sm:px-6"
   >
-    <span class="text-sm font-medium text-n-slate-11">
+    <h3 class="m-0 text-base font-semibold text-n-slate-12">
       {{ $t('CSAT_REPORTS.METRIC.RATING_DISTRIBUTION') }}
-    </span>
+    </h3>
 
     <div v-if="isLoading" class="mt-4">
       <div class="h-6 w-full rounded-full bg-n-slate-3 animate-pulse" />
@@ -85,6 +85,11 @@ const getRatingCount = value => {
           :key="rating.value"
           class="flex items-center gap-2"
         >
+          <span
+            class="size-2.5 rounded-full"
+            :style="{ backgroundColor: rating.color }"
+            aria-hidden="true"
+          />
           <span class="text-sm text-n-slate-11">
             {{ getRatingLabel(rating.value) }}
           </span>

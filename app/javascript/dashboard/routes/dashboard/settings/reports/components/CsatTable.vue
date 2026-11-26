@@ -142,13 +142,13 @@ const table = useVueTable({
 
 <template>
   <div
-    class="shadow outline-1 outline outline-n-container rounded-xl bg-n-solid-2 overflow-hidden"
+    class="overflow-hidden rounded-2xl border border-n-teal-5 bg-n-solid-1 shadow-sm"
   >
     <CsatTableLoader v-if="isLoading" />
 
     <div v-else-if="tableData.length" class="overflow-x-auto">
       <table class="w-full">
-        <thead class="bg-n-solid-2 border-b border-n-container">
+        <thead class="border-b border-n-teal-5 bg-n-teal-2">
           <tr>
             <th
               v-for="header in table.getFlatHeaders()"

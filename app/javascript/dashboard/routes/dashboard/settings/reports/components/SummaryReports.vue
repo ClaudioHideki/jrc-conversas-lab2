@@ -62,14 +62,19 @@ const getMetrics = id =>
 const columnHelper = createColumnHelper();
 const { t } = useI18n();
 
-const defaulSpanRender = cellProps =>
-  h(
+const metricCell = tone => cell => {
+  const value = cell.getValue();
+  return h(
     'span',
     {
-      class: cellProps.getValue() ? '' : 'text-n-slate-12',
+      class:
+        value === '--'
+          ? 'text-n-slate-10'
+          : `inline-flex rounded-md px-2 py-1 text-xs font-semibold tabular-nums ${tone}`,
     },
-    cellProps.getValue()
+    value
   );
+};
 
 const columns = computed(() => [
   columnHelper.accessor('name', {
@@ -80,27 +85,27 @@ const columns = computed(() => [
   columnHelper.accessor('conversationsCount', {
     header: t('SUMMARY_REPORTS.CONVERSATIONS'),
     width: 200,
-    cell: defaulSpanRender,
+    cell: metricCell('bg-n-blue-3 text-n-blue-11'),
   }),
   columnHelper.accessor('avgFirstResponseTime', {
     header: t('SUMMARY_REPORTS.AVG_FIRST_RESPONSE_TIME'),
     width: 200,
-    cell: defaulSpanRender,
+    cell: metricCell('bg-n-violet-3 text-n-violet-11'),
   }),
   columnHelper.accessor('avgResolutionTime', {
     header: t('SUMMARY_REPORTS.AVG_RESOLUTION_TIME'),
     width: 200,
-    cell: defaulSpanRender,
+    cell: metricCell('bg-n-teal-3 text-n-teal-11'),
   }),
   columnHelper.accessor('avgReplyTime', {
     header: t('SUMMARY_REPORTS.AVG_REPLY_TIME'),
     width: 200,
-    cell: defaulSpanRender,
+    cell: metricCell('bg-n-amber-3 text-n-amber-11'),
   }),
   columnHelper.accessor('resolutionsCount', {
     header: t('SUMMARY_REPORTS.RESOLUTION_COUNT'),
     width: 200,
-    cell: defaulSpanRender,
+    cell: metricCell('bg-n-teal-3 text-n-teal-11'),
   }),
 ]);
 
@@ -204,11 +209,12 @@ defineExpose({ downloadReports });
 
 <template>
   <OverviewReportFilters
+    class="rounded-xl border border-n-weak bg-n-solid-1 p-3 shadow-sm"
     :disabled="isLoading"
     @filter-change="onFilterChange"
   />
   <div
-    class="relative flex-1 overflow-auto px-2 py-2 mt-5 shadow outline-1 outline outline-n-container rounded-xl bg-n-solid-2"
+    class="relative mt-4 flex-1 overflow-x-auto rounded-2xl border border-n-weak bg-n-solid-1 shadow-sm [&_table]:w-full [&_table]:min-w-[46rem] [&_thead]:bg-n-blue-2 [&_th]:text-n-blue-12 [&_tbody_tr:hover]:bg-n-blue-2"
   >
     <Table :table="table" />
     <Transition

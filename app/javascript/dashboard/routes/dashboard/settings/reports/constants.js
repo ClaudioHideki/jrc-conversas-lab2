@@ -114,45 +114,69 @@ export const DEFAULT_BAR_CHART = {
   backgroundColor: 'rgb(31, 147, 255)',
 };
 
+const chartColor =
+  (variable, fallback) =>
+  ({ chart }) => {
+    const rgb = getComputedStyle(chart.canvas)
+      .getPropertyValue(variable)
+      .trim();
+    return rgb ? `rgb(${rgb})` : fallback;
+  };
+
 const createChartConfig = yAxisTickCallback => ({
   datasets: [DEFAULT_BAR_CHART],
   scales: {
     x: {
       ticks: {
-        fontFamily: CHART_FONT_FAMILY,
+        color: chartColor('--slate-11', '#626c7e'),
+        font: { family: CHART_FONT_FAMILY, size: 11 },
+        maxRotation: 0,
+        maxTicksLimit: 8,
       },
-      grid: {
-        drawOnChartArea: false,
-      },
+      grid: { display: false },
+      border: { display: false },
     },
     y: {
       type: 'linear',
       position: 'left',
+      beginAtZero: true,
+      grace: '8%',
       ticks: {
-        fontFamily: CHART_FONT_FAMILY,
-        beginAtZero: true,
-        stepSize: 1,
+        color: chartColor('--slate-11', '#626c7e'),
+        font: { family: CHART_FONT_FAMILY, size: 11 },
+        maxTicksLimit: 5,
+        precision: 0,
         callback: yAxisTickCallback,
       },
       grid: {
-        drawOnChartArea: false,
+        color: chartColor('--slate-6', '#dce3ed'),
+        drawTicks: false,
       },
+      border: { display: false, dash: [4, 4] },
     },
   },
 });
 
-export const DEFAULT_CHART = createChartConfig((value, index, ticks) => {
-  if (!index || index === ticks.length - 1) {
-    return value;
-  }
-  return '';
-});
+export const DEFAULT_CHART = createChartConfig(value =>
+  Number(value).toLocaleString()
+);
 
-export const TIME_CHART_CONFIG = createChartConfig((value, index, values) => {
-  if (!index || index === values.length - 1) {
-    return formatTime(value);
-  }
-  return '';
+const timeTickUnits = [
+  { suffix: 'd', seconds: 86400 },
+  { suffix: 'h', seconds: 3600 },
+  { suffix: 'm', seconds: 60 },
+  { suffix: 's', seconds: 1 },
+];
+
+export const TIME_CHART_CONFIG = createChartConfig(value => {
+  let remaining = Number(value);
+  const parts = [];
+  timeTickUnits.forEach(unit => {
+    const amount = Math.floor(remaining / unit.seconds);
+    if (amount) parts.push(`${amount}${unit.suffix}`);
+    remaining %= unit.seconds;
+  });
+  return parts.join(' ') || '0';
 });
 
 export const METRIC_CHART = {

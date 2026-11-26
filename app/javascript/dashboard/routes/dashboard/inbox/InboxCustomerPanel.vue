@@ -20,10 +20,11 @@ const props = defineProps({
   unavailable: { type: Boolean, default: false },
   interaction: { type: Object, default: () => ({}) },
   crmEnabled: { type: Boolean, default: false },
+  canCreateLead: { type: Boolean, default: false },
   closable: { type: Boolean, default: false },
   whatsappTarget: { type: Object, default: null },
 });
-const emit = defineEmits(['showTab', 'more', 'close']);
+const emit = defineEmits(['showTab', 'more', 'close', 'createLead']);
 const { t, locale } = useI18n();
 const labels = computed(() => inbox360Labels(t));
 const callContact = event => {
@@ -354,5 +355,15 @@ const details = computed(() =>
     >
       {{ t('JRC_CONTACT_CENTER.INBOX_360.PARTIAL_CONTEXT') }}
     </p>
+    <button
+      v-if="canCreateLead"
+      type="button"
+      data-testid="create-conversation-lead"
+      class="flex w-full items-center justify-center gap-2 rounded-xl border border-n-violet-6 bg-n-violet-3 px-3 py-2.5 text-sm font-semibold text-n-violet-11 hover:bg-n-violet-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-violet-8"
+      @click="emit('createLead')"
+    >
+      <span class="i-lucide-user-round-plus size-4" />
+      {{ t('JRC_HOME.ACTIONS.LEAD') }}
+    </button>
   </div>
 </template>
