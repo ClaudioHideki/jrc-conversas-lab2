@@ -111,5 +111,35 @@
   "native_SD_public_editor_wiring_included": false,
   "provider_commands_or_real_customer_data_used": false,
   "whole_figure10_accepted": false,
-  "whole_Part1_accepted": false
+  "whole_Part1_accepted": false,
+  "counter_corrections": [
+    {
+      "name": "exact_280_case_counter_test_and_explicit_rejection_of_previous_276",
+      "source_sha256": {
+        "script/jrc_call_center_chrome_counter_test.py": "f1938238f83e32b00be5c00bdb63b5c7680ff46f2105fef0e032cd4c85a0da1c"
+      },
+      "parent_sources": {
+        "script/jrc_call_center_chrome_counter_test.py": "2f45a64a255beec68e71f5f6280bb06e48db7e8cb14b6fc6c795b129ae4ee01c"
+      }
+    }
+  ],
+  "counter_fixture_parent_failure": {
+    "sha": "7f44be5c810400d92c83a3cf64826e2bdf28c183",
+    "run": 45753945802,
+    "job": 139688025954,
+    "sanitized_log_sha256": "0f201ecac28b7b8daa883d2fdcda4fd00e3c4cd2011331457c0d612b7b1b7c98",
+    "early_11_counter_tests": {
+      "failed": 1,
+      "current_native_or_Chrome_tests_run": 0
+    },
+    "corrected_actual_workflow_guard_tests": {
+      "examples": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "product_workflow_or_permissions_changed": false,
+    "all_280_browser_cases_still_required": true,
+    "full_CI_approved": false
+  }
 }
