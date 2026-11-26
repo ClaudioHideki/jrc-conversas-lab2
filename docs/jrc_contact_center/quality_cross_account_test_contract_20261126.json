@@ -1,0 +1,17 @@
+{
+  "parent": "b8494b69b7b531d61bd3e62684a1f45323e3a720",
+  "failed_run": 45904820062,
+  "failed_job": 140198918465,
+  "path": "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+  "before_sha256": "ea7ad781f74274f398295ef102af415d2a8f71097b2788749f4086b448351246",
+  "after_sha256": "b508a9f6094aa9bd8fa86d00bd7fc66282d2656823b58e8fa9d7d08c9f0631f8",
+  "literal_before": "    get path.sub(\"accounts/#{account.id}\", \"accounts/#{foreign.id}\"), headers: headers, as: :json\n    expect(response).to have_http_status(:not_found)\n",
+  "literal_after": "    get path.sub(\"accounts/#{account.id}\", \"accounts/#{foreign.id}\"), headers: headers, as: :json\n    expect(response).to have_http_status(:unauthorized)\n    expect(response.parsed_body).not_to have_key('original')\n",
+  "native_report_sha256": "3e31bf2df9f5e6c21c48dfea6aaea32fc78d1515b2730dc112d7a1a79ed74cbe",
+  "native_observed": "Native account access rejects a non-member with HTTP401 before any recording lookup.",
+  "exact_401_required_no_range_or_200_accepted": true,
+  "original_analysis_must_be_absent_from_denied_response": true,
+  "own_account_request_identity_and_envelope_rejection_cases_preserved": true,
+  "no_product_authorization_change": true,
+  "native_or_Chrome_group_acceptance": false
+}

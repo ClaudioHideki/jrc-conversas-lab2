@@ -55,7 +55,8 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
   it 'rejects foreign accounts and forbids changing the actor or operational scope in the review envelope' do
     foreign = create(:account)
     get path.sub("accounts/#{account.id}", "accounts/#{foreign.id}"), headers: headers, as: :json
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:unauthorized)
+    expect(response.parsed_body).not_to have_key('original')
     post path, headers: headers, params: { quality_review: values.merge('account_id' => foreign.id, 'user_id' => actor.id) }, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcContactCenter::QualityReviewRevision.where(account: account)).to be_empty
