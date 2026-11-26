@@ -1,3 +1,4 @@
+import { sourcePins as qualityReviewPins, validateQualityReviewSources } from './validate_cc_quality_review_migration.mjs';
 import { sourcePins as endingAttemptPins, validateEndingAttemptSources } from './validate_cc_ending_attempt_migration.mjs';
 import { sourcePins as endingExecutionPins, validateEndingExecutionSources } from './validate_cc_ending_execution_migration.mjs';
 import { sourcePins as endingReadinessPins, validateEndingReadinessSources } from './validate_cc_ending_readiness_migration.mjs';
@@ -312,10 +313,24 @@ export function verifyTypedDestinationMigrations(changes, readCurrent, schema) {
   return validateNewMigrationTimestamps(schema, rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
 }
 
+// One empty additive human-review table. M1-M22, original hashes and the forward timestamp barrier remain unchanged.
+export function verifyQualityReviewMigrations(changes, readCurrent, schema) {
+  const additions = [qualityReviewPins.migration.path, qualityReviewPins.sql.path];
+  const rows = changes.trim().split('\n').filter(Boolean);
+  for (const path of additions) {
+    if (rows.filter(row => row === `A\t${path}`).length !== 1)
+      throw new Error(`Missing or duplicate reviewed human quality source: ${path}`);
+  }
+  const prior = rows.filter(row => !additions.some(path => row === `A\t${path}`));
+  verifyTypedDestinationMigrations(prior.join('\n'), readCurrent, schema);
+  validateQualityReviewSources(Object.fromEntries(Object.entries(qualityReviewPins).map(([key, pin]) => [key, readCurrent(pin.path)])));
+  return validateNewMigrationTimestamps(schema, rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyTypedDestinationMigrations(changes, readFileSync, schema);
+  const result = verifyQualityReviewMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
     [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash, [endingActionVersionMigrationPath]: endingActionVersionMigrationHash },
     pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, endingOriginPins,

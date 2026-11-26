@@ -42,8 +42,17 @@ class JrcContactCenter::Administration
     CARDS.filter_map do |key, (permission, state)|
       next unless card_allowed?(key, permission)
 
-      { key: key, state: state, count: count_for(key) }
+      { key: key, state: state, local_state: local_state_for(key), count: count_for(key) }
     end
+  end
+
+  # This describes existing local screens, never applied provider capabilities.
+  def local_state_for(key)
+    return 'read_only' if key == 'recordings'
+    return 'available' if %w[hours audio pauses distribution].include?(key)
+    return 'available' if key == 'ivr' && @policy.configure?
+
+    nil
   end
 
   # Local draft configuration is independent of provider publication authority.

@@ -10,4 +10,6 @@ require_relative 'owned_recording_media'
 
 SyntheticPublicEndingQueue.install!
 SyntheticRecordedCallMedia.install!
+require_relative 'owned_quality_source'
+SyntheticRecordedCallQuality.install!
 run Rails.application

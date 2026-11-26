@@ -1,8 +1,8 @@
 {
   "format_version": 1,
   "review_at": "2026-11-23T20:15:50.371122+00:00",
-  "validated_base_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
-  "candidate_source_parent_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+  "validated_base_sha": "d881005fb837f49cbc045d92759b231c985b36f2",
+  "candidate_source_parent_sha": "d881005fb837f49cbc045d92759b231c985b36f2",
   "candidate_not_yet_validated": true,
   "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
@@ -4238,7 +4238,7 @@
     "not_full_global_implementation_estimate": true
   },
   "figure10_proven_literal_percentage": 36.0,
-  "Parte1_proven_formal_lower_bound_percentage": 8.66,
+  "Parte1_proven_formal_lower_bound_percentage": 9.21,
   "full_global_reaudit_complete": false,
   "typed_durable_delivery_candidate": {
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
@@ -4289,8 +4289,8 @@
   },
   "latest_literal_functional_progress": {
     "document": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
-    "sha256": "8e4b1b575ef508855be02e44066d524291d27fa2c3800e4783e40c8a13d1824a",
-    "unique_closed": 48,
+    "sha256": "c47a39d1400ffc42b1579649640a7d41b3d8486eb39e09a68592808b6d5e0279",
+    "unique_closed": 51,
     "total_unique": 554,
     "whole_Part1_accepted": false
   },
@@ -4348,5 +4348,26 @@
     "document": "docs/jrc_contact_center/mixed_ending_and_recording_popup_candidate_20261126.json",
     "sha256": "9ca537238b4086e9632ffa8ecdb2c492102fdfa5f655cdeaaaef21c8ab7c3a8c",
     "accepted": false
+  },
+  "latest_native_mixed_worker_and_recording_popup_acceptance": {
+    "document": "docs/jrc_contact_center/mixed_destinations_and_recording_popup_native_acceptance_20261126.json",
+    "sha256": "871ae08f31c9a3a9eaf740ab3ae7d17fc1148ea53e53f82462f412a5bc02882d",
+    "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2"
+  },
+  "next_recording_access_history_group": {
+    "document": "docs/jrc_contact_center/recording_access_history_candidate_20261126.json",
+    "sha256": "f2803144ae719f017111b8ccf5fa027b6e0a17f7aefc7ab7920406c2e3f3157e",
+    "accepted": false
+  },
+  "next_native_human_quality_review": {
+    "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+    "sha256": "4628f30d8ca351b4e8d7537fa710bbf7f3698f497127313816c854bd0c24c31e",
+    "figure_document": "docs/jrc_contact_center/word_traceability/figure-23.json",
+    "figure_sha256": "8013bbe45239927f38f1cdc1f34478cafc1f8451697512c419169441b57b2398",
+    "related_team_visual_QA": {
+      "document": "docs/jrc_contact_center/word_traceability/figure-12.json",
+      "sha256": "834ed7659e02fb0cab37329c238bde6442cb8355b26590518b2b23695ef458ba"
+    },
+    "native_or_browser_accepted": false
   }
 }

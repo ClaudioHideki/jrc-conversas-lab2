@@ -27,11 +27,18 @@ const create = overrides =>
   mount(RecordingDetailsDialog, {
     props: {
       item,
+      accountId: 1,
       authorizePlayback: vi.fn().mockResolvedValue(true),
       capabilities: { recordings_listen: true, recordings_download: false },
       ...overrides,
     },
-    global: { stubs: { Dialog, CallRecordingPlayer: true } },
+    global: {
+      stubs: {
+        Dialog,
+        CallRecordingPlayer: true,
+        RecordingAccessHistory: true,
+      },
+    },
   });
 
 describe('authorized native recording details popup', () => {
@@ -79,5 +86,33 @@ describe('authorized native recording details popup', () => {
     expect(wrapper.emitted('playback')).toBeUndefined();
     await wrapper.get('[data-recording-close]').trigger('click');
     expect(wrapper.emitted('close')).toHaveLength(1);
+  });
+  it('requires explicit audit authority and an explicit click, and withdraws the history when authority changes', async () => {
+    const wrapper = create({
+      capabilities: { recordings_listen: true, audit: false },
+    });
+    expect(wrapper.find('[data-recording-audit-open]').exists()).toBe(false);
+    await wrapper.setProps({
+      capabilities: { recordings_listen: true, audit: true },
+    });
+    expect(
+      wrapper.findComponent({ name: 'RecordingAccessHistory' }).exists()
+    ).toBe(false);
+    await wrapper.get('[data-recording-audit-open]').trigger('click');
+    const history = wrapper.getComponent({ name: 'RecordingAccessHistory' });
+    expect(history.props('accountId')).toBe(1);
+    expect(history.props('recordingId')).toBe(item.id);
+    await wrapper.setProps({
+      capabilities: { recordings_listen: true, audit: false },
+    });
+    expect(
+      wrapper.findComponent({ name: 'RecordingAccessHistory' }).exists()
+    ).toBe(false);
+    await wrapper.setProps({
+      capabilities: { recordings_listen: true, audit: true },
+    });
+    expect(
+      wrapper.findComponent({ name: 'RecordingAccessHistory' }).exists()
+    ).toBe(false);
   });
 });

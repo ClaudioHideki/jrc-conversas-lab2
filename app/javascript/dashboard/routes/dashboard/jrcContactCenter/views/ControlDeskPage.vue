@@ -48,6 +48,17 @@ const icons = {
   general: 'i-lucide-settings',
   integrations: 'i-lucide-plug',
 };
+const countLabels = computed(() => ({
+  queues: t('JRC_CONTACT_CENTER.ADMIN.QUEUE_COUNT'),
+  closures: t('JRC_CONTACT_CENTER.ADMIN.PENDING_ACW_COUNT'),
+  general: t('JRC_CONTACT_CENTER.ADMIN.UNIT_COUNT'),
+}));
+const stateLabels = computed(() => ({
+  available: t('JRC_CONTACT_CENTER.ADMIN.STATES.available'),
+  read_only: t('JRC_CONTACT_CENTER.ADMIN.STATES.read_only'),
+  native_module: t('JRC_CONTACT_CENTER.ADMIN.STATES.native_module'),
+  pending_contract: t('JRC_CONTACT_CENTER.ADMIN.STATES.pending_contract'),
+}));
 const destination = key => ({
   name: 'jrc_contact_center_admin_section',
   params: { accountId: accountId.value, section: key },
@@ -189,8 +200,15 @@ onBeforeUnmount(() => {
             class="text-xl font-bold text-n-slate-12"
             >{{ card.count }}</span
           >
-          <span class="mt-auto text-xs text-n-blue-11">{{
-            t(`JRC_CONTACT_CENTER.ADMIN.STATES.${card.state}`)
+          <span
+            v-if="card.count !== null && countLabels[card.key]"
+            class="text-xs text-n-slate-11"
+            data-card-count-label
+          >
+            {{ countLabels[card.key] }}
+          </span>
+          <span class="mt-auto text-xs text-n-blue-11" data-card-state>{{
+            stateLabels[card.local_state || card.state]
           }}</span>
         </RouterLink>
       </div>

@@ -1,10 +1,13 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import CallRecordingPlayer from 'dashboard/components-next/Calls/CallRecordingPlayer.vue';
+import RecordingAccessHistory from './RecordingAccessHistory.vue';
+import QualityReviewDialog from './QualityReviewDialog.vue';
 
 const props = defineProps({
+  accountId: { type: [String, Number], required: true },
   item: { type: Object, required: true },
   capabilities: { type: Object, required: true },
   url: { type: String, default: '' },
@@ -16,7 +19,17 @@ const props = defineProps({
 const emit = defineEmits(['close', 'playback', 'download', 'playback-error']);
 const { t } = useI18n();
 const dialog = ref(null);
+const showHistory = ref(false);
+const showQuality = ref(false);
+watch(
+  () => props.capabilities.audit,
+  allowed => {
+    if (!allowed) showHistory.value = false;
+  }
+);
 const labels = computed(() => ({
+  AUDIT_HISTORY: t('JRC_CONTACT_CENTER.RECORDINGS.ACCESS_HISTORY.TITLE'),
+  QUALITY: t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY'),
   DETAILS: t('JRC_CONTACT_CENTER.RECORDINGS.DETAILS'),
   CALL: t('JRC_CONTACT_CENTER.RECORDINGS.CALL'),
   CALL_ID: t('JRC_CONTACT_CENTER.RECORDINGS.CALL_ID'),
@@ -112,6 +125,15 @@ onMounted(() => dialog.value.open());
           {{ text('DOWNLOAD') }}
         </button>
       </div>
+      <button
+        v-if="capabilities.recordings_listen"
+        type="button"
+        class="rounded-lg border border-n-violet-6 px-3 py-2 text-n-violet-11"
+        data-recording-quality-open
+        @click="showQuality = true"
+      >
+        {{ text('QUALITY') }}
+      </button>
       <CallRecordingPlayer
         v-if="url && capabilities.recordings_listen"
         :key="url"
@@ -120,6 +142,22 @@ onMounted(() => dialog.value.open());
         :can-download="false"
         :before-playback="authorizePlayback"
         @error="emit('playback-error')"
+      />
+      <button
+        v-if="capabilities.audit"
+        type="button"
+        class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
+        data-recording-audit-open
+        :aria-expanded="showHistory"
+        @click="showHistory = !showHistory"
+      >
+        {{ text('AUDIT_HISTORY') }}
+      </button>
+      <RecordingAccessHistory
+        v-if="showHistory && capabilities.audit"
+        :key="`${accountId}-${item.id}`"
+        :account-id="accountId"
+        :recording-id="item.id"
       />
       <button
         type="button"
@@ -131,4 +169,12 @@ onMounted(() => dialog.value.open());
       </button>
     </div>
   </Dialog>
+  <QualityReviewDialog
+    v-if="showQuality && capabilities.recordings_listen"
+    :key="`${accountId}-${item.id}`"
+    :account-id="accountId"
+    :recording="item"
+    :formatted-duration="formattedDuration"
+    @close="showQuality = false"
+  />
 </template>

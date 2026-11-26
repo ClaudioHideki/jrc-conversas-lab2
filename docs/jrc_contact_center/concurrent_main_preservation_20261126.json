@@ -1,0 +1,20 @@
+{
+  "call_center_parent": "d881005fb837f49cbc045d92759b231c985b36f2",
+  "concurrent_main_observed": "b2aaf1b49bb31aa9c59ba5468e2f7a4e4bbc028a",
+  "previous_reviewed_main": "e6bd4cc9418b3522378a460bb97814b700f39123",
+  "concurrent_commits": 53,
+  "inspection_sha256": "a9abf9e231f9c2ccaed3d57179fd36242cbfc25f52691d0e6089f96bf196097d",
+  "review_sha256": "86f991664d8cff23e202a3862e32447ea17e4b1cbfa8586bef8f83131b98558e",
+  "shared_prepared_path": [
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json"
+  ],
+  "shared_change": "Four additional source translation keys for browser-call controls and expanded conversation layout; none of those concurrent consumers is transported in this increment.",
+  "all_concurrent_main_work_preserved": true,
+  "no_merge_cherry_pick_or_reapplication": true,
+  "current_increment_uses_only_proved_call_center_line": true,
+  "must_reconcile_before_future_release": true,
+  "latest_main_instructions_read": "Register confirmed bugs and reproducible regression evidence; retain authorized reconnection/filter/permission behavior when changing the inbox.",
+  "this_increment_does_not_change_inbox_or_broker_callbacks": true,
+  "original_checkout_and_three_dirty_files_unchanged": true,
+  "no_main_publication_deploy_or_production_operation": true
+}

@@ -45,7 +45,7 @@
         22
       ],
       "delivery": "Scoped rule editor, native destination configuration, selected action and typed history in the existing inbox.",
-      "status": "native_editor_and_Project_worker_accepted_mixed_CRM_SD_public_flow_candidate",
+      "status": "bounded_native_Project_and_mixed_CRM_SD_user_flows_accepted_other_destinations_pending",
       "acceptance": [
         "Current original-agent permission per attempt",
         "Explicit manual review",
@@ -53,7 +53,7 @@
         "Real complete UI flow, partial failure and selected retry without replay of success"
       ],
       "prior_status_preserved": "private_increment_in_progress_not_homologated",
-      "evidence_source": "5ca5550f788d2d90f3ef8bcbca38422b8025fcd8",
+      "evidence_source": "d881005fb837f49cbc045d92759b231c985b36f2",
       "next_candidate": "docs/jrc_contact_center/mixed_ending_and_recording_popup_candidate_20261126.json",
       "whole_figures_accepted": false
     },
@@ -88,10 +88,10 @@
         23
       ],
       "delivery": "Reuse institutional audio and native recording/quality sources; complete internal analysis/review/context surfaces.",
-      "status": "institutional_audio_and_bounded_personal_recordings_accepted_popup_and_reproduction_audit_candidate",
+      "status": "bounded_native_recording_table_popup_and_audited_playback_accepted_history_next_candidate",
       "prior_status_preserved": "internal_work_independent_of_external_provider_homologation",
-      "evidence_source": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
-      "next_candidate": "docs/jrc_contact_center/mixed_ending_and_recording_popup_candidate_20261126.json",
+      "evidence_source": "d881005fb837f49cbc045d92759b231c985b36f2",
+      "next_candidate": "docs/jrc_contact_center/recording_access_history_candidate_20261126.json",
       "whole_figures_accepted": false
     }
   ],
@@ -114,14 +114,15 @@
     "accepted_after_new_native_and_four_mode_Chrome_only": true
   },
   "current_verified_delivery": {
-    "document": "docs/jrc_contact_center/recordings_and_closed_source_native_acceptance_20261126.json",
-    "source_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
-    "run": 45843151860,
+    "document": "docs/jrc_contact_center/mixed_destinations_and_recording_popup_native_acceptance_20261126.json",
+    "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2",
+    "run": 45882932168,
     "usable_functions": [
-      "Current authorized personal recordings: native filters, real pagination and URL reload, explicit playback/pause/seek and separately authorized download.",
-      "An ordinary second viewer plays authorized audio while the native download endpoint denies its missing download permission.",
-      "Role changes withdraw old recording/media/lookup state; source/account/unit/tenant and exact call origin are checked on the server.",
-      "Historical Service Desk rule deactivation persists under an inactive source queue; UI and API block reactivation without changing prior versions."
+      "Original ordinary agent confirms classification; actual own worker preserves CRM success while the native Service Desk transaction rolls back.",
+      "The user selects only the failed Service Desk destination for retry; one native ticket results and successful CRM/Projects receipts remain unchanged.",
+      "Word recording results use one semantic desktop table and stacked mobile rows, authorized metadata and the existing native details dialog.",
+      "Every actual play/resume revalidates current listening authority and records a native idempotent receipt before sound.",
+      "An actual owned PostgreSQL audit rejection removes the player and retains metadata; recovery requires explicit actions."
     ]
   },
   "next_grouped_delivery": {
@@ -138,12 +139,18 @@
     "targeted_composable_functional_regressions_passed": 3
   },
   "next_grouped_increment": {
-    "document": "docs/jrc_contact_center/mixed_ending_and_recording_popup_candidate_20261126.json",
-    "figures": [
-      10,
-      17
+    "documents": [
+      "docs/jrc_contact_center/recording_access_history_candidate_20261126.json",
+      "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json"
     ],
-    "native_or_browser_accepted": false
+    "figures": [
+      1,
+      12,
+      17,
+      23
+    ],
+    "native_or_browser_accepted": false,
+    "single_sequential_CI": true
   },
   "effective_hours_not_measured_not_fabricated": true,
   "grouped_delivery_status_is_bounded_not_whole_figure_acceptance": true

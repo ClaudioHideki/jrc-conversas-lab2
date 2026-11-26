@@ -4,20 +4,20 @@
   "new_bounded_acceptance": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
   "new_bounded_acceptance_sha256": "dc6466fe913b916c65c8b4d8b1823afa72e4c132023ece222870bee47f61906d",
   "Word_requirements_unique": 554,
-  "formal_literal_reviews_closed": 48,
-  "Parte1_proven_lower_bound_percentage": 8.66,
+  "formal_literal_reviews_closed": 51,
+  "Parte1_proven_lower_bound_percentage": 9.21,
   "not_an_estimated_implementation_percentage": true,
   "canonical_statuses": {
-    "concluido_com_aceite": 48,
+    "concluido_com_aceite": 51,
     "implementado_sem_aceite": 0,
-    "parcial": 438,
+    "parcial": 435,
     "pendente": 44,
     "bloqueado": 24
   },
   "triage_466_preserved_as_historical_snapshot": true,
   "remaining_partial_triage": {
     "implemented_pending_homologation": 117,
-    "small_adjustments": 99,
+    "small_adjustments": 96,
     "significant_development": 166,
     "documental_not_autonomous_functions": 56
   },
@@ -26,10 +26,10 @@
   "evidence_reuse_requires_unchanged_source_hashes": true,
   "whole_figure14_or_Part1_accepted": false,
   "figure10_unchanged": {
-    "formally_closed": 9,
+    "formally_closed": 11,
     "total": 25,
-    "percentage": 36.0,
-    "changed_by_bounded_idempotence_acceptance": true
+    "percentage": 44.0,
+    "changed_by_native_mixed_destination_user_acceptance": true
   },
   "internal_engineering_effort_estimate_hours": {
     "development": [
@@ -89,7 +89,7 @@
     "D2-P0225-C01",
     "D2-P0228-C01"
   ],
-  "current_bounded_triage_change_note": "Three reviewed literal clauses closed from awaiting homologation and two from small adjustments; no whole-figure or functional implementation percentage inferred.",
+  "current_bounded_triage_change_note": "Three small UI gap clauses closed after native worker, actual SQL rollback/selected retry and original four-mode browser images; other requirements unchanged.",
   "latest_audio_and_idempotence_acceptance": {
     "document": "docs/jrc_contact_center/literal_audio_row_and_destination_idempotence_acceptance_20261126.json",
     "sha256": "57e477a6b31e3e3f836c68b2abed2e962e8db3f2559d0625e90f79c10edd63fa",
@@ -99,5 +99,10 @@
     "document": "docs/jrc_contact_center/literal_pause_audio_and_recording_controls_acceptance_20261126.json",
     "sha256": "aceea403f7f9844107546d5adae7dc859adf8cb28902316da8d8e3cbdca771c3",
     "source_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b"
+  },
+  "latest_mixed_and_recording_popup_acceptance": {
+    "document": "docs/jrc_contact_center/literal_mixed_and_recording_popup_acceptance_20261126.json",
+    "sha256": "fd50084899063b1f1123802c2dbe302e06234d7e043c66107cafb7be71b39aae",
+    "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2"
   }
 }

@@ -566,9 +566,26 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_write.rb",
+          "app/services/jrc_contact_center/quality_review_presentation.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "spec/services/jrc_contact_center/quality_review_write_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0427-C01",
@@ -599,9 +616,25 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_presentation.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0427-C02",
@@ -632,9 +665,24 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_input.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0427-C03",
@@ -665,9 +713,25 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_write.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "spec/services/jrc_contact_center/quality_review_write_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0427-C04",
@@ -698,9 +762,26 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_input.rb",
+          "app/services/jrc_contact_center/quality_review_write.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "spec/services/jrc_contact_center/quality_review_write_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0427-C05",
@@ -731,9 +812,25 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_input.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0427-C06",
@@ -764,9 +861,26 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_write.rb",
+          "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0428-C01",
@@ -797,9 +911,27 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required.",
+        "The existing native source does not supply original model provenance; it remains explicitly unknown and is never inferred from current settings."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/services/jrc_contact_center/quality_review_write.rb",
+          "app/models/jrc_contact_center/quality_review_revision.rb",
+          "app/services/jrc_contact_center/quality_review_presentation.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "spec/services/jrc_contact_center/quality_review_write_spec.rb",
+          "spec/models/jrc_contact_center/quality_review_revision_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0428-C02",
@@ -830,9 +962,25 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_presentation.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0429-C01",
@@ -863,9 +1011,26 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/services/jrc_contact_center/quality_review_source.rb",
+          "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb",
+          "app/policies/jrc_contact_center/module_policy.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0429-C02",
@@ -896,9 +1061,26 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/models/jrc_contact_center/quality_review_revision.rb",
+          "app/services/jrc_contact_center/quality_review_write.rb",
+          "db/functions/20261126193000_contact_center_quality_reviews.sql"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "spec/models/jrc_contact_center/quality_review_revision_spec.rb",
+          "spec/services/jrc_contact_center/quality_review_write_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0429-C03",
@@ -929,9 +1111,25 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/services/jrc_contact_center/quality_review_write.rb",
+          "app/services/jrc_contact_center/quality_review_source.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "spec/services/jrc_contact_center/quality_review_write_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0429-C04",
@@ -962,9 +1160,26 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/services/jrc_contact_center/quality_review_input.rb",
+          "app/services/jrc_contact_center/quality_review_write.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "spec/services/jrc_contact_center/quality_review_write_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0430-C01",
@@ -995,9 +1210,26 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_input.rb",
+          "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0430-C02",
@@ -1028,9 +1260,25 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_write.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0432-C01",
@@ -1061,9 +1309,27 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/models/jrc_contact_center/quality_review_revision.rb",
+          "app/services/jrc_contact_center/quality_review_write.rb",
+          "app/services/jrc_contact_center/quality_review_presentation.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "spec/services/jrc_contact_center/quality_review_write_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0433-C01",
@@ -1094,9 +1360,27 @@
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "current_candidate_mapping_not_acceptance": {
+        "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue",
+          "app/services/jrc_contact_center/quality_review_source.rb",
+          "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb",
+          "app/services/jrc_contact_center/quality_review_input.rb"
+        ],
+        "prepared_tests_not_yet_executed": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js",
+          "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs"
+        ],
+        "native_and_browser_accepted": false
+      }
     }
   ],
   "divergences": [
@@ -1104,5 +1388,48 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "native_human_review_candidate": {
+    "document": "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json",
+    "source_manifest_sha256": "4628f30d8ca351b4e8d7537fa710bbf7f3698f497127313816c854bd0c24c31e",
+    "native_tests_or_Chrome_accepted": false,
+    "source_files": {
+      "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb": "ced76990761c1a17cb49ca25308308ae5ca3e64ccec726748da3de753de89ced",
+      "app/javascript/dashboard/api/jrcContactCenter.js": "6e69c31e8c4f6d6b0492a7cf2ba2ce20a1ff8d65c703bd209e2978ae3ceb4c2c",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "518a5d905d490bf48366d83dd1e2186c873a6c0af2d4aef60a5df629304bce5e",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.spec.js": "e420a3854ac80c7333c2983117657ec652f51321ef3d9dace23912ca68feaf9d",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.vue": "d7f46df79d2e1adb6fd1af210cf009e43e539fbf412428f29ea3a274b32c5238",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js": "01bad6169ce9d90af9aa56c78bb11b46292d60d157845e35a5ae3e297b8f749d",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.vue": "9617e646690c1b3170015d2cbeb034e6e8da6df54fefd5610f486a3fc8857496",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "250b9e6be3a71c2f4481a9a5ad373d239c884d83e498e655008e0b88f972517b",
+      "app/models/jrc_contact_center/quality_review_revision.rb": "2aa0dfe73f1aa9adaa32474deedd5928eed923d970f4e77c27c3b8f9936a5b5d",
+      "app/services/jrc_contact_center/quality_review_presentation.rb": "11e2cbe5e9bdce695e2f5cf0de938ad822e057e82253289e7c37345184198b4b",
+      "app/services/jrc_contact_center/quality_review_scope.rb": "14e5b3838fba230059f117fe18fa3f1724c2838c82f924ab6d6fb80989fad51a",
+      "app/services/jrc_contact_center/quality_review_source.rb": "dafd2ce977104d821cb04d3134a7faafcf189aeca6b7c076d58f2a3ef0358fa8",
+      "app/services/jrc_contact_center/quality_review_write.rb": "00c0ab0cf63e83122eb3eeac6fe6a00698a2764ec0d00bdb80b5bdfc15977487",
+      "db/functions/20261126193000_contact_center_quality_reviews.sql": "c6f65980ef4ce034b19ebcc4974f251249ac935092be01b613621ef0bd84e19b",
+      "db/migrate/20261126193000_create_contact_center_quality_reviews.rb": "ab708f3b36ac763af666d7b871b53ece2b77cf27b87359d2bf71909b4bda3123",
+      "lib/jrc_contact_center/quality_review_schema_receipt.rb": "b126ee6710363470983ca0717d2ae97ab4fca97501fd31b66d7ab0d068378a29"
+    },
+    "prepared_native_specs": {
+      "spec/models/jrc_contact_center/quality_review_revision_spec.rb": 5,
+      "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb": 12,
+      "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb": 3,
+      "spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb": 5,
+      "spec/services/jrc_contact_center/quality_review_source_spec.rb": 10,
+      "spec/services/jrc_contact_center/quality_review_write_spec.rb": 8,
+      "spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb": 4,
+      "spec/services/jrc_contact_center/synthetic_quality_source_scope_spec.rb": 4
+    },
+    "prepared_Vue_specs": {
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js": 13
+    },
+    "unaccepted_source_or_layout_limits": [
+      "The existing analysis DTO does not prove an original analysis model or sentiment confidence; neither is inferred from current settings or ASR confidence.",
+      "The native original transcript is neither rewritten nor copied into the human revision ledger.",
+      "Corrections of an unmapped operational unit remain blocked; current and historical scopes never come from request parameters.",
+      "No external Nico/Supabase/PABX homologation was performed; prepared tests substitute the source read only.",
+      "Text controls retain the already approved native validation limits; the reference-image 500 counter is not claimed as a defined server rule."
+    ]
+  }
 }

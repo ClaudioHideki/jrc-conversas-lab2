@@ -165,7 +165,8 @@ onBeforeUnmount(() => {
       role="status"
       class="rounded-xl border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
     >
-      {{ t('JRC_CONTACT_CENTER.ADMIN.PENDING') }} {{ text('LOCAL_ONLY') }}
+      {{ t('JRC_CONTACT_CENTER.ADMIN.LOCAL_PROVIDER_PENDING') }}
+      {{ text('LOCAL_ONLY') }}
     </p>
     <form class="grid min-w-0 gap-3 sm:grid-cols-3" @submit.prevent="search">
       <label class="min-w-0 text-sm">

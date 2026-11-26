@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcContactCenter';
 const props = defineProps({
@@ -11,6 +11,28 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
+const labels = computed(() => {
+  const names = {
+    unit: {
+      search: t('JRC_CONTACT_CENTER.ACW_RULES.UNIT_SEARCH'),
+      target: t('JRC_CONTACT_CENTER.ACW_RULES.UNIT_TARGET'),
+    },
+    queue: {
+      search: t('JRC_CONTACT_CENTER.ACW_RULES.QUEUE_SEARCH'),
+      target: t('JRC_CONTACT_CENTER.ACW_RULES.QUEUE_TARGET'),
+    },
+    team: {
+      search: t('JRC_CONTACT_CENTER.ACW_RULES.TEAM_SEARCH'),
+      target: t('JRC_CONTACT_CENTER.ACW_RULES.TEAM_TARGET'),
+    },
+  };
+  return (
+    names[props.scope] || {
+      search: t('JRC_CONTACT_CENTER.ACW_RULES.TARGET_SEARCH'),
+      target: t('JRC_CONTACT_CENTER.ACW_RULES.TARGET'),
+    }
+  );
+});
 const q = ref('');
 const page = ref(1);
 const pages = ref(0);
@@ -64,7 +86,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="min-w-0 space-y-2" data-acw-rule-target>
     <label class="block min-w-0 text-sm">
-      {{ t('JRC_CONTACT_CENTER.ACW_RULES.TARGET_SEARCH') }}
+      {{ labels.search }}
       <input
         v-model="q"
         :disabled="disabled"
@@ -74,7 +96,7 @@ onBeforeUnmount(() => {
       />
     </label>
     <label class="block min-w-0 text-sm">
-      {{ t('JRC_CONTACT_CENTER.ACW_RULES.TARGET') }}
+      {{ labels.target }}
       <select
         :value="modelValue"
         :disabled="disabled || loading"

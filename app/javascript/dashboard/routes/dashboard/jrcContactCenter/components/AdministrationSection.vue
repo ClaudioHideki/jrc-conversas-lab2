@@ -168,11 +168,13 @@ const title = computed(() =>
     ? label(key.value.toUpperCase())
     : t(`JRC_CONTACT_CENTER.ADMIN.CARDS.${key.value}.NAME`)
 );
-const configurationTitle = computed(() =>
-  key.value === 'closures'
-    ? t('JRC_CONTACT_CENTER.ACW_RULES.CONFIGURATION_TITLE')
-    : `${title.value} — ${label(editing.value ? 'EDIT' : 'CREATE')}`
-);
+const configurationTitle = computed(() => {
+  if (key.value === 'closures')
+    return t('JRC_CONTACT_CENTER.ACW_RULES.CONFIGURATION_TITLE');
+  const subject =
+    key.value === 'queues' ? label(`RESOURCES.${resource.value}`) : title.value;
+  return `${subject} — ${label(editing.value ? 'EDIT' : 'CREATE')}`;
+});
 const queryValue = suffix => route.query[`${resource.value}_${suffix}`];
 const page = computed(() => {
   const value = Number(queryValue('page') || 1);
@@ -615,8 +617,20 @@ onBeforeUnmount(() => {
       role="status"
       class="rounded-xl border border-n-amber-6 bg-n-amber-2 p-4 text-sm text-n-amber-11"
     >
-      {{ label('PENDING') }}
+      {{ label(card.local_state ? 'LOCAL_PROVIDER_PENDING' : 'PENDING') }}
     </p>
+    <RouterLink
+      v-if="key === 'recordings' && context.capabilities.recordings_view"
+      :to="{
+        name: 'jrc_contact_center_recordings',
+        params: { accountId },
+        query: route.query,
+      }"
+      class="inline-flex rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11"
+      data-native-recordings-entry
+    >
+      {{ label('OPEN_RECORDINGS') }}
+    </RouterLink>
     <CalendarLibrary
       v-if="key === 'hours' && context.capabilities.configure"
       :account-id="accountId"
@@ -1295,7 +1309,7 @@ onBeforeUnmount(() => {
           class="space-y-3 rounded-xl border border-n-weak p-3 sm:col-span-2"
           :disabled="saving || savingMembers"
         >
-          <legend class="px-1 text-sm font-semibold">
+          <legend class="px-1 text-sm font-semibold text-n-slate-12">
             {{ label('TEAM_MEMBERS') }}
           </legend>
           <p class="text-sm text-n-slate-11">{{ label('TEAM_SCOPE') }}</p>

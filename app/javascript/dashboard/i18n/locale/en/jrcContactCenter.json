@@ -1770,27 +1770,27 @@
         },
         "ivr": {
           "NAME": "URA",
-          "DESCRIPTION": "Menus e publicação dependem do contrato homologado do PABX."
+          "DESCRIPTION": "Edite e revise rascunhos locais de URA. A publicação exige contrato e confirmação do PABX."
         },
         "hours": {
           "NAME": "Horários",
-          "DESCRIPTION": "Calendários operacionais aguardam integração autorizada."
+          "DESCRIPTION": "Configure expedientes, feriados, exceções e vínculos locais, com versões preservadas."
         },
         "audio": {
           "NAME": "Áudios",
-          "DESCRIPTION": "Armazenamento, revisão e geração de voz ainda não habilitados."
+          "DESCRIPTION": "Biblioteca privada por unidade, com arquivos, versões e inspeção técnica. Síntese e publicação dependem de integração."
         },
         "pauses": {
           "NAME": "Pausas",
-          "DESCRIPTION": "O catálogo administrativo depende da etapa operacional de pausas."
+          "DESCRIPTION": "Configure motivos, justificativas, aprovação e uso do catálogo, preservando as pausas e os eventos existentes."
         },
         "closures": {
           "NAME": "Encerramentos",
-          "DESCRIPTION": "Configure a política local de pós-atendimento dos canais existentes."
+          "DESCRIPTION": "Gerencie motivos, formulários, pós-atendimento e automações autorizadas nos módulos existentes."
         },
         "distribution": {
           "NAME": "Distribuição",
-          "DESCRIPTION": "Estratégias e publicação no fornecedor aguardam contrato."
+          "DESCRIPTION": "Crie e revise rascunhos locais de roteamento. A aplicação no PABX permanece pendente."
         },
         "permissions": {
           "NAME": "Permissões",
@@ -1798,7 +1798,7 @@
         },
         "recordings": {
           "NAME": "Gravações",
-          "DESCRIPTION": "Acesso separado para visualizar, ouvir e baixar; catálogo administrativo pendente."
+          "DESCRIPTION": "Consulte o histórico autorizado, detalhes e reprodução auditada. Download exige permissão própria."
         },
         "pabx": {
           "NAME": "PABX",
@@ -1864,7 +1864,12 @@
         "event_schema": "Contrato de eventos"
       },
       "ACW_GLOBAL_DENIED": "Esta política afeta toda a conta. Seu escopo atual não permite alterar a configuração global.",
-      "NATIVE_PABX_SETTINGS": "Conexão e histórico/CDR do PABX (Super Admin)"
+      "NATIVE_PABX_SETTINGS": "Conexão e histórico/CDR do PABX (Super Admin)",
+      "LOCAL_PROVIDER_PENDING": "Recursos locais disponíveis. A aplicação no PABX permanece pendente de confirmação técnica.",
+      "OPEN_RECORDINGS": "Consultar gravações autorizadas",
+      "QUEUE_COUNT": "Filas no seu escopo",
+      "UNIT_COUNT": "Unidades no seu escopo",
+      "PENDING_ACW_COUNT": "Pós-atendimentos pendentes no seu escopo"
     },
     "CONFIGURATION_AUDIT": {
       "TITLE": "Auditoria administrativa",
@@ -2197,7 +2202,13 @@
       "TARGET": "Fila ou equipe existente",
       "EXACT_SECONDS": "Limite preservado: {seconds} segundos. Preencha o horário apenas para alterá-lo.",
       "CONFLICT": "Há regras de ACW conflitantes no mesmo nível. Revise os motivos, filas e equipes.",
-      "INVALID": "Revise os campos e os tempos das regras de ACW."
+      "INVALID": "Revise os campos e os tempos das regras de ACW.",
+      "UNIT_SEARCH": "Pesquisar unidade operacional",
+      "UNIT_TARGET": "Unidade operacional existente",
+      "QUEUE_SEARCH": "Pesquisar fila",
+      "QUEUE_TARGET": "Fila existente",
+      "TEAM_SEARCH": "Pesquisar equipe",
+      "TEAM_TARGET": "Equipe existente"
     },
     "ROUTING_DRAFTS": {
       "KIND": "Critério de roteamento",
@@ -3231,7 +3242,82 @@
       "RECORDING_ID": "Identificador da gravação",
       "EXTENSION": "Ramal",
       "STORAGE_NOT_CONFIRMED": "Política, retenção, bloqueio legal e capacidade de armazenamento não confirmados nesta consulta. Nenhum prazo foi presumido; esta tela não permite excluir o original.",
-      "MEDIA_AUDIT_ERROR": "A reprodução foi interrompida porque não foi possível registrar a auditoria. Selecione Ouvir para tentar novamente com sua autorização atual."
+      "MEDIA_AUDIT_ERROR": "A reprodução foi interrompida porque não foi possível registrar a auditoria. Selecione Ouvir para tentar novamente com sua autorização atual.",
+      "ACCESS_HISTORY": {
+        "TITLE": "Histórico de acessos desta gravação",
+        "NOTICE": "São exibidos somente os acessos autorizados no seu escopo. Alguns registros antigos podem não estar disponíveis nesta consulta.",
+        "DATE": "Data e hora",
+        "ACTOR": "Usuário",
+        "OPERATION": "Operação",
+        "REQUEST": "Identificador da solicitação",
+        "EMPTY": "Nenhum registro de acesso disponível no seu escopo.",
+        "ERROR": "Não foi possível consultar o histórico. Os dados da gravação foram preservados.",
+        "DENIED": "Seu acesso à auditoria não está autorizado. O histórico anterior foi retirado da tela.",
+        "UNAVAILABLE": "O histórico não está disponível com a configuração ou o acesso atuais.",
+        "UNKNOWN_ACTOR": "Usuário indisponível",
+        "UNKNOWN_REQUEST": "Não informado",
+        "RETRY": "Tentar novamente",
+        "VIEW": "Consulta dos detalhes",
+        "LISTEN": "Carregamento para escuta",
+        "DOWNLOAD": "Download",
+        "REPRODUCE": "Solicitação autorizada de reprodução"
+      },
+      "QUALITY": "Análise e revisão do Nico"
+    },
+    "QUALITY_REVIEW": {
+      "TITLE": "Corrigir Análise do Nico",
+      "NUMBER": "Número da chamada",
+      "EXTENSION": "Ramal registrado",
+      "STARTED": "Data e hora da chamada",
+      "DURATION": "Duração",
+      "INTRO": "Revise, ajuste e registre a análise, preservando o resultado original.",
+      "LOADING": "Carregando análise autorizada…",
+      "UNKNOWN": "Não informado pela fonte",
+      "CALL": "Chamada",
+      "REVISION": "Revisão",
+      "HUMAN_ORIGIN": "Revisão humana registrada:",
+      "LATEST_HUMAN_REVIEW": "Última revisão humana disponível no seu escopo",
+      "OLDER_SOURCE_REVIEW": "Esta revisão pertence à versão anterior da análise. A fonte atual permanece exibida separadamente.",
+      "SENTIMENT": "Classificação do sentimento",
+      "ORIGINAL_CLASS": "Sentimento original do Nico",
+      "ORIGINAL_QUALITY": "Qualidade original da ligação",
+      "SCORE": "Nota de qualidade original",
+      "SENTIMENT_CONFIDENCE": "Confiança do sentimento",
+      "ASR_CONFIDENCE": "Confiança da transcrição (não é confiança do sentimento)",
+      "MODEL": "Modelo da análise original",
+      "NEW_CLASS": "Nova classificação (revisão humana) — obrigatória",
+      "POSITIVE": "Positivo",
+      "NEUTRAL": "Neutro",
+      "NEGATIVE": "Negativo",
+      "ORIGINAL_SUMMARY": "Resumo original do Nico",
+      "ADJUSTED_SUMMARY": "Resumo ajustado",
+      "ORIGINAL_THEMES": "Temas originais",
+      "ADJUSTED_THEMES": "Temas ajustados",
+      "ONE_THEME_PER_LINE": "Informe um tema por linha.",
+      "RECOMMENDATIONS": "Recomendações sugeridas",
+      "SUGGESTIONS_ONLY": "Manter uma sugestão não envia mensagens nem executa ações em outros módulos.",
+      "NO_RECOMMENDATIONS": "Nenhuma recomendação fornecida pela fonte.",
+      "JUSTIFICATION": "Justificativa da correção — obrigatória",
+      "IMMUTABLE_ORIGINAL": "A revisão será auditada. Áudio, transcrição e análise original permanecerão preservados.",
+      "REVIEW_REQUIRED": "A análise ou a revisão mudou. Seu rascunho foi preservado; confira a fonte atual antes de reaplicar.",
+      "SUGGESTIONS_CHANGED": "Há sugestões selecionadas que não pertencem mais à análise atual. Revise a seleção antes de salvar.",
+      "REMOVE_UNAVAILABLE": "Remover sugestões indisponíveis da seleção",
+      "REFRESH_REVIEW": "Carregar fonte atual para revisão",
+      "ACCEPT_REVIEW": "Revisei a fonte e quero reaplicar meu rascunho",
+      "DISCARD_QUESTION": "Descartar as alterações que ainda não foram salvas?",
+      "KEEP_EDITING": "Continuar editando",
+      "DISCARD": "Descartar alterações",
+      "RETRY": "Tentar novamente",
+      "CANCEL": "Cancelar",
+      "SAVING": "Salvando…",
+      "SAVE": "Salvar correção",
+      "DENIED": "A gravação ou esta operação não está disponível no seu acesso atual.",
+      "CONFLICT": "Existe uma alteração concorrente. Revise os dados atuais antes de salvar novamente.",
+      "SOURCE_UNAVAILABLE": "A análise está indisponível ou ainda não foi gerada para esta chamada. Nenhuma correção foi salva.",
+      "REASON_REQUIRED": "Preencha a justificativa da correção.",
+      "CLASS_REQUIRED": "Selecione uma classificação válida.",
+      "ERROR": "Não foi possível concluir. O rascunho foi preservado; confira o resultado antes de tentar novamente.",
+      "SEPARATOR": "·"
     }
   }
 }

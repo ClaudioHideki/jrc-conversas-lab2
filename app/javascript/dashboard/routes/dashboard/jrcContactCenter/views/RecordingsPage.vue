@@ -124,7 +124,7 @@ const duration = value =>
           v-model="filters.from"
           type="date"
           data-recordings-from
-          class="mt-1 block w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-2 p-2"
+          class="mt-1 block w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-2 p-2 [color-scheme:light] dark:[color-scheme:dark]"
         />
       </label>
       <label class="min-w-0 text-sm">
@@ -133,7 +133,7 @@ const duration = value =>
           v-model="filters.to"
           type="date"
           data-recordings-to
-          class="mt-1 block w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-2 p-2"
+          class="mt-1 block w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-2 p-2 [color-scheme:light] dark:[color-scheme:dark]"
         />
       </label>
       <label class="min-w-0 text-sm">
@@ -310,6 +310,7 @@ const duration = value =>
     <RecordingDetailsDialog
       v-if="selected"
       :key="`${accountId}-${actorScope}-${selected.id}`"
+      :account-id="accountId"
       :item="selected"
       :formatted-duration="duration(selected.talk_duration_seconds)"
       :capabilities="capabilities"

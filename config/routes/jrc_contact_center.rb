@@ -101,6 +101,10 @@ namespace :api, defaults: { format: 'json' } do
           get :playback, on: :member
           get :download, on: :member
           post :reproduce, on: :member
+          resource :quality_review, only: %i[show create], controller: 'quality_reviews' do
+            get :history
+          end
+          get :access_history, on: :member
         end
         resource :deferred_pause_request, only: %i[create destroy], controller: 'deferred_pause_requests' do
           post :preview

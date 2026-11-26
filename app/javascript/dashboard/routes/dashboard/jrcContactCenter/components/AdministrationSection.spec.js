@@ -99,6 +99,99 @@ beforeEach(() => {
 });
 
 describe('administrative workflow', () => {
+  it('shows the authorized local availability and scoped count meaning without claiming an applied PABX state', async () => {
+    API.administration.mockResolvedValueOnce({
+      data: {
+        cards: [
+          {
+            key: 'hours',
+            state: 'pending_contract',
+            local_state: 'available',
+            count: null,
+          },
+          { key: 'closures', state: 'available', local_state: null, count: 0 },
+        ],
+        capabilities: {},
+        provider: { configured: false },
+      },
+    });
+    const wrapper = mount(ControlDeskPage, {
+      global: {
+        stubs: {
+          RouterLink: { template: '<a><slot /></a>' },
+          RecentConfigurationActivity: true,
+        },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.get('[data-card="hours"] [data-card-state]').text()).toBe(
+      'JRC_CONTACT_CENTER.ADMIN.STATES.available'
+    );
+    expect(
+      wrapper.get('[data-card="closures"] [data-card-count-label]').text()
+    ).toBe('JRC_CONTACT_CENTER.ADMIN.PENDING_ACW_COUNT');
+    expect(wrapper.get('[data-provider-state]').text()).toBe(
+      'JRC_CONTACT_CENTER.ADMIN.CONNECTION_MISSING'
+    );
+  });
+
+  it('provides the native recordings route only with its current independent view authority and does not call an unsupported generic list', async () => {
+    const wrapper = mount(AdministrationSection, {
+      props: {
+        accountId: '1',
+        card: { key: 'recordings', state: 'pending_contract' },
+        context,
+      },
+      global: {
+        stubs: {
+          Dialog,
+          RouterLink: {
+            props: { to: { type: [Object, String], required: true } },
+            template: '<a :data-route-name="to.name"><slot /></a>',
+          },
+        },
+      },
+    });
+    await wrapper.setProps({
+      card: {
+        key: 'recordings',
+        state: 'pending_contract',
+        local_state: 'read_only',
+      },
+      context: {
+        ...context,
+        capabilities: { configure: false, recordings_view: true },
+      },
+    });
+    await flushPromises();
+    const link = wrapper.getComponent('[data-native-recordings-entry]');
+    expect(link.props('to')).toEqual({
+      name: 'jrc_contact_center_recordings',
+      params: { accountId: '1' },
+      query: {},
+    });
+    expect(wrapper.find('[data-create]').exists()).toBe(false);
+    expect(API.administrativeList).not.toHaveBeenCalled();
+    await wrapper.setProps({
+      context: { ...context, capabilities: { recordings_view: false } },
+    });
+    expect(wrapper.find('[data-native-recordings-entry]').exists()).toBe(false);
+  });
+
+  it('distinguishes a usable local draft from the still pending provider operation without enabling generic create or publish', async () => {
+    const wrapper = mountSection('ivr', 'pending_contract');
+    await wrapper.setProps({
+      card: { key: 'ivr', state: 'pending_contract', local_state: 'available' },
+    });
+    await flushPromises();
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.ADMIN.LOCAL_PROVIDER_PENDING'
+    );
+    expect(wrapper.text()).not.toContain('JRC_CONTACT_CENTER.ADMIN.PENDING');
+    expect(wrapper.find('[data-create], [data-publish]').exists()).toBe(false);
+    expect(API.administrativeList).not.toHaveBeenCalled();
+  });
+
   it('opens only the scoped rule editor and resets its reviewed context on account changes', async () => {
     const wrapper = mountSection('closures');
     await wrapper.setProps({
@@ -483,13 +576,27 @@ describe('administrative workflow', () => {
 
   it('restores the selected native team tab from the URL', async () => {
     mocks.route.query = { queues_tab: 'teams', teams_q: 'support' };
-    mountSection('queues');
+    API.administrativeList.mockResolvedValueOnce({
+      data: {
+        items: [{ id: 25, name: 'SYNTHETIC existing team' }],
+        agents: [],
+        can_manage: true,
+      },
+    });
+    TeamsAPI.getAgents.mockResolvedValueOnce({ data: [] });
+    const wrapper = mountSection('queues');
     await flushPromises();
     expect(API.administrativeList).toHaveBeenCalledWith(
       '1',
       'teams',
       expect.objectContaining({ q: 'support' })
     );
+    await wrapper.get('[data-edit]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-dialog]').attributes('title')).toBe(
+      'JRC_CONTACT_CENTER.ADMIN.RESOURCES.teams — JRC_CONTACT_CENTER.ADMIN.EDIT'
+    );
+    expect(wrapper.get('legend').classes()).toContain('text-n-slate-12');
   });
 
   it('preserves a non-voice queue channel while editing its name', async () => {

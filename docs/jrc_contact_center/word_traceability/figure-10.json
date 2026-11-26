@@ -3079,21 +3079,27 @@
    "figures": [
     10
    ],
-   "status": "parcial",
-   "verification": "Independent native CRM/Service Desk transactions, actual rollback, selected retry and current authority are implemented and tested in the typed82-case boundary. Public mixed CRM/Service Desk Chrome flow remains pending.",
+   "status": "implementado",
+   "verification": {
+    "document": "docs/jrc_contact_center/literal_mixed_and_recording_popup_acceptance_20261126.json",
+    "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2",
+    "run": 45882932168
+   },
    "code_reference_ids": [],
    "test_reference_ids": [],
    "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
    "divergences": [
-    "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
+    "Other clauses of this figure and external homologation remain separate."
    ],
    "direct_functional_review": {
-    "status": "parcial",
-    "behavior": "Independent native CRM/Service Desk transactions, actual rollback, selected retry and current authority are implemented and tested in the typed82-case boundary. Public mixed CRM/Service Desk Chrome flow remains pending.",
-    "code": [],
-    "tests": [],
-    "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
-    "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+    "status": "implementado",
+    "literal_clause_only": true,
+    "whole_figure_accepted": false,
+    "review": {
+     "document": "docs/jrc_contact_center/literal_mixed_and_recording_popup_acceptance_20261126.json",
+     "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2",
+     "run": 45882932168
+    }
    },
    "candidate_test_reference_ids_not_approval": [],
    "historical_functional_review_before_M21": {
@@ -3118,7 +3124,7 @@
     "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
     "whole_requirement_accepted": false
    },
-   "previous_review_recoverable_at_checkpoint": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041"
+   "previous_review_recoverable_at_checkpoint": "d881005fb837f49cbc045d92759b231c985b36f2"
   },
   {
    "id": "D2-P0225-C02",
@@ -3354,21 +3360,27 @@
    "figures": [
     10
    ],
-   "status": "parcial",
-   "verification": "Independent native CRM/Service Desk transactions, actual rollback, selected retry and current authority are implemented and tested in the typed82-case boundary. Public mixed CRM/Service Desk Chrome flow remains pending.",
+   "status": "implementado",
+   "verification": {
+    "document": "docs/jrc_contact_center/literal_mixed_and_recording_popup_acceptance_20261126.json",
+    "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2",
+    "run": 45882932168
+   },
    "code_reference_ids": [],
    "test_reference_ids": [],
    "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
    "divergences": [
-    "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
+    "Other clauses of this figure and external homologation remain separate."
    ],
    "direct_functional_review": {
-    "status": "parcial",
-    "behavior": "Independent native CRM/Service Desk transactions, actual rollback, selected retry and current authority are implemented and tested in the typed82-case boundary. Public mixed CRM/Service Desk Chrome flow remains pending.",
-    "code": [],
-    "tests": [],
-    "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
-    "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+    "status": "implementado",
+    "literal_clause_only": true,
+    "whole_figure_accepted": false,
+    "review": {
+     "document": "docs/jrc_contact_center/literal_mixed_and_recording_popup_acceptance_20261126.json",
+     "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2",
+     "run": 45882932168
+    }
    },
    "candidate_test_reference_ids_not_approval": [],
    "historical_functional_review_before_M21": {
@@ -3393,7 +3405,7 @@
     "remaining": "Continuam pendentes: CRM, Service Desk, notificações e NICO operacionais; modo manual; recuperação operacional em escala. F10-B entre CRM e Service Desk e o PABX externo não foram homologados.",
     "whole_requirement_accepted": false
    },
-   "previous_review_recoverable_at_checkpoint": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041"
+   "previous_review_recoverable_at_checkpoint": "d881005fb837f49cbc045d92759b231c985b36f2"
   }
  ],
  "divergences": [
@@ -6865,5 +6877,14 @@
    "D2-P0224-C02",
    "D2-P0227-C01"
   ]
+ },
+ "latest_bounded_native_and_Chrome_acceptance": {
+  "document": "docs/jrc_contact_center/mixed_destinations_and_recording_popup_native_acceptance_20261126.json",
+  "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2",
+  "literal_IDs": [
+   "D2-P0225-C01",
+   "D2-P0228-C01"
+  ],
+  "whole_figure_accepted": false
  }
 }

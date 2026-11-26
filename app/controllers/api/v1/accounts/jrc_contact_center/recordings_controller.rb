@@ -45,6 +45,16 @@ class Api::V1::Accounts::JrcContactCenter::RecordingsController < Api::V1::Accou
     end
   end
 
+  def access_history
+    with_recording_authority do
+      authorize_contact_center!(:audit?)
+      raise JrcContactCenter::OperationError.new('native_audit_unavailable', status: :not_found) unless Current.account.feature_enabled?('audit_logs')
+
+      record, = current_reader.find(params[:id])
+      render json: recording_history_payload(record)
+    end
+  end
+
   def playback
     transmit(:listen, 'inline')
   end
@@ -61,6 +71,13 @@ class Api::V1::Accounts::JrcContactCenter::RecordingsController < Api::V1::Accou
       authorize_contact_center!(:recordings_view?)
       yield
     end
+  end
+
+  def recording_history_payload(record)
+    rows = JrcContactCenter::RecordingAudit.new(context: pundit_user).call.where(auditable: record).order(created_at: :desc, id: :desc)
+    params[:page] = 1 if params[:page].blank?
+    list_payload(rows) { |row| JrcContactCenter::RecordingAudit.present(row) }
+      .merge(recording_id: record.id.to_s, timezone: Time.zone.tzinfo.identifier)
   end
 
   def audit_list!(payload)
@@ -131,8 +148,7 @@ class Api::V1::Accounts::JrcContactCenter::RecordingsController < Api::V1::Accou
       comment: 'jrc_contact_center_recording_reproduction_v1'
     ) do |row|
       row.action = 'read'
-      row.audited_changes = { 'schema_version' => 1, 'operation' => 'reproduce', 'call_session_id' => call.id.to_s,
-                              'unit_id' => call.current_unit_id&.to_s, 'queue_id' => call.current_queue_id&.to_s }
+      row.audited_changes = recording_access_changes(call, 'reproduce')
     end
   end
 
@@ -165,9 +181,14 @@ class Api::V1::Accounts::JrcContactCenter::RecordingsController < Api::V1::Accou
   def audit_read!(record, call, action)
     Audited.audit_class.create!(
       auditable: record, associated: Current.account, user: Current.user, action: 'read', comment: 'jrc_contact_center_recording_access_v1',
-      audited_changes: { 'schema_version' => 1, 'operation' => action.to_s, 'call_session_id' => call.id.to_s,
-                         'unit_id' => call.current_unit_id&.to_s, 'queue_id' => call.current_queue_id&.to_s }
+      audited_changes: recording_access_changes(call, action.to_s)
     )
+  end
+
+  def recording_access_changes(call, operation)
+    values = { 'schema_version' => 1, 'operation' => operation, 'call_session_id' => call.id.to_s,
+               'unit_id' => call.current_unit_id&.to_s, 'queue_id' => call.current_queue_id&.to_s }
+    values.merge(JrcContactCenter::RecordingAudit.scope_fields(call))
   end
 
   def private_response

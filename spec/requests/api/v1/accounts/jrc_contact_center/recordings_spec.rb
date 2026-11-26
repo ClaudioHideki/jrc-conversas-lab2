@@ -284,4 +284,114 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
     expect(response).to have_http_status(:unauthorized)
     expect(Audited.audit_class.where(auditable: record, comment: 'jrc_contact_center_recording_reproduction_v1')).to be_empty
   end
+
+  context 'with explicit recording audit authority' do
+    let(:rights) { super() + ['jrc_contact_center_audit'] }
+
+    it 'pages actual native read events and emits only bounded authorized identifiers in the account timezone' do
+      account.update!(reporting_timezone: 'America/Sao_Paulo')
+      2.times { get "#{path}/#{record.id}", headers: headers }
+      audits = Audited.audit_class.where(auditable: record, comment: JrcContactCenter::RecordingAudit::COMMENTS)
+      expect(audits.count).to eq(2)
+      expect(audits.last.audited_changes.dig('cc_scope', 'after', 'business_unit_id')).to eq(business.id.to_s)
+      get "#{path}/#{record.id}/access_history", headers: headers, params: { per_page: 1 }
+      expect(response).to have_http_status(:ok)
+      first = response.parsed_body
+      expect(first).to include('account_id' => account.id.to_s, 'recording_id' => record.id.to_s, 'timezone' => 'America/Sao_Paulo')
+      expect(first.fetch('meta')).to include('page' => 1, 'total' => 2, 'pages' => 2, 'per_page' => 1)
+      expect(first.fetch('items').sole.keys).to match_array(%w[id created_at actor_id operation request_id])
+      expect(first.fetch('items').sole).to include('actor_id' => actor.id.to_s, 'operation' => 'view')
+      expect(response.body).not_to include(actor.email, record.caller, 'recording_reference', '/var/spool', 'audited_changes')
+      get "#{path}/#{record.id}/access_history", headers: headers, params: { page: 2, per_page: 1 }
+      expect(response.parsed_body.fetch('items').sole.fetch('id')).not_to eq(first.fetch('items').sole.fetch('id'))
+      expect(response.headers['Cache-Control']).to include('private', 'no-store')
+    end
+
+    it 'keeps the historical access events stored but hides legacy unknown and unauthorized historical unit snapshots' do
+      get "#{path}/#{record.id}", headers: headers
+      current = Audited.audit_class.where(auditable: record, comment: 'jrc_contact_center_recording_access_v1').sole
+      legacy = Audited.audit_class.create!(auditable: record, associated: account, user: actor, action: 'read',
+                                           comment: current.comment, audited_changes: { 'operation' => 'view', 'schema_version' => 1 })
+      fields = current.audited_changes.deep_dup
+      fields['cc_scope'].each_value { |scope| scope['unit_id'] = '9223372036854775806' }
+      outside = Audited.audit_class.create!(auditable: record, associated: account, user: actor, action: 'read',
+                                            comment: current.comment, audited_changes: fields)
+      get "#{path}/#{record.id}/access_history", headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body.fetch('items').pluck('id')).to eq([current.id.to_s])
+      expect(Audited.audit_class.where(id: [legacy.id, outside.id]).count).to eq(2)
+    end
+
+    it 'does not expose recording events through the ordinary account audit relation after audit authority is withdrawn' do
+      get "#{path}/#{record.id}", headers: headers
+      audit = Audited.audit_class.where(auditable: record, comment: JrcContactCenter::RecordingAudit::COMMENTS).sole
+      relation = Audited.audit_class.where(associated: account)
+      context = { account: account, account_user: member.reload, user: actor }
+      expect(JrcContactCenter::ConfigurationAuditScope.protect_native_list(relation, context).pluck(:id)).to include(audit.id)
+      role.update!(permissions: rights - ['jrc_contact_center_audit'])
+      get "#{path}/#{record.id}/access_history", headers: headers
+      expect(response).to have_http_status(:unauthorized)
+      member.reload
+      expect(JrcContactCenter::ConfigurationAuditScope.protect_native_list(relation, context).pluck(:id)).not_to include(audit.id)
+    end
+
+    it 'does not expose the recording history from another account or after the native corporate coverage is withdrawn' do
+      get "#{path}/#{record.id}", headers: headers
+      foreign = create(:user, account: create(:account))
+      get "#{path}/#{record.id}/access_history", headers: foreign.create_new_auth_token
+      expect(response).to have_http_status(:unauthorized)
+      account.jrc_crm_user_business_units.where(user: actor).find_each { |coverage| coverage.update!(active: false) }
+      get "#{path}/#{record.id}/access_history", headers: headers
+      expect(response).to have_http_status(:not_found)
+      context = { account: account, account_user: member.reload, user: actor }
+      expect(JrcContactCenter::RecordingAudit.new(context: context).call).to be_empty
+    end
+
+    it 'honors the native audit feature without converting unavailable history into an empty successful response' do
+      account.disable_features!('audit_logs')
+      get "#{path}/#{record.id}/access_history", headers: headers
+      expect(response).to have_http_status(:not_found)
+      expect(response.parsed_body.fetch('error')).to eq('native_audit_unavailable')
+      expect(response.parsed_body).not_to have_key('items')
+    end
+
+    it 'hides recording events from the generic audit relation when native personal history is disabled without hiding ordinary events' do
+      get "#{path}/#{record.id}", headers: headers
+      recording_audit = Audited.audit_class.where(auditable: record, comment: JrcContactCenter::RecordingAudit::COMMENTS).sole
+      ordinary = Audited.audit_class.create!(auditable: account, associated: account, user: actor, action: 'read',
+                                             comment: 'synthetic ordinary audit', audited_changes: { 'operation' => 'view' })
+      account.sip_credentials.find_by!(user: actor).update!(enabled: false)
+      context = { account: account, account_user: member.reload, user: actor }
+      scope = JrcContactCenter::ConfigurationAuditScope.protect_native_list(Audited.audit_class.where(associated: account), context)
+      expect(scope.pluck(:id)).to include(ordinary.id)
+      expect(scope.pluck(:id)).not_to include(recording_audit.id)
+    end
+
+    it 'keeps the native Enterprise account audit HTTP endpoint from bypassing independent recording audit authority' do
+      member.update!(role: :administrator)
+      get "#{path}/#{record.id}", headers: headers
+      audit = Audited.audit_class.where(auditable: record, comment: JrcContactCenter::RecordingAudit::COMMENTS).sole
+      role.update!(permissions: rights - ['jrc_contact_center_audit'])
+      get "/api/v1/accounts/#{account.id}/audit_logs", headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body.fetch('audit_logs').pluck('id')).not_to include(audit.id)
+      expect(response.body).not_to include(record.external_unique_id, record.recording_reference)
+    end
+
+    it 'intersects native Enterprise account audit HTTP history with the current recording and historical operational unit' do
+      member.update!(role: :administrator)
+      get "#{path}/#{record.id}", headers: headers
+      audit = Audited.audit_class.where(auditable: record, comment: JrcContactCenter::RecordingAudit::COMMENTS).sole
+      fields = audit.audited_changes.deep_dup
+      fields['cc_scope'].each_value { |scope| scope['unit_id'] = '9223372036854775806' }
+      outside = Audited.audit_class.create!(auditable: record, associated: account, user: actor, action: 'read',
+                                            comment: audit.comment, audited_changes: fields)
+      get "/api/v1/accounts/#{account.id}/audit_logs", headers: headers
+      expect(response).to have_http_status(:ok)
+      rows = response.parsed_body.fetch('audit_logs')
+      expect(rows.pluck('id')).to include(audit.id)
+      expect(rows.pluck('id')).not_to include(outside.id)
+      expect(rows.find { |row| row['id'] == audit.id }.fetch('audited_changes')).to eq(audit.audited_changes)
+    end
+  end
 end

@@ -35,6 +35,12 @@ const localIvrRoute = contactCenterRoutes[0].children.find(
 if (!localIvrRoute)
   throw new Error('Native IVR route missing from fixture source');
 
+const localRecordingRoute = contactCenterRoutes[0].children.find(
+  route => route.name === 'jrc_contact_center_recordings'
+);
+if (!localRecordingRoute)
+  throw new Error('Native recording route missing from fixture source');
+
 window.chatwootConfig = {};
 window.axios = axios;
 Object.assign(
@@ -78,6 +84,10 @@ const router = createRouter({
           {
             ...localIvrRoute,
             path: contactCenterRoutes[0].path + '/' + localIvrRoute.path,
+          },
+          {
+            ...localRecordingRoute,
+            path: contactCenterRoutes[0].path + '/' + localRecordingRoute.path,
           },
           {
             path: '/app/accounts/:accountId/contact-center/control-desk',
@@ -149,9 +159,12 @@ const store = createStore({
 router.beforeEach(async to => {
   if (
     !nativeNavigation &&
-    !['ramal_settings', 'jrc_contact_center_ivr', 'jrc_approvals'].includes(
-      to.name
-    ) &&
+    ![
+      'ramal_settings',
+      'jrc_contact_center_ivr',
+      'jrc_contact_center_recordings',
+      'jrc_approvals',
+    ].includes(to.name) &&
     !String(to.name).startsWith('settings_teams_')
   )
     return true;

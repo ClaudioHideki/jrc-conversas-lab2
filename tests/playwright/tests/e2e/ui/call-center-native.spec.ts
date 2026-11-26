@@ -1244,7 +1244,17 @@ test('native access conflict preserves draft and requires explicit comparison be
 test('fifteen permission-bound cards, actual CSS, honest pending states and no overflow', async ({
   page,
 }, info) => {
+  const administrationResponse = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname ===
+        new URL(api + '/administration').pathname &&
+      response.request().method() === 'GET'
+  );
   await page.goto(base);
+  const administration = await administrationResponse;
+  expect(administration.status()).toBe(200);
+  const nativeAdministration = await administration.json();
+  expect(nativeAdministration.cards).toHaveLength(15);
   await expect(page.locator('[data-card]')).toHaveCount(15);
   await expect(
     page.getByRole('heading', {
@@ -1312,6 +1322,20 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
         );
       })
     ).toBe(true);
+    const nativeCard = nativeAdministration.cards.find(row => row.key === key);
+    if (['ivr', 'hours', 'audio', 'pauses', 'distribution'].includes(key)) {
+      expect(nativeCard.local_state).toBe('available');
+      expect(nativeCard.state).toBe('pending_contract');
+      await expect(card.locator('[data-card-state]')).toHaveText(
+        'Configuração local disponível'
+      );
+    }
+    if (key === 'recordings') {
+      expect(nativeCard.local_state).toBe('read_only');
+      await expect(card.locator('[data-card-state]')).toHaveText(
+        'Somente consulta'
+      );
+    }
     await page.locator(`[data-card="${key}"]`).click();
     await expect(page.locator('[data-administration-section] h2')).toHaveText(
       name
@@ -1333,13 +1357,35 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
       );
       await expect(library.locator('input[type="file"], audio')).toHaveCount(0);
     } else if (pending.includes(key)) {
+      const localResource = key !== 'numbers';
+      const message = localResource
+        ? 'Recursos locais disponíveis'
+        : 'Funcionalidade pendente';
       const pendingNotice = page
         .locator('[data-administration-section] [role="status"]')
-        .filter({ hasText: 'Funcionalidade pendente' });
+        .filter({ hasText: message });
       await expect(pendingNotice).toHaveCount(1);
       await expect(pendingNotice).toBeVisible();
-      await expect(pendingNotice).toContainText('Funcionalidade pendente');
+      await expect(pendingNotice).toContainText(message);
       await expect(page.locator('[data-create]')).toHaveCount(0);
+      if (key === 'recordings') {
+        const sectionURL = page.url();
+        const entry = page.locator('[data-native-recordings-entry]');
+        await expect(entry).toHaveAttribute(
+          'href',
+          `/app/accounts/${session.account_id}/contact-center/gravacoes`
+        );
+        await entry.click();
+        await expect(page.locator('[data-scoped-recordings]')).toBeVisible();
+        await expect(page).toHaveURL(/\/contact-center\/gravacoes/);
+        // This administrative account has no configured personal SIP source.
+        // The dedicated four recording accounts prove actual allowed audio separately.
+        await expect(page.locator('[data-recording-row]')).toHaveCount(0);
+        await page.goto(sectionURL);
+        await expect(
+          page.locator('[data-native-recordings-entry]')
+        ).toBeVisible();
+      }
       if (key === 'distribution') {
         await expect(page.locator('[data-routing-create]')).toHaveCount(1);
         await expect(page.locator('[data-publish]')).toHaveCount(0);
@@ -1369,6 +1415,24 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
     path: `${out}/${info.project.name}-central.png`,
     fullPage: true,
   });
+  fs.writeFileSync(
+    `${out}/${info.project.name}-administration-local-availability.json`,
+    JSON.stringify(
+      {
+        sha: process.env.GITHUB_SHA,
+        project: info.project.name,
+        synthetic: true,
+        local_availability_verified_against_native_HTTP: true,
+        real_existing_recording_route_opened_from_administration: true,
+        provider_application_not_enabled: true,
+        cards: nativeAdministration.cards,
+        provider: nativeAdministration.provider,
+        new_model_or_permission_or_provider_command: false,
+      },
+      null,
+      2
+    )
+  );
 });
 
 test('native unit popup: validation failure preserves values, creation editing reload and API persistence', async ({
@@ -4895,6 +4959,13 @@ test('team roster last eligible withdrawal uses real native review, persistence 
   await teamRow.locator('[data-edit]').click();
   await expectContainedDialog(page);
   const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Equipes — Editar');
+  const rosterLegend = dialog.getByText('Participantes da equipe nativa', {
+    exact: true,
+  });
+  await expect(rosterLegend).toBeVisible();
+  const rosterLegendContrast = await measureTextContrast(rosterLegend);
+  expect(rosterLegendContrast.ratio).toBeGreaterThanOrEqual(4.5);
   const selection = dialog.locator(
     `[data-team-member="${target.operator_user_id}"]`
   );
@@ -4980,7 +5051,14 @@ test('team roster last eligible withdrawal uses real native review, persistence 
   else expect(reviewBrightness).toBeLessThan(300);
   fs.writeFileSync(
     `.codex/call-center-native-e2e/${info.project.name}-team-last-agent-theme.json`,
-    JSON.stringify({ color: reviewColor, brightness: reviewBrightness })
+    JSON.stringify({
+      color: reviewColor,
+      brightness: reviewBrightness,
+      rosterLegendContrast,
+      native_team_dialog_title_verified: true,
+      sha: process.env.GITHUB_SHA,
+      project: info.project.name,
+    })
   );
   await expect(page.locator('html')).toHaveClass(
     info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/

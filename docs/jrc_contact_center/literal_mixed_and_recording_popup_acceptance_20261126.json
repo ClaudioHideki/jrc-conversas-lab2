@@ -1,0 +1,18 @@
+{
+  "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2",
+  "run": 45882932168,
+  "artifact_sha256": "d37bc3d509ac6d0ae51163e3809c896a0ccb37e290f51ddb44aa8e3cc88913f8",
+  "unique_literal_IDs": [
+    "D2-P0225-C01",
+    "D2-P0228-C01",
+    "D2-P0348-C03"
+  ],
+  "expected_text_sha256": {
+    "D2-P0225-C01": "98cc9d1a999aaf263877da16873ea3ecbc6812151fc2f69968c48bd416d81edb",
+    "D2-P0228-C01": "cf7a80ae2129726d7e902b6c34238d205bd543a1d5c6f1a25d8211ada54290fd",
+    "D2-P0348-C03": "6b3b5b86d7479c5d086d55f1c0dc2047a142406000431a71b915d65c2db805c9"
+  },
+  "native_acceptance": "docs/jrc_contact_center/mixed_destinations_and_recording_popup_native_acceptance_20261126.json",
+  "all_32_original_images_actually_opened": true,
+  "whole_Part1_accepted": false
+}

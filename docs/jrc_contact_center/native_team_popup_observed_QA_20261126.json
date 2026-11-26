@@ -1,0 +1,73 @@
+{
+  "source_sha": "cb4d176fea2e61cc7a158a3f89358971a95a358b",
+  "run": 45843151860,
+  "artifact_sha256": "2c9be62b65dd2730408a2b44c809e011357c18df457d34c951087220563d2500",
+  "all_8_originals_actually_opened": true,
+  "images": [
+    {
+      "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-team-last-agent-manager-review.png",
+      "sha256": "60caa6ac69c030da43fbbe593b9de1de1fdc3a98886dcbb436da4cbf2f24a9e3",
+      "actually_opened": true,
+      "observation": "The actual team roster popup displays the parent queue title instead of the edited team; the native impact and explicit manager checkbox are visible."
+    },
+    {
+      "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-team-last-agent-audit.png",
+      "sha256": "7ba5f7bc377cb3d7120c51b48fbfad2e115dbe1e1940c18159d99f967ca38dc9",
+      "actually_opened": true,
+      "observation": "The native audit visibly identifies the confirming manager and queue, the 1-to-0 eligibility transition and preserved queue attribution; provider application is explicitly not claimed."
+    },
+    {
+      "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-team-last-agent-manager-review.png",
+      "sha256": "749c4b415430208c3a2f7463e512f1aed240bba57b603c7e73dff56358f3f191",
+      "actually_opened": true,
+      "observation": "The actual team roster popup displays the parent queue title instead of the edited team; the native impact and explicit manager checkbox are visible. The participant fieldset legend is black against the dark dialog and needs the existing native text token."
+    },
+    {
+      "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-team-last-agent-audit.png",
+      "sha256": "661c0db52de9d02b27a891a2697cad43c9ee51e953dbd6539cd1a465d24f163f",
+      "actually_opened": true,
+      "observation": "The native audit visibly identifies the confirming manager and queue, the 1-to-0 eligibility transition and preserved queue attribution; provider application is explicitly not claimed."
+    },
+    {
+      "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-team-last-agent-manager-review.png",
+      "sha256": "51b1d26bfa4b0d34035623f77de008b6cfe126744f9f186caf595118b622fac7",
+      "actually_opened": true,
+      "observation": "The actual team roster popup displays the parent queue title instead of the edited team; the native impact and explicit manager checkbox are visible. At390px the impact wraps within the dialog; the submit label is truncated, and this scrolled capture does not show the legend."
+    },
+    {
+      "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-team-last-agent-audit.png",
+      "sha256": "d821ae6e977de88cbff9fe4927f283e7d3d04df350b7a0f0a9976a5b32cc293e",
+      "actually_opened": true,
+      "observation": "The native audit visibly identifies the confirming manager and queue, the 1-to-0 eligibility transition and preserved queue attribution; provider application is explicitly not claimed."
+    },
+    {
+      "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-team-last-agent-manager-review.png",
+      "sha256": "31ae0738c2a6f2a2afdda90ff4ec714e57d05a5296c7f583f31250934d25698c",
+      "actually_opened": true,
+      "observation": "The actual team roster popup displays the parent queue title instead of the edited team; the native impact and explicit manager checkbox are visible. At390px the impact wraps within the dialog; the submit label is truncated, and this scrolled capture does not show the legend."
+    },
+    {
+      "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-team-last-agent-audit.png",
+      "sha256": "8305cb65cf4892ab069fc078cbff160433a9037edb776b461d0fe0850bee1813",
+      "actually_opened": true,
+      "observation": "The native audit visibly identifies the confirming manager and queue, the 1-to-0 eligibility transition and preserved queue attribution; provider application is explicitly not claimed."
+    }
+  ],
+  "existing_positive_native_API_examples": 20,
+  "Word_literal_related": "D2-P0259-C02",
+  "new_formal_acceptance": false,
+  "source_cause": "AdministrationSection configurationTitle uses the queue-card title for its team subtab; the team legend omits a native text color.",
+  "necessary_fix": [
+    "Use the actual resource subtab for the editor heading.",
+    "Apply text-n-slate-12 to the participant legend and assert actual >=4.5 contrast in all four existing Chrome cases."
+  ],
+  "not_refactored_or_changed": [
+    "Team APIs and persistence",
+    "Native account/company/unit permissions",
+    "Manager confirmation",
+    "Audit",
+    "No PABX publishing"
+  ],
+  "remaining_visual_limit": "The mobile metadata-submit label is truncated by the existing two-button dialog footer; no broader footer redesign is included.",
+  "whole_figure12_or_Part1_accepted": false
+}

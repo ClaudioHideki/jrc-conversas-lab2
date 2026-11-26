@@ -128,4 +128,26 @@ describe('native scoped ACW target lookup', () => {
     });
     wrapper.unmount();
   });
+  it.each([
+    ['unit', 'UNIT'],
+    ['queue', 'QUEUE'],
+    ['team', 'TEAM'],
+  ])(
+    'uses the actual %s resource labels without presenting an unrelated queue/team prompt',
+    async (scope, key) => {
+      const wrapper = mount(AcwRuleTarget, { props: { accountId: 1, scope } });
+      await flushPromises();
+      const labels = wrapper.findAll('label');
+      expect(labels[0].text()).toContain(
+        `JRC_CONTACT_CENTER.ACW_RULES.${key}_SEARCH`
+      );
+      expect(labels[1].text()).toContain(
+        `JRC_CONTACT_CENTER.ACW_RULES.${key}_TARGET`
+      );
+      expect(wrapper.text()).not.toContain(
+        'JRC_CONTACT_CENTER.ACW_RULES.TARGET_SEARCH'
+      );
+      wrapper.unmount();
+    }
+  );
 });

@@ -1,5 +1,6 @@
 import { test } from './cc-native-test.mjs';
 import fs from 'node:fs';
+import { verifyNativeQualityReview } from './call-center-quality-review-native.mjs';
 import { verifyNativeRecordingHistory } from './call-center-recordings-native.mjs';
 
 const session = JSON.parse(
@@ -11,6 +12,17 @@ test('native own-extension recordings require current scoped authority and play 
 }, info) => {
   test.setTimeout(150000);
   await verifyNativeRecordingHistory(
+    page,
+    info,
+    session.pause_targets[info.project.name].recordings
+  );
+});
+
+test('native human Nico correction preserves immutable source, reviewed conflicts and independent authority', async ({
+  page,
+}, info) => {
+  test.setTimeout(180000);
+  await verifyNativeQualityReview(
     page,
     info,
     session.pause_targets[info.project.name].recordings

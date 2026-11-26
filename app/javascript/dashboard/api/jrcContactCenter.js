@@ -502,8 +502,29 @@ export default {
       responseType: 'blob',
       signal,
     }),
+  recordingAccessHistory: (accountId, id, params = {}) =>
+    axios.get(
+      `${base(accountId)}/recordings/${recordIdentity(id)}/access_history`,
+      { params }
+    ),
   recordingReproduction: (accountId, id, data) =>
     axios.post(`${base(accountId)}/recordings/${id}/reproduce`, data),
+  qualityReview: (accountId, id) =>
+    axios.get(
+      `${base(accountId)}/recordings/${recordIdentity(id)}/quality_review`,
+      { timeout: 30000 }
+    ),
+  saveQualityReview: (accountId, id, values) =>
+    axios.post(
+      `${base(accountId)}/recordings/${recordIdentity(id)}/quality_review`,
+      { quality_review: values },
+      { timeout: 30000 }
+    ),
+  qualityReviewHistory: (accountId, id, params = {}) =>
+    axios.get(
+      `${base(accountId)}/recordings/${recordIdentity(id)}/quality_review/history`,
+      { params }
+    ),
   reportSummary: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/reports/summary`, { params }),
   integrationCapabilities: accountId =>

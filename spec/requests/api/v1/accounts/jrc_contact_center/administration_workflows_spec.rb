@@ -16,6 +16,48 @@ RSpec.describe 'Call Center administrative workflows', type: :request do
     expect(response.parsed_body.fetch('provider')).to include('configured' => false, 'state' => 'pending_contract', 'last_sync_at' => nil)
   end
 
+  it 'distinguishes existing local configuration screens from unchanged pending provider application without a publishing grant' do
+    account.enable_features!('custom_roles')
+    rights = %w[jrc_contact_center_view jrc_contact_center_configure jrc_contact_center_recordings_view]
+    role = create(:custom_role, account: account, permissions: rights)
+    member.update!(role: :agent, custom_role: role)
+    get "#{base}/administration", headers: headers
+    expect(response).to have_http_status(:ok)
+    data = response.parsed_body
+    %w[ivr hours audio pauses distribution].each do |key|
+      expect(data.fetch('cards').find { |card| card['key'] == key }).to include('local_state' => 'available', 'state' => 'pending_contract')
+    end
+    expect(data.fetch('cards').find { |card| card['key'] == 'recordings' }).to include('local_state' => 'read_only')
+    expect(data.fetch('provider')).to include('configured' => false, 'state' => 'pending_contract')
+    expect(data.fetch('capabilities').fetch('publish')).to be(false)
+    expect(role.reload.permissions).to eq(rights)
+  end
+
+  it 'does not expose local configuration cards or section access merely because recording viewing is allowed' do
+    account.enable_features!('custom_roles')
+    role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_recordings_view])
+    member.update!(role: :agent, custom_role: role)
+    get "#{base}/administration", headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('cards').pluck('key')).to eq(['recordings'])
+    %w[hours audio pauses].each do |key|
+      get "#{base}/administration/#{key}", headers: headers
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  it 'withdraws the local availability entries on the next request after native configuration authority is removed' do
+    account.enable_features!('custom_roles')
+    role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure])
+    member.update!(role: :agent, custom_role: role)
+    get "#{base}/administration", headers: headers
+    expect(response.parsed_body.fetch('cards').pluck('key')).to include('hours', 'audio', 'pauses')
+    role.update!(permissions: ['jrc_contact_center_view'])
+    get "#{base}/administration", headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('cards')).to be_empty
+  end
+
   it 'offers native team member options only to a native team administrator' do
     get "#{base}/administration/teams", headers: headers
     expect(response).to have_http_status(:ok)

@@ -56,7 +56,9 @@ class JrcContactCenter::SyntheticRecordingsSeed
   end
 
   def configure_roles
-    @operator.custom_role.update!(permissions: RIGHTS + %w[jrc_contact_center_operate jrc_contact_center_recordings_download])
+    extra = %w[jrc_contact_center_operate jrc_contact_center_recordings_download jrc_contact_center_audit
+               jrc_contact_center_quality_review]
+    @operator.custom_role.update!(permissions: RIGHTS + extra)
     @viewer.custom_role.update!(permissions: RIGHTS)
     @viewer.update!(role: :agent)
     JrcContactCenter::QueueMembership.create!(account: @account, queue: @queues.first, account_user: @viewer, active: true, role: 'agent')

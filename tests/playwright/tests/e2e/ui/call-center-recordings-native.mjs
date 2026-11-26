@@ -18,6 +18,7 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
   const observations = [];
   const auditRequests = [];
   const auditResponses = [];
+  let accessHistory;
   const reproductionPath = `${new URL(root).pathname}/${expected.id}/reproduce`;
   const auditFault = operation => {
     const raw = execFileSync(
@@ -228,6 +229,20 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     );
     await expect(targets.nth(0)).toHaveValue(String(target.unit_id));
     await expect(targets.nth(1)).toHaveValue(String(target.queue_id));
+    await expect(targets.nth(0).locator('xpath=..')).toContainText(
+      'Unidade operacional existente'
+    );
+    await expect(targets.nth(1).locator('xpath=..')).toContainText(
+      'Fila existente'
+    );
+    for (const selector of ['[data-recordings-from]', '[data-recordings-to]']) {
+      expect(
+        await page
+          .locator(selector)
+          .evaluate(node => getComputedStyle(node).colorScheme)
+      ).toBe(dark ? 'dark' : 'light');
+    }
+
     await expect(page.locator('[data-recordings-period]')).toContainText(
       listed.period.timezone
     );
@@ -322,6 +337,48 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     expect((await download).suggestedFilename()).toBe(
       `call-${expected.id}.wav`
     );
+    // Current account + own recording + explicit audit authority. No API responses are fulfilled.
+    const historyResponse = page.waitForResponse(response =>
+      new URL(response.url()).pathname.endsWith(
+        `/${expected.id}/access_history`
+      )
+    );
+    await selected.locator('[data-recording-audit-open]').click();
+    const history = await historyResponse;
+    expect(history.status()).toBe(200);
+    accessHistory = await history.json();
+    expect(accessHistory).toMatchObject({
+      account_id: account,
+      recording_id: expected.id,
+      meta: { page: 1, per_page: 20 },
+    });
+    expect(accessHistory.items.length).toBeGreaterThanOrEqual(5);
+    expect(
+      accessHistory.items.filter(row => row.operation === 'reproduce')
+    ).toHaveLength(2);
+    expect(
+      accessHistory.items.filter(row => row.operation === 'download')
+    ).toHaveLength(1);
+    expect(JSON.stringify(accessHistory)).not.toMatch(
+      /recording_reference|audited_changes|551100000001|spool|synthetic-password/
+    );
+    for (const item of accessHistory.items) {
+      expect(Object.keys(item).sort()).toEqual([
+        'actor_id',
+        'created_at',
+        'id',
+        'operation',
+        'request_id',
+      ]);
+      expect(item.actor_id).toBe(String(profile.id));
+    }
+    await expect(selected.locator('[data-recording-audit-row]')).toHaveCount(
+      accessHistory.items.length
+    );
+    await selected
+      .locator('[data-recording-access-history]')
+      .scrollIntoViewIfNeeded();
+    await capture('audit-history');
     await selected.locator('[data-recording-close]').click();
     await expect(selected).toHaveCount(0);
     await expect(page.locator('dialog[open]')).toHaveCount(0);
@@ -352,6 +409,15 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     await expect(page.locator('[data-recording-row]')).toHaveCount(1);
     await page.locator(`[data-recording-details="${expected.id}"]`).click();
     await expect(selected.locator('[data-recording-download]')).toHaveCount(0);
+    await expect(selected.locator('[data-recording-audit-open]')).toHaveCount(
+      0
+    );
+    const deniedHistory = await read(
+      `${root}/${expected.id}/access_history`,
+      target.scoped
+    );
+    expect(deniedHistory.status()).toBe(401);
+    expect((await deniedHistory.json()).items).toBeUndefined();
     await expect(selected.locator('[data-recording-listen]')).toBeVisible();
     const viewerProfileResponse = await read(
       'http://127.0.0.1:5387/api/v1/profile',
@@ -462,6 +528,14 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
         queue_id: String(target.queue_id),
       });
     }
+    const storedAuditIds = new Set(operations.map(row => String(row.id)));
+    expect(accessHistory.items.every(row => storedAuditIds.has(row.id))).toBe(
+      true
+    );
+    for (const row of operations) {
+      expect(row.changes.cc_scope.before.unit_id).toBe(String(target.unit_id));
+      expect(row.changes.cc_scope.after.queue_id).toBe(String(target.queue_id));
+    }
     expect(auditRequests).toHaveLength(4);
     expect(new Set(auditRequests.map(row => row.request_id)).size).toBe(4);
     expect(auditResponses.map(row => row.status)).toEqual([500, 200, 200, 200]);
@@ -488,7 +562,13 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
           },
           separate_listen_download_authority: true,
           actual_viewer_without_download_reproduced_audio: true,
+          explicit_native_audit_authority_required: true,
+          authorized_current_record_access_history: accessHistory,
+          viewer_without_audit_history_status: deniedHistory.status(),
+          access_history_IDS_verified_against_native_SQL: true,
+          historical_scope_snapshots_verified: true,
           actual_pause_and_position_seek: true,
+          native_unit_queue_labels_and_date_theme_verified: true,
           actual_native_table_desktop_and_stacked_mobile: true,
           actual_native_details_popup_and_explicit_close: true,
           authorized_metadata_and_unconfirmed_storage_honestly_presented: true,
