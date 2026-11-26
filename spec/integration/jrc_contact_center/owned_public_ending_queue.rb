@@ -31,7 +31,7 @@ module SyntheticPublicEndingQueue
     filename = ENV.fetch('JRC_CC_PUBLIC_QUEUE_CONTROL')
     raise 'Owned temporary queue control required' unless filename.match?(%r{\A/tmp/jrc-cc-public-ending-[0-9a-f]{24}\.private\z})
     raise 'Bounded private queue control required' unless File.file?(filename) && File.size(filename).between?(1, 8192)
-    raise 'Private queue control permissions required' unless (File.stat(filename).mode & 0o077).zero?
+    raise 'Private queue control permissions required' unless File.stat(filename).mode.nobits?(0o077)
 
     JSON.parse(File.binread(filename))
   end
@@ -41,9 +41,13 @@ module SyntheticPublicEndingQueue
     raise 'Exact queue control fields required' unless values.is_a?(Hash) && values.keys.sort == fields.sort
     raise 'Owned nonce required' unless values['nonce'].is_a?(String) && values['nonce'].match?(/\A[0-9a-f]{24}\z/)
     raise 'Nonce queue mismatch' unless values['queue'] == "jrc_cc_public_#{values.fetch('nonce')}"
-    raise 'Exact source revision required' unless values['source_sha'] == ENV.fetch('GITHUB_SHA') && values['source_sha'].match?(/\A[0-9a-f]{40}\z/)
+    validate_source_revision!(values.fetch('source_sha'))
 
     validate_accounts_shape!(values['account_ids'])
+  end
+
+  def self.validate_source_revision!(value)
+    raise 'Exact source revision required' unless value == ENV.fetch('GITHUB_SHA') && value.match?(/\A[0-9a-f]{40}\z/)
   end
 
   def self.validate_accounts_shape!(ids)
@@ -96,9 +100,7 @@ module SyntheticPublicEndingQueue
       job = name.constantize
       previous = job.queue_adapter
       raise 'Owned queue was already installed' if previous.is_a?(Adapter)
-      unless previous.is_a?(ActiveJob::QueueAdapters::TestAdapter)
-        raise 'Preserve the existing isolated Rails test adapter for all unrelated jobs'
-      end
+      raise 'Preserve the existing isolated Rails test adapter for all unrelated jobs' unless previous.is_a?(ActiveJob::QueueAdapters::TestAdapter)
 
       job.queue_adapter = Adapter.new(previous, configuration)
     end

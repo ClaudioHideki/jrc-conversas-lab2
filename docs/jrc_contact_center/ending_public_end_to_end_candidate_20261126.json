@@ -169,6 +169,25 @@
       "parent_sources": {
         "script/jrc_call_center_pause_seed.rb": "6de7e93d33b0463c449bfd9ec51eca8715e7894dc4763a53d121a1bbfbf7b58f"
       }
+    },
+    {
+      "name": "exact_native_Rubocop_fixes_preserve_all_21_guarded_browser_checks",
+      "source_sha256": {
+        "script/jrc_call_center_ending_public_evidence.rb": "5f2f5d86ab21aafc0661a3dda5351fab617d5ac7035abd43556b43feaf2705b1",
+        "script/jrc_call_center_ending_public_queue_control.rb": "ffa966ddcd9053bdac9e1ef36e3b5a651b0d6d6e44e518fc4e176f4d64e29ed9",
+        "script/jrc_call_center_ending_public_release_fault.rb": "61164e1eb8dc47261780797deed8be18151bda0b3b036585fe2687bc2e8f36e1",
+        "script/jrc_call_center_ending_public_seed.rb": "7be786a54016af54efa4746f2540dfd40e2e6f0a22f770ebcaf3a0e7e16aaca1",
+        "spec/integration/jrc_contact_center/owned_public_ending_queue.rb": "9373f749a9be694211213278042e56c0a3d078b1a0cc426f75f485b2c54ae3a0",
+        "app/services/jrc_contact_center/ending_actions/service_desk_rule_parameters.rb": "72c155a8c3cdf34fe37407ca1994b1a88166e7ca8489a7a3430c9c668965d247"
+      },
+      "parent_sources": {
+        "script/jrc_call_center_ending_public_evidence.rb": "47662b627f0179039cc318b1bc4743ee7fb18179c4175d31ba566404b4d16628",
+        "script/jrc_call_center_ending_public_queue_control.rb": "44b706e859e09979d1d3ee11afbe508c7c55910211e8dee14c35ca22753d273d",
+        "script/jrc_call_center_ending_public_release_fault.rb": "c7cb28c300eaeda3f8db14d4f5ecef8b0a046492a4defd3ee84707dc12bef09d",
+        "script/jrc_call_center_ending_public_seed.rb": "58c179fcafc9042904970c5a90e53b4031e91d615730d78a16cc9c53e6703b98",
+        "spec/integration/jrc_contact_center/owned_public_ending_queue.rb": "152f64ae1f2af7803ff5d232cabb0426a28526a1169a5d5744951a23b4626982",
+        "app/services/jrc_contact_center/ending_actions/service_desk_rule_parameters.rb": "f57a0c047014a04e1b2492231421b3d5cc191efbf9a4cfd03ab15441f78693ba"
+      }
     }
   ],
   "Lead_recovery_regression": {
@@ -202,5 +221,12 @@
     "previous_offenses": 3,
     "exact_remaining_rule": "Style/GuardClause",
     "no_gate_removed": true
+  },
+  "grouped_native_lint_correction": {
+    "run": 45756853543,
+    "reported_offenses_addressed": 21,
+    "focused_files": 6,
+    "no_guards_removed": true,
+    "native_and_Chrome_acceptance_pending": true
   }
 }

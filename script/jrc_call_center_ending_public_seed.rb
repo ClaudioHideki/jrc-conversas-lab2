@@ -38,7 +38,7 @@ class JrcContactCenter::SyntheticEndingPublicSeed
   def verify_owned_fixture!
     verify_disposable_environment!
     raise 'Owned synthetic ending browser fixture required' unless @account.name.start_with?('SYNTHETIC ')
-    unless [@admin.account_id, @operator.account_id, @queue.account_id].all? { |id| id == @account.id }
+    unless [@admin.account_id, @operator.account_id, @queue.account_id].all?(@account.id)
       raise 'Synthetic fixture identities must belong to the same new Account'
     end
     raise 'Do not reuse a populated fixture Account' if JrcContactCenter::CallSession.exists?(account: @account)
@@ -88,7 +88,7 @@ class JrcContactCenter::SyntheticEndingPublicSeed
       @account.reload
       revision = JrcContactCenter::AcwPolicy.new(account: @account).revision
       JrcContactCenter::EndingActions::ActivateRule.new(account: @account, member: @admin, rule_code: code,
-                                                       request_key: SecureRandom.uuid, expected_revision: revision).call
+                                                        request_key: SecureRandom.uuid, expected_revision: revision).call
     end
   end
 

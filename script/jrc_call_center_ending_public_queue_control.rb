@@ -20,7 +20,7 @@ nonce = SecureRandom.hex(12)
 accounts.each do |id|
   account = Account.find(id)
   raise 'Expected new owned synthetic account' unless account.name.start_with?('SYNTHETIC ') &&
-                                                     account.custom_attributes[SyntheticPublicEndingQueue::MARKER].nil?
+                                                      account.custom_attributes[SyntheticPublicEndingQueue::MARKER].nil?
 
   account.update!(custom_attributes: account.custom_attributes.merge(SyntheticPublicEndingQueue::MARKER => nonce))
 end

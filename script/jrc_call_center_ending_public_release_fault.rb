@@ -13,7 +13,7 @@ raise 'Account is not owned by this browser witness' unless configuration.fetch(
 origin = JrcContactCenter::EndingActionOrigin.find_by!(account_id: account_id)
 attempts = JrcContactCenter::EndingDestinationAttempt.where(account_id: account_id, origin: origin)
 raise 'The explicit original manual action must have actually failed' unless attempts.count == 1 &&
-                                                                          attempts.first.outcome&.outcome == 'failed'
+                                                                             attempts.first.outcome&.outcome == 'failed'
 raise 'Native Task must have been rolled back' if JrcProjects::Task.exists?(account_id: account_id)
 raise 'No successful destination receipt may exist yet' if JrcContactCenter::EndingDestinationExecution.exists?(account_id: account_id)
 

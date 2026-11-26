@@ -38,9 +38,7 @@ class JrcContactCenter::EndingActions::ServiceDeskRuleParameters < JrcServiceDes
 
   def mapped_configuration
     @context = fresh_context!
-    business = context.account.jrc_crm_business_units.where(active: true).find(@source_scope.fetch('business_unit_id'))
-    identifier = JrcServiceDesk::Input.id(business.settings.fetch('service_desk_unit_id', nil))
-    unit = context.unit_scope.lock('FOR SHARE').find(identifier)
+    unit = mapped_unit
     authorize_mapping!(unit)
     raise Pundit::NotAuthorizedError unless context.capability?(:tickets_create) && context.capability?(:customers_view)
 
@@ -51,13 +49,19 @@ class JrcContactCenter::EndingActions::ServiceDeskRuleParameters < JrcServiceDes
     { configuration_available: false }
   end
 
+  def mapped_unit
+    business = context.account.jrc_crm_business_units.where(active: true).find(@source_scope.fetch('business_unit_id'))
+    identifier = JrcServiceDesk::Input.id(business.settings.fetch('service_desk_unit_id', nil))
+    context.unit_scope.lock('FOR SHARE').find(identifier)
+  end
+
   def authorize_mapping!(unit)
     raise JrcContactCenter::OperationError, 'ending_service_desk_mapping_required' unless @source_scope['business_unit_id']
 
     business = context.account.jrc_crm_business_units.where(active: true).lock('FOR SHARE').find(@source_scope.fetch('business_unit_id'))
     linked = JrcServiceDesk::Input.id(business.settings.fetch('service_desk_unit_id', nil))
     expected = [@source_scope.fetch('issuer_company_id').to_s, unit.id]
-    return if [business.company_id.to_s, linked] == expected
+    return if expected == [business.company_id.to_s, linked]
 
     raise JrcContactCenter::OperationError.new('ending_service_desk_mapping_changed', status: :conflict)
   rescue ArgumentError
@@ -83,7 +87,8 @@ class JrcContactCenter::EndingActions::ServiceDeskRuleParameters < JrcServiceDes
     raise Pundit::NotAuthorizedError if service&.default_assignee_membership && !context.capability?(:tickets_assign)
 
     selection = input.fetch('attributes').slice('ticket_type_id', 'category_id', 'subcategory_id')
-    selection.merge!('unit_id' => unit.id.to_s, 'service_id' => input.fetch('service_id'))
+    selection['unit_id'] = unit.id.to_s
+    selection['service_id'] = input.fetch('service_id')
     JrcServiceDesk::CatalogueForm.new(user_context: context.to_h).call(parameters: selection)
   end
 
@@ -95,10 +100,14 @@ class JrcContactCenter::EndingActions::ServiceDeskRuleParameters < JrcServiceDes
 
     candidate.team = native_team(fields['team_id'] || candidate.queue&.team_id)
     candidate.assignee_membership = assignee(fields['assignee_account_user_id'], unit)
-    assigned = candidate.queue || candidate.team || candidate.assignee_membership || form.dig(:defaults, :assignee_account_user_id)
-    raise Pundit::NotAuthorizedError if assigned && !context.capability?(:tickets_assign)
+    authorize_assignment!(candidate, form)
 
     candidate
+  end
+
+  def authorize_assignment!(candidate, form)
+    assigned = candidate.queue || candidate.team || candidate.assignee_membership || form.dig(:defaults, :assignee_account_user_id)
+    raise Pundit::NotAuthorizedError if assigned && !context.capability?(:tickets_assign)
   end
 
   def native_references(unit, fields, form)
