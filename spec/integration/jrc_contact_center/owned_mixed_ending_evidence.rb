@@ -56,9 +56,9 @@ class SyntheticMixedEndingEvidence
     [crm, sd]
   end
 
-  def self.require_rolled_back_pair!(account, crm, sd)
-    valid = crm.outcome&.outcome == 'succeeded' && sd.outcome&.outcome == 'failed'
-    valid &&= sd.execution.nil? && JrcServiceDesk::Ticket.where(account: account).none?
+  def self.require_rolled_back_pair!(account, crm, service_desk)
+    valid = crm.outcome&.outcome == 'succeeded' && service_desk.outcome&.outcome == 'failed'
+    valid &&= service_desk.execution.nil? && JrcServiceDesk::Ticket.where(account: account).none?
     raise 'Actual independent CRM success and rolled-back Service Desk failure required' unless valid
   end
 

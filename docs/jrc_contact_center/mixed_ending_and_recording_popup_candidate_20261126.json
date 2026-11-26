@@ -98,6 +98,15 @@
         "script/jrc_call_center_mixed_ending_seed.rb": "b62d6b110668800b614f38ed2ba12dae69c750f9a966e2996fc145794276c40f",
         "spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb": "d47e539d66b20b25dd933bbb4b887b92fbecf71fdc4dcec5f2269d65696782f1"
       }
+    },
+    {
+      "name": "exact_mixed_fixture_parameter_name_only_native_lint_correction",
+      "source_sha256": {
+        "spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb": "202e853767330b3fe9c2481ac3c9e0250f92535d216479868703663c317a09a1"
+      },
+      "parent_sources": {
+        "spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb": "53f5253158f86e470e36269ce596c5c684053dec76eb272a326e65caa247c388"
+      }
     }
   ],
   "first_native_validation": {
@@ -110,5 +119,15 @@
     "targeted_SD_and_audio_Vue_passed": 110,
     "not_native_Rails_or_Chrome_acceptance": true,
     "correction": "Split new owned fixture checks into readable methods, preserve every condition and receipt, align existing values; no linter configuration or product behavior changed."
+  },
+  "native_fixture_lint_progress": {
+    "sha": "16639d6ad90d541563d8ac8de52a10e69b1a2aec",
+    "run": 45865129380,
+    "artifact": 15141235206,
+    "artifact_sha256": "a1393ebac0e95c3a81899091a514142f800a2059de56b8d1d560f23e38c27830",
+    "previous_offenses": 34,
+    "remaining": 1,
+    "only_remaining_cop": "Naming/MethodParameterName",
+    "last_parameter_rename_requires_native_revalidation": true
   }
 }
