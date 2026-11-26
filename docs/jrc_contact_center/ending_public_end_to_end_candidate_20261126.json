@@ -210,6 +210,15 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_completion_projection_commit_spec.rb": null,
         ".github/workflows/call-center-administration.yml": "31f8b182b64ab614c82ac570db088fc150252a92e6b8555e9f363c6ea6fc161e"
       }
+    },
+    {
+      "name": "exact_committed_regression_let_baseline_without_instance_variables",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_completion_projection_commit_spec.rb": "7c6bb07e6c7d13274278c6666085679900cf69e8180b908f185d22f938c6d129"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_completion_projection_commit_spec.rb": "7d5ea2d4fd31a77c4301938bd4a88208a51e92baf1407a940e634ddf037f1f1b"
+      }
     }
   ],
   "Lead_recovery_regression": {
@@ -270,5 +279,12 @@
     "expected_distinct_Rails_examples": 3751,
     "new_native_or_Chrome_approval": false,
     "no_timeout_expected_count_or_assertions_relaxed": true
+  },
+  "completion_spec_lint_correction": {
+    "parent": "0a1f8b6e5cb365356677eb5ba9febc370418ebe4",
+    "run": 45767365637,
+    "offenses": 5,
+    "cases_and_assertions_unchanged": 4,
+    "native_execution_pending": true
   }
 }

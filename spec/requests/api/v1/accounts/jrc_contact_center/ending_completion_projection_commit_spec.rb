@@ -12,6 +12,7 @@ RSpec.describe 'Native ending dispatch survives the authenticated completion pro
   let(:job) { JrcContactCenter::EndingActionsJob }
   let(:endpoint) { "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications/#{qualification.id}" }
   let(:completion) { { reason_code: 'SYNTHETIC_ORIGIN_REASON', outcome_code: 'completed' } }
+  let(:baseline) { job.queue_adapter.enqueued_jobs.length }
 
   around do |example|
     config = ApplicationRecord.connection_db_config
@@ -33,7 +34,7 @@ RSpec.describe 'Native ending dispatch survives the authenticated completion pro
       qualification, attributes: { reason_code: 'SYNTHETIC_ORIGIN_REASON' },
                      expected_revision: JrcContactCenter::QualificationDraftRevision.token(qualification), request_key: SecureRandom.uuid
     )
-    @baseline = job.queue_adapter.enqueued_jobs.length
+    baseline
   end
 
   def complete_and_project
@@ -45,7 +46,7 @@ RSpec.describe 'Native ending dispatch survives the authenticated completion pro
   end
 
   def expect_one_new_committed_job
-    added = job.queue_adapter.enqueued_jobs.drop(@baseline)
+    added = job.queue_adapter.enqueued_jobs.drop(baseline)
     expect(added).to contain_exactly(include(job: job, args: [account.id, qualification.id]))
   end
 
@@ -65,7 +66,7 @@ RSpec.describe 'Native ending dispatch survives the authenticated completion pro
     JrcContactCenter::AuthorityTransaction.call(account: account, member: member) do
       row = complete_and_project
       expect(row.completed_at).to be_present
-      expect(job.queue_adapter.enqueued_jobs.length).to eq(@baseline)
+      expect(job.queue_adapter.enqueued_jobs.length).to eq(baseline)
     end
     expect_one_new_committed_job
     expect(qualification.reload.completed_at).to be_present
@@ -75,12 +76,12 @@ RSpec.describe 'Native ending dispatch survives the authenticated completion pro
   it 'does not enqueue or retain a completion after the outer completion and projection transaction rolls back' do
     JrcContactCenter::AuthorityTransaction.call(account: account, member: member) do
       complete_and_project
-      expect(job.queue_adapter.enqueued_jobs.length).to eq(@baseline)
+      expect(job.queue_adapter.enqueued_jobs.length).to eq(baseline)
       raise ActiveRecord::Rollback
     end
     expect(qualification.reload.completed_at).to be_nil
     expect(JrcContactCenter::EndingActionCompletion.where(account: account, origin: origin)).to be_empty
-    expect(job.queue_adapter.enqueued_jobs.length).to eq(@baseline)
+    expect(job.queue_adapter.enqueued_jobs.length).to eq(baseline)
     expect(JrcProjects::Task.where(account: account)).to be_empty
   end
 
@@ -91,7 +92,7 @@ RSpec.describe 'Native ending dispatch survives the authenticated completion pro
     end
     expect(qualification.reload.completed_at).to be_nil
     expect(JrcContactCenter::EndingActionCompletion.where(account: account, origin: origin)).to be_empty
-    expect(job.queue_adapter.enqueued_jobs.length).to eq(@baseline)
+    expect(job.queue_adapter.enqueued_jobs.length).to eq(baseline)
     expect(JrcProjects::Task.where(account: account)).to be_empty
   end
 end
