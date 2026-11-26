@@ -149,6 +149,9 @@ jobs:
           pnpm exec vitest run
           app/javascript/dashboard/routes/dashboard/webphone
           app/javascript/dashboard/routes/dashboard/inbox
+          app/javascript/dashboard/routes/dashboard/contacts/pages/spec/ContactsIndex.spec.js
+          app/javascript/dashboard/routes/dashboard/crm/views/leads/spec/LeadCreateModal.spec.js
+          app/javascript/dashboard/routes/dashboard/settings/reports/specs/ReportContainer.spec.js
           app/javascript/dashboard/routes/dashboard/jrcContactCenter
           app/javascript/dashboard/components-next/layout/specs
           app/javascript/dashboard/__tests__/voiceV4Locale.spec.js

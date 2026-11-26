@@ -2,7 +2,7 @@ name: NICO - reservas, consumo e concorrencia por Account
 
 on:
   push:
-    branches: [codex/quick-nico-capacidade-20261011, codex/nico-provider-usage-20261123, codex/nico-groq-rate-limit-20261123]
+    branches: [codex/quick-nico-capacidade-20261011, codex/nico-provider-usage-20261123, codex/nico-groq-rate-limit-20261123, codex/consolidacao-atendimento-20261126]
   workflow_dispatch:
 
 permissions:
@@ -39,7 +39,7 @@ jobs:
       JRC_SD_CONCURRENCY: '1'
       DB_POOL_SIZE: '8'
       SCHEMA: /tmp/nico-capacity-native-schema.rb
-      NICO_CAPACITY_BASE: ${{ github.ref == 'refs/heads/codex/nico-groq-rate-limit-20261123' && 'a651a5645814725f90cc9c99b3c47aa3ae9d6518' || github.ref == 'refs/heads/codex/nico-provider-usage-20261123' && 'e6bd4cc9418b3522378a460bb97814b700f39123' || 'f7cfe4638e7aeb5414685583bd99d4b4e6602480' }}
+      NICO_CAPACITY_BASE: ${{ github.ref_name == 'codex/consolidacao-atendimento-20261126' && '91ca7ca0047627fca5da0db2a68e94357c16a1f2' || github.ref == 'refs/heads/codex/nico-groq-rate-limit-20261123' && 'a651a5645814725f90cc9c99b3c47aa3ae9d6518' || github.ref == 'refs/heads/codex/nico-provider-usage-20261123' && 'e6bd4cc9418b3522378a460bb97814b700f39123' || 'f7cfe4638e7aeb5414685583bd99d4b4e6602480' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,7 +48,7 @@ jobs:
       - name: Confirmar branch, commit e recursos
         run: |
           case "$GITHUB_REF" in
-            refs/heads/codex/quick-nico-capacidade-20261011|refs/heads/codex/nico-provider-usage-20261123|refs/heads/codex/nico-groq-rate-limit-20261123) ;;
+            refs/heads/codex/quick-nico-capacidade-20261011|refs/heads/codex/nico-provider-usage-20261123|refs/heads/codex/nico-groq-rate-limit-20261123|refs/heads/codex/consolidacao-atendimento-20261126) ;;
             *) exit 1 ;;
           esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"

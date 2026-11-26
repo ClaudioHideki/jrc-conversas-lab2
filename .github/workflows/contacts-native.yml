@@ -2,7 +2,7 @@ name: Contatos - validacao nativa isolada por Account
 
 on:
   push:
-    branches: [codex/contatos-nico-mini-publicacao-20261011]
+    branches: [codex/contatos-nico-mini-publicacao-20261011, codex/consolidacao-atendimento-20261126]
   workflow_dispatch:
 
 permissions:
@@ -34,6 +34,7 @@ jobs:
       REDIS_URL: redis://127.0.0.1:6380/15
       SECRET_KEY_BASE: service-desk-isolated-test-only-not-an-installation-secret
       BUNDLE_FROZEN: 'true'
+      CONTACTS_BASE: ${{ github.ref_name == 'codex/consolidacao-atendimento-20261126' && '91ca7ca0047627fca5da0db2a68e94357c16a1f2' || '1eb261c8f80e4cfb3e17b2076c928d3b4a8dada4' }}
       TZ: UTC
     steps:
       - uses: actions/checkout@v4
@@ -42,10 +43,13 @@ jobs:
           persist-credentials: false
       - name: Confirmar branch, commit e recursos
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/contatos-nico-mini-publicacao-20261011
+          case "$GITHUB_REF" in
+            refs/heads/codex/contatos-nico-mini-publicacao-20261011|refs/heads/codex/consolidacao-atendimento-20261126) ;;
+            *) exit 1 ;;
+          esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor 1eb261c8f80e4cfb3e17b2076c928d3b4a8dada4 HEAD
-          git diff --check 1eb261c8f80e4cfb3e17b2076c928d3b4a8dada4 HEAD
+          git merge-base --is-ancestor "$CONTACTS_BASE" HEAD
+          git diff --check "$CONTACTS_BASE" HEAD
           free -h
           df -h /
       - uses: actions/setup-node@v4
@@ -74,8 +78,8 @@ jobs:
         if: always()
         run: |
           python3 - <<'PY'
-          import collections, json, pathlib, subprocess
-          base = '1eb261c8f80e4cfb3e17b2076c928d3b4a8dada4'
+          import collections, json, os, pathlib, subprocess
+          base = os.environ['CONTACTS_BASE']
           files = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', base, 'HEAD', '--', '*.rb'], text=True).splitlines()
           rows, blockers = [], []
           for path in files:
