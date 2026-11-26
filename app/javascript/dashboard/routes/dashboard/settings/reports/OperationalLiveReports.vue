@@ -3,6 +3,8 @@ import AgentLiveReportContainer from './components/AgentLiveReportContainer.vue'
 import TeamLiveReportContainer from './components/TeamLiveReportContainer.vue';
 import StatsLiveReportsContainer from './components/StatsLiveReportsContainer.vue';
 
+defineProps({ embedded: { type: Boolean, default: false } });
+
 const TEXT = Object.freeze({
   breadcrumb: 'Relatórios / Tempo real',
   title: 'Indicadores operacionais em tempo real',
@@ -31,6 +33,7 @@ const TEXT = Object.freeze({
         </p>
       </div>
       <RouterLink
+        v-if="!embedded"
         :to="{ name: 'account_overview_reports' }"
         class="inline-flex h-9 items-center gap-2 rounded-xl border border-n-weak bg-n-solid-1 px-3 text-sm font-semibold text-n-brand hover:border-n-blue-6"
       >

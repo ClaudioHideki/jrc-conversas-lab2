@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 defineProps({
   title: { type: String, required: true },
@@ -11,6 +11,9 @@ const emit = defineEmits(['close', 'export']);
 const { t } = useI18n();
 const dialog = ref(null);
 onMounted(() => dialog.value.showModal());
+onBeforeUnmount(() => {
+  if (dialog.value?.open) dialog.value.close();
+});
 </script>
 
 <template>

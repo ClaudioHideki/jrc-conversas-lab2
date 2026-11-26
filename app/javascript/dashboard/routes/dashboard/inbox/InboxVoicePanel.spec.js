@@ -3,11 +3,19 @@ import { ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import InboxVoicePanel from './InboxVoicePanel.vue';
 import InboxChannelGroups from './InboxChannelGroups.vue';
+import CallExperiencePage from '../jrcContactCenter/views/visual/CallExperiencePage.vue';
+import CallWorkspace from '../jrcContactCenter/views/CallWorkspace.vue';
 import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 import API from 'dashboard/api/jrcContactCenter';
 import { clearVoiceNoteDrafts, writeVoiceNoteDraft } from './voiceNoteDrafts';
 
-const state = vi.hoisted(() => ({ sip: null, calls: {}, initiating: null }));
+const state = vi.hoisted(() => ({
+  sip: null,
+  calls: {},
+  initiating: null,
+  route: null,
+}));
+vi.mock('vue-router', () => ({ useRoute: () => state.route }));
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: key => key, locale: ref('pt_BR') }),
 }));
@@ -19,7 +27,7 @@ vi.mock('../webphone/useSipWebphone', () => ({
   useSipWebphone: () => state.sip,
 }));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
-  default: { saveCallObservations: vi.fn(), call: vi.fn() },
+  default: { saveCallObservations: vi.fn(), call: vi.fn(), context: vi.fn() },
 }));
 enableAutoUnmount(afterEach);
 const props = {
@@ -98,6 +106,56 @@ beforeEach(() => {
   state.calls = { hasActiveCall: false, hasIncomingCall: false };
   state.initiating = ref(false);
   vi.clearAllMocks();
+});
+describe('contact center call page', () => {
+  beforeEach(() => {
+    state.route = { params: { accountId: '1' }, query: {} };
+    API.context.mockResolvedValue({
+      data: { capabilities: { operate: true } },
+    });
+  });
+
+  it('pauses and ends the active SIP call through the shared softphone', async () => {
+    state.sip.hasCall.value = true;
+    state.sip.established.value = true;
+    state.sip.hangup.mockImplementation(async () => {
+      state.sip.hasCall.value = false;
+    });
+    const wrapper = mount(CallExperiencePage);
+    await flushPromises();
+
+    await button(wrapper, 'HOLD').trigger('click');
+    expect(state.sip.setHold).toHaveBeenCalledWith(true);
+    const hangup = wrapper
+      .findAll('button')
+      .find(item => item.text() === 'VOICE_V4.HANGUP');
+    await hangup.trigger('click');
+    await flushPromises();
+    expect(state.sip.hangup).toHaveBeenCalledOnce();
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.CALL.NO_BROWSER_CALL');
+    expect(wrapper.findComponent(InboxVoicePanel).exists()).toBe(false);
+  });
+
+  it('only shows SIP controls for the exact selected record in the same account', async () => {
+    state.route.params.callId = '7';
+    state.sip.hasCall.value = true;
+    state.sip.established.value = true;
+    const wrapper = mount(CallExperiencePage, {
+      global: { stubs: { CallWorkspace: true } },
+    });
+    await flushPromises();
+    const workspace = wrapper.getComponent(CallWorkspace);
+    workspace.vm.$emit('loaded', { call: record });
+    await flushPromises();
+    expect(wrapper.findComponent(InboxVoicePanel).exists()).toBe(false);
+    workspace.vm.$emit('loaded', { call: { ...record, provider: 'sip' } });
+    await flushPromises();
+    expect(wrapper.findComponent(InboxVoicePanel).exists()).toBe(true);
+    state.sip.accountId.value = 2;
+    await flushPromises();
+    expect(wrapper.findComponent(InboxVoicePanel).exists()).toBe(false);
+    expect(state.sip.hangup).not.toHaveBeenCalled();
+  });
 });
 describe('central shared voice panel', () => {
   it('opens the global DTMF keypad as a labeled overlay and closes it with Escape without ending the call', async () => {

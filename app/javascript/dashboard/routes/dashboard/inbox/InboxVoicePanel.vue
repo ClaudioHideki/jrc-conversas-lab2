@@ -32,6 +32,7 @@ const props = defineProps({
   sessionView: { type: Boolean, default: false },
   elapsed: { type: String, default: '' },
   controlsOnly: { type: Boolean, default: false },
+  keyboardShortcuts: { type: Boolean, default: true },
   showControls: { type: Boolean, default: true },
   draftUserId: { type: Number, default: null },
   notesOnly: { type: Boolean, default: false },
@@ -393,6 +394,7 @@ const controls = computed(() => [
 const shortcut = event => {
   if (
     !props.controlsOnly ||
+    !props.keyboardShortcuts ||
     !matches.value ||
     !sip.hasCall.value ||
     event.defaultPrevented ||

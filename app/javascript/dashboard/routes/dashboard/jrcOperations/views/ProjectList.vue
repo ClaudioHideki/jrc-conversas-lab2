@@ -23,6 +23,10 @@ import {
 import CreateProject from '../components/CreateProject.vue';
 import DeleteProjectButton from '../../jrcProjects/components/DeleteProjectButton.vue';
 
+const props = defineProps({
+  reportOnly: { type: Boolean, default: false },
+});
+
 const { accountId, userId, status, canCreate, projectText } = useProjects();
 const router = useRouter();
 const route = useRoute();
@@ -34,7 +38,11 @@ const projectDestination = projectId => ({
   query: segmentQuery.value,
 });
 const preferenceKey = computed(
-  () => 'jrc:projects:portfolio:' + accountId.value + ':' + userId.value
+  () =>
+    (props.reportOnly ? 'jrc:reports:projects:' : 'jrc:projects:portfolio:') +
+    accountId.value +
+    ':' +
+    userId.value
 );
 const filters = useProjectPreferences(preferenceKey, {
   q: '',
@@ -275,7 +283,7 @@ async function exportProjects() {
           }}
         </button>
         <RouterLink
-          v-if="status?.administrator"
+          v-if="!reportOnly && status?.administrator"
           class="flex items-center gap-2 rounded-lg border border-n-weak bg-n-solid-1 px-3 py-2 text-sm"
           :to="routeTo('jrc_projects_settings', accountId)"
         >
@@ -284,7 +292,7 @@ async function exportProjects() {
           }}
         </RouterLink>
         <button
-          v-if="canCreate"
+          v-if="!reportOnly && canCreate"
           class="flex items-center gap-2 rounded-lg bg-n-blue-9 px-4 py-2 text-sm font-medium text-white hover:bg-n-blue-10"
           @click="creating = true"
         >
@@ -574,7 +582,10 @@ async function exportProjects() {
           >
           <div class="ml-auto flex items-center gap-2">
             <RouterLink
-              v-if="project.capabilities?.includes('projects.project.update')"
+              v-if="
+                !reportOnly &&
+                project.capabilities?.includes('projects.project.update')
+              "
               class="rounded-lg border border-n-weak p-2 text-n-blue-11 hover:bg-n-blue-2"
               :to="{
                 ...projectDestination(project.id),
@@ -587,6 +598,7 @@ async function exportProjects() {
                 aria-hidden="true"
             /></RouterLink>
             <DeleteProjectButton
+              v-if="!reportOnly"
               :project="project"
               compact
               :disabled="loading"

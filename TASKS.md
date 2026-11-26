@@ -1,6 +1,8 @@
 <!-- jrc-operational-init:v1 -->
 # Backlog operacional — JRC Conversas LAB2 — Grupo JRC
 
+- Contact Center / Chamada ativa usa os controles do softphone para a sessão SIP deste navegador. Um atendimento selecionado exige correspondência de conta, provedor e identificador da sessão. A Central de Relatórios reúne Atendimento, CRM, Service Desk e Projetos com os filtros, exportações e regras de acesso de cada módulo. Validação local com 109 testes Vue e SIP e Chrome com chamadas sintéticas, abas e diálogos. O painel de ramais é mantido no repositório separado do monitor.
+
 - [x] **SD-SAVE-403-20261123 — implementação e validação locais:** Causa comprovada na API isolada, `IntakeRuleApplication#record_sla!` na linha 28 da base b6cfb57 exigia permissão manual para aplicar SLA publicado. Persistência compartilhada, autorização manual preservada e frontend mantém formulário após 403. 1.068 cenários Rails cobertos com revalidação dos 19 de abertura após corrigir a expectativa nativa 404; 22 concorrentes e 1.153 Vue aprovados, além de 74 verificações finais direcionadas. Sem push, merge ou deploy; homologação produtiva pendente. [Relatório](docs/jrc_consolidation/service-desk-save-403-validacao-20261123.md); [ADR0009](docs/adr/0009-sla-publicado-na-criacao-autorizada.md).
 
   Ajuste final de destinatários: fila padrão de serviço inativa não antecede o destino interno válido; destinatários exigem autenticação nativa ativa. 176 Rails e 87 Vue revalidados, incluindo 25 casos de abertura e escolhas de outras equipes/filas, padrão desabilitado, replay e negação de destinos inválidos. Sem exceções por usuário ou novas permissões.

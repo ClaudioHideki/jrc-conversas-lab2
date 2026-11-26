@@ -36,6 +36,8 @@
     "CALL": {
       "IVR_STEP": "URA {menu} · Opcao {option} · {time}",
       "TITLE": "Contexto e jornada da chamada",
+      "NO_BROWSER_CALL": "Nenhuma ligação ativa no softphone",
+      "CONTROLS_ON_ORIGIN": "Para encerrar esta chamada, use o softphone onde ela foi iniciada ou atendida.",
       "ERP_PENDING": "Pedido e status ERP pendentes do contrato HOYA.",
       "AMBIGUOUS": "Mais de um contato corresponde ao telefone. Nenhum foi selecionado automaticamente.",
       "LEG": "Perna {id} · {status} · Fila {queue}",

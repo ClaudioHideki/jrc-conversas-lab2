@@ -4,6 +4,8 @@ import ReportHeader from './components/ReportHeader.vue';
 import SummaryReports from './components/SummaryReports.vue';
 import V4Button from 'dashboard/components-next/button/Button.vue';
 
+defineProps({ embedded: { type: Boolean, default: false } });
+
 const summarReportsRef = ref(null);
 const TEXT = Object.freeze({
   breadcrumb: 'Relatórios / Equipe',
@@ -53,6 +55,7 @@ const onDownloadClick = () => {
     :header-description="TEXT.agentsDescription"
   >
     <V4Button
+      v-if="!embedded"
       :label="TEXT.back"
       icon="i-ph-arrow-left"
       size="sm"
