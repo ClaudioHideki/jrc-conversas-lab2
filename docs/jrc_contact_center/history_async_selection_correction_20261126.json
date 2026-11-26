@@ -1,0 +1,20 @@
+{
+  "parent": "d991fed7973dee6518427228c88e448d76e9f3a9",
+  "failed_run": 45900864321,
+  "failed_job": 140186002152,
+  "cause": "A synchronous watcher issues an intermediate (new account, old recording) request when Vue updates both props; it consumes the intended final response and fails closed on identity mismatch.",
+  "correction": "Batch the watcher before the next render; clear prior rows and advance the generation in that pre-render callback. Retain all response identity checks and late-response rejection.",
+  "source_sha256": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.vue": {
+      "before": "4bbe4ac93c4aaba5bc6fb726e130302cafec6f6d02d79aaa75bc5b7095c0ae44",
+      "after": "b03ecf673dd54189be7ac380abe6839d3041242bc81cc1c0abdd9a6b49c83b76"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.spec.js": {
+      "before": "a09d3cecd35bf549298a3469945896ade3e468cf8c4a988b6a10b8f7dc30a86c",
+      "after": "6302ea873450ce22e861ca6fa06245302eba905d853b8fc18963fa487155ad0f"
+    }
+  },
+  "test_case_preserved_and_strengthened": "Same failing rapid-switch scenario now also requires exactly two total API requests.",
+  "no_test_removed_or_response_identity_check_weakened": true,
+  "native_or_Chrome_acceptance": false
+}

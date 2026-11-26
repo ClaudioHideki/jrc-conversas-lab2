@@ -108,7 +108,7 @@ watch(
     page.value = 1;
     load(1);
   },
-  { immediate: true, flush: 'sync' }
+  { immediate: true, flush: 'pre' }
 );
 onBeforeUnmount(() => {
   generation += 1;

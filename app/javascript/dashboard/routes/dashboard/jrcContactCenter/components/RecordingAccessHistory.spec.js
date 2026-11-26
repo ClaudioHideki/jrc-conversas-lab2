@@ -116,6 +116,7 @@ describe('native scoped recording access history', () => {
     await flushPromises();
     completeFirst(response());
     await flushPromises();
+    expect(API.recordingAccessHistory).toHaveBeenCalledTimes(2);
     expect(API.recordingAccessHistory).toHaveBeenLastCalledWith('2', '16', {
       page: 1,
       per_page: 20,
