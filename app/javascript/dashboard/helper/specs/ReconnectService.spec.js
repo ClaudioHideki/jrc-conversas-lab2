@@ -123,7 +123,10 @@ describe('ReconnectService', () => {
 
   describe('handleOnlineEvent', () => {
     it('does not reload on a later online event after connectivity was restored', async () => {
-      vi.spyOn(reconnectService, 'handleRouteSpecificFetch').mockResolvedValue();
+      vi.spyOn(
+        reconnectService,
+        'handleRouteSpecificFetch'
+      ).mockResolvedValue();
       vi.spyOn(reconnectService, 'revalidateCaches').mockResolvedValue();
       reconnectService.onDisconnect();
       await reconnectService.onReconnect();

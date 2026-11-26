@@ -417,15 +417,15 @@ const fetchConversations = async ({ reset = false } = {}) => {
 };
 
 const restoreConversationPages = async (lastPage, generation) => {
-  let data = await fetchConversations();
-  while (
+  const data = await fetchConversations();
+  if (
     data &&
     generation === accountGeneration &&
     page.value < lastPage &&
     !hasEndReached.value(assigneeFilter.value)
   ) {
     page.value += 1;
-    data = await fetchConversations();
+    await restoreConversationPages(lastPage, generation);
   }
 };
 
