@@ -149,32 +149,38 @@ onMounted(() => dialog.value?.open());
     :dismissible="!busy"
     :close-on-click-outside="!busy"
     :show-close-button="!busy"
+    overflow-y-auto
     @close="emit('close')"
   >
-    <form class="space-y-3" @submit.prevent="dial">
+    <form class="space-y-4" @submit.prevent="dial">
       <div
-        class="space-y-3 rounded-xl bg-n-slate-12 p-4 text-n-slate-1 dark:bg-n-solid-3 dark:text-n-slate-12"
+        class="space-y-3 rounded-2xl border border-n-blue-5 bg-gradient-to-br from-n-blue-2 to-n-teal-2 p-4 sm:p-5"
       >
-        <div class="flex items-center justify-between gap-2 text-xs">
-          <label for="outbound-extension" class="!text-white">{{
-            t('VOICE_V4.SOURCE')
-          }}</label>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div
+            class="flex items-center gap-2 text-sm font-medium text-n-blue-11"
+          >
+            <span class="grid size-8 place-items-center rounded-lg bg-n-blue-3">
+              <span class="i-lucide-headset size-4" aria-hidden="true" />
+            </span>
+            <label for="outbound-extension">{{ t('VOICE_V4.SOURCE') }}</label>
+          </div>
           <input
             id="outbound-extension"
             data-outbound-source
             :value="sameAccount ? sip.credential.value?.extension || '' : ''"
             readonly
-            class="w-20 rounded-md border-0 bg-n-alpha-2 px-2 py-1 text-right !text-white"
+            class="!m-0 w-24 rounded-lg !border-n-blue-5 bg-n-solid-1 px-2 py-1 text-center text-sm font-semibold tabular-nums text-n-blue-11"
           />
         </div>
         <label
           for="outbound-number"
-          class="block text-sm font-medium !text-white"
+          class="block text-sm font-semibold text-n-slate-12"
         >
           {{ t('SOFTPHONE.CENTRAL.PHONE') }}
         </label>
         <div
-          class="flex items-center gap-1 rounded-lg border border-n-slate-8 bg-n-alpha-2"
+          class="flex items-center gap-1 rounded-xl border border-n-blue-6 bg-n-solid-1 px-1 shadow-sm focus-within:ring-2 focus-within:ring-n-blue-8"
         >
           <input
             id="outbound-number"
@@ -186,14 +192,14 @@ onMounted(() => dialog.value?.open());
             autocomplete="off"
             maxlength="30"
             :disabled="busy"
-            class="min-w-0 flex-1 border-0 bg-transparent px-3 py-3 text-xl tabular-nums !text-white focus:ring-0"
+            class="!m-0 min-w-0 flex-1 !border-0 !bg-transparent px-3 py-3 text-2xl font-semibold tabular-nums text-n-slate-12 !shadow-none focus:!ring-0"
           />
           <button
             type="button"
             data-outbound-backspace
             :disabled="busy || !phone"
             :aria-label="t('VOICE_V4.BACKSPACE')"
-            class="grid size-11 shrink-0 place-items-center rounded-lg hover:bg-n-alpha-2 disabled:opacity-40"
+            class="grid size-10 shrink-0 place-items-center rounded-lg bg-n-blue-2 text-n-blue-11 hover:bg-n-blue-4 focus-visible:ring-2 focus-visible:ring-n-blue-8 disabled:opacity-40"
             @click="phone = phone.slice(0, -1)"
           >
             <span class="i-lucide-delete size-5" aria-hidden="true" />
@@ -209,7 +215,7 @@ onMounted(() => dialog.value?.open());
             type="button"
             :data-outbound-tone="tone"
             :disabled="busy || !allowed || !sameAccount"
-            class="min-h-11 rounded-lg bg-n-alpha-2 text-lg hover:bg-n-alpha-3 focus-visible:outline focus-visible:outline-2 disabled:opacity-40"
+            class="min-h-11 rounded-xl border border-n-blue-5 bg-n-solid-1 text-lg font-semibold text-n-slate-12 shadow-sm hover:bg-n-blue-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-blue-8 disabled:opacity-40"
             @click="pressTone(tone)"
           >
             {{ tone }}
@@ -217,8 +223,8 @@ onMounted(() => dialog.value?.open());
         </div>
       </div>
       <p class="m-0 text-xs text-n-slate-11">{{ t('VOICE_V4.SOURCE_HINT') }}</p>
-      <details class="rounded-lg border border-n-weak p-3">
-        <summary class="cursor-pointer text-sm font-medium">
+      <details class="rounded-xl border border-n-weak bg-n-solid-1 p-3">
+        <summary class="cursor-pointer text-sm font-semibold text-n-blue-11">
           {{ t('VOICE_V4.CALL_DETAILS') }}
         </summary>
         <div class="mt-3 space-y-3">
@@ -291,9 +297,10 @@ onMounted(() => dialog.value?.open());
           type="submit"
           data-outbound-call
           :disabled="!canDial"
-          class="min-h-11 rounded-lg bg-n-teal-9 px-5 font-semibold text-white shadow-[0_3px_0_0_rgba(0,0,0,0.2)] transition-transform duration-150 active:translate-y-0.5 active:duration-100 motion-reduce:transform-none motion-reduce:transition-none disabled:opacity-40"
+          class="inline-flex min-h-11 items-center gap-2 rounded-xl bg-n-teal-9 px-5 font-semibold text-white shadow-sm hover:bg-n-teal-10 focus-visible:ring-2 focus-visible:ring-n-teal-8 disabled:opacity-40"
           @click.prevent="dial"
         >
+          <span class="i-lucide-phone size-4" aria-hidden="true" />
           {{ t('VOICE_V4.CALL') }}
         </button>
       </div>

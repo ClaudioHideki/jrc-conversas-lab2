@@ -354,6 +354,7 @@ const controls = computed(() => [
     label: matches.value && sip.muted.value ? 'UNMUTE' : 'MUTE',
     icon:
       matches.value && sip.muted.value ? 'i-lucide-mic' : 'i-lucide-mic-off',
+    tone: 'border-n-violet-6 bg-n-violet-3 text-n-violet-11 hover:bg-n-violet-4',
     enabled: canControl.value,
     action: () => sip.setMuted(!sip.muted.value),
   },
@@ -361,6 +362,7 @@ const controls = computed(() => [
     key: 'KEYPAD',
     label: 'KEYPAD',
     icon: 'i-lucide-grip',
+    tone: 'border-n-blue-6 bg-n-blue-3 text-n-blue-11 hover:bg-n-blue-4',
     enabled: canControl.value,
     action: () => {
       keypadOpen.value = !keypadOpen.value;
@@ -369,7 +371,9 @@ const controls = computed(() => [
   {
     key: 'HOLD',
     label: matches.value && sip.held.value ? 'RESUME' : 'HOLD',
-    icon: matches.value && sip.held.value ? 'i-lucide-play' : 'i-lucide-pause',
+    icon:
+      matches.value && sip.held.value ? 'i-lucide-play' : 'i-lucide-music-2',
+    tone: 'border-n-amber-6 bg-n-amber-3 text-n-amber-11 hover:bg-n-amber-4',
     enabled:
       canControl.value &&
       (independentSession.value || props.capabilities.hold === 'available') &&
@@ -379,7 +383,8 @@ const controls = computed(() => [
   {
     key: 'TRANSFER',
     label: 'TRANSFER',
-    icon: 'i-lucide-arrow-right',
+    icon: 'i-lucide-phone-forwarded',
+    tone: 'border-n-teal-6 bg-n-teal-3 text-n-teal-11 hover:bg-n-teal-4',
     enabled:
       canControl.value &&
       (supportsTransfer('immediate') || supportsTransfer('supervised')),
@@ -678,7 +683,7 @@ defineExpose({ endCall, canEnd, duration });
         class="gap-1.5"
         :class="
           controlsOnly
-            ? 'flex flex-wrap items-center'
+            ? 'flex flex-wrap items-center justify-end'
             : 'grid grid-cols-2 sm:grid-cols-4'
         "
         data-voice-controls
@@ -700,17 +705,25 @@ defineExpose({ endCall, canEnd, duration });
                   ? keypadOpen
                   : undefined
           "
-          class="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-n-strong bg-n-solid-1 px-3 py-2 text-xs font-semibold text-n-slate-12 shadow-[0_3px_0_0_rgba(0,0,0,0.18)] transition-[transform,box-shadow,background-color] duration-150 hover:bg-n-alpha-2 active:translate-y-0.5 active:shadow-none active:duration-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-n-brand motion-reduce:transform-none motion-reduce:transition-none disabled:translate-y-0 disabled:shadow-none disabled:opacity-40"
-          :class="{
-            'bg-n-teal-3 ring-2 ring-n-teal-7':
-              (control.key === 'MUTE' && matches && sip.muted.value) ||
-              (control.key === 'HOLD' && matches && sip.held.value),
-          }"
+          class="flex items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-n-brand disabled:opacity-40"
+          :class="[
+            controlsOnly
+              ? `min-h-9 ${control.tone}`
+              : 'min-h-11 border-n-strong bg-n-solid-1 text-n-slate-12 hover:bg-n-alpha-2',
+            {
+              'ring-2 ring-current':
+                (control.key === 'MUTE' && matches && sip.muted.value) ||
+                (control.key === 'HOLD' && matches && sip.held.value),
+            },
+          ]"
           @click="run(control.enabled, control.action)"
         >
           <span class="grid size-6 place-items-center"
-            ><span class="size-5" :class="control.icon" /></span
-          ><span :class="controlsOnly ? 'sr-only' : ''">{{
+            ><span
+              class="size-4"
+              :class="control.icon"
+              aria-hidden="true" /></span
+          ><span :class="controlsOnly ? 'sr-only xl:not-sr-only' : ''">{{
             t(`SOFTPHONE.CENTRAL.${control.label}`)
           }}</span>
         </button>
@@ -718,7 +731,7 @@ defineExpose({ endCall, canEnd, duration });
           v-if="controlsOnly && !sip.incoming.value"
           type="button"
           :disabled="!canEnd"
-          class="ml-auto flex min-h-11 items-center justify-center gap-2 rounded-lg border border-n-ruby-10 bg-n-ruby-9 px-3 text-xs font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
+          class="flex min-h-9 items-center justify-center gap-2 rounded-lg border border-n-ruby-10 bg-n-ruby-9 px-3 text-xs font-semibold text-white hover:bg-n-ruby-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
           @click="endCall"
         >
           <span class="i-lucide-phone-off size-5" aria-hidden="true" />

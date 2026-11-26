@@ -177,7 +177,13 @@ const selectContact = contact =>
     ...camelcaseKeys(contact, { deep: true }),
   });
 
-defineExpose({ selectContact });
+const openForContact = async contact => {
+  if (props.disabled || !contact?.id) return;
+  selectContact(contact);
+  await popoverRef.value?.show();
+};
+
+defineExpose({ selectContact, openForContact });
 
 const handleTargetInbox = inbox => {
   targetInbox.value = inbox;

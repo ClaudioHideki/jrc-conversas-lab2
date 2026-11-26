@@ -8,11 +8,19 @@ import ContactHeader from 'dashboard/components-next/Contacts/ContactsHeader/Con
 import ContactsBulkActionBar from '../../components/ContactsBulkActionBar.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import BulkActionsAPI from 'dashboard/api/bulkActions';
+import ContactAPI from 'dashboard/api/contacts';
+import { openEmbeddedSoftphone } from '../../../webphone/useEmbeddedSoftphone';
 import crmLocale from 'dashboard/i18n/locale/en/crm.json';
 
 const contactLabels = crmLocale.CRM.CONTACT_LEAD.UI;
 
 vi.mock('dashboard/api/bulkActions', () => ({ default: { create: vi.fn() } }));
+vi.mock('dashboard/api/contacts', () => ({
+  default: { getConversations: vi.fn() },
+}));
+vi.mock('../../../webphone/useEmbeddedSoftphone', () => ({
+  openEmbeddedSoftphone: vi.fn(),
+}));
 
 vi.mock('vue-router', () => ({ useRoute: vi.fn(), useRouter: vi.fn() }));
 vi.mock('dashboard/composables', () => ({
@@ -128,6 +136,71 @@ describe('Relationship center pagination', () => {
       ids: [42],
       action_name: 'delete',
     });
+  });
+
+  it('opens the authorized WhatsApp conversation for the clicked contact', async () => {
+    ContactAPI.getConversations.mockResolvedValue({
+      data: {
+        payload: [
+          { id: 11, account_id: 2, meta: { channel: 'Channel::Whatsapp' } },
+          { id: 12, account_id: 1, meta: { channel: 'Channel::Email' } },
+          { id: 13, account_id: 1, meta: { channel: 'Channel::Whatsapp' } },
+        ],
+      },
+    });
+    wrapper = page();
+    await wrapper.get('button[data-contact-whatsapp]').trigger('click');
+    await flushPromises();
+    expect(ContactAPI.getConversations).toHaveBeenCalledWith(42);
+    expect(useRouter().push).toHaveBeenCalledWith({
+      name: 'inbox_view_conversation',
+      params: { accountId: 1, type: 'conversation', id: 13 },
+    });
+  });
+
+  it('loads the clicked contact number into the existing softphone', async () => {
+    store.getters['contacts/getContactsList'][0].phoneNumber =
+      '+55 (11) 98888-1212';
+    openEmbeddedSoftphone.mockReturnValue(true);
+    wrapper = page();
+    await wrapper.get('button[data-contact-call]').trigger('click');
+    expect(openEmbeddedSoftphone).toHaveBeenCalledWith(
+      1,
+      '+55 (11) 98888-1212'
+    );
+    expect(useRouter().push).not.toHaveBeenCalled();
+  });
+
+  it('requires confirmation and deletes only the clicked row even with another contact selected', async () => {
+    store.getters['contacts/getContactsList'].push({
+      id: 43,
+      name: 'Outro contato',
+    });
+    const open = vi.fn();
+    wrapper = page({
+      Dialog: {
+        name: 'Dialog',
+        template: '<div />',
+        methods: { open, close: vi.fn() },
+      },
+    });
+    await wrapper.get('tbody input[type="checkbox"]').setValue(true);
+    await wrapper.findAll('button[data-contact-delete]')[1].trigger('click');
+    expect(open).toHaveBeenCalledOnce();
+    expect(store.dispatch).not.toHaveBeenCalledWith('contacts/delete', 43);
+    wrapper.findAllComponents(Dialog)[1].vm.$emit('confirm');
+    await flushPromises();
+    expect(store.dispatch).toHaveBeenCalledWith('contacts/delete', 43);
+    expect(store.dispatch).not.toHaveBeenCalledWith('contacts/delete', 42);
+    expect(
+      wrapper.getComponent(ContactsBulkActionBar).props('selectedContactIds')
+    ).toEqual([42]);
+  });
+
+  it('hides individual deletion for an agent without administrator permission', () => {
+    store.getters.getCurrentUser.accounts[0].role = 'agent';
+    wrapper = page();
+    expect(wrapper.find('button[data-contact-delete]').exists()).toBe(false);
   });
 
   it('connects native select-all and clear-selection controls', async () => {
