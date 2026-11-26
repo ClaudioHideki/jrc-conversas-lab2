@@ -188,6 +188,15 @@
         "spec/integration/jrc_contact_center/owned_public_ending_queue.rb": "152f64ae1f2af7803ff5d232cabb0426a28526a1169a5d5744951a23b4626982",
         "app/services/jrc_contact_center/ending_actions/service_desk_rule_parameters.rb": "f57a0c047014a04e1b2492231421b3d5cc191efbf9a4cfd03ab15441f78693ba"
       }
+    },
+    {
+      "name": "exact_native_required_empty_line_after_unchanged_nonce_guard",
+      "source_sha256": {
+        "spec/integration/jrc_contact_center/owned_public_ending_queue.rb": "bd03b7375d755d201180cdfd16cf7d168a031522a747ad0bce4e52a7a5d8704c"
+      },
+      "parent_sources": {
+        "spec/integration/jrc_contact_center/owned_public_ending_queue.rb": "9373f749a9be694211213278042e56c0a3d078b1a0cc426f75f485b2c54ae3a0"
+      }
     }
   ],
   "Lead_recovery_regression": {
@@ -228,5 +237,12 @@
     "focused_files": 6,
     "no_guards_removed": true,
     "native_and_Chrome_acceptance_pending": true
+  },
+  "native_lint_group_progress": {
+    "run": 45757509809,
+    "previous_offenses": 21,
+    "remaining": 1,
+    "only_blank_line_added": true,
+    "Lead_passed": 37
   }
 }

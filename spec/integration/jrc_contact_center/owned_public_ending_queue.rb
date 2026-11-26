@@ -41,6 +41,7 @@ module SyntheticPublicEndingQueue
     raise 'Exact queue control fields required' unless values.is_a?(Hash) && values.keys.sort == fields.sort
     raise 'Owned nonce required' unless values['nonce'].is_a?(String) && values['nonce'].match?(/\A[0-9a-f]{24}\z/)
     raise 'Nonce queue mismatch' unless values['queue'] == "jrc_cc_public_#{values.fetch('nonce')}"
+
     validate_source_revision!(values.fetch('source_sha'))
 
     validate_accounts_shape!(values['account_ids'])
