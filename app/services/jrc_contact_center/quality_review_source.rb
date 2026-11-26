@@ -20,9 +20,7 @@ class JrcContactCenter::QualityReviewSource
     analysis = JrcVoiceQuality::SupabaseClient.new.find_analysis(account_id: @account.id, call_id: before.fetch(:call_id))
     snapshot = JrcContactCenter::QualityAnalysisSnapshot.new(analysis: analysis, authorized_call_id: before.fetch(:call_id))
     with_current_source(record_id) do |record, call|
-      unless identity(record, call) == before
-        raise JrcContactCenter::OperationError.new('quality_analysis_source_changed', status: :conflict)
-      end
+      raise JrcContactCenter::OperationError.new('quality_analysis_source_changed', status: :conflict) unless identity(record, call) == before
 
       yield record, call, snapshot
     end

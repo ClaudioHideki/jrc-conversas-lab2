@@ -4,7 +4,7 @@ require 'rails_helper'
 require Rails.root.join('spec/integration/jrc_contact_center/owned_quality_source')
 require Rails.root.join('spec/integration/jrc_contact_center/owned_quality_evidence')
 
-RSpec.describe 'Owned browser quality-source boundary' do
+RSpec.describe SyntheticRecordedCallQuality do
   it 'refuses installation outside the owned native recording server without modifying the provider client' do
     before = JrcVoiceQuality::SupabaseClient.ancestors
     with_modified_env(GITHUB_ACTIONS: 'false') do
@@ -29,7 +29,7 @@ RSpec.describe 'Owned browser quality-source boundary' do
 
   it 'requires an unchanged original and a contiguous native revision sequence rather than trusting positive counters' do
     original = { 'resumo_conversa' => 'SYNTHETIC original', 'payload_completo' => {}, 'id' => 'synthetic',
-                 'call_id' => 'call', 'chamada_id' => 'source' }
+                'call_id' => 'call', 'chamada_id' => 'source' }
     snapshot = JrcContactCenter::QualityAnalysisSnapshot.new(analysis: original, authorized_call_id: 'call')
     row = instance_double(JrcContactCenter::QualityReviewRevision, revision: 2,
                           original_analysis: JrcContactCenter::QualityReviewPresentation.original(snapshot), source_sha256: snapshot.sha256)

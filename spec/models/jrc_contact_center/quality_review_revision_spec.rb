@@ -13,10 +13,21 @@ RSpec.describe JrcContactCenter::QualityReviewRevision, :pabx do
   end
   let(:revision) { JrcContactCenter::QualityReviewWrite.new(account: account, member: member).call(record.id, values) }
 
+  # Explicit SQL is essential here: prove that PostgreSQL protects history even without model callbacks.
+  def insert_native_revision(attributes)
+    connection = ApplicationRecord.connection
+    columns = attributes.keys.map { |key| connection.quote_column_name(key) }.join(', ')
+    json_fields = %w[original_analysis reviewed_values scope_snapshot]
+    values = attributes.map { |key, value| connection.quote(json_fields.include?(key) ? JSON.generate(value) : value) }.join(', ')
+    connection.execute("INSERT INTO #{connection.quote_table_name(described_class.table_name)} (#{columns}) VALUES (#{values})")
+  end
+
   it 'rejects SQL updates and individual deletion while preserving the exact original history' do
     original = revision.attributes
     expect do
-      ApplicationRecord.transaction(requires_new: true) { described_class.where(id: revision.id).update_all(revision: 8) }
+      ApplicationRecord.transaction(requires_new: true) do
+        ApplicationRecord.connection.execute("UPDATE #{described_class.table_name} SET revision = 8 WHERE id = #{Integer(revision.id)}")
+      end
     end.to raise_error(ActiveRecord::StatementInvalid, /history is immutable/)
     expect do
       ApplicationRecord.transaction(requires_new: true) { described_class.where(id: revision.id).delete_all }
@@ -28,7 +39,7 @@ RSpec.describe JrcContactCenter::QualityReviewRevision, :pabx do
     attributes = revision.attributes.except('id').merge('request_key' => SecureRandom.uuid)
     [1, 9].each do |number|
       expect do
-        ApplicationRecord.transaction(requires_new: true) { described_class.insert_all!([attributes.merge('revision' => number)]) }
+        ApplicationRecord.transaction(requires_new: true) { insert_native_revision(attributes.merge('revision' => number)) }
       end.to raise_error(ActiveRecord::StatementInvalid, /revision conflict/)
     end
     expect(described_class.where(account: account).pluck(:revision)).to eq([1])
@@ -39,7 +50,7 @@ RSpec.describe JrcContactCenter::QualityReviewRevision, :pabx do
     foreign = create(:account)
     [attributes.merge('account_id' => foreign.id), attributes.merge('actor_user_id' => create(:user).id)].each do |input|
       expect do
-        ApplicationRecord.transaction(requires_new: true) { described_class.insert_all!([input]) }
+        ApplicationRecord.transaction(requires_new: true) { insert_native_revision(input) }
       end.to raise_error(ActiveRecord::StatementInvalid, /Quality review/)
     end
     expect(described_class.where(account: account).count).to eq(1)
@@ -49,7 +60,7 @@ RSpec.describe JrcContactCenter::QualityReviewRevision, :pabx do
   it 'rejects missing required JSON fields rather than allowing SQL NULL to satisfy a CHECK' do
     attributes = revision.attributes.except('id').merge('revision' => 2, 'request_key' => SecureRandom.uuid, 'reviewed_values' => {})
     expect do
-      ApplicationRecord.transaction(requires_new: true) { described_class.insert_all!([attributes]) }
+      ApplicationRecord.transaction(requires_new: true) { insert_native_revision(attributes) }
     end.to raise_error(ActiveRecord::StatementInvalid, /cc_quality_review_/)
     expect(described_class.where(account: account).count).to eq(1)
   end

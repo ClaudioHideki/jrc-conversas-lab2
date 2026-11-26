@@ -29,12 +29,12 @@ RSpec.describe 'Native human quality review contention', :pabx do
   let(:state) { { ready: Queue.new, results: Queue.new } }
 
   def quality_worker(input)
-    identifiers = [account.id, member.id, record.id]
+    account_id, member_id, recording_id = account.id, member.id, record.id
     Thread.new do
       ApplicationRecord.connection_pool.with_connection do |connection|
         state[:ready] << connection.raw_connection.backend_pid
-        writer = JrcContactCenter::QualityReviewWrite.new(account: Account.find(identifiers.first), member: AccountUser.find(identifiers[1]))
-        state[:results] << writer.call(identifiers.last, input)
+        writer = JrcContactCenter::QualityReviewWrite.new(account: Account.find(account_id), member: AccountUser.find(member_id))
+        state[:results] << writer.call(recording_id, input)
       end
     rescue StandardError => e
       state[:results] << e
@@ -77,7 +77,7 @@ RSpec.describe 'Native human quality review contention', :pabx do
     ensure
       join_quality_workers(workers)
     end
-    results = 2.times.map { Timeout.timeout(8) { state[:results].pop } }
+    results = Array.new(2) { Timeout.timeout(8) { state[:results].pop } }
     expect(pids.uniq.length).to eq(2)
     expect(results.count { |row| row.is_a?(JrcContactCenter::QualityReviewRevision) }).to eq(1)
     expect(results.select { |row| row.is_a?(JrcContactCenter::OperationError) }.map(&:message)).to eq(['quality_review_revision_changed'])
@@ -97,7 +97,7 @@ RSpec.describe 'Native human quality review contention', :pabx do
     ensure
       join_quality_workers(workers)
     end
-    results = 2.times.map { Timeout.timeout(8) { state[:results].pop } }
+    results = Array.new(2) { Timeout.timeout(8) { state[:results].pop } }
     expect(results).to all(be_a(JrcContactCenter::QualityReviewRevision))
     expect(results.map(&:id).uniq.length).to eq(1)
     expect(Audited.audit_class.where(auditable: results.first, action: 'create').count).to eq(1)

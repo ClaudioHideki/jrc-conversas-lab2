@@ -111,12 +111,12 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
     post path, headers: headers, params: { quality_review: values }, as: :json
     expect(response).to have_http_status(:ok)
     allow(provider).to receive(:find_analysis).and_raise(JrcVoiceQuality::PersistenceError.new('SYNTHETIC unavailable', code: :supabase_error))
-    get path + '/history', headers: headers, params: { page: 1, per_page: 1 }, as: :json
+    get "#{path}/history", headers: headers, params: { page: 1, per_page: 1 }, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('meta')).to include('page' => 1, 'per_page' => 1, 'total' => 1)
     expect(response.parsed_body.fetch('items').sole.fetch('origin')).to eq('human')
     role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_recordings_view])
-    get path + '/history', headers: headers, as: :json
+    get "#{path}/history", headers: headers, as: :json
     expect(response).to have_http_status(:unauthorized)
   end
 
@@ -129,10 +129,10 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
     other_queue = JrcContactCenter::Queue.create!(account: account, unit: target, code: 'B', name: 'SYNTHETIC other queue')
     JrcContactCenter::QueueMembership.create!(account: account, queue: other_queue, account_user: member)
     source_call.update!(current_unit: target, current_queue: other_queue)
-    account.jrc_crm_user_business_units.where(user: actor).update_all(active: false)
+    account.jrc_crm_user_business_units.where(user: actor).find_each { |coverage| coverage.update!(active: false) }
     account.jrc_crm_user_business_units.create!(user: actor, scope: 'BUSINESS_UNIT', company: company, business_unit: other,
                                                 active: true, structure_managed: true)
-    get path + '/history', headers: headers, as: :json
+    get "#{path}/history", headers: headers, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items')).to be_empty
     get path, headers: headers, as: :json
@@ -149,9 +149,9 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
                                                        started_at: source_call.started_at, ended_at: source_call.ended_at)
     JrcContactCenter::CallLeg.create!(account: account, call_session: other_call, account_user: member, queue: queue,
                                       direction: 'inbound', status: 'ended', started_at: other_call.started_at, ended_at: other_call.ended_at)
-    JrcContactCenter::CallLeg.where(account: account, call_session: source_call).update_all(account_user_id: nil)
+    JrcContactCenter::CallLeg.where(account: account, call_session: source_call).find_each { |leg| leg.update!(account_user: nil) }
     record.update!(external_unique_id: other_call.external_session_id)
-    get path + '/history', headers: headers, as: :json
+    get "#{path}/history", headers: headers, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items')).to be_empty
     expect(JrcContactCenter::QualityReviewRevision.where(account: account).count).to eq(1)

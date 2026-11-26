@@ -7,12 +7,7 @@ module JrcContactCenter::SyntheticQualityReviewEvidence
   def self.read(account_id, recording_id)
     SyntheticRecordedCallMedia.validate_environment!
     account = Account.find(account_id)
-    marker = SyntheticRecordedCallMedia.control!(account)
-    raise 'Exact owned recording required' unless marker.fetch('record_ids').include?(recording_id)
-
-    record = TelephonyCallRecord.where(account: account).find(recording_id)
-    original = SyntheticRecordedCallQuality.analysis(account.id, record.external_unique_id)
-    snapshot = JrcContactCenter::QualityAnalysisSnapshot.new(analysis: original, authorized_call_id: record.external_unique_id)
+    record, snapshot = authorized_source(account, recording_id)
     rows = JrcContactCenter::QualityReviewRevision.where(account: account, recording: record).order(:revision).to_a
     require_original!(rows, snapshot)
     { source_sha: ENV.fetch('GITHUB_SHA'), account_id: account.id, recording_id: record.id,
@@ -22,6 +17,16 @@ module JrcContactCenter::SyntheticQualityReviewEvidence
       independent_audio_reference_sha256: Digest::SHA256.hexdigest(record.recording_reference),
       ending_destination_actions: JrcContactCenter::EndingDestinationAttempt.where(account: account).count,
       PABX_commands: JrcContactCenter::Command.where(account: account).count, existing_records_modified_by_evidence: false }
+  end
+
+  def self.authorized_source(account, recording_id)
+    marker = SyntheticRecordedCallMedia.control!(account)
+    raise 'Exact owned recording required' unless marker.fetch('record_ids').include?(recording_id)
+
+    record = TelephonyCallRecord.where(account: account).find(recording_id)
+    original = SyntheticRecordedCallQuality.analysis(account.id, record.external_unique_id)
+    snapshot = JrcContactCenter::QualityAnalysisSnapshot.new(analysis: original, authorized_call_id: record.external_unique_id)
+    [record, snapshot]
   end
 
   def self.require_original!(rows, snapshot)

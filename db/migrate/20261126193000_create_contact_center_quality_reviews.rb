@@ -9,15 +9,11 @@ class CreateContactCenterQualityReviews < ActiveRecord::Migration[7.1]
   RECEIPT = 'lib/jrc_contact_center/quality_review_schema_receipt.rb'
   SOURCES = {
     SQL => 'c6f65980ef4ce034b19ebcc4974f251249ac935092be01b613621ef0bd84e19b',
-    RECEIPT => 'b126ee6710363470983ca0717d2ae97ab4fca97501fd31b66d7ab0d068378a29'
+    RECEIPT => '1942b7d67ad38232e6525e7ec5eb368b26c4ae5a1c2f4d2463279e8d76220a57'
   }.freeze
 
   def up
-    raise ActiveRecord::MigrationError, 'Unprepared quality review migration' unless SOURCES.keys.sort == [SQL, RECEIPT].sort
-
-    SOURCES.each do |path, expected|
-      raise ActiveRecord::MigrationError, 'Unreviewed quality review source' unless Digest::SHA256.file(Rails.root.join(path)).hexdigest == expected
-    end
+    verify_sources!
     require Rails.root.join(RECEIPT.delete_suffix('.rb'))
     receipt = JrcContactCenter::QualityReviewSchemaReceipt.new(connection)
     return receipt.verify! if table_exists?(TABLE)
@@ -34,6 +30,14 @@ class CreateContactCenterQualityReviews < ActiveRecord::Migration[7.1]
   end
 
   private
+
+  def verify_sources!
+    raise ActiveRecord::MigrationError, 'Unprepared quality review migration' unless SOURCES.keys.sort == [SQL, RECEIPT].sort
+
+    SOURCES.each do |path, expected|
+      raise ActiveRecord::MigrationError, 'Unreviewed quality review source' unless Digest::SHA256.file(Rails.root.join(path)).hexdigest == expected
+    end
+  end
 
   def create_history_table
     create_table TABLE do |table|
@@ -54,13 +58,13 @@ class CreateContactCenterQualityReviews < ActiveRecord::Migration[7.1]
     add_check_constraint TABLE, fields.map { |field| "#{field} > 0" }.join(' AND '), name: 'cc_quality_review_identity'
     add_check_constraint TABLE, "source_sha256 ~ '^[0-9a-f]{64}$' AND input_sha256 ~ '^[0-9a-f]{64}$'", name: 'cc_quality_review_fingerprints'
     add_check_constraint TABLE, "jsonb_typeof(original_analysis) = 'object' AND jsonb_typeof(reviewed_values) = 'object' AND " \
-                               "jsonb_typeof(scope_snapshot) = 'object'",
+                         "jsonb_typeof(scope_snapshot) = 'object'",
                          name: 'cc_quality_review_objects'
     add_check_constraint TABLE, "COALESCE(reviewed_values ->> 'classification' IN ('positive', 'neutral', 'negative') AND " \
                                "jsonb_typeof(reviewed_values -> 'justification') = 'string' AND " \
-                               "btrim(reviewed_values ->> 'justification') <> '', false)", name: 'cc_quality_review_reason'
+                         "btrim(reviewed_values ->> 'justification') <> '', false)", name: 'cc_quality_review_reason'
     add_check_constraint TABLE, "COALESCE(jsonb_typeof(reviewed_values -> 'adjusted_themes') = 'array' AND " \
                                "jsonb_typeof(reviewed_values -> 'recommendation_ids') = 'array' AND " \
-                               "jsonb_typeof(reviewed_values -> 'adjusted_summary') = 'string', false)", name: 'cc_quality_review_content'
+                         "jsonb_typeof(reviewed_values -> 'adjusted_summary') = 'string', false)", name: 'cc_quality_review_content'
   end
 end

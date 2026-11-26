@@ -1,0 +1,218 @@
+{
+  "parent": "d47519b1eb6847923bebaab1ac21aeac96064167",
+  "failed_run": 45902913016,
+  "failed_job": 140192736320,
+  "native_report_sha256": "645f6903fd29b41b6579b9fcfafd34c0131b792152d010ef3cdbf5ed1715ce1f",
+  "offenses_to_resolve": 27,
+  "source_sha256": {
+    "app/services/jrc_contact_center/quality_review_source.rb": "66c873e613a4ac993313ad14bab4480f6445b61efccd98a8c7117b08e2c1e1e5",
+    "db/migrate/20261126193000_create_contact_center_quality_reviews.rb": "9339bc41d60442fe5df5f76c458b1e9ae4926a11305c4ac3e26e22301301a544",
+    "lib/jrc_contact_center/quality_review_schema_receipt.rb": "1942b7d67ad38232e6525e7ec5eb368b26c4ae5a1c2f4d2463279e8d76220a57",
+    "script/jrc_call_center_quality_schema_probe.rb": "fb0810490252c87e332fe1f6930ecbfddfb055ccab01edf51055b86724720337",
+    "spec/integration/jrc_contact_center/owned_quality_evidence.rb": "2af755b1ead43c27351786e0e099442ea7490aa99d6a79965af8c927cacad260",
+    "spec/models/jrc_contact_center/quality_review_revision_spec.rb": "b44c5c652a07cae65b956c795447be7ea8a9cb229dd4d3d8bfd482570215e5c0",
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb": "eadd1ac17916e7a1f17e20a01254a418696c3ba2c584a8a74351ac140f8fbed8",
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb": "ea7ad781f74274f398295ef102af415d2a8f71097b2788749f4086b448351246",
+    "spec/services/jrc_contact_center/quality_review_write_spec.rb": "be7d7068d99a072fa03af1195398fba54ffac965968da3db2d761ab3c8455943",
+    "spec/services/jrc_contact_center/synthetic_quality_source_scope_spec.rb": "39b83a93903b785b7f93d6a14758fd186a3e7e18e03fd9f01a4dc8b84aac69d4",
+    "script/validate_cc_quality_review_migration.mjs": "dde9932b7fa37c1f778aff25c01b0e8a683682cd0ca1e1c9b4089ef62cda9efc"
+  },
+  "parent_sources": {
+    "app/services/jrc_contact_center/quality_review_source.rb": "dafd2ce977104d821cb04d3134a7faafcf189aeca6b7c076d58f2a3ef0358fa8",
+    "db/migrate/20261126193000_create_contact_center_quality_reviews.rb": "ab708f3b36ac763af666d7b871b53ece2b77cf27b87359d2bf71909b4bda3123",
+    "lib/jrc_contact_center/quality_review_schema_receipt.rb": "b126ee6710363470983ca0717d2ae97ab4fca97501fd31b66d7ab0d068378a29",
+    "script/jrc_call_center_quality_schema_probe.rb": "37725e122773c147f476aed2f892c6d9fa24fd027e0816664da444a8fafec891",
+    "spec/integration/jrc_contact_center/owned_quality_evidence.rb": "4142e23ba66323bef34b11c48196abac4788e8dd847b46b2cf0fcd2cf9e7dc18",
+    "spec/models/jrc_contact_center/quality_review_revision_spec.rb": "dcd0bd32da5290b8a7fe22a18634396442210cc9e2a52ec098015aa000caa897",
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb": "e35c8755315fc58427049d727fc329713d2ab72b2a7c512d30d3b1e4ac6c2ef2",
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb": "71416b4291ba60e742fa50768cd5739fd21c61f4893a4098b870ccc5ebf03818",
+    "spec/services/jrc_contact_center/quality_review_write_spec.rb": "149a1c53a47efa66947303b35b8e87daae9b7ccc58f72559973ccec5bced3fb3",
+    "spec/services/jrc_contact_center/synthetic_quality_source_scope_spec.rb": "1003548eb05e7c8594775558906925254614e1bfac961a92ad6db5d737b7b124",
+    "script/validate_cc_quality_review_migration.mjs": "d0f048c5111ea702d17227e0396c7de357bee3a680b9796f843ac26644dc0691"
+  },
+  "literal_replacements": {
+    "app/services/jrc_contact_center/quality_review_source.rb": [
+      [
+        "      unless identity(record, call) == before\n        raise JrcContactCenter::OperationError.new('quality_analysis_source_changed', status: :conflict)\n      end\n",
+        "      raise JrcContactCenter::OperationError.new('quality_analysis_source_changed', status: :conflict) unless identity(record, call) == before\n",
+        1
+      ]
+    ],
+    "lib/jrc_contact_center/quality_review_schema_receipt.rb": [
+      [
+        "    valid = @connection.table_exists?(TABLE) && @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort\n    raise ActiveRecord::MigrationError, 'Incomplete quality review schema' unless valid\n\n    keys = @connection.foreign_keys(TABLE)\n    valid = keys.length == 1 && keys.first.to_table == 'accounts' && keys.first.on_delete == :cascade\n    valid &&= functions.map(&:first) == FUNCTIONS && triggers.map(&:first) == TRIGGERS\n",
+        "    verify_columns!\n    verify_account_reference!\n    valid = functions.map(&:first) == FUNCTIONS && triggers.map(&:first) == TRIGGERS\n",
+        1
+      ],
+      [
+        "  def structure\n",
+        "  def verify_columns!\n    valid = @connection.table_exists?(TABLE) && @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort\n    raise ActiveRecord::MigrationError, 'Incomplete quality review schema' unless valid\n  end\n\n  def verify_account_reference!\n    keys = @connection.foreign_keys(TABLE)\n    valid = keys.length == 1 && keys.first.to_table == 'accounts' && keys.first.on_delete == :cascade\n    raise ActiveRecord::MigrationError, 'Unknown quality review references or guards' unless valid\n  end\n\n  def structure\n",
+        1
+      ]
+    ],
+    "db/migrate/20261126193000_create_contact_center_quality_reviews.rb": [
+      [
+        "    raise ActiveRecord::MigrationError, 'Unprepared quality review migration' unless SOURCES.keys.sort == [SQL, RECEIPT].sort\n\n    SOURCES.each do |path, expected|\n      raise ActiveRecord::MigrationError, 'Unreviewed quality review source' unless Digest::SHA256.file(Rails.root.join(path)).hexdigest == expected\n    end\n",
+        "    verify_sources!\n",
+        1
+      ],
+      [
+        "  def create_history_table\n",
+        "  def verify_sources!\n    raise ActiveRecord::MigrationError, 'Unprepared quality review migration' unless SOURCES.keys.sort == [SQL, RECEIPT].sort\n\n    SOURCES.each do |path, expected|\n      raise ActiveRecord::MigrationError, 'Unreviewed quality review source' unless Digest::SHA256.file(Rails.root.join(path)).hexdigest == expected\n    end\n  end\n\n  def create_history_table\n",
+        1
+      ],
+      [
+        "                               \"jsonb_typeof(scope_snapshot) = 'object'\"",
+        "                         \"jsonb_typeof(scope_snapshot) = 'object'\"",
+        1
+      ],
+      [
+        "                               \"btrim(reviewed_values ->> 'justification') <> '', false)\"",
+        "                         \"btrim(reviewed_values ->> 'justification') <> '', false)\"",
+        1
+      ],
+      [
+        "                               \"jsonb_typeof(reviewed_values -> 'adjusted_summary') = 'string', false)\"",
+        "                         \"jsonb_typeof(reviewed_values -> 'adjusted_summary') = 'string', false)\"",
+        1
+      ],
+      [
+        "b126ee6710363470983ca0717d2ae97ab4fca97501fd31b66d7ab0d068378a29",
+        "1942b7d67ad38232e6525e7ec5eb368b26c4ae5a1c2f4d2463279e8d76220a57",
+        1
+      ]
+    ],
+    "script/jrc_call_center_quality_schema_probe.rb": [
+      [
+        "    owned = Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&\n            ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15' && config.configuration_hash[:host] == '127.0.0.1' &&\n",
+        "    owned = owned_environment? && config.configuration_hash[:host] == '127.0.0.1' &&\n",
+        1
+      ],
+      [
+        "    raise 'Exclusive disposable quality schema diagnostics required' unless owned\n  end\nend\n",
+        "    raise 'Exclusive disposable quality schema diagnostics required' unless owned\n  end\n\n  def self.owned_environment?\n    Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&\n      ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'\n  end\nend\n",
+        1
+      ]
+    ],
+    "spec/integration/jrc_contact_center/owned_quality_evidence.rb": [
+      [
+        "    marker = SyntheticRecordedCallMedia.control!(account)\n    raise 'Exact owned recording required' unless marker.fetch('record_ids').include?(recording_id)\n\n    record = TelephonyCallRecord.where(account: account).find(recording_id)\n    original = SyntheticRecordedCallQuality.analysis(account.id, record.external_unique_id)\n    snapshot = JrcContactCenter::QualityAnalysisSnapshot.new(analysis: original, authorized_call_id: record.external_unique_id)\n",
+        "    record, snapshot = authorized_source(account, recording_id)\n",
+        1
+      ],
+      [
+        "  def self.require_original!(rows, snapshot)\n",
+        "  def self.authorized_source(account, recording_id)\n    marker = SyntheticRecordedCallMedia.control!(account)\n    raise 'Exact owned recording required' unless marker.fetch('record_ids').include?(recording_id)\n\n    record = TelephonyCallRecord.where(account: account).find(recording_id)\n    original = SyntheticRecordedCallQuality.analysis(account.id, record.external_unique_id)\n    snapshot = JrcContactCenter::QualityAnalysisSnapshot.new(analysis: original, authorized_call_id: record.external_unique_id)\n    [record, snapshot]\n  end\n\n  def self.require_original!(rows, snapshot)\n",
+        1
+      ]
+    ],
+    "spec/models/jrc_contact_center/quality_review_revision_spec.rb": [
+      [
+        "described_class.where(id: revision.id).update_all(revision: 8)",
+        "ApplicationRecord.connection.execute(\"UPDATE #{described_class.table_name} SET revision = 8 WHERE id = #{Integer(revision.id)}\")",
+        1
+      ],
+      [
+        "described_class.insert_all!([attributes.merge('revision' => number)])",
+        "insert_native_revision(attributes.merge('revision' => number))",
+        1
+      ],
+      [
+        "described_class.insert_all!([input])",
+        "insert_native_revision(input)",
+        1
+      ],
+      [
+        "described_class.insert_all!([attributes])",
+        "insert_native_revision(attributes)",
+        1
+      ],
+      [
+        "  it 'rejects SQL updates",
+        "  # Explicit SQL is essential here: prove that PostgreSQL protects history even without model callbacks.\n  def insert_native_revision(attributes)\n    connection = ApplicationRecord.connection\n    columns = attributes.keys.map { |key| connection.quote_column_name(key) }.join(', ')\n    json_fields = %w[original_analysis reviewed_values scope_snapshot]\n    values = attributes.map { |key, value| connection.quote(json_fields.include?(key) ? JSON.generate(value) : value) }.join(', ')\n    connection.execute(\"INSERT INTO #{connection.quote_table_name(described_class.table_name)} (#{columns}) VALUES (#{values})\")\n  end\n\n  it 'rejects SQL updates",
+        1
+      ],
+      [
+        "      ApplicationRecord.transaction(requires_new: true) { ApplicationRecord.connection.execute(\"UPDATE #{described_class.table_name} SET revision = 8 WHERE id = #{Integer(revision.id)}\") }",
+        "      ApplicationRecord.transaction(requires_new: true) do\n        ApplicationRecord.connection.execute(\"UPDATE #{described_class.table_name} SET revision = 8 WHERE id = #{Integer(revision.id)}\")\n      end",
+        1
+      ]
+    ],
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb": [
+      [
+        "    identifiers = [account.id, member.id, record.id]",
+        "    account_id, member_id, recording_id = account.id, member.id, record.id",
+        1
+      ],
+      [
+        "Account.find(identifiers.first), member: AccountUser.find(identifiers[1])",
+        "Account.find(account_id), member: AccountUser.find(member_id)",
+        1
+      ],
+      [
+        "writer.call(identifiers.last, input)",
+        "writer.call(recording_id, input)",
+        1
+      ],
+      [
+        "2.times.map { Timeout.timeout(8) { state[:results].pop } }",
+        "Array.new(2) { Timeout.timeout(8) { state[:results].pop } }",
+        2
+      ]
+    ],
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb": [
+      [
+        "get path + '/history'",
+        "get \"#{path}/history\"",
+        4
+      ],
+      [
+        "account.jrc_crm_user_business_units.where(user: actor).update_all(active: false)",
+        "account.jrc_crm_user_business_units.where(user: actor).find_each { |coverage| coverage.update!(active: false) }",
+        1
+      ],
+      [
+        "JrcContactCenter::CallLeg.where(account: account, call_session: source_call).update_all(account_user_id: nil)",
+        "JrcContactCenter::CallLeg.where(account: account, call_session: source_call).find_each { |leg| leg.update!(account_user: nil) }",
+        1
+      ]
+    ],
+    "spec/services/jrc_contact_center/quality_review_write_spec.rb": [
+      [
+        "                                            'nota_final' => 0, 'model' => nil, 'sentiment_confidence' => nil)",
+        "                                           'nota_final' => 0, 'model' => nil, 'sentiment_confidence' => nil)",
+        1
+      ]
+    ],
+    "spec/services/jrc_contact_center/synthetic_quality_source_scope_spec.rb": [
+      [
+        "RSpec.describe 'Owned browser quality-source boundary' do",
+        "RSpec.describe SyntheticRecordedCallQuality do",
+        1
+      ],
+      [
+        "                 'call_id' => 'call', 'chamada_id' => 'source' }",
+        "                'call_id' => 'call', 'chamada_id' => 'source' }",
+        1
+      ]
+    ],
+    "script/validate_cc_quality_review_migration.mjs": [
+      [
+        "ab708f3b36ac763af666d7b871b53ece2b77cf27b87359d2bf71909b4bda3123",
+        "9339bc41d60442fe5df5f76c458b1e9ae4926a11305c4ac3e26e22301301a544",
+        1
+      ],
+      [
+        "b126ee6710363470983ca0717d2ae97ab4fca97501fd31b66d7ab0d068378a29",
+        "1942b7d67ad38232e6525e7ec5eb368b26c4ae5a1c2f4d2463279e8d76220a57",
+        1
+      ]
+    ]
+  },
+  "schema_SQL_columns_constraints_token_and_migration_timestamp_unchanged": true,
+  "M1_to_M22_sources_and_all_negative_migration_tests_unchanged": true,
+  "M23_unreleased_verification_source_pins_recomputed_transitively": true,
+  "all_native_example_counts_current_authority_and_actual_PG_contention_preserved": true,
+  "no_rule_exclusion_or_validation_disabled": true,
+  "native_or_Chrome_acceptance": false
+}

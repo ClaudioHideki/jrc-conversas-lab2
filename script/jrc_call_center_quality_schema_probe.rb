@@ -26,10 +26,14 @@ module JrcContactCenter::SyntheticQualitySchemaProbe
 
   def self.guard!(stage)
     config = ApplicationRecord.connection_db_config
-    owned = Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
-            ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15' && config.configuration_hash[:host] == '127.0.0.1' &&
+    owned = owned_environment? && config.configuration_hash[:host] == '127.0.0.1' &&
             config.database == DATABASES.fetch(stage) && ApplicationRecord.connection.current_database == config.database &&
             !ApplicationRecord.connection.transaction_open?
     raise 'Exclusive disposable quality schema diagnostics required' unless owned
+  end
+
+  def self.owned_environment?
+    Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
+      ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'
   end
 end

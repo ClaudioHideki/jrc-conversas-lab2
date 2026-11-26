@@ -21,7 +21,7 @@ RSpec.describe JrcContactCenter::QualityReviewWrite, :pabx do
     row = service.call(record.id, values).reload
     expect(row.reviewed_values).to include('classification' => 'negative', 'justification' => values.fetch('justification'))
     expect(row.original_analysis).to include('sentimento_cliente' => 'positivo', 'classificacao_ligacao' => 'excelente',
-                                            'nota_final' => 0, 'model' => nil, 'sentiment_confidence' => nil)
+                                           'nota_final' => 0, 'model' => nil, 'sentiment_confidence' => nil)
     expect(row.original_analysis).not_to have_key('texto_transcrito')
     expect(row).to have_attributes(revision: 1, actor_user_id: actor.id, actor_account_user_id: member.id)
     expect(row.scope_snapshot.fetch('business_unit_id')).to eq(business.id.to_s)

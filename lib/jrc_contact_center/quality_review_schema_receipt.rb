@@ -30,12 +30,20 @@ class JrcContactCenter::QualityReviewSchemaReceipt
   private
 
   def verify_structure!
+    verify_columns!
+    verify_account_reference!
+    valid = functions.map(&:first) == FUNCTIONS && triggers.map(&:first) == TRIGGERS
+    raise ActiveRecord::MigrationError, 'Unknown quality review references or guards' unless valid
+  end
+
+  def verify_columns!
     valid = @connection.table_exists?(TABLE) && @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort
     raise ActiveRecord::MigrationError, 'Incomplete quality review schema' unless valid
+  end
 
+  def verify_account_reference!
     keys = @connection.foreign_keys(TABLE)
     valid = keys.length == 1 && keys.first.to_table == 'accounts' && keys.first.on_delete == :cascade
-    valid &&= functions.map(&:first) == FUNCTIONS && triggers.map(&:first) == TRIGGERS
     raise ActiveRecord::MigrationError, 'Unknown quality review references or guards' unless valid
   end
 
