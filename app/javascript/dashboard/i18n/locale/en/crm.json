@@ -144,6 +144,12 @@
       "UNAVAILABLE_ACTION": "This action is not available in this view.",
       "UNAVAILABLE_VIEWS": "The disabled views and actions are not available in this contact list.",
       "CALLING_CENTER": "Open calling center",
+      "CALL_SOFTPHONE": "Call with softphone",
+      "OPEN_WHATSAPP": "Open WhatsApp conversation",
+      "WHATSAPP_NOT_FOUND": "No accessible WhatsApp conversation or phone number was found for this contact.",
+      "WHATSAPP_FAILED": "Could not load this contact's WhatsApp conversation.",
+      "DELETE_CONTACT": "Delete contact",
+      "DELETE_CONTACT_CONFIRM": "Delete {name}? This also deletes the contact's conversation history.",
       "VIEW_PROFILE": "View contact profile",
       "CLOSE_DETAILS": "Close contact details",
       "CONTACT_OPTIONS": "Contact options",
@@ -204,7 +210,7 @@
         "DEALS": "Deals",
         "ACTIVITIES": "Activities",
         "CALL": "Call",
-        "CALL_HINT": "Open WhatsApp Calling to start.",
+        "CALL_HINT": "Use the softphone to call the contact.",
         "FULL_PROFILE": "View full profile",
         "SELECT_CONTACT_HINT": "Select a contact to view details."
       },
@@ -256,6 +262,11 @@
       "UNSAVED": "Salve as alterações antes de baixar o PDF. Se houve falha ao atualizar um produto, reabra a proposta e revise os dados primeiro."
     },
     "LEAD_FORM": {
+      "COMPANY_CONTACT": "Company contact",
+      "EXISTING_CONTACT": "Existing contact",
+      "MORE_CONTACTS": "Show more contacts",
+      "NO_CONTACTS": "No contacts found.",
+      "CONTACT_FALLBACK": "Contact #{id}",
       "TITLE": "Novo Lead",
       "CLOSE": "Fechar",
       "NAME": "Nome *",

@@ -35,6 +35,11 @@ const options = {
         },
         template: '<div data-active-voice-controls />',
       },
+      OutboundVoiceDialog: {
+        name: 'OutboundVoiceDialog',
+        props: { initialPhone: String },
+        template: '<div data-voice-dialer />',
+      },
       Dialog: {
         methods: { open() {}, close() {} },
         template: '<div><slot /></div>',
@@ -80,6 +85,18 @@ describe('persistent global voice bar', () => {
     expect(wrapper.text()).toContain('VOICE_V4.NO_ACTIVE_CALL');
     expect(wrapper.text()).not.toContain('03:27');
     expect(wrapper.find('[data-active-voice-controls]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('opens the dial pad without starting a call and swaps it for active controls', async () => {
+    const wrapper = mount(GlobalVoiceBar, options);
+    await wrapper.get('[data-voice-dialpad]').trigger('click');
+    expect(wrapper.get('[data-voice-dialer]').exists()).toBe(true);
+    state.sip.hasCall.value = true;
+    state.sip.established.value = true;
+    await flushPromises();
+    expect(wrapper.find('[data-voice-dialpad]').exists()).toBe(false);
+    expect(wrapper.get('[data-active-voice-controls]').exists()).toBe(true);
     wrapper.unmount();
   });
 

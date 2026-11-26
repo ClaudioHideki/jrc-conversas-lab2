@@ -1,21 +1,29 @@
 <script setup>
-import { reactive, ref, watch, onBeforeUnmount } from 'vue';
+import { computed, reactive, ref, watch, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { authorityScope } from 'dashboard/store/crm/authorityScope';
-import { useFormDraft } from '../../helpers/useFormDraft';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
+import ContactPicker from 'dashboard/routes/dashboard/jrcCustomers/components/ContactPicker.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
-const props = defineProps({ contact: { type: Object, default: null } });
-const emit = defineEmits(['close', 'created']);
-const { enabled: hasCustomerMaster } = useCustomerMaster();
-const companyId = ref(null);
 import { crmControlClasses } from '../../crmControlClasses';
-
+import { useFormDraft } from '../../helpers/useFormDraft';
 import { useI18n } from 'vue-i18n';
 import { leadsAPI } from 'dashboard/api/crm';
 import { useAlert } from 'dashboard/composables';
 
+const props = defineProps({
+  contact: { type: Object, default: null },
+  source: { type: String, default: '' },
+});
+const emit = defineEmits(['close', 'created']);
+const { enabled: hasCustomerMaster, canAccess: canBrowseContacts } =
+  useCustomerMaster();
+const companyId = ref(null);
+const selectedContactId = ref(null);
+const linkedContactId = computed(
+  () => props.contact?.id || selectedContactId.value
+);
 const { t } = useI18n();
 const store = useStore();
 const route = useRoute();
@@ -33,17 +41,25 @@ const saving = ref(false);
 const errorMessage = ref('');
 const contact = props.contact;
 companyId.value = contact?.company_id || contact?.companyId || null;
+const contactFields = person => ({
+  name:
+    person?.name?.trim() ||
+    person?.email ||
+    person?.phone_number ||
+    person?.phoneNumber ||
+    (person?.id ? t('CRM.LEAD_FORM.CONTACT_FALLBACK', { id: person.id }) : ''),
+  email: person?.email || '',
+  phone: person?.phoneNumber || person?.phone_number || '',
+});
 const form = reactive({
-  name: contact?.name || '',
+  ...contactFields(contact),
   company_name:
     contact?.company?.name ||
     contact?.companyName ||
     contact?.additionalAttributes?.companyName ||
     contact?.additional_attributes?.company_name ||
     '',
-  email: contact?.email || '',
-  phone: contact?.phoneNumber || contact?.phone_number || '',
-  source: '',
+  source: props.source,
   status: 'new',
   temperature: 'warm',
   notes: '',
@@ -52,16 +68,55 @@ const form = reactive({
 const activeDraft = ref(true);
 const initialForm = { ...form };
 const initialCompany = companyId.value;
+const clearPerson = () => {
+  selectedContactId.value = null;
+  Object.assign(form, contactFields(null));
+};
+const selectCompany = company => {
+  companyId.value = company?.id || null;
+  form.company_name = company?.name || '';
+  if (selectedContactId.value) clearPerson();
+};
+const selectPerson = person => {
+  errorMessage.value = '';
+  if (!person) {
+    clearPerson();
+    return;
+  }
+  selectedContactId.value = person.id;
+  Object.assign(form, contactFields(person));
+  if (!companyId.value && person.company_id) {
+    companyId.value = person.company_id;
+    form.company_name = person.company_name || '';
+  }
+};
 const draft = useFormDraft('crm:new_lead:' + (contact?.id || 'standalone'), {
   active: activeDraft,
-  snapshot: () => ({ form: { ...form }, company_id: companyId.value }),
+  snapshot: () => ({
+    form: { ...form },
+    company_id: companyId.value,
+    contact_id: selectedContactId.value,
+  }),
   restore: value => {
     Object.assign(form, value.form || {});
-    companyId.value = value.company_id || null;
+    if (contact) {
+      Object.assign(form, contactFields(contact), {
+        company_name: initialForm.company_name,
+      });
+    } else {
+      companyId.value = canBrowseContacts.value
+        ? value.company_id || null
+        : null;
+      selectedContactId.value = canBrowseContacts.value
+        ? value.contact_id || null
+        : null;
+      if (value.contact_id && !selectedContactId.value) clearPerson();
+    }
   },
   reset: () => {
     Object.assign(form, initialForm);
     companyId.value = initialCompany;
+    selectedContactId.value = null;
   },
 });
 draft.open();
@@ -95,7 +150,7 @@ const save = async () => {
       lead: {
         ...form,
         ...(hasCustomerMaster.value ? { company_id: companyId.value } : {}),
-        ...(contact ? { contact_id: contact.id } : {}),
+        ...(linkedContactId.value ? { contact_id: linkedContactId.value } : {}),
       },
     });
     if (!isCurrent() || !draft.complete(savingDraftKey)) return;
@@ -123,14 +178,13 @@ const save = async () => {
       v-if="!invalidated"
       :class="crmControlClasses"
       class="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 p-4"
-      @click.self="close"
       @keydown.esc="close"
     >
       <form
         role="dialog"
         aria-modal="true"
         aria-labelledby="lead-create-title"
-        class="max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-2xl border border-n-weak bg-n-solid-2 p-6 shadow-2xl"
+        class="max-h-[90dvh] w-full max-w-2xl space-y-4 overflow-y-auto rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-2xl sm:p-6"
         @submit.prevent="save"
       >
         <div class="flex items-center justify-between">
@@ -153,38 +207,68 @@ const save = async () => {
         >
           {{
             t('CRM.LEAD_FORM.LINKED_CONTACT', {
-              name: contact.name,
+              name: form.name,
               id: contact.id,
             })
           }}
         </p>
-        <label class="block text-sm text-n-slate-11">
-          <span class="block">{{ t('CRM.LEAD_FORM.NAME') }}</span>
-          <input
-            v-model="form.name"
-            name="name"
-            required
-            class="mt-1 w-full rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2.5 text-n-slate-12"
-          />
-        </label>
         <div class="grid gap-3 sm:grid-cols-2">
-          <CompanyPicker
-            v-if="hasCustomerMaster"
-            v-model="companyId"
-            :disabled="saving"
-            @selected="
-              value => {
-                form.company_name = value?.name || '';
-              }
-            "
-          />
+          <div
+            v-if="hasCustomerMaster && canBrowseContacts && !contact"
+            class="min-w-0 text-sm text-n-slate-11"
+          >
+            <p class="mb-1">{{ t('CRM.LEAD_FORM.COMPANY') }}</p>
+            <CompanyPicker
+              :model-value="companyId"
+              :disabled="saving"
+              @selected="selectCompany"
+            />
+          </div>
           <label v-else class="text-sm text-n-slate-11">
             <span class="block">{{ t('CRM.LEAD_FORM.COMPANY') }}</span
             ><input
               v-model="form.company_name"
               name="company_name"
+              :readonly="!!contact || !!companyId"
               class="mt-1 w-full rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2.5 text-n-slate-12"
           /></label>
+          <div
+            v-if="!contact && canBrowseContacts"
+            class="min-w-0 text-sm text-n-slate-11"
+          >
+            <p class="mb-1">
+              {{
+                t(
+                  companyId
+                    ? 'CRM.LEAD_FORM.COMPANY_CONTACT'
+                    : 'CRM.LEAD_FORM.EXISTING_CONTACT'
+                )
+              }}
+            </p>
+            <ContactPicker
+              :key="companyId ?? 'unscoped'"
+              :model-value="selectedContactId"
+              :company-id="companyId"
+              :disabled="saving"
+              browse-company
+              @selected="selectPerson"
+              @update:model-value="
+                id => {
+                  if (!id && selectedContactId) clearPerson();
+                }
+              "
+            />
+          </div>
+          <label class="text-sm text-n-slate-11">
+            <span class="block">{{ t('CRM.LEAD_FORM.NAME') }}</span>
+            <input
+              v-model="form.name"
+              name="name"
+              required
+              :readonly="!!linkedContactId"
+              class="mt-1 w-full rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2.5 text-n-slate-12 read-only:bg-n-alpha-1"
+            />
+          </label>
           <label class="text-sm text-n-slate-11">
             <span class="block">{{ t('CRM.LEAD_FORM.SOURCE') }}</span
             ><input
@@ -198,7 +282,8 @@ const save = async () => {
               v-model="form.email"
               name="email"
               type="email"
-              class="mt-1 w-full rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2.5 text-n-slate-12"
+              :readonly="!!linkedContactId"
+              class="mt-1 w-full rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2.5 text-n-slate-12 read-only:bg-n-alpha-1"
           /></label>
           <label class="text-sm text-n-slate-11">
             <span class="block">{{ t('CRM.LEAD_FORM.PHONE') }}</span
@@ -206,8 +291,9 @@ const save = async () => {
               v-model="form.phone"
               name="phone"
               type="tel"
+              :readonly="!!linkedContactId"
               :placeholder="t('CRM.LEAD_FORM.PHONE_HINT')"
-              class="mt-1 w-full rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2.5 text-n-slate-12"
+              class="mt-1 w-full rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2.5 text-n-slate-12 read-only:bg-n-alpha-1"
           /></label>
         </div>
         <label class="block text-sm text-n-slate-11">
@@ -235,7 +321,7 @@ const save = async () => {
             class="mt-1 w-full rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2.5 text-n-slate-12"
           />
         </label>
-        <p v-if="!contact" class="text-xs text-n-slate-11">
+        <p v-if="!linkedContactId" class="text-xs text-n-slate-11">
           {{ t('CRM.LEAD_FORM.IDENTITY_HINT') }}
         </p>
         <p

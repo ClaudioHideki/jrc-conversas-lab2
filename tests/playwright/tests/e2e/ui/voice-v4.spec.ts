@@ -91,11 +91,10 @@ test('discador preserva contexto e permite anotar depois da chamada', async ({
   ).toBeVisible();
   await expect(page.locator('[data-whatsapp-fixture]')).toBeVisible();
   await expect(page.locator('[data-outbound-call]')).toBeDisabled();
-  await page.locator('[data-outbound-phone]').fill('2002');
-  await expect(page.locator('[data-outbound-phone]')).toHaveCSS(
-    'color',
-    'rgb(255, 255, 255)'
-  );
+  const phone = page.locator('[data-outbound-phone]');
+  await phone.fill('2002');
+  await expect(phone).toHaveValue('2002');
+  await expect(phone).toHaveCSS('color', 'rgb(28, 32, 36)');
   await expect(page.locator('[data-outbound-call]')).toBeEnabled();
   await page.screenshot({
     path: testInfo.outputPath('nova-ligacao.png'),

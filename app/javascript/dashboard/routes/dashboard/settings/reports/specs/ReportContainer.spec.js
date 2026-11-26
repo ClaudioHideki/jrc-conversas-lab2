@@ -91,6 +91,32 @@ describe('ReportContainer.vue', () => {
     vi.clearAllMocks();
   });
 
+  it('uses different series colors without changing the values or their order', () => {
+    const data = [
+      { value: 12, timestamp: 1621103400 },
+      { value: 4, timestamp: 1621189800 },
+    ];
+    const chart = reportKey =>
+      mountComponent({ reportKey, data })
+        .getComponent({ name: 'BarChart' })
+        .props('collection').datasets[0];
+    const conversations = chart('conversations_count');
+    const outgoing = chart('outgoing_messages_count');
+    expect(conversations.data).toEqual([12, 4]);
+    expect(outgoing.data).toEqual(conversations.data);
+    expect(outgoing.backgroundColor).not.toBe(conversations.backgroundColor);
+    expect(outgoing.borderRadius).toBeGreaterThan(0);
+  });
+
+  it('labels time ticks with the seconds remaining after whole minutes', () => {
+    const chart = mountComponent({
+      reportKey: 'avg_first_response_time',
+    }).getComponent({ name: 'BarChart' });
+    expect(chart.props('chartOptions').scales.y.ticks.callback(100)).toBe(
+      '1m 40s'
+    );
+  });
+
   it('opens a drilldown request with report context when a non-zero bar is clicked', async () => {
     const wrapper = mountComponent();
 

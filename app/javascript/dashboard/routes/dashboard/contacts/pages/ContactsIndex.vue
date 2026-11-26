@@ -1,5 +1,12 @@
 <script setup>
-import { onMounted, computed, ref, reactive, watch } from 'vue';
+import {
+  onMounted,
+  onBeforeUnmount,
+  computed,
+  ref,
+  reactive,
+  watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
@@ -20,6 +27,11 @@ import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import { useCustomerMaster } from '../../jrcCustomers/useCustomerMaster';
 import ContactDetailsDialog from '../../jrcCustomers/components/ContactDetailsDialog.vue';
 import CompanyDetailsDialog from '../../jrcCustomers/components/CompanyDetailsDialog.vue';
+import ContactAPI from 'dashboard/api/contacts';
+import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
+import { isWhatsAppInbox } from 'dashboard/helper/inbox';
+import { usePolicy } from 'dashboard/composables/usePolicy';
+import { openEmbeddedSoftphone } from '../../webphone/useEmbeddedSoftphone';
 
 const DEFAULT_SORT_FIELD = 'last_activity_at';
 const DEBOUNCE_DELAY = 300;
@@ -32,6 +44,32 @@ const { canAccess: canUseCustomerMaster, identity: masterIdentity } =
   useCustomerMaster();
 const contactDialogId = ref(null);
 const companyDialogId = ref(null);
+const contactToDelete = ref(null);
+const singleDeleteDialog = ref(null);
+const whatsappComposer = ref(null);
+const openingWhatsapp = ref(null);
+onBeforeUnmount(() => {
+  openingWhatsapp.value = null;
+});
+const { checkPermissions } = usePolicy();
+const accountId = computed(() => Number(route.params.accountId));
+const canDeleteContact = computed(() =>
+  store.getters.getCurrentUser?.accounts?.some(
+    account =>
+      Number(account.id) === accountId.value && account.role === 'administrator'
+  )
+);
+const canConverse = computed(() =>
+  checkPermissions([
+    'administrator',
+    'conversation_manage',
+    'conversation_unassigned_manage',
+    'conversation_participating_manage',
+  ])
+);
+const canUseSoftphone = computed(() =>
+  checkPermissions(['administrator', 'agent', 'custom_role'])
+);
 
 const { updateUISettings, uiSettings } = useUISettings();
 
@@ -95,6 +133,9 @@ watch([masterIdentity, canUseCustomerMaster], () => {
   companyDialogId.value = null;
   selectedContactIds.value = [];
   bulkDeleteDialogRef.value?.close?.();
+  contactToDelete.value = null;
+  singleDeleteDialog.value?.close?.();
+  openingWhatsapp.value = null;
 });
 const crmSelectedContact = ref();
 const contactHeaderRef = ref(null);
@@ -144,8 +185,18 @@ const selectedRelationshipContact = computed(() =>
     : crmSelectedContact.value
 );
 
-const contactPhone = contact =>
-  contact?.phoneNumber || contact?.phone_number || '—';
+const contactNumber = contact =>
+  String(contact?.phoneNumber || contact?.phone_number || '');
+const contactPhone = contact => contactNumber(contact) || '—';
+const dialableContactNumber = contact => {
+  const phone = contactNumber(contact).trim();
+  return /^\+?[\d\s().-]{2,30}$/.test(phone) &&
+    phone.replace(/\D/g, '').length >= 2
+    ? phone
+    : '';
+};
+const canCallContact = contact =>
+  canUseSoftphone.value && !!dialableContactNumber(contact);
 const contactCompany = contact =>
   contact?.company?.name ||
   contact?.companyName ||
@@ -190,12 +241,63 @@ const openSelectedContact = async contact => {
   });
 };
 
-const openWhatsappCalling = async contact => {
-  if (contact) crmSelectedContact.value = contact;
-  await router.push({
-    name: 'whatsapp_calling_index',
-    params: { accountId: route.params.accountId },
-  });
+const openContactWhatsapp = async contact => {
+  if (!contact?.id || !canConverse.value || openingWhatsapp.value) return;
+  const selectedAccount = accountId.value;
+  const selectedAuthority = masterIdentity.value;
+  const request = Symbol('contact-whatsapp');
+  openingWhatsapp.value = request;
+  const isCurrent = () =>
+    openingWhatsapp.value === request &&
+    selectedAuthority === masterIdentity.value &&
+    canConverse.value;
+  try {
+    const { data } = await ContactAPI.getConversations(contact.id);
+    if (!isCurrent()) return;
+    const conversation = data.payload.find(item => {
+      const inbox = store.getters['inboxes/getInboxById']?.(item.inbox_id);
+      return (
+        Number(item.account_id) === selectedAccount &&
+        (isWhatsAppInbox(inbox) ||
+          isWhatsAppInbox({ channel_type: item.meta?.channel }))
+      );
+    });
+    if (conversation) {
+      await router.push({
+        name: 'inbox_view_conversation',
+        params: {
+          accountId: selectedAccount,
+          type: 'conversation',
+          id: conversation.id,
+        },
+      });
+    } else if (dialableContactNumber(contact)) {
+      await whatsappComposer.value?.openForContact(contact);
+    } else {
+      useAlert(t('CRM.CONTACT_LEAD.WHATSAPP_NOT_FOUND'));
+    }
+  } catch {
+    if (isCurrent()) useAlert(t('CRM.CONTACT_LEAD.WHATSAPP_FAILED'));
+  } finally {
+    if (openingWhatsapp.value === request) openingWhatsapp.value = null;
+  }
+};
+const callContact = contact => {
+  if (!canCallContact(contact)) return;
+  const phone = dialableContactNumber(contact);
+  if (!openEmbeddedSoftphone(accountId.value, phone)) {
+    router.push({
+      name: 'ramal_index',
+      params: { accountId: accountId.value },
+      query: { phone },
+    });
+  }
+};
+const openContactDelete = contact => {
+  if (!canDeleteContact.value || !contact?.id || isBulkActionLoading.value)
+    return;
+  contactToDelete.value = contact;
+  singleDeleteDialog.value?.open();
 };
 const bulkDeleteDialogTitle = computed(() =>
   selectedCount.value > 1
@@ -540,6 +642,38 @@ const deleteContacts = async () => {
     bulkDeleteDialogRef.value?.close?.();
   } catch (error) {
     useAlert(t('CONTACTS_BULK_ACTIONS.DELETE_FAILED'));
+  } finally {
+    isBulkActionLoading.value = false;
+  }
+};
+
+const deleteContact = async () => {
+  const contact = contactToDelete.value;
+  if (!canDeleteContact.value || !contact || isBulkActionLoading.value) return;
+  const authority = masterIdentity.value;
+  isBulkActionLoading.value = true;
+  try {
+    await store.dispatch('contacts/delete', contact.id);
+    if (authority !== masterIdentity.value) return;
+    selectedContactIds.value = selectedContactIds.value.filter(
+      id => id !== contact.id
+    );
+    if (selectedRelationshipContact.value?.id === contact.id)
+      crmSelectedContact.value = null;
+    if (contactDialogId.value === contact.id) contactDialogId.value = null;
+    singleDeleteDialog.value?.close();
+    contactToDelete.value = null;
+    useAlert(t('CONTACTS_LAYOUT.DETAILS.DELETE_DIALOG.API.SUCCESS_MESSAGE'));
+    await fetchContactsBasedOnContext(pageNumber.value, {
+      clearSelection: false,
+    });
+  } catch (error) {
+    if (authority === masterIdentity.value) {
+      useAlert(
+        error.message ||
+          t('CONTACTS_LAYOUT.DETAILS.DELETE_DIALOG.API.ERROR_MESSAGE')
+      );
+    }
   } finally {
     isBulkActionLoading.value = false;
   }
@@ -944,28 +1078,44 @@ onMounted(async () => {
                   <div class="flex gap-1">
                     <button
                       type="button"
-                      disabled
-                      :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
-                      :aria-label="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
-                      class="flex size-8 items-center justify-center rounded-lg bg-n-slate-3 text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
+                      :disabled="!canConverse || !!openingWhatsapp"
+                      :title="t('CRM.CONTACT_LEAD.OPEN_WHATSAPP')"
+                      :aria-label="t('CRM.CONTACT_LEAD.OPEN_WHATSAPP')"
+                      class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-teal-3 text-n-teal-11 hover:bg-n-teal-4 disabled:opacity-50"
+                      data-contact-whatsapp
+                      @click="openContactWhatsapp(contact)"
                     >
                       <span class="i-ri-whatsapp-fill size-4" /></button
                     ><button
                       type="button"
-                      class="flex size-8 items-center justify-center rounded-lg bg-n-brand text-white"
-                      :title="t('CRM.CONTACT_LEAD.CALLING_CENTER')"
-                      :aria-label="t('CRM.CONTACT_LEAD.CALLING_CENTER')"
-                      @click="openWhatsappCalling(contact)"
+                      class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-blue-3 text-n-blue-11 hover:bg-n-blue-4 disabled:opacity-50"
+                      :title="t('CRM.CONTACT_LEAD.CALL_SOFTPHONE')"
+                      :aria-label="t('CRM.CONTACT_LEAD.CALL_SOFTPHONE')"
+                      :disabled="!canCallContact(contact)"
+                      data-contact-call
+                      @click="callContact(contact)"
                     >
                       <span class="i-lucide-phone size-4" /></button
                     ><button
                       type="button"
-                      class="flex size-8 items-center justify-center rounded-lg bg-n-violet-9 text-white"
+                      class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-violet-3 text-n-violet-11 hover:bg-n-violet-4"
                       :title="t('CRM.CONTACT_LEAD.VIEW_PROFILE')"
                       :aria-label="t('CRM.CONTACT_LEAD.VIEW_PROFILE')"
                       @click="openSelectedContact(contact)"
                     >
                       <span class="i-lucide-user-round size-4" />
+                    </button>
+                    <button
+                      v-if="canDeleteContact"
+                      type="button"
+                      class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-ruby-3 text-n-ruby-11 hover:bg-n-ruby-4 disabled:opacity-50"
+                      :disabled="isBulkActionLoading"
+                      :title="t('CRM.CONTACT_LEAD.DELETE_CONTACT')"
+                      :aria-label="t('CRM.CONTACT_LEAD.DELETE_CONTACT')"
+                      data-contact-delete
+                      @click="openContactDelete(contact)"
+                    >
+                      <span class="i-lucide-trash-2 size-4" />
                     </button>
                   </div>
                 </td>
@@ -1056,20 +1206,25 @@ onMounted(async () => {
           </div>
           <div class="mt-4 grid grid-cols-4 gap-2">
             <button
-              disabled
-              :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
-              class="rounded-lg bg-n-slate-3 px-2 py-2 text-xs font-semibold text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
+              type="button"
+              :disabled="!canConverse || !!openingWhatsapp"
+              :title="t('CRM.CONTACT_LEAD.OPEN_WHATSAPP')"
+              class="rounded-lg bg-n-teal-3 px-2 py-2 text-xs font-semibold text-n-teal-11 hover:bg-n-teal-4 disabled:opacity-50"
+              @click="openContactWhatsapp(selectedRelationshipContact)"
             >
               <span
                 class="i-ri-whatsapp-fill me-1 inline-block size-4 align-text-bottom"
               />{{ t('CRM.CONTACT_LEAD.UI.WHATSAPP') }}</button
             ><button
-              class="rounded-lg bg-n-brand px-2 py-2 text-xs font-semibold text-white"
-              @click="openWhatsappCalling(selectedRelationshipContact)"
+              type="button"
+              class="rounded-lg bg-n-blue-3 px-2 py-2 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-4 disabled:opacity-50"
+              :disabled="!canCallContact(selectedRelationshipContact)"
+              :title="t('CRM.CONTACT_LEAD.CALL_SOFTPHONE')"
+              @click="callContact(selectedRelationshipContact)"
             >
               <span
                 class="i-lucide-phone me-1 inline-block size-4 align-text-bottom"
-              />{{ t('CRM.CONTACT_LEAD.CALLING_CENTER') }}</button
+              />{{ t('VOICE_V4.CALL') }}</button
             ><button
               disabled
               :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
@@ -1194,6 +1349,29 @@ onMounted(async () => {
       :is-loading="isBulkActionLoading"
       :disable-confirm-button="!hasSelection"
       @confirm="deleteContacts"
+    />
+    <Dialog
+      ref="singleDeleteDialog"
+      type="alert"
+      data-single-contact-delete
+      :title="t('CRM.CONTACT_LEAD.DELETE_CONTACT')"
+      :description="
+        t('CRM.CONTACT_LEAD.DELETE_CONTACT_CONFIRM', {
+          name: contactToDelete?.name || contactToDelete?.id,
+        })
+      "
+      :confirm-button-label="t('CONTACTS_LAYOUT.DETAILS.DELETE_DIALOG.CONFIRM')"
+      :is-loading="isBulkActionLoading"
+      :disable-confirm-button="!canDeleteContact || !contactToDelete"
+      @confirm="deleteContact"
+      @close="contactToDelete = null"
+    />
+    <ComposeConversation
+      v-if="canConverse"
+      :key="masterIdentity"
+      ref="whatsappComposer"
+      :inbox-filter="isWhatsAppInbox"
+      native-dialog
     />
     <ContactDetailsDialog
       v-if="contactDialogId && canUseCustomerMaster"

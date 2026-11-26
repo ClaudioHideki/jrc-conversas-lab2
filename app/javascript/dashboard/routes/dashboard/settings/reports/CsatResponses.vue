@@ -115,7 +115,11 @@ export default {
 </script>
 
 <template>
-  <ReportHeader :header-title="$t('CSAT_REPORTS.HEADER')">
+  <ReportHeader
+    accent="teal"
+    icon="i-lucide-smile"
+    :header-title="$t('CSAT_REPORTS.HEADER')"
+  >
     <V4Button
       :label="$t('CSAT_REPORTS.DOWNLOAD')"
       icon="i-ph-download-simple"

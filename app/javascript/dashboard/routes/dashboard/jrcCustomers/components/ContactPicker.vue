@@ -11,6 +11,7 @@ const props = defineProps({
   modelValue: { type: [Number, String], default: null },
   companyId: { type: [Number, String], default: null },
   disabled: { type: Boolean, default: false },
+  browseCompany: { type: Boolean, default: false },
 });
 const emit = defineEmits(['update:modelValue', 'selected']);
 const { t } = useI18n();
@@ -21,24 +22,39 @@ const selected = ref(null);
 const results = ref([]);
 const error = ref('');
 const busy = ref(false);
+const searched = ref(false);
+const total = ref(0);
+const pageSize = 15;
 let timer;
 let generation = 0;
 let selectedGeneration = 0;
-const search = async () => {
+const search = async (append = false) => {
   if (props.disabled || (enabled.value && !canAccess.value)) return;
+  if (props.browseCompany && !props.companyId && query.value.trim().length < 2)
+    return;
   generation += 1;
   const version = generation;
+  const page = append ? Math.floor(results.value.length / pageSize) + 1 : 1;
   busy.value = true;
   error.value = '';
   try {
     const { data } = enabled.value
-      ? await API.contacts({
-          q: query.value,
-          company_id: props.companyId || undefined,
-          per_page: 15,
-        })
+      ? await API.contacts(
+          {
+            q: query.value.trim(),
+            company_id: props.companyId || undefined,
+            per_page: pageSize,
+            page,
+          },
+          { accountId: accountId.value }
+        )
       : await ContactsAPI.search(query.value, 1);
-    if (version === generation) results.value = data.payload || [];
+    if (version === generation) {
+      const matches = data.payload || [];
+      results.value = append ? [...results.value, ...matches] : matches;
+      total.value = data.meta?.total || results.value.length;
+      searched.value = true;
+    }
   } catch (err) {
     if (version === generation) error.value = errorMessage(err);
   } finally {
@@ -50,14 +66,22 @@ const choose = contact => {
   query.value = '';
   results.value = [];
   generation += 1;
+  busy.value = false;
   emit('update:modelValue', contact?.id || null);
   emit('selected', contact);
 };
 watch(query, () => {
   clearTimeout(timer);
   generation += 1;
-  if (query.value.trim().length >= 2) timer = setTimeout(search, 300);
-  else results.value = [];
+  results.value = [];
+  searched.value = false;
+  busy.value = false;
+  if (
+    query.value.trim().length >= 2 ||
+    (props.browseCompany && props.companyId && !selected.value)
+  ) {
+    timer = setTimeout(() => search(), 300);
+  }
 });
 watch(
   [
@@ -66,6 +90,7 @@ watch(
     () => store.getters.getCurrentUser?.id,
     () => props.modelValue,
     () => props.companyId,
+    enabled,
   ],
   async () => {
     selectedGeneration += 1;
@@ -76,10 +101,19 @@ watch(
     query.value = '';
     selected.value = null;
     error.value = '';
-    if (!props.modelValue || (enabled.value && !canAccess.value)) return;
+    searched.value = false;
+    busy.value = false;
+    total.value = 0;
+    if (enabled.value && !canAccess.value) return;
+    if (!props.modelValue) {
+      if (props.browseCompany && props.companyId) {
+        await search();
+      }
+      return;
+    }
     try {
       const { data } = enabled.value
-        ? await API.contact(props.modelValue)
+        ? await API.contact(props.modelValue, { accountId: accountId.value })
         : await ContactsAPI.show(props.modelValue);
       if (version !== selectedGeneration) return;
       const contact = data.payload || data;
@@ -92,7 +126,12 @@ watch(
       }
       selected.value = contact;
     } catch (err) {
-      if (version === selectedGeneration) error.value = errorMessage(err);
+      if (version !== selectedGeneration) return;
+      if (props.browseCompany && [403, 404].includes(err.response?.status)) {
+        emit('update:modelValue', null);
+      } else {
+        error.value = errorMessage(err);
+      }
     }
   },
   { immediate: true }
@@ -124,14 +163,15 @@ onBeforeUnmount(() => {
       </button>
     </div>
     <input
+      v-if="!selected || !browseCompany"
       v-model="query"
       type="search"
       :class="inputClass"
       :disabled="disabled || (enabled && !canAccess)"
       :aria-label="t('CRM.CREATION.CONTACT_SEARCH')"
       :placeholder="t('CRM.CREATION.CONTACT_SEARCH')"
-      @focus="search"
-      @keydown.enter.prevent="search"
+      @focus="search()"
+      @keydown.enter.prevent="search()"
     />
     <p
       v-if="busy"
@@ -164,6 +204,22 @@ onBeforeUnmount(() => {
           contact.email || contact.phone_number
         }}</span>
       </button>
+      <button
+        v-if="browseCompany && enabled && results.length < total"
+        type="button"
+        :class="buttonClass"
+        :disabled="busy || disabled"
+        @click="search(true)"
+      >
+        {{ t('CRM.LEAD_FORM.MORE_CONTACTS') }}
+      </button>
     </div>
+    <p
+      v-else-if="browseCompany && searched && !busy && !error"
+      role="status"
+      class="mt-1 text-xs text-n-slate-11"
+    >
+      {{ t('CRM.LEAD_FORM.NO_CONTACTS') }}
+    </p>
   </div>
 </template>

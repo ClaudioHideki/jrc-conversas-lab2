@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useAlert } from 'dashboard/composables';
 import { useQuickActionContext } from './useQuickActionAccess';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
@@ -142,13 +143,20 @@ const qualificationPending = computed(
     Boolean(voiceShellState.value?.agent?.pending_qualifications?.length)
 );
 const openOutbound = number => {
-  if (
-    !allowed.value ||
-    !sameAccount.value ||
-    sip.hasCall.value ||
-    qualificationPending.value
-  )
+  if (!allowed.value || !sameAccount.value) {
+    useAlert(t('VOICE_V4.DIAL_RESTRICTED'));
     return;
+  }
+  if (sip.hasCall.value || qualificationPending.value) {
+    useAlert(
+      t(
+        sip.hasCall.value
+          ? 'VOICE_V4.CALL_ALREADY_ACTIVE'
+          : 'SOFTPHONE.INBOX.QUALIFICATION_PENDING'
+      )
+    );
+    return;
+  }
   initialPhone.value = typeof number === 'string' ? number : '';
   outboundOpen.value = true;
 };
@@ -218,9 +226,10 @@ const openAttendance = () => {
         />
       </div>
       <span
-        class="i-lucide-phone size-5 shrink-0 text-n-teal-10"
-        aria-hidden="true"
-      />
+        class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-teal-3 text-n-teal-11"
+      >
+        <span class="i-lucide-phone size-4" aria-hidden="true" />
+      </span>
       <div class="min-w-0 flex-1 text-xs sm:flex-none sm:max-w-72">
         <div
           class="flex flex-wrap items-center gap-2 font-semibold"
@@ -262,13 +271,15 @@ const openAttendance = () => {
       <button
         v-if="!active"
         type="button"
-        class="ml-auto min-h-10 rounded-lg border border-n-strong px-4 text-xs font-semibold text-n-brand focus-visible:ring-2 focus-visible:ring-n-brand disabled:opacity-40"
-        :disabled="
-          !sameAccount || !sip.registered.value || qualificationPending
-        "
+        data-voice-dialpad
+        :title="t('VOICE_V4.NEW_CALL')"
+        :aria-label="t('VOICE_V4.NEW_CALL')"
+        class="ml-auto inline-flex min-h-9 items-center gap-2 rounded-lg border border-n-blue-6 bg-n-blue-3 px-3 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-4 focus-visible:ring-2 focus-visible:ring-n-brand disabled:opacity-40"
+        :disabled="!sameAccount || qualificationPending"
         @click="openOutbound()"
       >
-        {{ t('VOICE_V4.NEW_CALL') }}
+        <span class="i-lucide-grid-3x3 size-4" aria-hidden="true" />
+        {{ t('SOFTPHONE.CENTRAL.KEYPAD') }}
       </button>
       <InboxVoicePanel
         v-if="active"

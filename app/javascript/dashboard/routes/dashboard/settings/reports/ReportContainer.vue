@@ -108,31 +108,48 @@ export default {
       const themes = {
         conversations_count: {
           icon: 'i-lucide-messages-square',
-          tone: 'bg-n-blue-3 text-n-blue-11',
+          tone: 'bg-n-blue-3 text-n-blue-11 ring-n-blue-5',
+          color: '#3277e7',
         },
         incoming_messages_count: {
           icon: 'i-lucide-inbox',
-          tone: 'bg-n-cyan-3 text-n-cyan-11',
+          tone: 'bg-sky-100 text-sky-800 ring-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:ring-sky-800',
+          color: '#0891b2',
         },
         outgoing_messages_count: {
           icon: 'i-lucide-send',
-          tone: 'bg-n-teal-3 text-n-teal-11',
+          tone: 'bg-n-teal-3 text-n-teal-11 ring-n-teal-5',
+          color: '#0d9488',
         },
         avg_first_response_time: {
           icon: 'i-lucide-zap',
-          tone: 'bg-n-amber-3 text-n-amber-11',
+          tone: 'bg-n-amber-3 text-n-amber-11 ring-n-amber-5',
+          color: '#d97706',
         },
         avg_resolution_time: {
           icon: 'i-lucide-circle-check-big',
-          tone: 'bg-n-violet-3 text-n-violet-11',
+          tone: 'bg-n-violet-3 text-n-violet-11 ring-n-violet-5',
+          color: '#8457d9',
         },
         resolutions_count: {
           icon: 'i-lucide-check-check',
-          tone: 'bg-n-teal-3 text-n-teal-11',
+          tone: 'bg-emerald-100 text-emerald-800 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:ring-emerald-800',
+          color: '#218c67',
         },
         reply_time: {
           icon: 'i-lucide-hourglass',
-          tone: 'bg-n-slate-3 text-n-slate-11',
+          tone: 'bg-n-ruby-3 text-n-ruby-11 ring-n-ruby-5',
+          color: '#d44b72',
+        },
+        bot_resolutions_count: {
+          icon: 'i-lucide-bot',
+          tone: 'bg-n-violet-3 text-n-violet-11 ring-n-violet-5',
+          color: '#8457d9',
+        },
+        bot_handoffs_count: {
+          icon: 'i-lucide-headset',
+          tone: 'bg-n-amber-3 text-n-amber-11 ring-n-amber-5',
+          color: '#d97706',
         },
       };
       return themes[key] || themes.conversations_count;
@@ -163,10 +180,15 @@ export default {
         return format(fromUnixTime(element.timestamp), 'dd-MMM');
       });
       const datasets = METRIC_CHART[metric.KEY].datasets.map(dataset => {
+        const { color } = this.metricTheme(metric.KEY);
         switch (dataset.type) {
           case 'bar':
             return {
               ...dataset,
+              backgroundColor: color,
+              hoverBackgroundColor: `${color}cc`,
+              borderRadius: 7,
+              maxBarThickness: 40,
               yAxisID: 'y',
               label: metric.NAME,
               data: data.map(element => element.value),
@@ -190,6 +212,8 @@ export default {
     getChartOptions(metric) {
       const options = {
         scales: METRIC_CHART[metric.KEY].scales,
+        layout: { padding: { top: 8, right: 8 } },
+        interaction: { mode: 'nearest', intersect: true },
       };
 
       // Only add tooltip configuration for time-based metrics
@@ -296,11 +320,11 @@ export default {
     <article
       v-for="metric in metrics"
       :key="metric.KEY"
-      class="rounded-2xl border border-n-weak bg-n-solid-1 p-4 shadow-sm transition hover:border-n-blue-5 hover:shadow-md"
+      class="rounded-2xl border border-n-weak bg-n-solid-1 p-4 shadow-sm"
     >
       <div class="flex items-center gap-3">
         <span
-          class="grid size-11 shrink-0 place-items-center rounded-xl"
+          class="grid size-11 shrink-0 place-items-center rounded-xl ring-1 ring-inset"
           :class="metricTheme(metric.KEY).tone"
         >
           <span class="size-5" :class="metricTheme(metric.KEY).icon" />
@@ -319,18 +343,20 @@ export default {
     <article
       v-for="metric in metrics"
       :key="`${metric.KEY}-chart`"
-      class="rounded-2xl border border-n-weak bg-n-solid-1 p-5 shadow-sm transition hover:border-n-blue-5 hover:shadow-md"
+      class="min-w-0 overflow-hidden rounded-2xl border border-n-weak bg-n-solid-1 shadow-sm"
     >
-      <header class="flex items-start justify-between gap-3">
+      <header
+        class="flex items-start justify-between gap-3 border-b border-n-weak px-4 py-3 sm:px-5"
+      >
         <div class="flex min-w-0 items-start gap-3">
           <span
-            class="grid size-10 shrink-0 place-items-center rounded-xl"
+            class="grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-inset"
             :class="metricTheme(metric.KEY).tone"
           >
             <span class="size-5" :class="metricTheme(metric.KEY).icon" />
           </span>
           <div class="min-w-0">
-            <h3 class="truncate text-base font-semibold text-n-slate-12">
+            <h3 class="break-words text-base font-semibold text-n-slate-12">
               {{ metric.NAME }}
             </h3>
             <p v-if="metric.DESC" class="mt-1 text-xs text-n-slate-10">
@@ -344,7 +370,7 @@ export default {
           class="i-lucide-info size-4 shrink-0 text-n-slate-9"
         />
       </header>
-      <div class="mt-5 h-72 rounded-xl bg-n-alpha-1 p-3">
+      <div class="h-64 px-3 pb-3 pt-2 sm:h-72 sm:px-5">
         <woot-loading-state
           v-if="accountReport.isFetching[metric.KEY]"
           class="text-xs"
@@ -353,6 +379,7 @@ export default {
         <div v-else class="flex h-full items-center justify-center">
           <BarChart
             v-if="accountReport.data[metric.KEY].length"
+            :aria-label="metric.NAME"
             :collection="getCollection(metric)"
             :chart-options="getChartOptions(metric)"
             :clickable="isDrilldownEnabled()"
