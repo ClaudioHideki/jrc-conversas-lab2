@@ -1,0 +1,22 @@
+{
+  "parent": "a1336473b9684641cbde39e6f193ac0f8a48ada5",
+  "failed_run": 45901423560,
+  "failed_job": 140187849265,
+  "cause": "The workflow already required all 70 cases and the exact six-file dictionary but retained an obsolete five-suite length assertion.",
+  "workflow_path": ".github/workflows/call-center-administration.yml",
+  "before_sha256": "9afabd5dbc8762b31d690e8ebc604dbb4a1e48d4ea6b60372704d5b244dd3bb5",
+  "after_sha256": "257ef09f04d821b6cce599e9e8e9110d47e86b7a19dc3585bc2828eba27f9057",
+  "single_changed_byte": true,
+  "actual_report_sha256": "3a8502d3adf24aa5096138d8a92d0be2a90b577c13f73a10b20bf7b7998d7cb6",
+  "actual_native_Vue": {
+    "passed": 70,
+    "failures": 0,
+    "pending": 0,
+    "suites": 6
+  },
+  "old_failure_reproduced": true,
+  "corrected_validator_accepts_actual_report": true,
+  "missing_suite_pending_failed_skipped_and_unknown_suite_rejected": 5,
+  "no_test_or_required_source_omitted": true,
+  "native_or_Chrome_group_acceptance": false
+}

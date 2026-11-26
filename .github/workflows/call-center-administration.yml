@@ -150,7 +150,7 @@ jobs:
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
           assert report['numTotalTests'] == report['numPassedTests'] == 70
           assert report['numFailedTests'] == report['numPendingTests'] == 0
-          assert len(report['testResults']) == 5 and all(row['status'] == 'passed' for row in report['testResults'])
+          assert len(report['testResults']) == 6 and all(row['status'] == 'passed' for row in report['testResults'])
           expected = {'useScopedRecordings.spec.js': 22, 'ScopedNativeRecordingPlayer.spec.js': 8, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 4, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13}
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
