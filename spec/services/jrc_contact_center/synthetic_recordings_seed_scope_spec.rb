@@ -9,7 +9,7 @@ RSpec.describe JrcContactCenter::SyntheticRecordingsSeed do
     before = [Account.count, JrcContactCenter::CallSession.count, SipCredential.count, TelephonyIntegration.count]
     with_modified_env(GITHUB_ACTIONS: 'false', RUNNER_ENVIRONMENT: 'github-hosted') do
       expect do
-        JrcContactCenter::SyntheticRecordingsSeed.call(account: nil, operator: nil, viewer: nil, queues: [])
+        described_class.call(account: nil, operator: nil, viewer: nil, queues: [])
       end.to raise_error(RuntimeError, 'Owned synthetic recording scope required')
     end
     expect([Account.count, JrcContactCenter::CallSession.count, SipCredential.count, TelephonyIntegration.count]).to eq(before)

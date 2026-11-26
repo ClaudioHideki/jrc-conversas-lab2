@@ -34,10 +34,11 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
                                 caller: '551100000001', callee: '1410', has_recording: true,
                                 recording_reference: '/var/spool/asterisk/monitor/8/synthetic-test.wav')
   end
+  let(:audio) { "RIFF#{[36].pack('V')}WAVEfmt #{[16, 1, 1, 8_000, 16_000, 2, 16].pack('VvvVVvv')}data#{[0].pack('V')}".b }
+
   def path
     "/api/v1/accounts/#{account.id}/jrc_contact_center/recordings"
   end
-  let(:audio) { "RIFF#{[36].pack('V')}WAVEfmt #{[16, 1, 1, 8_000, 16_000, 2, 16].pack('VvvVVvv')}data#{[0].pack('V')}".b }
 
   before do
     account.enable_features!('jrc_contact_center', 'custom_roles', 'audit_logs')
@@ -58,7 +59,7 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
     expect(response).to have_http_status(:ok)
     body = response.parsed_body
     expect(body.fetch('items').sole).to include('id' => record.id.to_s, 'call_session_id' => source_call.id.to_s,
-                                      'unit_id' => unit.id.to_s, 'queue_id' => queue.id.to_s)
+                                                'unit_id' => unit.id.to_s, 'queue_id' => queue.id.to_s)
     expect(body.fetch('meta')).to include('page' => 1, 'per_page' => 20, 'total' => 1)
     expect(response.headers['Cache-Control']).to include('private', 'no-store')
     expect(response.body).not_to match(/recording_reference|synthetic-password|synthetic-user|service_url|metadata/)

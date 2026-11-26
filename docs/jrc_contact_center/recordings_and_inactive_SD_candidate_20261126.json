@@ -124,6 +124,24 @@
         "spec/integration/jrc_contact_center/owned_recording_media.rb": "d5c924241edb545ab9e2080ba956514c48688c236502c5390723c670f2c36d3e",
         "spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb": "0026cd7cef697b43a7b30d12d082b37ab56a239cc7ab25b50b8529c103d8b687"
       }
+    },
+    {
+      "name": "exact_recordings_final_spec_organization_and_class_path_rename",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "cbd47a328c7ffa0d1b0e57e019e3a7046cb4de4777c4aaab361df94f15298bbe",
+        "spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb": "f32d190b6aa756d907bd1b4c88f5df1553b16df2dc8954e878ce2384cae332e4",
+        ".github/workflows/call-center-administration.yml": "6da3b7c93151d6b63f8a5523948166c66a658a8c5c8eb8b4145c5a2eeb224366"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "b8bc4771bf709dcdf12ae1ef49b7d8e3523895f8c72ed81e9d77fa23c1f5983a",
+        "spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb": "598075b9cc475ffec65105246924def24a2b6392d87a7fd67076c4056e19ed98",
+        ".github/workflows/call-center-administration.yml": "ef363a6e959e0f1283298768f6597a947640cdcc870b3746eeb142fbb4f7b89e"
+      },
+      "spec_rename": {
+        "old": "spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb",
+        "new": "spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb",
+        "old_sha256": "598075b9cc475ffec65105246924def24a2b6392d87a7fd67076c4056e19ed98"
+      }
     }
   ]
 }
