@@ -105,6 +105,25 @@
         "config/routes/jrc_contact_center.rb": "514c77d484cb415a9c69596816fb9db20503a8effd25f2c7bf8acf9e1c8321dc",
         ".github/workflows/call-center-administration.yml": "90ece7971810abd3291e123fa0c43e9349436ae8dfa3db223da05a69fdec5290"
       }
+    },
+    {
+      "name": "exact_recordings_focused_native_lint_and_validated_fixture_updates",
+      "source_sha256": {
+        "app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb": "c400be3093a9585158a5d9f7901b51d89dbf9131adda3e1429349f52fb70e856",
+        "app/services/jrc_contact_center/recorded_calls.rb": "7fa5ae7a47bb3aa972da3bff7cbe146bb0724f05957835bf0cc7989352fc857d",
+        "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "b8bc4771bf709dcdf12ae1ef49b7d8e3523895f8c72ed81e9d77fa23c1f5983a",
+        "script/jrc_call_center_recordings_seed.rb": "f58bd3c56130156711d7c79093572c4d05c33e8fb281c10fdab5ede3049d8a33",
+        "spec/integration/jrc_contact_center/owned_recording_media.rb": "980c2e9e834b0f42cc415067b035f2bda62594dc04c5f833066531e5b735340e",
+        "spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb": "598075b9cc475ffec65105246924def24a2b6392d87a7fd67076c4056e19ed98"
+      },
+      "parent_sources": {
+        "app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb": "a20132101dd7f6bfe1bcac0b965fdd8b31643ea4ac500a1df8c0c454c5eac40b",
+        "app/services/jrc_contact_center/recorded_calls.rb": "e99d4524a23c754ebd30e50aed62c846561eaaa14025f4e7acc3de87d34c0da3",
+        "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "01359baa5d6969f4f7fefbef37c668e8172f9dd23ac25cf26dedc7231a73137e",
+        "script/jrc_call_center_recordings_seed.rb": "764d670499ab9b47dd32a824c622b0937ea61559c90b6b2cc721c222161edbd4",
+        "spec/integration/jrc_contact_center/owned_recording_media.rb": "d5c924241edb545ab9e2080ba956514c48688c236502c5390723c670f2c36d3e",
+        "spec/services/jrc_contact_center/synthetic_recordings_scope_spec.rb": "0026cd7cef697b43a7b30d12d082b37ab56a239cc7ab25b50b8529c103d8b687"
+      }
     }
   ]
 }

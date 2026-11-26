@@ -44,12 +44,15 @@ class JrcContactCenter::SyntheticRecordingsSeed
 
   def owned_environment!
     config = ApplicationRecord.connection_db_config
-    owned = Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
-            ENV['GITHUB_REF_NAME'] == 'codex/call-center-control-desk-20261116' &&
-            config.database == 'jrc_sd_bc_portal_concurrency_20261025_test' && config.configuration_hash[:host] == '127.0.0.1' &&
-            ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15' && @account.name.start_with?('SYNTHETIC pause ')
-    owned &&= @account.name.end_with?('-recordings') && ENV.fetch('GITHUB_SHA').match?(/\A[0-9a-f]{40}\z/)
-    raise 'Owned synthetic recording scope required' unless owned
+    runtime = [Rails.env.test?, ENV['GITHUB_ACTIONS'] == 'true', ENV['RUNNER_ENVIRONMENT'] == 'github-hosted',
+               ENV['GITHUB_REF_NAME'] == 'codex/call-center-control-desk-20261116',
+               config.database == 'jrc_sd_bc_portal_concurrency_20261025_test', config.configuration_hash[:host] == '127.0.0.1',
+               ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15', ENV.fetch('GITHUB_SHA', '').match?(/\A[0-9a-f]{40}\z/)].all?
+    raise 'Owned synthetic recording scope required' unless runtime && owned_account?
+  end
+
+  def owned_account?
+    @account&.name&.start_with?('SYNTHETIC pause ') && @account.name.end_with?('-recordings')
   end
 
   def configure_roles
@@ -76,19 +79,19 @@ class JrcContactCenter::SyntheticRecordingsSeed
     key = "synthetic-recording-#{@nonce}-#{kind}"
     first = 2.minutes.ago
     call = JrcContactCenter::CallSession.create!(account: @account, provider: provider, external_session_id: key, correlation_id: key,
-                                                current_unit: queue.unit, current_queue: queue, direction: 'inbound', status: 'ended',
-                                                started_at: first, answered_at: first + 1.second, ended_at: first + 61.seconds)
+                                                 current_unit: queue.unit, current_queue: queue, direction: 'inbound', status: 'ended',
+                                                 started_at: first, answered_at: first + 1.second, ended_at: first + 61.seconds)
     create_participant_legs(call, queue)
     TelephonyCallRecord.create!(account: @account, provider: Pabx::Settings::PROVIDER, external_tenant: tenant, extension: '1410',
-                               external_unique_id: key, started_at: first, synced_at: Time.current, direction: 'inbound', status: 'answered',
-                               caller: '551100000001', callee: '1410', duration_seconds: 61, answered_seconds: 60,
-                               has_recording: true, recording_reference: "/var/spool/asterisk/monitor/#{tenant}/synthetic-#{@nonce}.wav")
+                                external_unique_id: key, started_at: first, synced_at: Time.current, direction: 'inbound', status: 'answered',
+                                caller: '551100000001', callee: '1410', duration_seconds: 61, answered_seconds: 60,
+                                has_recording: true, recording_reference: "/var/spool/asterisk/monitor/#{tenant}/synthetic-#{@nonce}.wav")
   end
 
   def create_participant_legs(call, queue)
     [@operator, @viewer].each do |member|
       JrcContactCenter::CallLeg.create!(account: @account, call_session: call, account_user: member, queue: queue, direction: 'inbound',
-                                      status: 'ended', started_at: call.started_at, answered_at: call.answered_at, ended_at: call.ended_at)
+                                        status: 'ended', started_at: call.started_at, answered_at: call.answered_at, ended_at: call.ended_at)
     end
   end
 end

@@ -55,8 +55,7 @@ class JrcContactCenter::RecordedCalls
 
   def present(record)
     call = calls.find_by!(external_session_id: record.external_unique_id)
-    links = [call.current_unit, call.current_queue].compact
-    raise ActiveRecord::RecordNotFound unless links.all? { |link| link.account_id == @account.id }
+    verify_links!(call)
 
     settings = Pabx::Settings.new(@account.telephony_integration)
     record.public_payload(settings: settings).merge(
@@ -66,6 +65,11 @@ class JrcContactCenter::RecordedCalls
   end
 
   private
+
+  def verify_links!(call)
+    links = [call.current_unit, call.current_queue].compact
+    raise ActiveRecord::RecordNotFound unless links.all? { |link| link.account_id == @account.id }
+  end
 
   def authorize!(action)
     allowed = @access.policy.public_send("recordings_#{action}?") && @member.user.active_for_authentication?

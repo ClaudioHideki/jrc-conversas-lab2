@@ -4,7 +4,7 @@ require 'rails_helper'
 require Rails.root.join('script/jrc_call_center_recordings_seed')
 require Rails.root.join('spec/integration/jrc_contact_center/owned_recording_media')
 
-RSpec.describe 'Owned synthetic recording fixtures never provision or install in other environments' do
+RSpec.describe JrcContactCenter::SyntheticRecordingsSeed do
   it 'rejects seeding before changing accounts, calls, SIP or native integration settings outside the explicit runner' do
     before = [Account.count, JrcContactCenter::CallSession.count, SipCredential.count, TelephonyIntegration.count]
     with_modified_env(GITHUB_ACTIONS: 'false', RUNNER_ENVIRONMENT: 'github-hosted') do

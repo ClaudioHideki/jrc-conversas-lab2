@@ -7,11 +7,11 @@ module SyntheticRecordedCallMedia
 
   def self.validate_environment!
     config = ApplicationRecord.connection_db_config
-    owned = Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
-            ENV['GITHUB_REF_NAME'] == 'codex/call-center-control-desk-20261116' &&
-            config.database == 'jrc_sd_bc_portal_concurrency_20261025_test' && config.configuration_hash[:host] == '127.0.0.1' &&
-            ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'
-    raise 'Owned recording media boundary required' unless owned && ENV.fetch('GITHUB_SHA').match?(/\A[0-9a-f]{40}\z/)
+    owned = [Rails.env.test?, ENV['GITHUB_ACTIONS'] == 'true', ENV['RUNNER_ENVIRONMENT'] == 'github-hosted',
+             ENV['GITHUB_REF_NAME'] == 'codex/call-center-control-desk-20261116',
+             config.database == 'jrc_sd_bc_portal_concurrency_20261025_test', config.configuration_hash[:host] == '127.0.0.1',
+             ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15', ENV.fetch('GITHUB_SHA', '').match?(/\A[0-9a-f]{40}\z/)].all?
+    raise 'Owned recording media boundary required' unless owned
   end
 
   def self.install!
@@ -22,14 +22,24 @@ module SyntheticRecordedCallMedia
   def self.control!(account)
     validate_environment!
     marker = account.settings.fetch(MARKER)
-    valid = marker.is_a?(Hash) && marker.keys.sort == %w[nonce record_ids source_sha] && marker['source_sha'] == ENV.fetch('GITHUB_SHA')
+    valid = valid_marker?(marker)
     valid &&= account.name.start_with?('SYNTHETIC pause ') && account.name.end_with?('-recordings')
-    valid &&= marker['nonce'].is_a?(String) && marker['nonce'].match?(/\A[0-9a-f]{24}\z/)
-    ids = marker['record_ids']
-    valid &&= ids.is_a?(Array) && ids.length == 24 && ids.uniq.length == 24 && ids.all? { |id| id.is_a?(Integer) && id.positive? }
+    valid &&= valid_nonce?(marker['nonce']) && valid_ids?(marker['record_ids'])
     raise 'Exact owned recording fixture source required' unless valid
 
     marker
+  end
+
+  def self.valid_marker?(marker)
+    marker.is_a?(Hash) && marker.keys.sort == %w[nonce record_ids source_sha] && marker['source_sha'] == ENV.fetch('GITHUB_SHA')
+  end
+
+  def self.valid_nonce?(nonce)
+    nonce.is_a?(String) && nonce.match?(/\A[0-9a-f]{24}\z/)
+  end
+
+  def self.valid_ids?(ids)
+    ids.is_a?(Array) && ids.length == 24 && ids.uniq.length == 24 && ids.all? { |id| id.is_a?(Integer) && id.positive? }
   end
 
   def self.wav

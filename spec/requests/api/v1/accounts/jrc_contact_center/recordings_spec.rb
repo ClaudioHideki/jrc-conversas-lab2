@@ -14,28 +14,30 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
   let(:business) { account.jrc_crm_business_units.create!(operating_company: company, code: 'A', name: 'SYNTHETIC recording business unit') }
   let(:unit) do
     JrcContactCenter::Unit.create!(account: account, code: 'A', name: 'SYNTHETIC recording unit', kind: 'sac',
-                                  settings: { issuer_company_id: company.id, business_unit_id: business.id })
+                                   settings: { issuer_company_id: company.id, business_unit_id: business.id })
   end
   let(:queue) { JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'A', name: 'SYNTHETIC recording queue') }
   let(:integration) do
     create(:telephony_integration, account: account, pabx_settings: pabx_settings(recording_lookup: 'link', sync_enabled: false),
-           pabx_username: 'synthetic-user', pabx_password: 'synthetic-password')
+                                   pabx_username: 'synthetic-user', pabx_password: 'synthetic-password')
   end
   let(:source_call) do
     JrcContactCenter::CallSession.create!(account: account, provider: Pabx::Settings::PROVIDER,
-                                         external_session_id: 'synthetic-recorded-call', correlation_id: 'synthetic-recording-origin',
-                                         current_unit: unit, current_queue: queue, direction: 'inbound', status: 'ended',
-                                         started_at: 30.minutes.ago, ended_at: 29.minutes.ago)
+                                          external_session_id: 'synthetic-recorded-call', correlation_id: 'synthetic-recording-origin',
+                                          current_unit: unit, current_queue: queue, direction: 'inbound', status: 'ended',
+                                          started_at: 30.minutes.ago, ended_at: 29.minutes.ago)
   end
   let(:record) do
     TelephonyCallRecord.create!(account: account, provider: Pabx::Settings::PROVIDER, external_tenant: '8', extension: '1410',
-                               external_unique_id: source_call.external_session_id, synced_at: Time.current,
-                               started_at: source_call.started_at, direction: 'inbound', status: 'answered',
-                               caller: '551100000001', callee: '1410', has_recording: true,
-                               recording_reference: '/var/spool/asterisk/monitor/8/synthetic-test.wav')
+                                external_unique_id: source_call.external_session_id, synced_at: Time.current,
+                                started_at: source_call.started_at, direction: 'inbound', status: 'answered',
+                                caller: '551100000001', callee: '1410', has_recording: true,
+                                recording_reference: '/var/spool/asterisk/monitor/8/synthetic-test.wav')
   end
-  let(:path) { "/api/v1/accounts/#{account.id}/jrc_contact_center/recordings" }
-  let(:audio) { "RIFF#{[36].pack('V')}WAVEfmt #{[16, 1, 1, 8000, 16000, 2, 16].pack('VvvVVvv')}data#{[0].pack('V')}".b }
+  def path
+    "/api/v1/accounts/#{account.id}/jrc_contact_center/recordings"
+  end
+  let(:audio) { "RIFF#{[36].pack('V')}WAVEfmt #{[16, 1, 1, 8_000, 16_000, 2, 16].pack('VvvVVvv')}data#{[0].pack('V')}".b }
 
   before do
     account.enable_features!('jrc_contact_center', 'custom_roles', 'audit_logs')
@@ -43,12 +45,12 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
     integration
     create(:sip_credential, account: account, user: actor, enabled: true, extension: '1410', call_history_extension: '1410')
     account.jrc_crm_user_business_units.create!(user: actor, scope: 'BUSINESS_UNIT', company: company, business_unit: business,
-                                               active: true, structure_managed: true)
+                                                active: true, structure_managed: true)
     JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: member)
     JrcContactCenter::CallLeg.create!(account: account, call_session: source_call, account_user: member, queue: queue,
-                                     direction: 'inbound', status: 'ended', started_at: source_call.started_at, ended_at: source_call.ended_at)
+                                      direction: 'inbound', status: 'ended', started_at: source_call.started_at, ended_at: source_call.ended_at)
     record
-    expect(Pabx::Client).not_to receive(:new)
+    allow(Pabx::Client).to receive(:new) { raise 'External PABX client forbidden in native recording tests' }
   end
 
   it 'lists only an exact native provider and call identity with real scoped totals and private metadata' do
@@ -56,7 +58,7 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
     expect(response).to have_http_status(:ok)
     body = response.parsed_body
     expect(body.fetch('items').sole).to include('id' => record.id.to_s, 'call_session_id' => source_call.id.to_s,
-                                               'unit_id' => unit.id.to_s, 'queue_id' => queue.id.to_s)
+                                      'unit_id' => unit.id.to_s, 'queue_id' => queue.id.to_s)
     expect(body.fetch('meta')).to include('page' => 1, 'per_page' => 20, 'total' => 1)
     expect(response.headers['Cache-Control']).to include('private', 'no-store')
     expect(response.body).not_to match(/recording_reference|synthetic-password|synthetic-user|service_url|metadata/)
@@ -86,7 +88,7 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
 
   it 'does not expose a same-queue call in which the ordinary viewer did not participate' do
     other = create(:user, account: account)
-    source_call.legs.update_all(account_user_id: account.account_users.find_by!(user: other).id)
+    source_call.legs.each { |leg| leg.update!(account_user_id: account.account_users.find_by!(user: other).id) }
     get "#{path}/#{record.id}", headers: headers
     expect(response).to have_http_status(:not_found)
   end
@@ -94,7 +96,7 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
   it 'rejects a direct record in another native operational unit despite an existing personal leg' do
     other_business = account.jrc_crm_business_units.create!(operating_company: company, code: 'B', name: 'SYNTHETIC denied business unit')
     other_unit = JrcContactCenter::Unit.create!(account: account, code: 'B', name: 'SYNTHETIC denied recording unit', kind: 'sac',
-                                               settings: { issuer_company_id: company.id, business_unit_id: other_business.id })
+                                                settings: { issuer_company_id: company.id, business_unit_id: other_business.id })
     source_call.update!(current_unit: other_unit)
     get "#{path}/#{record.id}", headers: headers
     expect(response).to have_http_status(:not_found)
@@ -211,7 +213,7 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
     provider = instance_double(Pabx::Provider)
     allow(Pabx::Provider).to receive(:new).with(integration).and_return(provider)
     allow(provider).to receive(:recording) do
-      account.jrc_crm_user_business_units.where(user: actor).update_all(active: false)
+      account.jrc_crm_user_business_units.where(user: actor).find_each { |coverage| coverage.update!(active: false) }
       { body: audio, content_type: 'audio/wav' }
     end
     get "#{path}/#{record.id}/playback", headers: headers

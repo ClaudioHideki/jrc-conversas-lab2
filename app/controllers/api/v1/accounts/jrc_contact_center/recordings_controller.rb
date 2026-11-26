@@ -80,11 +80,15 @@ class Api::V1::Accounts::JrcContactCenter::RecordingsController < Api::V1::Accou
       verify_connection!(source)
       type = media_content_type(result)
       audit_read!(current, call, action)
-      response.headers['X-Jrc-Recording-Account'] = Current.account.id.to_s
-      response.headers['X-Jrc-Recording-Id'] = current.id.to_s
-      response.headers['X-Jrc-Recording-Call'] = call.id.to_s
-      send_data result.fetch(:body), type: type, filename: "call-#{current.id}.#{MEDIA_EXTENSIONS.fetch(type)}", disposition: disposition
+      send_private_media(current, call, result, type, disposition)
     end
+  end
+
+  def send_private_media(current, call, result, type, disposition)
+    response.headers['X-Jrc-Recording-Account'] = Current.account.id.to_s
+    response.headers['X-Jrc-Recording-Id'] = current.id.to_s
+    response.headers['X-Jrc-Recording-Call'] = call.id.to_s
+    send_data result.fetch(:body), type: type, filename: "call-#{current.id}.#{MEDIA_EXTENSIONS.fetch(type)}", disposition: disposition
   end
 
   def media_content_type(result)
