@@ -414,19 +414,17 @@ const call = () => {
     const account = activeAccountId.value;
     const version = initializationVersion;
     if (credential.value?.contact_center_enabled) {
+      const checkStartedAt = performance.now();
       const { data } = await SipCredentialsAPI.getMine();
       if (
         version !== initializationVersion ||
-        account !== activeAccountId.value ||
-        data.contact_center_acw_pending
-      ) {
-        if (
-          version === initializationVersion &&
-          account === activeAccountId.value &&
-          data.contact_center_acw_pending
-        )
-          errorMessage.value =
-            'Conclua a qualificação pendente antes de iniciar ou atender outra ligação.';
+        account !== activeAccountId.value
+      )
+        return false;
+      client.logCallTiming('Validação do pós-atendimento', checkStartedAt);
+      if (data.contact_center_acw_pending) {
+        errorMessage.value =
+          'Conclua a qualificação pendente antes de iniciar ou atender outra ligação.';
         return false;
       }
     }

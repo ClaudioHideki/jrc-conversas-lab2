@@ -7,6 +7,7 @@ const mock = vi.hoisted(() => ({
   transfer: vi.fn(),
   call: vi.fn(),
   answer: vi.fn(),
+  logCallTiming: vi.fn(),
   acwEnabled: false,
   acwPending: false,
   sendDtmf: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock('./SipClient', () => ({
       this.transfer = mock.transfer;
       this.call = mock.call;
       this.answer = mock.answer;
+      this.logCallTiming = mock.logCallTiming;
       this.sendDtmf = mock.sendDtmf;
     }
   },
@@ -220,6 +222,10 @@ describe('softphone reconnect coordinator', () => {
     await api.initialize(1);
     mock.acwPending = true;
     await expect(api.call()).resolves.toBe(false);
+    expect(mock.logCallTiming).toHaveBeenCalledWith(
+      'Validação do pós-atendimento',
+      expect.any(Number)
+    );
     await expect(api.answer()).resolves.toBe(false);
     expect(api.errorMessage.value).toContain('qualificação pendente');
     expect(mock.call).not.toHaveBeenCalled();

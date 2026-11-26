@@ -74,6 +74,11 @@ export class SipClient {
     logger(`[SIP] ${safeMessage}`);
   }
 
+  logCallTiming(stage, startedAt) {
+    const elapsed = Math.round(performance.now() - startedAt);
+    this.log('LATÊNCIA SIP', `Latência SIP · ${stage} · ${elapsed} ms`);
+  }
+
   setStatus(label, tone = 'neutral') {
     this.emit('onStatus', { label, tone });
   }
@@ -306,6 +311,7 @@ export class SipClient {
   }
 
   async receive(invitation) {
+    const receivedAt = performance.now();
     if (this.hasCall || this.callStarting) {
       await invitation.reject({ statusCode: 486, reasonPhrase: 'Busy Here' });
       return;
@@ -324,6 +330,7 @@ export class SipClient {
       remote,
       callId: invitation.request?.callId || invitation.id,
     });
+    this.logCallTiming('INVITE recebido até aviso local', receivedAt);
   }
 
   async call(destination) {
@@ -332,7 +339,9 @@ export class SipClient {
       throw new Error('Já existe uma chamada ativa');
     }
     this.callStarting = true;
+    const startedAt = performance.now();
     let inviter;
+    let submittedAt;
     try {
       const cleanDestination = String(destination).replace(/[\s()-]/g, '');
       const target = UserAgent.makeURI(
@@ -357,15 +366,18 @@ export class SipClient {
       await inviter.invite({
         requestDelegate: {
           onTrying: () => {
-            this.log('CHAMADA', 'PABX recebeu a solicitação de chamada');
+            if (this.session !== inviter) return;
+            this.logCallTiming('INVITE até SIP 100', submittedAt ?? startedAt);
           },
           onProgress: response => {
+            if (this.session !== inviter) return;
             const statusCode = response?.message?.statusCode;
             this.setStatus('Chamando', 'warning');
-            this.log(
-              'CHAMADA',
-              `Destino em progresso${statusCode ? ` (${statusCode})` : ''}`
-            );
+            if (Number.isInteger(statusCode))
+              this.logCallTiming(
+                `INVITE até SIP ${statusCode}`,
+                submittedAt ?? startedAt
+              );
           },
           onAccept: response => {
             const statusCode = response?.message?.statusCode || 200;
@@ -389,6 +401,15 @@ export class SipClient {
           },
         },
       });
+      submittedAt = performance.now();
+      const iceState =
+        inviter.sessionDescriptionHandler?.peerConnection?.iceGatheringState;
+      this.logCallTiming(
+        iceState
+          ? `Preparação e envio do INVITE (ICE: ${iceState})`
+          : 'Preparação e envio do INVITE',
+        startedAt
+      );
     } catch (error) {
       this.callStarting = false;
       this.markIntentionalTermination(inviter);

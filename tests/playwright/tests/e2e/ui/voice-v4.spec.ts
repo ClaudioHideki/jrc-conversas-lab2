@@ -81,6 +81,23 @@ test('discador preserva contexto e permite anotar depois da chamada', async ({
   await page.goto(`${fixture}?state=idle`);
   const bar = page.locator('[data-global-voice-bar]');
   await expect(bar).toContainText('Nenhuma ligação ativa');
+  const idleStatus = await bar.locator('[data-voice-status]').boundingBox();
+  const dialpad = await bar.locator('[data-voice-dialpad]').boundingBox();
+  const barBounds = await bar.boundingBox();
+  expect(idleStatus).not.toBeNull();
+  expect(dialpad).not.toBeNull();
+  expect(barBounds).not.toBeNull();
+  expect(dialpad!.x - (idleStatus!.x + idleStatus!.width)).toBeLessThan(24);
+  expect(
+    barBounds!.x + barBounds!.width - (dialpad!.x + dialpad!.width)
+  ).toBeLessThan(24);
+  expect(
+    Math.abs(
+      idleStatus!.y +
+        idleStatus!.height / 2 -
+        (dialpad!.y + dialpad!.height / 2)
+    )
+  ).toBeLessThan(4);
   await page.screenshot({
     path: testInfo.outputPath('vazio.png'),
     fullPage: true,
@@ -162,7 +179,9 @@ test('mantem a chamada ao sair do Atendimento para outro modulo e voltar', async
   await activeDialer.locator('[data-voice-action=TRANSFER]').click();
   const transfer = activeDialer.locator('form');
   await transfer.locator('input').fill('2002');
-  await transfer.getByRole('button', { name: 'Transferir', exact: true }).click();
+  await transfer
+    .getByRole('button', { name: 'Transferir', exact: true })
+    .click();
   await expect(transfer).not.toBeVisible();
   await activeDialer.getByRole('button', { name: 'Encerrar ligação' }).click();
   await expect(activeDialer).not.toBeVisible();
