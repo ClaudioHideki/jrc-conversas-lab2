@@ -17,9 +17,9 @@ class SyntheticPublicEndingWorkerWitness
     @configuration = configuration
   end
 
-  def call(_worker, job, queue, &block)
+  def call(_worker, job, queue, &)
     arguments, name = validate_job!(job, queue)
-    SyntheticPublicEndingProcessEvidence.with_job(job, arguments, name, &block)
+    SyntheticPublicEndingProcessEvidence.with_job(job, arguments, name, &)
     receipt = native_receipt(job, queue, arguments, name)
     Redis.new(url: ENV.fetch('REDIS_URL')).hset("jrc_cc_public:#{@configuration.fetch('nonce')}:acks", job.fetch('jid'), receipt.to_json)
   end
