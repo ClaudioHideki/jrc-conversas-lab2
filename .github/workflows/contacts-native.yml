@@ -34,7 +34,7 @@ jobs:
       REDIS_URL: redis://127.0.0.1:6380/15
       SECRET_KEY_BASE: service-desk-isolated-test-only-not-an-installation-secret
       BUNDLE_FROZEN: 'true'
-      CONTACTS_BASE: ${{ github.ref_name == 'codex/consolidacao-atendimento-20261126' && '91ca7ca0047627fca5da0db2a68e94357c16a1f2' || '1eb261c8f80e4cfb3e17b2076c928d3b4a8dada4' }}
+      CONTACTS_BASE: ${{ (github.ref_name == 'codex/consolidacao-atendimento-20261126' || github.ref_name == 'codex/diagnostico-latencia-ramal-20261126') && '91ca7ca0047627fca5da0db2a68e94357c16a1f2' || '1eb261c8f80e4cfb3e17b2076c928d3b4a8dada4' }}
       TZ: UTC
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
       - name: Confirmar branch, commit e recursos
         run: |
           case "$GITHUB_REF" in
-            refs/heads/codex/contatos-nico-mini-publicacao-20261011|refs/heads/codex/consolidacao-atendimento-20261126) ;;
+            refs/heads/codex/contatos-nico-mini-publicacao-20261011|refs/heads/codex/consolidacao-atendimento-20261126|refs/heads/codex/diagnostico-latencia-ramal-20261126) ;;
             *) exit 1 ;;
           esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
