@@ -154,7 +154,13 @@ describe('native Service Desk rule configuration', () => {
   });
 
   it('applies separately reviewed parameters while preserving the existing Project action and deferring persistence', async () => {
-    state.editor.source.value = { scope_revision: 'a'.repeat(64) };
+    state.editor.source.value = {
+      id: '12',
+      name: 'SYNTHETIC source queue',
+      unit: { id: '13', name: 'SYNTHETIC source unit' },
+      scope_revision: 'a'.repeat(64),
+      configuration_available: true,
+    };
     state.editor.serviceDeskOptions.value = {
       configuration_available: true,
       unit: { id: '11', name: 'SYNTHETIC mapped' },
@@ -194,7 +200,13 @@ describe('native Service Desk rule configuration', () => {
   });
 
   it('preserves all parameters on cancel and removes only the explicitly selected destination', async () => {
-    state.editor.source.value = { scope_revision: 'a'.repeat(64) };
+    state.editor.source.value = {
+      id: '12',
+      name: 'SYNTHETIC source queue',
+      unit: { id: '13', name: 'SYNTHETIC source unit' },
+      scope_revision: 'a'.repeat(64),
+      configuration_available: true,
+    };
     state.editor.serviceDeskOptions.value = {
       configuration_available: true,
       unit: { id: '11', name: 'SYNTHETIC mapped' },

@@ -74,6 +74,12 @@ beforeEach(() => {
 describe('Existing native Service Desk controls in an ending rule template', () => {
   it('requires native context, catalogue validity and explicit review before applying parameters to the outer rule', async () => {
     const wrapper = open();
+    const controls = wrapper.findAllComponents(Lookup);
+    expect(controls.length).toBeGreaterThan(0);
+    expect(controls.every(control => control.props('currentName') === '')).toBe(
+      true
+    );
+    expect(wrapper.emitted('save')).toBeUndefined();
     expect(apply(wrapper).element.disabled).toBe(true);
     await ready(wrapper);
     expect(apply(wrapper).element.disabled).toBe(true);

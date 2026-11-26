@@ -105,7 +105,7 @@ const missingAssignmentAuthority = computed(
 );
 const currentName = (key, name) => {
   const selected = selectedNames.value[name];
-  return selected?.id === attributes.value[key] ? selected.name : '';
+  return selected && selected.id === attributes.value[key] ? selected.name : '';
 };
 const valid = computed(
   () =>

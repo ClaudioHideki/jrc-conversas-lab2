@@ -1,0 +1,28 @@
+{
+  "parent": "27ab05657ef3093a965211a4111963bbb5f36a8d",
+  "failed_run": 45781436811,
+  "failed_job": 139777600495,
+  "native_or_Chrome_tests_approved": false,
+  "parent_sources": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.vue": "407cec2ba7f85ae71d44418e6124b2183608328ca8669020303c33fa0591bb37",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.spec.js": "a18d1b2230260f5ad58941494e232d3bbf16fe2db14caf63001cb9eb1a0ab681",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.spec.js": "3bb58b55e0eca55067efeab44f62c79e26528cd09845913f8d2020d29c041e9f"
+  },
+  "source_sha256": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.vue": "eefec1dbb2c8a3e07a3ee9df6a9fb655922ebb9540cbd3cbcfa2e7ed58fc79d2",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.spec.js": "04d7831256a606e749556bcbc77de52f208d1cf8855df932ba5aa006fe10dad0",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.spec.js": "9c4104a42afd4d6b8c39da03d3c418a1c2ce488fa03d9e9cb3b52840c8900c9e"
+  },
+  "actual_bug": "Missing optional lookup selection and its missing draft identifier both compared as undefined; the true branch dereferenced selected.name.",
+  "fixture_bug": "Two new parent editor fixtures omitted the unit/name fields always returned by native SourceContext.",
+  "product_permissions_source_DTO_and_review_criteria_unchanged": true,
+  "retained_Vue_case_counts": {
+    "EndingServiceDeskConfiguration.spec.js": 12,
+    "EndingAutomationEditor.spec.js": 8
+  },
+  "actual_provider_or_application_data_changed": false,
+  "light_ESLint_files": 3,
+  "light_ESLint_errors": 0,
+  "light_ESLint_warnings": 0,
+  "light_ESLint_sha256": "84597bda073ba43f958caca7ebcada37192361287da2da408559eb4bbc2cf780"
+}

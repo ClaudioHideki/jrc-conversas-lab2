@@ -98,5 +98,29 @@
   ],
   "whole_figure10_accepted": false,
   "whole_Part1_accepted": false,
-  "external_PABX_Nico_homologation": false
+  "external_PABX_Nico_homologation": false,
+  "functional_corrections": [
+    {
+      "name": "exact_optional_native_SD_selection_guard_and_complete_parent_editor_test_DTO",
+      "source_sha256": {
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.vue": "eefec1dbb2c8a3e07a3ee9df6a9fb655922ebb9540cbd3cbcfa2e7ed58fc79d2",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.spec.js": "04d7831256a606e749556bcbc77de52f208d1cf8855df932ba5aa006fe10dad0",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.spec.js": "9c4104a42afd4d6b8c39da03d3c418a1c2ce488fa03d9e9cb3b52840c8900c9e"
+      },
+      "parent_sources": {
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.vue": "407cec2ba7f85ae71d44418e6124b2183608328ca8669020303c33fa0591bb37",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingServiceDeskConfiguration.spec.js": "a18d1b2230260f5ad58941494e232d3bbf16fe2db14caf63001cb9eb1a0ab681",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.spec.js": "3bb58b55e0eca55067efeab44f62c79e26528cd09845913f8d2020d29c041e9f"
+      }
+    }
+  ],
+  "early_Vue_failure_correction": {
+    "run": 45781436811,
+    "Vue_cases": 81,
+    "passed": 70,
+    "failed": 11,
+    "actual_optional_selection_bug_fixed": true,
+    "incomplete_parent_fixtures_corrected": true,
+    "native_and_Chrome_execution_pending": true
+  }
 }
