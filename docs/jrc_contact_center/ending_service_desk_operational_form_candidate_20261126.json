@@ -138,6 +138,15 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_public_pipeline_spec.rb": "d1d803e4750749de07c51feb3ed2900f4ac699479ce6a818d697a74088edf579",
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb": "740733c3b1f33012e9678aad902ba282eb25f75c6ffd8fb3aeed45711947bd6c"
       }
+    },
+    {
+      "name": "exact_existing_readiness_test_current_SD_authority_denial_and_zero_native_effects",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "49b1f9d5b3f174783c4fb3bd2618810d09669145045ae4cebb283372cb1cee6f"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "115f10a75d22ef4bda01f4cec86e732071e5c3fdc73b9309146798ae8bbceeab"
+      }
     }
   ],
   "early_Vue_failure_correction": {
@@ -162,5 +171,13 @@
     "original_resolved": 10,
     "retained_new_native_cases": 20,
     "native_or_Chrome_approval_pending": true
+  },
+  "existing_readiness_case_current_denial": {
+    "run": 45784545498,
+    "old_expected": 422,
+    "current_denial": 401,
+    "product_unchanged": true,
+    "additional_no_native_Ticket_check": true,
+    "native_revalidation_pending": true
   }
 }

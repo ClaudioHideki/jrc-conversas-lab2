@@ -150,12 +150,13 @@ RSpec.describe 'Explicit scoped preparation of v2 ending destinations', type: :r
       publish_typed_schema_definition('actions' => [action])
     end
 
-    it 'refuses technical preparation instead of marking an unsupported Service Desk configuration operational' do
+    it 'refuses technical preparation when current native Service Desk access is unavailable' do
       count = JrcContactCenter::EndingActionReadiness.where(account: account).count
       prepare_rule
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unauthorized)
       expect(JrcContactCenter::EndingActionReadiness.where(account: account).count).to eq(count)
       expect(native_effect_counts).to eq([0, 0, 0])
+      expect(JrcServiceDesk::Ticket.where(account: account)).to be_empty
     end
   end
 end

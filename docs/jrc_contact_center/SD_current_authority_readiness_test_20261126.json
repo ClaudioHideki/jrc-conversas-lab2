@@ -1,0 +1,20 @@
+{
+  "parent": "71763727e6dd988a9ac9d1017f71e1383260d27f",
+  "failed_run": 45784545498,
+  "parent_sources": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "115f10a75d22ef4bda01f4cec86e732071e5c3fdc73b9309146798ae8bbceeab"
+  },
+  "source_sha256": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "49b1f9d5b3f174783c4fb3bd2618810d09669145045ae4cebb283372cb1cee6f"
+  },
+  "retained_file_scenarios": 9,
+  "server_policy_permissions_and_product_unchanged": true,
+  "previous_expectation": 422,
+  "current_exact_denial": 401,
+  "old_no_readiness_attempt_consent_or_Task_checks_preserved": true,
+  "native_Ticket_absence_assertion_added": true,
+  "verified_native_SD_configuration_cases": 17,
+  "verified_Vue_cases": 81,
+  "prior_artifact_sha256": "893e8a8103ab2446f93935a937a25faee63bca60f3ad1e9db615335f2ffdec62",
+  "native_revalidation_pending": true
+}
