@@ -17,6 +17,7 @@ const options = {
   props: { accountId: 7, userId: 91, allowed: true },
   global: {
     stubs: {
+      InboxVoicePanel: true,
       Dialog: {
         name: 'Dialog',
         props: ['dismissible', 'closeOnClickOutside', 'showCloseButton'],
@@ -31,6 +32,10 @@ beforeEach(() => {
     Object.entries({
       accountId: 7,
       hasCall: false,
+      incoming: false,
+      held: false,
+      established: false,
+      remoteNumber: '',
       registered: true,
       credential: { extension: '1234' },
       destination: '',
@@ -95,6 +100,14 @@ describe('outbound confirmation without changing selected attendance', () => {
     await flushPromises();
     expect(state.sip.destination.value).toBe('141');
     expect(wrapper.emitted('started')[0][0].reason).toBe('');
+    expect(wrapper.find('[data-outbound-call]').exists()).toBe(false);
+    expect(
+      wrapper.getComponent({ name: 'InboxVoicePanel' }).props()
+    ).toMatchObject({
+      accountId: 7,
+      controlsOnly: true,
+      inlineControls: true,
+    });
     wrapper.unmount();
   });
   it('starts only the reviewed number from the already authorized extension', async () => {
@@ -117,14 +130,8 @@ describe('outbound confirmation without changing selected attendance', () => {
   it('does not dial a second call or use another Account credential', async () => {
     state.sip.hasCall.value = true;
     const wrapper = mount(OutboundVoiceDialog, options);
-    await wrapper.get('[data-outbound-phone]').setValue('12345678');
-    await wrapper.get('[data-outbound-reason]').setValue('Retorno');
-    expect(
-      wrapper.get('[data-outbound-call]').attributes('disabled')
-    ).toBeDefined();
-    expect(wrapper.get('[data-outbound-blocked]').text()).toContain(
-      'VOICE_V4.CALL_ALREADY_ACTIVE'
-    );
+    expect(wrapper.find('[data-outbound-call]').exists()).toBe(false);
+    expect(wrapper.find('[data-outbound-active]').exists()).toBe(true);
     state.sip.hasCall.value = false;
     state.sip.accountId.value = 8;
     await flushPromises();

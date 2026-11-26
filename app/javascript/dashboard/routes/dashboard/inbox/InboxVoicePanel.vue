@@ -32,6 +32,7 @@ const props = defineProps({
   sessionView: { type: Boolean, default: false },
   elapsed: { type: String, default: '' },
   controlsOnly: { type: Boolean, default: false },
+  inlineControls: { type: Boolean, default: false },
   keyboardShortcuts: { type: Boolean, default: true },
   showControls: { type: Boolean, default: true },
   draftUserId: { type: Number, default: null },
@@ -723,9 +724,12 @@ defineExpose({ endCall, canEnd, duration });
               class="size-4"
               :class="control.icon"
               aria-hidden="true" /></span
-          ><span :class="controlsOnly ? 'sr-only xl:not-sr-only' : ''">{{
-            t(`SOFTPHONE.CENTRAL.${control.label}`)
-          }}</span>
+          ><span
+            :class="
+              controlsOnly && !inlineControls ? 'sr-only xl:not-sr-only' : ''
+            "
+            >{{ t(`SOFTPHONE.CENTRAL.${control.label}`) }}</span
+          >
         </button>
         <button
           v-if="controlsOnly && !sip.incoming.value"
@@ -746,9 +750,9 @@ defineExpose({ endCall, canEnd, duration });
         v-if="transferOpen && canControl"
         class="flex flex-wrap gap-3 rounded-lg border border-n-weak bg-n-solid-1 p-4 shadow-lg"
         :class="
-          controlsOnly
+          controlsOnly && !inlineControls
             ? 'absolute right-0 top-full z-40 mt-2 w-80 max-w-full'
-            : ''
+            : 'mt-2'
         "
         @submit.prevent="transfer"
       >
@@ -832,9 +836,9 @@ defineExpose({ endCall, canEnd, duration });
       :aria-label="t('SOFTPHONE.CENTRAL.KEYPAD')"
       class="grid grid-cols-3 gap-2 rounded-xl border border-n-strong bg-n-solid-1 p-3 shadow-lg"
       :class="
-        controlsOnly
+        controlsOnly && !inlineControls
           ? 'absolute right-0 top-full z-40 mt-2 w-64 max-w-full'
-          : 'mx-auto max-w-xs'
+          : 'mx-auto mt-2 max-w-xs'
       "
       data-call-keypad
     >

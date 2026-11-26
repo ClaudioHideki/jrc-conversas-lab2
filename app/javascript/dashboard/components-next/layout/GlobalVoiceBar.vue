@@ -147,7 +147,7 @@ const openOutbound = number => {
     useAlert(t('VOICE_V4.DIAL_RESTRICTED'));
     return;
   }
-  if (sip.hasCall.value || qualificationPending.value) {
+  if (sip.hasCall.value ? Boolean(number) : qualificationPending.value) {
     useAlert(
       t(
         sip.hasCall.value
@@ -269,26 +269,25 @@ const openAttendance = () => {
         >
       </div>
       <button
-        v-if="!active"
         type="button"
         data-voice-dialpad
-        :title="t('VOICE_V4.NEW_CALL')"
-        :aria-label="t('VOICE_V4.NEW_CALL')"
+        :title="t(active ? 'VOICE_V4.BAR_LABEL' : 'VOICE_V4.NEW_CALL')"
+        :aria-label="t(active ? 'VOICE_V4.BAR_LABEL' : 'VOICE_V4.NEW_CALL')"
         class="ml-auto inline-flex min-h-9 items-center gap-2 rounded-lg border border-n-blue-6 bg-n-blue-3 px-3 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-4 focus-visible:ring-2 focus-visible:ring-n-brand disabled:opacity-40"
-        :disabled="!sameAccount || qualificationPending"
+        :disabled="!sameAccount || (!active && qualificationPending)"
         @click="openOutbound()"
       >
         <span class="i-lucide-grid-3x3 size-4" aria-hidden="true" />
-        {{ t('SOFTPHONE.CENTRAL.KEYPAD') }}
+        {{ t(active ? 'VOICE_V4.BAR_LABEL' : 'SOFTPHONE.CENTRAL.KEYPAD') }}
       </button>
       <InboxVoicePanel
-        v-if="active"
+        v-if="active && !outboundOpen"
         :account-id="Number(accountId)"
         :allowed="allowed"
         :qualification-pending="qualificationPending"
         session-view
         controls-only
-        class="basis-full sm:ml-auto sm:w-auto sm:flex-1 sm:basis-auto"
+        class="basis-full sm:w-auto sm:basis-auto"
       />
     </div>
     <p

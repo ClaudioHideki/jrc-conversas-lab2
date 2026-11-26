@@ -10,6 +10,7 @@ import {
   useVueTable,
   createColumnHelper,
   getCoreRowModel,
+  getSortedRowModel,
 } from '@tanstack/vue-table';
 import { computed, onMounted, ref, h } from 'vue';
 
@@ -62,8 +63,17 @@ const getMetrics = id =>
 const columnHelper = createColumnHelper();
 const { t } = useI18n();
 
-const metricCell = tone => cell => {
-  const value = cell.getValue();
+const isAgentReport = computed(() => props.type === 'agent');
+const formatCount = value => value.toLocaleString();
+const reportValue = value => {
+  if (!isAgentReport.value) return value || undefined;
+  if (value == null) return undefined;
+  return Number(value);
+};
+
+const metricCell = (tone, format) => cell => {
+  const metric = cell.getValue();
+  const value = metric === undefined ? '--' : format(metric);
   return h(
     'span',
     {
@@ -79,39 +89,36 @@ const metricCell = tone => cell => {
 const columns = computed(() => [
   columnHelper.accessor('name', {
     header: t(`SUMMARY_REPORTS.${props.type.toUpperCase()}`),
+    enableSorting: false,
     width: 300,
     cell: cellProps => h(SummaryReportLink, cellProps),
   }),
   columnHelper.accessor('conversationsCount', {
     header: t('SUMMARY_REPORTS.CONVERSATIONS'),
     width: 200,
-    cell: metricCell('bg-n-blue-3 text-n-blue-11'),
+    cell: metricCell('bg-n-blue-3 text-n-blue-11', formatCount),
   }),
   columnHelper.accessor('avgFirstResponseTime', {
     header: t('SUMMARY_REPORTS.AVG_FIRST_RESPONSE_TIME'),
     width: 200,
-    cell: metricCell('bg-n-violet-3 text-n-violet-11'),
+    cell: metricCell('bg-n-violet-3 text-n-violet-11', formatTime),
   }),
   columnHelper.accessor('avgResolutionTime', {
     header: t('SUMMARY_REPORTS.AVG_RESOLUTION_TIME'),
     width: 200,
-    cell: metricCell('bg-n-teal-3 text-n-teal-11'),
+    cell: metricCell('bg-n-teal-3 text-n-teal-11', formatTime),
   }),
   columnHelper.accessor('avgReplyTime', {
     header: t('SUMMARY_REPORTS.AVG_REPLY_TIME'),
     width: 200,
-    cell: metricCell('bg-n-amber-3 text-n-amber-11'),
+    cell: metricCell('bg-n-amber-3 text-n-amber-11', formatTime),
   }),
   columnHelper.accessor('resolutionsCount', {
     header: t('SUMMARY_REPORTS.RESOLUTION_COUNT'),
     width: 200,
-    cell: metricCell('bg-n-teal-3 text-n-teal-11'),
+    cell: metricCell('bg-n-teal-3 text-n-teal-11', formatCount),
   }),
 ]);
-
-const renderAvgTime = value => (value ? formatTime(value) : '--');
-
-const renderCount = value => (value ? value.toLocaleString() : '--');
 
 const tableData = computed(() =>
   rowItems.value.map(row => {
@@ -128,11 +135,11 @@ const tableData = computed(() =>
       // we fallback on title, label for instance does not have a name property
       name: row.name ?? row.title,
       type: props.type,
-      conversationsCount: renderCount(conversationsCount),
-      avgFirstResponseTime: renderAvgTime(avgFirstResponseTime),
-      avgReplyTime: renderAvgTime(avgReplyTime),
-      avgResolutionTime: renderAvgTime(avgResolutionTime),
-      resolutionsCount: renderCount(resolvedConversationsCount),
+      conversationsCount: reportValue(conversationsCount),
+      avgFirstResponseTime: reportValue(avgFirstResponseTime),
+      avgReplyTime: reportValue(avgReplyTime),
+      avgResolutionTime: reportValue(avgResolutionTime),
+      resolutionsCount: reportValue(resolvedConversationsCount),
     };
   })
 );
@@ -175,8 +182,13 @@ const table = useVueTable({
   get columns() {
     return columns.value;
   },
-  enableSorting: false,
+  enableSorting: isAgentReport.value,
+  enableSortingRemoval: false,
+  sortDescFirst: false,
+  enableMultiSort: false,
+  defaultColumn: { sortingFn: 'basic', sortUndefined: 'last' },
   getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
 });
 
 // downloadReports method is not used in this component

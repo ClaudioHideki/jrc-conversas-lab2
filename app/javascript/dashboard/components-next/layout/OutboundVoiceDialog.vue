@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import InboxVoicePanel from 'dashboard/routes/dashboard/inbox/InboxVoicePanel.vue';
 import { useSipWebphone } from 'dashboard/routes/dashboard/webphone/useSipWebphone';
 import { normalizeSipDialNumber } from 'dashboard/routes/dashboard/webphone/phoneNumber';
 import { useCallsStore } from 'dashboard/stores/calls';
@@ -36,6 +37,17 @@ const contact = computed(() =>
 const sameAccount = computed(
   () => Number(sip.accountId.value) === props.accountId
 );
+const active = computed(
+  () => props.allowed && sameAccount.value && sip.hasCall.value
+);
+const activeStatus = computed(() => {
+  if (sip.incoming.value) return 'VOICE_V4.INCOMING';
+  if (sip.held.value) return 'VOICE_V4.ON_HOLD';
+  return sip.established.value ? 'VOICE_V4.CONNECTED' : 'VOICE_V4.DIALING';
+});
+watch(active, (isActive, wasActive) => {
+  if (!isActive && wasActive) dialog.value?.close();
+});
 const pressTone = tone => {
   if (
     !busy.value &&
@@ -129,7 +141,6 @@ const dial = async () => {
       reason: reason.value.trim(),
       notes: observations.value.trim(),
     });
-    dialog.value?.close();
   } catch {
     failed.value = true;
   } finally {
@@ -142,7 +153,7 @@ onMounted(() => dialog.value?.open());
 <template>
   <Dialog
     ref="dialog"
-    :title="t('VOICE_V4.NEW_CALL')"
+    :title="t(active ? 'VOICE_V4.BAR_LABEL' : 'VOICE_V4.NEW_CALL')"
     :show-confirm-button="false"
     :show-cancel-button="false"
     :use-form="false"
@@ -152,7 +163,40 @@ onMounted(() => dialog.value?.open());
     overflow-y-auto
     @close="emit('close')"
   >
-    <form class="space-y-4" @submit.prevent="dial">
+    <div
+      v-if="active"
+      data-outbound-active
+      class="space-y-4 rounded-2xl border border-n-teal-5 bg-n-teal-2 p-4"
+    >
+      <div
+        class="flex flex-wrap items-center justify-between gap-2"
+        role="status"
+      >
+        <div>
+          <p class="m-0 font-semibold text-n-teal-11">{{ t(activeStatus) }}</p>
+          <p class="m-0 text-sm text-n-slate-11">
+            {{
+              sip.remoteNumber.value || t('SOFTPHONE.CENTRAL.UNKNOWN_CUSTOMER')
+            }}
+          </p>
+        </div>
+        <span
+          v-if="sip.established.value"
+          class="text-sm tabular-nums text-n-teal-11"
+        >
+          {{ sip.duration.value }}
+        </span>
+      </div>
+      <InboxVoicePanel
+        :account-id="accountId"
+        :allowed="allowed"
+        :qualification-pending="qualificationPending"
+        session-view
+        controls-only
+        inline-controls
+      />
+    </div>
+    <form v-else class="space-y-4" @submit.prevent="dial">
       <div
         class="space-y-3 rounded-2xl border border-n-blue-5 bg-gradient-to-br from-n-blue-2 to-n-teal-2 p-4 sm:p-5"
       >

@@ -103,10 +103,22 @@ test('discador preserva contexto e permite anotar depois da chamada', async ({
   await page.locator('[data-outbound-call]').click();
   await expect(bar).toContainText('Chamando');
   await expect(bar).not.toContainText('Em ligação');
+  const activeDialer = page.getByRole('dialog', {
+    name: 'Controles da ligação ativa',
+  });
+  await expect(activeDialer.locator('[data-voice-action=MUTE]')).toBeDisabled();
+  await expect(
+    activeDialer.locator('[data-voice-action=TRANSFER]')
+  ).toBeDisabled();
   await page.screenshot({
     path: testInfo.outputPath('chamando.png'),
     fullPage: true,
   });
+  await activeDialer
+    .getByRole('button', { name: 'Cancelar tentativa' })
+    .click();
+  await expect(activeDialer).not.toBeVisible();
+  await expect(bar).toContainText('Nenhuma ligação ativa');
 });
 test('mantem a chamada ao sair do Atendimento para outro modulo e voltar', async ({
   page,
@@ -133,6 +145,28 @@ test('mantem a chamada ao sair do Atendimento para outro modulo e voltar', async
     'aria-pressed',
     'true'
   );
+
+  await bar.getByRole('button', { name: 'Controles da ligação ativa' }).click();
+  const activeDialer = page.getByRole('dialog', {
+    name: 'Controles da ligação ativa',
+  });
+  const mute = activeDialer.locator('[data-voice-action=MUTE]');
+  await expect(mute).toHaveAttribute('aria-pressed', 'true');
+  await mute.click();
+  await expect(mute).toHaveAttribute('aria-pressed', 'false');
+  const hold = activeDialer.locator('[data-voice-action=HOLD]');
+  await hold.click();
+  await expect(hold).toHaveAttribute('aria-pressed', 'true');
+  await hold.click();
+  await expect(hold).toHaveAttribute('aria-pressed', 'false');
+  await activeDialer.locator('[data-voice-action=TRANSFER]').click();
+  const transfer = activeDialer.locator('form');
+  await transfer.locator('input').fill('2002');
+  await transfer.getByRole('button', { name: 'Transferir', exact: true }).click();
+  await expect(transfer).not.toBeVisible();
+  await activeDialer.getByRole('button', { name: 'Encerrar ligação' }).click();
+  await expect(activeDialer).not.toBeVisible();
+  await expect(bar).toContainText('Nenhuma ligação ativa');
 });
 test('recebendo sem cronometro e pos-atendimento sem telefonia ativa', async ({
   page,
