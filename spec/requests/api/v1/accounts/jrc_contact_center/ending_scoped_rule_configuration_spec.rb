@@ -57,10 +57,16 @@ RSpec.describe 'Native per-rule ending configuration within existing corporate c
     expect(response.body).not_to include('SYNTHETIC_OTHER_UNIT_PRIVATE_TEMPLATE', 'SYNTHETIC other private queue', 'required_queue_ids')
   end
 
-  it 'keeps the account-wide ACW policy unavailable to a per-unit configurator' do
-    get "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy", headers: headers
+  it 'preserves public operational ACW limits while hiding global configuration and denying its writer' do
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy"
+    previous = policy.revision
+    get endpoint, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('item').keys.sort).to eq(%w[enabled id limits require_reason require_result revision voice_required])
+    expect(response.body).not_to include('SYNTHETIC_OTHER_UNIT_PRIVATE_TEMPLATE', 'voice_reason_catalog', 'voice_form_bindings', 'voice_rules')
+    patch endpoint, headers: headers, params: { limits: { voice: 120, whatsapp: 120 }, expected_revision: previous }, as: :json
     expect(response).to have_http_status(:unauthorized)
-    expect(response.body).not_to include('SYNTHETIC_OTHER_UNIT_PRIVATE_TEMPLATE')
+    expect(policy.revision).to eq(previous)
     expect(JrcCrm::UserBusinessUnit.where(account: account, user: actor, scope: 'GROUP', active: true)).to be_empty
   end
 

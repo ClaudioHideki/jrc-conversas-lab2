@@ -248,6 +248,19 @@
         "spec/services/jrc_contact_center/ending_actions/rule_source_authority_spec.rb": "1099bfabf0fce83a86b6ea8b36fb99d3d86aa90fae42fc6a57cd82f9bf46e42b",
         "script/jrc_call_center_lint_suggestions.py": "6254d733b5201692ed53f080dbcb6b01e80a5905a8ecbfc9a25e2f02bfdaf05e"
       }
+    },
+    {
+      "name": "exact_native_fixture_order_and_existing_ACW_read_write_contract",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_crm_rule_configuration_spec.rb": "eb22d7c7d5b5ef11278ab6fff613d18053e02ce65c4de36c872595d26e98f024",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_rule_configuration_spec.rb": "2e43211b4b70265a96a1492595a503667dd3eb719bbe314561036742c490bf18",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "115f10a75d22ef4bda01f4cec86e732071e5c3fdc73b9309146798ae8bbceeab"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_crm_rule_configuration_spec.rb": "0cd9472d2266bbc9ce4351abc52c2972758b1d1659c9a9ca3142073c8ba2151a",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_rule_configuration_spec.rb": "e286e41f88d442a64da9b0c66d69a3416f5dd95bb738d648a173d1a4ea63e205",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb": "616a693fbb6c5b0459a77264225db83c741e5cc1240b73082b74bd6a3bb09573"
+      }
     }
   ],
   "lint_parent": {
@@ -268,6 +281,18 @@
     "affected_Ruby_files_inspected": 34,
     "all_quality_gates_still_required": true,
     "safe_formatter_output_is_a_review_suggestion_not_a_pass": true,
+    "new_native_or_browser_acceptance": false
+  },
+  "native_preflight_parent": {
+    "sha": "2dff7546698259c196c2b75d81a25e5f584defc4",
+    "run": 45738226973,
+    "conclusion": "failure",
+    "focused_lint_offenses": 0,
+    "preflight_examples": 44,
+    "preflight_failures": 5,
+    "production_permission_or_ACW_behavior_changed": false,
+    "existing_ACW_read_redaction_and_global_write_denial_explicitly_tested": true,
+    "all_quality_gates_still_required": true,
     "new_native_or_browser_acceptance": false
   }
 }

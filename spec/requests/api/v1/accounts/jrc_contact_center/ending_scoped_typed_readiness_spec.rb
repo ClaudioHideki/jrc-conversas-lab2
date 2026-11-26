@@ -40,16 +40,21 @@ RSpec.describe 'Explicit scoped preparation of v2 ending destinations', type: :r
     expect(JrcContactCenter::Qualification.where(account: account)).to be_empty
   end
 
-  it 'permits only the current authorized unit preparation while the global ACW settings remain unavailable' do
+  it 'permits current unit preparation while denying global configuration writes and redacting private ACW settings' do
     own_unit_coverage
     prepare_rule
     expect(response).to have_http_status(:ok)
     get "#{endpoint}/readiness", headers: headers, params: review.slice(:rule_code, :expected_revision)
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('applicable_review')).to include('rule_code' => 'SYNTHETIC_ORIGIN_RULE')
-    get "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy", headers: headers
+    policy_endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy"
+    previous = JrcContactCenter::AcwPolicy.new(account: account.reload).revision
+    get policy_endpoint, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('item').keys.sort).to eq(%w[enabled id limits require_reason require_result revision voice_required])
+    patch policy_endpoint, headers: headers, params: { limits: { voice: 120, whatsapp: 120 }, expected_revision: previous }, as: :json
     expect(response).to have_http_status(:unauthorized)
-    expect(native_effect_counts).to eq([0, 0, 0])
+    expect([JrcContactCenter::AcwPolicy.new(account: account.reload).revision, native_effect_counts]).to eq([previous, [0, 0, 0]])
   end
 
   it 'rechecks corporate coverage after a readable preparation state rather than trusting the earlier read' do
@@ -75,7 +80,6 @@ RSpec.describe 'Explicit scoped preparation of v2 ending destinations', type: :r
   end
 
   it 'does not reveal a foreign-unit inactive rule through a distinguishable readiness-state error' do
-    publish_typed_schema_definition('active' => false)
     other = JrcCrm::BusinessUnit.create!(account: account, operating_company: issuer,
                                          code: 'SYNTHETIC_READY_OTHER', name: 'SYNTHETIC other covered unit')
     JrcContactCenter::Unit.create!(account: account, code: 'SYNTHETIC_READY_OTHER', name: 'SYNTHETIC other allowed source', kind: 'sac',
@@ -85,7 +89,12 @@ RSpec.describe 'Explicit scoped preparation of v2 ending destinations', type: :r
                                      business_unit: other, active: true, structure_managed: true)
     count = JrcContactCenter::EndingActionReadiness.where(account: account).count
     prepare_rule
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:unauthorized)
+    active_denial = response.parsed_body
+    publish_typed_schema_definition('active' => false) # Synthetic immutable version setup, not a public authorization.
+    prepare_rule
+    expect(response).to have_http_status(:unauthorized)
+    expect(response.parsed_body).to eq(active_denial)
     expect(response.body).not_to include('ending_action_not_ready', 'SYNTHETIC_ORIGIN_RULE', 'SYNTHETIC unarmed original evidence')
     expect(JrcContactCenter::EndingActionReadiness.where(account: account).count).to eq(count)
     expect(native_effect_counts).to eq([0, 0, 0])

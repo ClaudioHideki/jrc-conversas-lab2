@@ -87,6 +87,7 @@ RSpec.describe 'Explicit CRM ending configuration through the native private rul
   end
 
   it 'does not derive CRM permission from native Call Center configure access or administrator role' do
+    crm_rule # Build the reviewed input before withdrawing its unrelated project setup permission.
     role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure])
     member.update!(custom_role: role, crm_enabled: true)
     save_crm_rule
@@ -96,6 +97,7 @@ RSpec.describe 'Explicit CRM ending configuration through the native private rul
   end
 
   it 'rechecks native nonadministrator CRM enablement even when configuration and CRM permissions remain' do
+    crm_rule # Build the reviewed input before withdrawing its unrelated project setup permission.
     role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure jrc_crm])
     member.update!(role: :agent, custom_role: role, crm_enabled: false)
     save_crm_rule
