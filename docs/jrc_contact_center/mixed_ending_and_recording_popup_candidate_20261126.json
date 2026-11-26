@@ -86,5 +86,29 @@
   "Word_figure17_table_desktop_and_stacked_mobile_one_authorized_row_set": true,
   "whole_figure10_accepted": false,
   "whole_figure17_accepted": false,
-  "whole_Part1_accepted": false
+  "whole_Part1_accepted": false,
+  "functional_corrections": [
+    {
+      "name": "exact_mixed_fixture_native_lint_preserving_all_worker_and_scope_proofs",
+      "source_sha256": {
+        "script/jrc_call_center_mixed_ending_seed.rb": "b80f80522e0006b76f81b04ddf5e9837b273e5a4a6b1533cfc7e57a372a9db5c",
+        "spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb": "53f5253158f86e470e36269ce596c5c684053dec76eb272a326e65caa247c388"
+      },
+      "parent_sources": {
+        "script/jrc_call_center_mixed_ending_seed.rb": "b62d6b110668800b614f38ed2ba12dae69c750f9a966e2996fc145794276c40f",
+        "spec/integration/jrc_contact_center/owned_mixed_ending_evidence.rb": "d47e539d66b20b25dd933bbb4b887b92fbecf71fdc4dcec5f2269d65696782f1"
+      }
+    }
+  ],
+  "first_native_validation": {
+    "sha": "6cccf548c147bfbef52bd969e9988599b5598ca0",
+    "run": 45863579111,
+    "artifact": 15140280415,
+    "artifact_sha256": "606ba714f1509e71f5283589eaa29a699c3759d0905fba94ce80fe04ef9dff98",
+    "native_lint_failed_offenses": 34,
+    "targeted_recording_Vue_passed": 40,
+    "targeted_SD_and_audio_Vue_passed": 110,
+    "not_native_Rails_or_Chrome_acceptance": true,
+    "correction": "Split new owned fixture checks into readable methods, preserve every condition and receipt, align existing values; no linter configuration or product behavior changed."
+  }
 }
