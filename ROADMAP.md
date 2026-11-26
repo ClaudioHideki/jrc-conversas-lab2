@@ -227,3 +227,8 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 - Recibos por destino/ad8a50a1/CI 45670540681: 82 cenários nativos novos validados, incluindo falha parcial real CRM/Service Desk, concorrência PostgreSQL e repetição selecionada sem duplicação. O aceite é interno; editor/API público, despacho durável e F10-B pela interface ainda não estão homologados.
 
 - Próximo fluxo interno: intenções duráveis após commit e entrega pelo Sidekiq próprio, com 37 cenários novos de banco, Redis e autoridade atual, incluindo vínculo CRM com a empresa original. Sem ativação pública ou alterações de grants. O editor, os eventos operacionais e F10-B pela interface continuam pendentes.
+
+
+### Entrega funcional Control Desk — 26/11/2026
+
+Priorizar grupos utilizáveis e reaproveitar provas: ACW/ações nativas, Service Desk e prévia de áudio. Acompanhamento em blocos de 24 horas efetivas. Dependências PABX/NICO externas separadas; checkpoint e candidata discriminados em TASKS.md e na matriz dos554 requisitos.

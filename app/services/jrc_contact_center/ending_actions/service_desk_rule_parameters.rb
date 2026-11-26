@@ -12,17 +12,28 @@ class JrcContactCenter::EndingActions::ServiceDeskRuleParameters < JrcServiceDes
     @source_scope = source_scope
   end
 
-  def call(value)
+  def call(value, validate_current: true)
     ensure_transaction!
 
     input = JrcContactCenter::EndingActions::ServiceDeskDestinationDefinition.new.call(value)
     @context = fresh_context!
     unit = context.unit_scope.lock('FOR SHARE').find(input.fetch('unit_id'))
     authorize_mapping!(unit)
-    authorize_configuration!(unit, input)
+    authorize_configuration!(unit, input, validate_current: validate_current)
     input
   rescue ArgumentError
     raise JrcContactCenter::OperationError, 'invalid_ending_service_desk_definition'
+  end
+
+  # Labels are computed only after the same current native authorization.
+  # They are a read DTO, never part of an immutable stored rule definition.
+  def authorize_reference!(value)
+    call(value, validate_current: false)
+  end
+
+  def presentation(value)
+    authorize_reference!(value)
+    @presentation
   end
 
   def source_configuration
@@ -68,17 +79,33 @@ class JrcContactCenter::EndingActions::ServiceDeskRuleParameters < JrcServiceDes
     raise JrcContactCenter::OperationError, 'ending_service_desk_mapping_required'
   end
 
-  def authorize_configuration!(unit, input)
+  def authorize_configuration!(unit, input, validate_current:)
     raise Pundit::NotAuthorizedError unless context.capability?(:tickets_create) && context.capability?(:customers_view)
 
     fields = input.fetch('attributes')
     validate_text!(fields)
     form = catalogue_form(unit, input)
-    JrcServiceDesk::CatalogueAnswers.new(form.fetch(:form_fields)).validate!(fields.fetch('service_fields', {}))
-    candidate = native_candidate(unit, fields, form)
+    JrcServiceDesk::CatalogueAnswers.new(form.fetch(:form_fields)).validate!(fields.fetch('service_fields', {})) if validate_current
+    candidate = native_candidate(unit, fields, form, validate_current: validate_current)
     authorize!(candidate, :create?)
     verify_assignee_team!(candidate)
-    authorize_contract!(fields['contract_id'])
+    contract = authorize_contract!(fields['contract_id'])
+    @presentation = presentation_for(unit, candidate, form, contract)
+  end
+
+  def presentation_for(unit, candidate, form, contract)
+    names = REFERENCES.keys.to_h do |key|
+      field = key.delete_suffix('_id')
+      [field.to_sym, named(candidate.public_send(field))]
+    end
+    membership = candidate.assignee_membership
+    names.merge(unit: named(unit), service: form[:service], team: named(candidate.team),
+                assignee: membership && { id: membership.account_user_id.to_s, name: membership.account_user.user.name },
+                contract: contract && { id: contract.id.to_s, name: contract.contract_number })
+  end
+
+  def named(record)
+    record && { id: record.id.to_s, name: record.name }
   end
 
   def catalogue_form(unit, input)
@@ -92,10 +119,10 @@ class JrcContactCenter::EndingActions::ServiceDeskRuleParameters < JrcServiceDes
     JrcServiceDesk::CatalogueForm.new(user_context: context.to_h).call(parameters: selection)
   end
 
-  def native_candidate(unit, fields, form)
+  def native_candidate(unit, fields, form, validate_current:)
     references = native_references(unit, fields, form)
     candidate = JrcServiceDesk::Ticket.new(account: context.account, unit: unit, **references)
-    validate_initial_status!(candidate.status)
+    validate_initial_status!(candidate.status) if validate_current
     raise JrcContactCenter::OperationError, 'invalid_ending_service_desk_definition' unless candidate.priority
 
     candidate.team = native_team(fields['team_id'] || candidate.queue&.team_id)

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, getCurrentInstance, ref, watch } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useEmitter } from 'dashboard/composables/emitter';
 import { emitter } from 'shared/helpers/mitt';
@@ -13,6 +13,7 @@ const props = defineProps({
   inspectionId: { type: String, required: true },
   metadata: { type: Object, required: true },
   canManage: { type: Boolean, required: true },
+  openOnMount: { type: Boolean, default: false },
 });
 const emit = defineEmits(['denied']);
 const { t } = useI18n();
@@ -44,6 +45,9 @@ const { url, loading, error, open, clear, playbackFailed, download } =
     onDenied: () => emit('denied'),
   });
 watch(url, () => player.value?.pause(), { flush: 'sync' });
+onMounted(() => {
+  if (props.openOnMount) open();
+});
 </script>
 
 <template>

@@ -1,0 +1,85 @@
+{
+  "approved_source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+  "approved_run": 45693144825,
+  "artifact": 15065693526,
+  "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+  "accepted_literal_clauses": {
+    "D2-P0211-C01": {
+      "expected": "Acoes e resultado do clique: Motivo de Encerramento: escolher classificacao existente.",
+      "expected_sha256": "387f884ef02bd8f969fbfb60d49681f8aa138605d3bdda01782d3cf09cc8629e"
+    },
+    "D2-P0211-C02": {
+      "expected": "Tempo de Pos-Atendimento: configurar horas/minutos.",
+      "expected_sha256": "8ef6beb6979acf8319e4c72dc3981041fe0d1085a669fbf95d939d5c8f371776"
+    }
+  },
+  "evidence_review_sha256": "53bd021e2d3a4b5facce60a1a3dbd7705ca437b29a474347faa408053a4a2685",
+  "unchanged_native_sources": {
+    "app/services/jrc_contact_center/acw_policy.rb": "a4c6ae2c06e02a863181eccc52373fc087debe697a29b519ecddee751af101fd",
+    "app/services/jrc_contact_center/acw_scoped_rules.rb": "55e450845a380ddfd8b5ee1f4d9f365e6c2a70dfbcbfc5c1ad8db6735c9fe7c3",
+    "app/services/jrc_contact_center/acw_ending_reasons.rb": "2797c3427cff7ad542cce1b1ea6235067edf02bbd040e59416b06ad1d7df6320",
+    "app/services/jrc_contact_center/acw_rule_precedence.rb": "43fd84bfb7ee6840ae7a5f665797f4c97aab6d3b0ef91c8545aeaccb1259c353",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRulesEditor.vue": "21e6719d5031013d90d12b97cd22a318bf50e910d4ee6edee7c2bec0688e5826",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRulesEditor.spec.js": "075b8aa680467cb2dcc97d2b810f1854387f3f5798f3a9ce13a2d6f2bb63c658",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.vue": "5698a43399bc36692092c291476ad51fcaaef4bd16b1d5c77ef2d548fb3c37e3",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleFormBinding.vue": "b25dc66f7a8bfe058d128cfa36b2fc42a1d29b222f5faf477f56f9fb53609101"
+  },
+  "unchanged_complete_Chrome_case_sha256": "d706767c504388e812ae38fbbcacc4ee1c7f0c576ecb9f1bfc83af1c011fd52c",
+  "Chrome_report": {
+    "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/results.json",
+    "sha256": "79f517502e5c11e4e49ca5f5130450c670e45718f88976cb7b4871be2963ccde"
+  },
+  "four_browser_modes": [
+    {
+      "project": "desktop-light",
+      "status": "passed",
+      "duration_ms": 4573
+    },
+    {
+      "project": "desktop-dark",
+      "status": "passed",
+      "duration_ms": 4356
+    },
+    {
+      "project": "mobile-light",
+      "status": "passed",
+      "duration_ms": 3718
+    },
+    {
+      "project": "mobile-dark",
+      "status": "passed",
+      "duration_ms": 3763
+    }
+  ],
+  "Vue_reports": [
+    {
+      "path": "tmp/call-center-vitest.json",
+      "sha256": "dece9238b916d061921b329cccebc983ab2cee14834eb4b1dcea45a6a88ea69a",
+      "cases": 14,
+      "all_passed": true
+    }
+  ],
+  "four_original_screenshots_actually_opened": [
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-acw-scoped-rules.png",
+      "sha256": "269d1d0931e243ff2fb6ca2e0c87338b9ac9e6e8ff226cd462c6225ad80d02ac"
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-acw-scoped-rules.png",
+      "sha256": "feafc56c1291c6ebe0e01aa834bd10cf84ca7dc426d91588895e56d40a0304c0"
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-acw-scoped-rules.png",
+      "sha256": "3ac1d0079f4e0c45a3d7b0d5eddadbc48fba1e197656f9b631c7a1c1ad7cd780"
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-acw-scoped-rules.png",
+      "sha256": "400485c6e8d70ece652da75d518547d50d38a799862fc8d958a05ada2624c84e"
+    }
+  ],
+  "real_UI_and_API_behavior": "Choose existing order classification, set00:02, persist120seconds through real API, reload exact classification/HH:MM; reject duplicate rule422 without overwriting the previous policy.",
+  "actual_new_test_executions": 0,
+  "new_images_generated": 0,
+  "whole_figure09_or_Part1_accepted": false,
+  "not_a_claim_of_new_candidate_whole_CI_approval": true
+}

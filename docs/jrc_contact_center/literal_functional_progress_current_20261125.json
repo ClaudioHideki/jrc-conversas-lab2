@@ -4,31 +4,32 @@
   "new_bounded_acceptance": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
   "new_bounded_acceptance_sha256": "dc6466fe913b916c65c8b4d8b1823afa72e4c132023ece222870bee47f61906d",
   "Word_requirements_unique": 554,
-  "formal_literal_reviews_closed": 33,
-  "Parte1_proven_lower_bound_percentage": 5.96,
+  "formal_literal_reviews_closed": 40,
+  "Parte1_proven_lower_bound_percentage": 7.22,
   "not_an_estimated_implementation_percentage": true,
   "canonical_statuses": {
-    "concluido_com_aceite": 33,
+    "concluido_com_aceite": 40,
     "implementado_sem_aceite": 0,
-    "parcial": 451,
-    "pendente": 46,
+    "parcial": 446,
+    "pendente": 44,
     "bloqueado": 24
   },
   "triage_466_preserved_as_historical_snapshot": true,
   "remaining_partial_triage": {
-    "implemented_pending_homologation": 127,
-    "small_adjustments": 101,
-    "significant_development": 167,
+    "implemented_pending_homologation": 121,
+    "small_adjustments": 103,
+    "significant_development": 166,
     "documental_not_autonomous_functions": 56
   },
-  "new_accepted_functions": "Erro de campo visível, foco e preservação do popup/rascunho após rejeição real da API; correção seguida de persistência.",
+  "new_accepted_functions": "Seleção/persistência de supervisores elegíveis; seleção de classificação existente e tempo de ACW em HH:MM com persistência/recarga reais.",
   "new_tests_executed_for_this_registration": 0,
   "evidence_reuse_requires_unchanged_source_hashes": true,
   "whole_figure14_or_Part1_accepted": false,
   "figure10_unchanged": {
-    "formally_closed": 5,
+    "formally_closed": 7,
     "total": 25,
-    "percentage": 20.0
+    "percentage": 28.0,
+    "changed_by_bounded_mode_timing_acceptance": true
   },
   "internal_engineering_effort_estimate_hours": {
     "development": [
@@ -59,5 +60,34 @@
     "sha256": "b2272f550c716f02f4e2d75de540797efdb5dc60b96fdcf93e03e297d54379db",
     "source_sha": "7c317dbe997cbbd6c314f5dfdbb6fee9c107c056"
   },
-  "whole_Part1_accepted": false
+  "whole_Part1_accepted": false,
+  "latest_team_supervisor_acceptance": {
+    "document": "docs/jrc_contact_center/literal_team_supervisor_acceptance_20261126.json",
+    "sha256": "2aa529eb059bdf01063fd9a93bc147274f8887b1e23d114f04ad0753f7112385",
+    "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
+  },
+  "latest_acw_reason_time_acceptance": {
+    "document": "docs/jrc_contact_center/literal_acw_selection_time_acceptance_20261126.json",
+    "sha256": "85bdfeb6c6f4dda52143a5d19ab8daea280d921be41636f4cf3dd68d48e004d5",
+    "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
+  },
+  "latest_existing_form_binding_acceptance": {
+    "document": "docs/jrc_contact_center/literal_acw_existing_form_binding_acceptance_20261126.json",
+    "sha256": "9542c0996027072bc54b675e1f9b66ecfb314b52bff0c9d8397961ffc008064d",
+    "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
+  },
+  "latest_ending_mode_timing_acceptance": {
+    "document": "docs/jrc_contact_center/literal_ending_mode_timing_acceptance_20261126.json",
+    "sha256": "58451143933cf2d872ec9dfc5a66f99344b77d62a93f9fce2919fdc34c50667d",
+    "source_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
+    "unique_IDs": [
+      "D2-P0222-C05",
+      "D2-P0224-C04"
+    ]
+  },
+  "native_implemented_but_public_UI_pending_reclassified": [
+    "D2-P0225-C01",
+    "D2-P0228-C01"
+  ],
+  "current_bounded_triage_change_note": "C05 closed from significant work; C04 from awaiting acceptance. Two formerly pending mixed-destination clauses now partial/small UI gaps based on actual native proofs. Historical466 triage preserved."
 }

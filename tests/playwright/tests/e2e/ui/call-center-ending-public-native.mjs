@@ -86,6 +86,11 @@ export async function verifyPublicEndingExecution(parent, info, target) {
     );
   };
   const capture = async suffix => {
+    if (suffix === 'durable-reload')
+      await page
+        .locator('[data-ending-attempt-row]:visible')
+        .first()
+        .scrollIntoViewIfNeeded();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth

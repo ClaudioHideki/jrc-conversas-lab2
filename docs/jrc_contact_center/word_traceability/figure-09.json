@@ -1630,8 +1630,8 @@
       "figures": [
         9
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "status": "implementado",
+      "verification": "Aceite literal por interface real, persistência e recarga no banco sintético; quatro modos Chrome existentes conferidos, sem repetir execução.",
       "code_reference_ids": [
         0,
         1,
@@ -1685,7 +1685,12 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "document": "docs/jrc_contact_center/literal_acw_selection_time_acceptance_20261126.json",
+        "sha256": "85bdfeb6c6f4dda52143a5d19ab8daea280d921be41636f4cf3dd68d48e004d5",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
+      }
     },
     {
       "id": "D2-P0211-C02",
@@ -1700,8 +1705,8 @@
       "figures": [
         9
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "status": "implementado",
+      "verification": "Aceite literal por interface real, persistência e recarga no banco sintético; quatro modos Chrome existentes conferidos, sem repetir execução.",
       "code_reference_ids": [
         0,
         1,
@@ -1755,7 +1760,12 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "document": "docs/jrc_contact_center/literal_acw_selection_time_acceptance_20261126.json",
+        "sha256": "85bdfeb6c6f4dda52143a5d19ab8daea280d921be41636f4cf3dd68d48e004d5",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
+      }
     },
     {
       "id": "D2-P0211-C03",
@@ -1770,8 +1780,8 @@
       "figures": [
         9
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "status": "implementado",
+      "verification": "Aceite literal dos seletores e campos obrigatórios em quatro modos Chrome com API e persistência reais; código pertinente comparado com o checkpoint aprovado, sem nova execução.",
       "code_reference_ids": [
         0,
         1,
@@ -1825,7 +1835,12 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "document": "docs/jrc_contact_center/literal_acw_existing_form_binding_acceptance_20261126.json",
+        "sha256": "9542c0996027072bc54b675e1f9b66ecfb314b52bff0c9d8397961ffc008064d",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
+      }
     },
     {
       "id": "D2-P0211-C04",
@@ -1840,8 +1855,8 @@
       "figures": [
         9
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "status": "implementado",
+      "verification": "Aceite literal dos seletores e campos obrigatórios em quatro modos Chrome com API e persistência reais; código pertinente comparado com o checkpoint aprovado, sem nova execução.",
       "code_reference_ids": [
         0,
         1,
@@ -1895,7 +1910,12 @@
       "divergences": [
         "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "document": "docs/jrc_contact_center/literal_acw_existing_form_binding_acceptance_20261126.json",
+        "sha256": "9542c0996027072bc54b675e1f9b66ecfb314b52bff0c9d8397961ffc008064d",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
+      }
     },
     {
       "id": "D2-P0211-C05",
@@ -3193,5 +3213,15 @@
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
     "new_native_cases_prepared_not_accepted": 37,
     "public_editor_dispatch_or_whole_Part1_accepted": false
+  },
+  "native_reason_and_HHMM_literal_acceptance": {
+    "document": "docs/jrc_contact_center/literal_acw_selection_time_acceptance_20261126.json",
+    "sha256": "85bdfeb6c6f4dda52143a5d19ab8daea280d921be41636f4cf3dd68d48e004d5",
+    "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
+  },
+  "native_existing_form_binding_literal_acceptance": {
+    "document": "docs/jrc_contact_center/literal_acw_existing_form_binding_acceptance_20261126.json",
+    "sha256": "9542c0996027072bc54b675e1f9b66ecfb314b52bff0c9d8397961ffc008064d",
+    "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
   }
 }

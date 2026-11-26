@@ -1,0 +1,83 @@
+{
+  "source_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
+  "run": 45768281599,
+  "artifact": 15096174259,
+  "artifact_sha256": "d3e82bc0f2ec833a74599be231090ace2bf2afe3f190c382f2dd6b36ab1e9afd",
+  "independent_evidence_sha256": "ecd93b31f1d5a2e5b48129dcc2889f4a9b401cc9351d66d73d0ff50e279cf9ef",
+  "native_distinct_Rails": 3751,
+  "main_Vue": 1914,
+  "separate_Lead_Vue_not_added_to_main": 37,
+  "Chrome": 280,
+  "PNG_hashes_verified": 672,
+  "four_original_agent_Project_worker_flows_verified": true,
+  "new_completion_regression": {
+    "path": "tmp/call-center-ending-completion-projection-rspec.json",
+    "sha256": "c90167efba5beaec180b095379742d07da1f269d4172e9b9f2a061cd236989cb",
+    "new_distinct_examples": 4
+  },
+  "actual_original_image_review": {
+    "sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
+    "run": 45768281599,
+    "artifact": 15096174259,
+    "artifact_sha256": "d3e82bc0f2ec833a74599be231090ace2bf2afe3f190c382f2dd6b36ab1e9afd",
+    "images": [
+      {
+        "name": "desktop-light-ending-public-durable-reload.png",
+        "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-ending-public-durable-reload.png",
+        "sha256": "9a1d9b474f811eca76d05a39a1541767f41a09d9a3da36e34d2bfa377709cfb9"
+      },
+      {
+        "name": "desktop-light-ending-public-real-failure-rollback.png",
+        "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-ending-public-real-failure-rollback.png",
+        "sha256": "28de20f021a0a653a6dc5e913799242e69fd196e8076e9d63ade6d1bfb6b2590"
+      },
+      {
+        "name": "desktop-dark-ending-public-durable-reload.png",
+        "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-ending-public-durable-reload.png",
+        "sha256": "a58c59bab3861c97cf783a75bd8614ff7e481e63d7dec803c4f67a680f0803aa"
+      },
+      {
+        "name": "desktop-dark-ending-public-real-failure-rollback.png",
+        "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-ending-public-real-failure-rollback.png",
+        "sha256": "7fbff0cd7489b3d3395a167d323ca70649fbaae976b5a01b6e6e8a1ba1bc814f"
+      },
+      {
+        "name": "mobile-light-ending-public-durable-reload.png",
+        "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-ending-public-durable-reload.png",
+        "sha256": "dc34d206b3b3774db2a57a55015c98cbcc6efcd0eb63666017d88cd8069bc159"
+      },
+      {
+        "name": "mobile-light-ending-public-real-failure-rollback.png",
+        "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-ending-public-real-failure-rollback.png",
+        "sha256": "3081aa8407d2bc56282120d44b89fb8cbd20e379fa044b3dc6da968a8bd4d30d"
+      },
+      {
+        "name": "mobile-dark-ending-public-durable-reload.png",
+        "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-ending-public-durable-reload.png",
+        "sha256": "e8c7594fbd5d22b34d7569223a88ed2fe4dd7b9203d1d000049f15d5a4627d88"
+      },
+      {
+        "name": "mobile-dark-ending-public-real-failure-rollback.png",
+        "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-ending-public-real-failure-rollback.png",
+        "sha256": "c1ccf55615683cfee575f61645bba4b159a9ce91887eb5e562d20c81558845bd"
+      }
+    ],
+    "all_eight_original_images_actually_opened": true,
+    "visual_findings": {
+      "desktop_and_mobile_light_dark_readable": true,
+      "failure_state_native_and_ACW_still_open_visible": true,
+      "mobile_final_success_card_below_current_screenshot_viewport": true,
+      "next_QA_capture_focuses_existing_final_card_without_changing_application_or_assertions": true,
+      "whole_figure10_or_Part1_visual_acceptance": false
+    }
+  },
+  "accepted_behavior": [
+    "Explicit classification and separate manual consent; ACW remains independent.",
+    "Real isolated Redis/Sidekiq and native Task creator/audit receipts.",
+    "Actual PostgreSQL failure rolls back its Task; selected retry preserves the failed root.",
+    "ACW commit dispatches its separate automatic action; two native Tasks remain after reload."
+  ],
+  "public_CRM_SD_full_Chrome_or_external_homologation": false,
+  "whole_figure10_accepted": false,
+  "whole_Part1_accepted": false
+}

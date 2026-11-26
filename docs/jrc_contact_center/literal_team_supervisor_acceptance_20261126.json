@@ -1,0 +1,116 @@
+{
+  "accepted_literal_clauses": {
+    "D2-P0256-C02": {
+      "expected_sha256": "cfde18d09149a8eb50f1a21e29486738e4db77252cb79b5e37a96cd019ccc648",
+      "expected": "Supervisor Principal e Supervisores Adicionais: selecionar usuarios elegiveis."
+    }
+  },
+  "approved_source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+  "approved_run": 45693144825,
+  "artifact": 15065693526,
+  "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+  "native_supervision_examples_reused": 95,
+  "native_report": {
+    "path": "tmp/call-center-rspec.json",
+    "sha256": "4c2557f38cb624ec159ee40321af129eda63f4273d0b7c0ee61f39f61d369410"
+  },
+  "four_Chrome_receipts": [
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-team-supervision-native.json",
+      "sha256": "ad3348dba90a61ffe96dc959e54cced3d0ec53faca5fe38e4fdf1bc92f7c3268",
+      "result": {
+        "synthetic": true,
+        "sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "team": "342",
+        "saved": 200,
+        "persisted_primary": "3671",
+        "persisted_additional": "3672",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-team-supervision-native.json",
+      "sha256": "af16a23e04c365579a5bc296e3868dab1389fd7b7799fe4c6f13bb655b05a6a5",
+      "result": {
+        "synthetic": true,
+        "sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "team": "338",
+        "saved": 200,
+        "persisted_primary": "3563",
+        "persisted_additional": "3564",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-team-supervision-native.json",
+      "sha256": "4a292ac5d7b48af1fc67d2f8bc28c45f4fd7db3fe4644a71ad9cf80120e9d6fd",
+      "result": {
+        "synthetic": true,
+        "sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "team": "350",
+        "saved": 200,
+        "persisted_primary": "3887",
+        "persisted_additional": "3888",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-team-supervision-native.json",
+      "sha256": "ad1bbd2b74e734cb0e1283e5c2895f39959fc773e419fac1d5204a88dd829c4a",
+      "result": {
+        "synthetic": true,
+        "sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "team": "346",
+        "saved": 200,
+        "persisted_primary": "3779",
+        "persisted_additional": "3780",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    }
+  ],
+  "screenshots_originals_actually_opened": [
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-team-supervision-reviewed.png",
+      "sha256": "278cbb65ceccb7b653e6c76b504ce55676aad96f9628bf512dabd9e68566355c"
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-team-supervision-reviewed.png",
+      "sha256": "c48a914e8ab85e786a0a0ad39ce29a237a05ff1cb15f2c2e4f582bb27e14241d"
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-team-supervision-reviewed.png",
+      "sha256": "af2ea1948aeb6269b9a6e6bfc74992109c470d76eaa3012e1421ee4c58f47bae"
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-team-supervision-reviewed.png",
+      "sha256": "997b910b702be6b5f921bb08fb2d0e9bf4f6e0557f5f237fbff8f3483f98cfca"
+    }
+  ],
+  "current_15_source_paths_unchanged_proof_sha256": "211faa31ef736006120ba023be34176c803722f6829c75e6b98c3736875376b0",
+  "shared_API_locale_and_wiring_review_sha256": "a4e5bc3bf68c5719375f15b65ea2f16c50d99cd51caf1f2df06cc2d269235338",
+  "actual_new_test_executions": 0,
+  "new_screenshots_generated": 0,
+  "not_an_acceptance_of_current_whole_CI": true,
+  "whole_figure12_or_Part1_accepted": false,
+  "PABX_routing_delivery_not_homologated": true
+}

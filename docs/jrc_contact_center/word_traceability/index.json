@@ -1,8 +1,8 @@
 {
   "format_version": 1,
   "review_at": "2026-11-23T20:15:50.371122+00:00",
-  "validated_base_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
-  "candidate_source_parent_sha": "151bf30d8063376b2b5f7dc05400161165f48f54",
+  "validated_base_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
+  "candidate_source_parent_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
   "candidate_not_yet_validated": true,
   "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
@@ -4209,8 +4209,8 @@
     "closed_unique_literal_clauses": 18,
     "not_full_global_implementation_estimate": true
   },
-  "figure10_proven_literal_percentage": 20.0,
-  "Parte1_proven_formal_lower_bound_percentage": 5.96,
+  "figure10_proven_literal_percentage": 28.0,
+  "Parte1_proven_formal_lower_bound_percentage": 7.22,
   "full_global_reaudit_complete": false,
   "typed_durable_delivery_candidate": {
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
@@ -4261,8 +4261,8 @@
   },
   "latest_literal_functional_progress": {
     "document": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
-    "sha256": "94225dc2cf6889e03e8291bd017956c86cbd0711aa172a65c9445defa1c8b05f",
-    "unique_closed": 33,
+    "sha256": "852e78586ae807f51e9d8a8a7d8b1aae0b07906ca6c4f006b84a49330e0bb4a3",
+    "unique_closed": 40,
     "total_unique": 554,
     "whole_Part1_accepted": false
   },
@@ -4290,5 +4290,15 @@
     "native_regressions_added": 4,
     "native_tests_or_whole_figure_acceptance": false,
     "existing_280_Chrome_cases_preserved": true
+  },
+  "current_public_Project_native_acceptance": {
+    "document": "docs/jrc_contact_center/ending_public_Project_native_acceptance_20261126.json",
+    "sha256": "6a4b1e84ae127169c84dbc8bbb9850f2584cfc5e8c7a674141e66eda8419a12a",
+    "source_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041"
+  },
+  "current_grouped_SD_audio_candidate": {
+    "document": "docs/jrc_contact_center/ending_service_desk_operational_form_candidate_20261126.json",
+    "sha256": "1c8d345d77e8af642e7d415b63d0e91b6e1734b6616ff971ab2294ac5ea463c4",
+    "native_or_Chrome_approval": false
   }
 }

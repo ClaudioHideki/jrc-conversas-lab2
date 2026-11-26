@@ -96,5 +96,20 @@
     "blocking_functional_issue": "ACW completion projection cleared the writer saved_changes before its after-update-commit delivery callback.",
     "correction_scope": "Fresh scoped reader, unchanged callback/authorization; four new committed regressions.",
     "accepted_after_new_native_and_four_mode_Chrome_only": true
+  },
+  "current_verified_delivery": {
+    "source_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
+    "document": "docs/jrc_contact_center/ending_public_Project_native_acceptance_20261126.json",
+    "sha256": "6a4b1e84ae127169c84dbc8bbb9850f2584cfc5e8c7a674141e66eda8419a12a",
+    "formal_literal_clauses_closed_total": 40
+  },
+  "next_grouped_delivery": {
+    "figures": [
+      6,
+      10
+    ],
+    "document": "docs/jrc_contact_center/ending_service_desk_operational_form_candidate_20261126.json",
+    "sha256": "1c8d345d77e8af642e7d415b63d0e91b6e1734b6616ff971ab2294ac5ea463c4",
+    "native_and_browser_approval_pending": true
   }
 }

@@ -3058,6 +3058,14 @@
           "note": "Nota",
           "system": "Sistema"
         }
+      },
+      "SERVICE_DESK_CONFIGURATION": {
+        "TITLE": "Configurar criação de chamado",
+        "AUTHORITY": "A unidade vem do vínculo autorizado da fila. A empresa e o solicitante serão obtidos do atendimento original; as permissões atuais do agente serão verificadas novamente em cada execução. Aplicar estes parâmetros não cria um chamado.",
+        "SOURCE_UNAVAILABLE": "O vínculo de unidade ou as permissões do Service Desk mudaram. Volte à regra e atualize o contexto antes de continuar.",
+        "REVIEW": "Revisei os parâmetros do chamado e a nova versão prospectiva da regra. Os registros, as versões e as ações anteriores serão preservados.",
+        "ASSIGNMENT_REQUIRED": "Este destino usa uma fila ou um responsável. É necessária permissão de atribuição no Service Desk para configurá-lo. Nenhuma permissão será concedida automaticamente.",
+        "INITIAL_STATUS_REQUIRED": "A unidade precisa ter uma situação inicial ativa no Service Desk. Configure-a no módulo de origem e revise os dados antes de continuar."
       }
     },
     "ENDING_ACTIVATION": {
@@ -3176,6 +3184,13 @@
       "CONFIRM": "Confirmar retomada",
       "RUNNING": "Registrando solicitação...",
       "CANCEL": "Cancelar"
+    },
+    "AUDIO_ROW_PREVIEW": {
+      "TITLE": "Prévia do áudio",
+      "OPEN": "Reproduzir",
+      "VERSION_CHANGED": "A versão deste áudio mudou. Atualize a lista e revise a versão atual antes de reproduzir.",
+      "NOT_READY": "Esta versão ainda não tem verificação técnica válida. Consulte o histórico antes de reproduzir.",
+      "ERROR": "Não foi possível carregar esta prévia. Feche e tente novamente."
     }
   }
 }

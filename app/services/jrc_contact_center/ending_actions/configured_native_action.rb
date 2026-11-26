@@ -10,8 +10,9 @@ class JrcContactCenter::EndingActions::ConfiguredNativeAction
     JrcOperations::Access.crm?(current) && (current.administrator? || current.crm_enabled?)
   end
 
-  def initialize(account:, member:)
+  def initialize(account:, member:, source_scope: nil)
     @account = account
+    @source_scope = source_scope
     @member = account.account_users.find_by!(id: member.id, user_id: member.user_id)
   end
 
@@ -24,14 +25,25 @@ class JrcContactCenter::EndingActions::ConfiguredNativeAction
       raise Pundit::NotAuthorizedError unless self.class.crm_available?(@member)
 
       action
+    when 'service_desk'
+      service_desk_parameters(action, active)
     else
-      # Service Desk remains unavailable until its native mapping, membership,
-      # catalogue references and selected target revision are all reviewed.
       raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable'
     end
   end
 
   private
+
+  def service_desk_parameters(action, active)
+    parameters = action.fetch('parameters')
+    raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' if parameters.key?('operation')
+    raise JrcContactCenter::OperationError, 'ending_service_desk_mapping_required' unless @source_scope.is_a?(Hash)
+
+    context = { account: @account, account_user: @member, user: @member.user }
+    validator = JrcContactCenter::EndingActions::ServiceDeskRuleParameters.new(user_context: context, source_scope: @source_scope)
+    checked = active ? validator.call(parameters) : validator.authorize_reference!(parameters)
+    action.merge('parameters' => checked)
+  end
 
   def project_parameters(action, active)
     validator = JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: @member)

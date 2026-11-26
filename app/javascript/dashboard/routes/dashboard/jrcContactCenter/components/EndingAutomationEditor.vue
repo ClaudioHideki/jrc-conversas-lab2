@@ -6,6 +6,7 @@ import AcwRuleTarget from './AcwRuleTarget.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import EndingProjectTaskConfiguration from './EndingProjectTaskConfiguration.vue';
 import EndingCrmConfiguration from './EndingCrmConfiguration.vue';
+import EndingServiceDeskConfiguration from './EndingServiceDeskConfiguration.vue';
 import EndingRuleActivation from './EndingRuleActivation.vue';
 import { useEndingAutomationEditor } from '../composables/useEndingAutomationEditor';
 
@@ -29,6 +30,8 @@ const {
   persisted,
   reasons,
   crmOptions,
+  serviceDeskOptions,
+  destinationPresentations,
   loading,
   saving,
   sourceLoading,
@@ -43,6 +46,7 @@ const {
 const activationBusy = ref(false);
 const taskConfiguration = ref(false);
 const crmConfiguration = ref(false);
+const serviceDeskConfiguration = ref(false);
 const discard = ref('');
 const conditions = computed({
   get: () => draft.value.conditions.outcome_codes.join('\n'),
@@ -59,13 +63,22 @@ const task = computed(() =>
 const crm = computed(() =>
   draft.value?.actions.find(action => action.kind === 'crm')
 );
+const serviceDesk = computed(() =>
+  draft.value?.actions.find(action => action.kind === 'service_desk')
+);
 const configured = kind =>
   draft.value?.actions.some(action => action.kind === kind);
 const destinationAllowed = kind =>
   kind === 'project_task' ||
-  (kind === 'crm' && crmOptions.value.configuration_available);
+  (kind === 'crm' && crmOptions.value.configuration_available) ||
+  (kind === 'service_desk' && serviceDeskOptions.value.configuration_available);
 const configureDestination = kind => {
   if (kind === 'project_task') taskConfiguration.value = true;
+  if (
+    kind === 'service_desk' &&
+    serviceDeskOptions.value.configuration_available
+  )
+    serviceDeskConfiguration.value = true;
   if (kind === 'crm' && crmOptions.value.configuration_available)
     crmConfiguration.value = true;
 };
@@ -89,6 +102,7 @@ const confirmDiscard = async () => {
   await editor.discard();
   taskConfiguration.value = false;
   crmConfiguration.value = false;
+  serviceDeskConfiguration.value = false;
   if (target === 'close') emit('close');
 };
 const applyTask = parameters => {
@@ -111,6 +125,20 @@ const removeCrm = () => {
     action => action.kind !== 'crm'
   );
   crmConfiguration.value = false;
+};
+const applyServiceDesk = parameters => {
+  draft.value.destination_schema_version = 2;
+  draft.value.actions = [
+    ...draft.value.actions.filter(action => action.kind !== 'service_desk'),
+    { kind: 'service_desk', parameters },
+  ];
+  serviceDeskConfiguration.value = false;
+};
+const removeServiceDesk = () => {
+  draft.value.actions = draft.value.actions.filter(
+    action => action.kind !== 'service_desk'
+  );
+  serviceDeskConfiguration.value = false;
 };
 // This is an explicit user choice. Opening a historical v1 rule never
 // upgrades it, arms it, or grants consent for an individual attendance action.
@@ -164,8 +192,26 @@ const destinations = [
       {{ text('RETRY') }}
     </button>
     <template v-if="error !== 'DENIED' && error !== 'LOAD_FAILED' && !loading">
+      <EndingServiceDeskConfiguration
+        v-if="
+          draft &&
+          serviceDeskConfiguration &&
+          serviceDeskOptions.configuration_available
+        "
+        :key="`${accountId}:${source.scope_revision}`"
+        :account-id="accountId"
+        :value="serviceDesk?.parameters || null"
+        :options="serviceDeskOptions"
+        :labels="destinationPresentations[draft.code]?.service_desk || {}"
+        :disabled="saving"
+        @save="applyServiceDesk"
+        @cancel="serviceDeskConfiguration = false"
+        @remove="removeServiceDesk"
+      />
       <EndingCrmConfiguration
-        v-if="draft && crmConfiguration && crmOptions.configuration_available"
+        v-else-if="
+          draft && crmConfiguration && crmOptions.configuration_available
+        "
         :key="String(accountId)"
         :value="crm?.parameters || null"
         :options="crmOptions"

@@ -1,0 +1,65 @@
+{
+  "approved_source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+  "approved_run": 45693144825,
+  "artifact_id": 15065693526,
+  "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+  "literal_IDs": [
+    "D2-P0211-C03",
+    "D2-P0211-C04"
+  ],
+  "actual_behaviour": "Existing native library selects exact version2, reviews required fields, persists exact binding with additional required fields, reloads checked state; the old attendance retains version1 and its captured clock. Managing the library remains its native existing UI.",
+  "source_reuse_proof_sha256": "edc601828f125de19a436c71fe4ead1671741a65f4cb8fd1dc123f20cb85fc20",
+  "source_reuse_proof": {
+    "approved_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+    "current_reviewed_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
+    "only_existing_evidence_reused": true,
+    "new_tests_executed": 0,
+    "new_images_generated": 0,
+    "same_whole_real_Chrome_case_sha256": "fa0a626ef0ab6f09c2a7c4c07915f437fae744c3b73962d55b35fa6e30e208b4",
+    "native_source_hashes": {
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleFormBinding.vue": "b25dc66f7a8bfe058d128cfa36b2fc42a1d29b222f5faf477f56f9fb53609101",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwFormLibrary.vue": "ebef207fdfbf3c8ea8cdb06d6ee1a401265b645f14f5245326026041da02af9c",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwFormSchemaEditor.vue": "e545f23050983ecb08b0a16c47e6e4dd491bb8be8f4904572e88af6307b9da65",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useAcwFormEditor.js": "53efd98d52bcb55a9e6d31396901b1bec768ba58e78468442a32cda426630eca",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/acwForms.js": "6b688502df597dfc3afccd97bf0af05ee39bfaf524b64749036ac9c72c1b1575",
+      "app/controllers/api/v1/accounts/jrc_contact_center/acw_policies_controller.rb": "7b5d5ec54c536cc5d2eb8a906bac29d0315d0645a4b7c3b055ce1cd5ba526f3b",
+      "app/controllers/api/v1/accounts/jrc_contact_center/acw_forms_controller.rb": "73c750ceca4e61bf4a40d9c80fd8875b2b5407955716f4330994c084b1fbc1ab"
+    },
+    "unchanged_native_API_methods": {
+      "acwForms": "625fb21f24e1f713143ca6a3034669ac2fd5ab359ea3a645cc456918f450553b",
+      "saveAcwForm": "0290e9ae3ef057b0e3fae9e05819bb255ae46da8ee1d8f7290e6cb9cea19e916",
+      "acwFormHistory": "69dc19eb62c20ec5ec12ec44b728e4d0fbef8db8a91fd1f3abd32b862d0da670",
+      "acwFormVersion": "ba012d9d6b33ab9859212b5529e2556c567d41ba1b4930871137d5e40ffb4a3a",
+      "acwPolicy": "55ff66557a7e296f8de8dbdd268fb4d20ba4358209c906abc29788e84062d910",
+      "updateAcwPolicy": "7afd8ce1751988499d83b9686943d6a9ced3026439e1266a4aebb64d6203e5f7"
+    },
+    "original_4_images_opened": true,
+    "literal_reusable_form_and_required_fields_candidates": [
+      "D2-P0211-C03",
+      "D2-P0211-C04"
+    ],
+    "does_not_accept_entire_F9_or_current_CI": true
+  },
+  "actual_4_original_images_opened": true,
+  "original_image_sha256": {
+    "desktop-dark-operational-form-binding.png": "bc6aed069398120b022d5063cab6a5b66150fd3dea312ef5d8fdbc80fdf76779",
+    "desktop-light-operational-form-binding.png": "13517518108c7f9c3f56df2278da8a20ba7d6a8ebdf6769b0c8c32b03a617807",
+    "mobile-dark-operational-form-binding.png": "4a4317727ab5e0ba7685129ee849b56fea61413765c034f04f1e2663cd4828c2",
+    "mobile-light-operational-form-binding.png": "9a451e04f1f9d956c8afd9bfbcf360e4d1bf2bd1e94ab7944590d51f954b539a"
+  },
+  "native_existing_cases_by_file": {
+    "spec/services/jrc_contact_center/acw_form_binding_policy_spec.rb": 8,
+    "spec/services/jrc_contact_center/acw_form_bindings_spec.rb": 29,
+    "spec/requests/api/v1/accounts/jrc_contact_center/acw_form_binding_configuration_spec.rb": 10,
+    "spec/requests/api/v1/accounts/jrc_contact_center/acw_forms_spec.rb": 8
+  },
+  "existing_Vue_case_counts": {
+    "useAcwFormEditor.spec.js": 16,
+    "AcwFormLibrary.spec.js": 10,
+    "AcwRuleFormBinding.spec.js": 6
+  },
+  "new_test_executions": 0,
+  "new_images_generated": 0,
+  "whole_F9_or_Part1_or_current_CI_accepted": false,
+  "unrelated_new_dispatch_regression_must_pass_separately": true
+}

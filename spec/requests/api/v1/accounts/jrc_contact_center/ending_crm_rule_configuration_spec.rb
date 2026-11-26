@@ -152,13 +152,13 @@ RSpec.describe 'Explicit CRM ending configuration through the native private rul
     expect(JrcContactCenter::EndingDestinationAttempt.where(account: account)).to be_empty
   end
 
-  it 'keeps Service Desk configuration blocked until all native mapping and reference checks are available' do
+  it 'does not infer native Service Desk authority from current CRM configuration rights' do
     parameters = {
       'unit_id' => '1', 'service_id' => nil, 'attributes' => { 'title' => 'SYNTHETIC unavailable' }
     }
     action = { 'kind' => 'service_desk', 'parameters' => parameters }
     save_crm_rule(crm_rule.merge('actions' => [action]))
-    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response).to have_http_status(:unauthorized)
     expect(JrcContactCenter::EndingActionVersion.where(account: account)).to be_empty
   end
 end

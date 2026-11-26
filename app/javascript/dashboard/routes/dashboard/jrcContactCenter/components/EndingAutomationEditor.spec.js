@@ -19,6 +19,7 @@ const create = () =>
         ConfigurationRevisionConflict: true,
         EndingProjectTaskConfiguration: true,
         EndingCrmConfiguration: true,
+        EndingServiceDeskConfiguration: true,
         EndingRuleActivation: true,
       },
     },
@@ -50,6 +51,8 @@ beforeEach(() => {
     persisted: ref(true),
     reasons: ref([{ code: 'SYNTHETIC_REASON', name: 'SYNTHETIC reason' }]),
     crmOptions: ref({ configuration_available: false, activity_types: [] }),
+    serviceDeskOptions: ref({ configuration_available: false }),
+    destinationPresentations: ref({}),
     loading: ref(false),
     saving: ref(false),
     sourceLoading: ref(false),
@@ -133,6 +136,93 @@ describe('explicit manual automation version choice', () => {
     await button.trigger('click');
     expect(state.editor.draft.value.destination_schema_version).toBeUndefined();
     expect(state.editor.reviewed.value).toBe(true);
+    expect(state.editor.save).not.toHaveBeenCalled();
+  });
+});
+
+describe('native Service Desk rule configuration', () => {
+  it('keeps the destination unavailable without the current authorized source and native context', () => {
+    const wrapper = create();
+    expect(
+      wrapper.get('[data-ending-configure-destination="service_desk"]').element
+        .disabled
+    ).toBe(true);
+    expect(
+      wrapper.findComponent({ name: 'EndingServiceDeskConfiguration' }).exists()
+    ).toBe(false);
+    expect(state.editor.save).not.toHaveBeenCalled();
+  });
+
+  it('applies separately reviewed parameters while preserving the existing Project action and deferring persistence', async () => {
+    state.editor.source.value = { scope_revision: 'a'.repeat(64) };
+    state.editor.serviceDeskOptions.value = {
+      configuration_available: true,
+      unit: { id: '11', name: 'SYNTHETIC mapped' },
+    };
+    const wrapper = create();
+    const previous = JSON.stringify(state.editor.draft.value.actions);
+    await wrapper
+      .get('[data-ending-configure-destination="service_desk"]')
+      .trigger('click');
+    const panel = wrapper.findComponent({
+      name: 'EndingServiceDeskConfiguration',
+    });
+    expect(panel.exists()).toBe(true);
+    const parameters = {
+      unit_id: '11',
+      service_id: null,
+      attributes: {
+        title: 'SYNTHETIC reviewed',
+        description: 'SYNTHETIC reviewed',
+      },
+    };
+    panel.vm.$emit('save', parameters);
+    await wrapper.vm.$nextTick();
+    expect(
+      JSON.stringify(
+        state.editor.draft.value.actions.filter(
+          row => row.kind === 'project_task'
+        )
+      )
+    ).toBe(previous);
+    expect(
+      state.editor.draft.value.actions.find(row => row.kind === 'service_desk')
+        .parameters
+    ).toEqual(parameters);
+    expect(state.editor.draft.value.destination_schema_version).toBe(2);
+    expect(state.editor.save).not.toHaveBeenCalled();
+  });
+
+  it('preserves all parameters on cancel and removes only the explicitly selected destination', async () => {
+    state.editor.source.value = { scope_revision: 'a'.repeat(64) };
+    state.editor.serviceDeskOptions.value = {
+      configuration_available: true,
+      unit: { id: '11', name: 'SYNTHETIC mapped' },
+    };
+    state.editor.draft.value.actions.push({
+      kind: 'service_desk',
+      parameters: { unit_id: '11' },
+    });
+    const previous = JSON.stringify(state.editor.draft.value.actions);
+    const wrapper = create();
+    await wrapper
+      .get('[data-ending-configure-destination="service_desk"]')
+      .trigger('click');
+    wrapper
+      .findComponent({ name: 'EndingServiceDeskConfiguration' })
+      .vm.$emit('cancel');
+    await wrapper.vm.$nextTick();
+    expect(JSON.stringify(state.editor.draft.value.actions)).toBe(previous);
+    await wrapper
+      .get('[data-ending-configure-destination="service_desk"]')
+      .trigger('click');
+    wrapper
+      .findComponent({ name: 'EndingServiceDeskConfiguration' })
+      .vm.$emit('remove');
+    await wrapper.vm.$nextTick();
+    expect(state.editor.draft.value.actions.map(row => row.kind)).toEqual([
+      'project_task',
+    ]);
     expect(state.editor.save).not.toHaveBeenCalled();
   });
 });

@@ -45,7 +45,7 @@ class JrcContactCenter::EndingActions::ManualDestinationPreview
     ready = JrcContactCenter::EndingActions::ExecutionReadiness.new(account: @account, origin: @origin).call(code)
     return [] unless JrcContactCenter::EndingActions::NativeTrigger.new(origin: @origin).call(rule)
 
-    rule.fetch('actions').filter_map { |action| preview(action, code, ready) }
+    rule.fetch('actions').filter_map { |action| preview(action, code, ready, rule.fetch('scope')) }
   rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
     []
   rescue JrcContactCenter::OperationError => e
@@ -54,13 +54,17 @@ class JrcContactCenter::EndingActions::ManualDestinationPreview
     []
   end
 
-  def preview(action, code, readiness)
+  def preview(action, code, readiness, source_scope)
     kind = action.fetch('kind')
     recorded = JrcContactCenter::EndingDestinationAttempt.exists?(account: @account, origin: @origin, rule_code: code, destination_kind: kind)
     return if recorded
 
-    JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member).call(action, active: true)
-    JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: @member, origin: @origin).call if kind == 'crm'
+    JrcContactCenter::EndingActions::ConfiguredNativeAction.new(
+      account: @account, member: @member, source_scope: source_scope
+    ).call(action, active: true)
+    if %w[crm service_desk].include?(kind)
+      JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: @member, origin: @origin).call
+    end
     input = [
       'SELECT cc_ending_destination_context(?, ?, ?, ?, ?)::text', @account.id, @origin.id, readiness.id, code, kind
     ]

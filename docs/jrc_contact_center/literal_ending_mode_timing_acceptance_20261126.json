@@ -1,0 +1,22 @@
+{
+  "source_sha": "5d4e5b2424cadb6e0f6b13660b21fd28b36b6041",
+  "run": 45768281599,
+  "artifact": 15096174259,
+  "artifact_sha256": "d3e82bc0f2ec833a74599be231090ace2bf2afe3f190c382f2dd6b36ab1e9afd",
+  "unique_literal_IDs": [
+    "D2-P0222-C05",
+    "D2-P0224-C04"
+  ],
+  "expected_text_sha256": {
+    "D2-P0222-C05": "e620c6778d7a31375cd7d97afe8de8b8d60c7a3ba599299662d3da1e7f02e852",
+    "D2-P0224-C04": "ed3609182af6b6ec30efe756ada90f009643a84ca2f6e293f4068945879910ec"
+  },
+  "native_acceptance": {
+    "document": "docs/jrc_contact_center/ending_public_Project_native_acceptance_20261126.json",
+    "sha256": "6a4b1e84ae127169c84dbc8bbb9850f2584cfc5e8c7a674141e66eda8419a12a"
+  },
+  "scope": "Per-rule automatic versus explicit original-agent confirmation and call_end versus acw_completed timing; actual native effects and post-commit worker in four Chrome modes.",
+  "screenshots_originals_opened": 8,
+  "whole_figure10_accepted": false,
+  "remaining": "Public CRM/Service Desk mixed Chrome flow and other destination/Nico controls retain separate pending acceptance."
+}

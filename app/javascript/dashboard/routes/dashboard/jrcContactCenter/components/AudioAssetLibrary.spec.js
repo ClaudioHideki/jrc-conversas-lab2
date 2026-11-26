@@ -3,6 +3,7 @@ import { computed, defineComponent, h, reactive, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import AudioAssetLibrary from './AudioAssetLibrary.vue';
+import AudioLibraryPreview from './AudioLibraryPreview.vue';
 import AudioInspectionHistory from './AudioInspectionHistory.vue';
 import AudioCaptureDraft from './AudioCaptureDraft.vue';
 
@@ -125,6 +126,63 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it('keeps direct row playback unavailable for unverified versions without reading private details', async () => {
+    const wrapper = fixture({ AudioLibraryPreview: true });
+    await flushPromises();
+    expect(
+      wrapper.get('[data-preview-audio-asset="44"]').element.disabled
+    ).toBe(true);
+    await wrapper.get('[data-preview-audio-asset="44"]').trigger('click');
+    expect(wrapper.findComponent(AudioLibraryPreview).exists()).toBe(false);
+    expect(API.audioAsset).not.toHaveBeenCalled();
+  });
+
+  it('opens the selected verified row in the native preview and preserves list state when closing it', async () => {
+    const item = structuredClone(row);
+    item.latest_version.technical_verification = { id: '12', ready: true };
+    API.audioAssets.mockResolvedValue({
+      data: {
+        items: [item],
+        meta: { total: 1, pages: 1 },
+        max_upload_bytes: 1000,
+      },
+    });
+    const wrapper = fixture({ AudioLibraryPreview: true });
+    await flushPromises();
+    await wrapper.get('[data-preview-audio-asset="44"]').trigger('click');
+    const preview = wrapper.getComponent(AudioLibraryPreview);
+    expect(preview.props()).toMatchObject({
+      accountId: '1',
+      unitId: '10',
+      asset: item,
+      canManage: true,
+    });
+    preview.vm.$emit('close');
+    await flushPromises();
+    expect(wrapper.findComponent(AudioLibraryPreview).exists()).toBe(false);
+    expect(wrapper.find('[data-audio-asset="44"]').exists()).toBe(true);
+    expect(API.audioAssets).toHaveBeenCalledOnce();
+  });
+
+  it('unmounts direct private playback on an account profile or unit context change', async () => {
+    const item = structuredClone(row);
+    item.latest_version.technical_verification = { id: '12', ready: true };
+    API.audioAssets.mockResolvedValue({
+      data: {
+        items: [item],
+        meta: { total: 1, pages: 1 },
+        max_upload_bytes: 1000,
+      },
+    });
+    const wrapper = fixture({ AudioLibraryPreview: true });
+    await flushPromises();
+    await wrapper.get('[data-preview-audio-asset="44"]').trigger('click');
+    expect(wrapper.findComponent(AudioLibraryPreview).exists()).toBe(true);
+    await wrapper.setProps({ unitId: '11' });
+    await flushPromises();
+    expect(wrapper.findComponent(AudioLibraryPreview).exists()).toBe(false);
+  });
+
   it('passes only the byte-admitted native selection to copying and clears partial outcomes on scope changes', async () => {
     const item = structuredClone(row);
     item.latest_version.technical_verification = { id: '100', ready: true };

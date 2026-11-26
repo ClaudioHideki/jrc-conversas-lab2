@@ -9,6 +9,7 @@ import API from 'dashboard/api/jrcContactCenter';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import AudioFolderPicker from './AudioFolderPicker.vue';
 import AudioInspectionHistory from './AudioInspectionHistory.vue';
+import AudioLibraryPreview from './AudioLibraryPreview.vue';
 import AudioCaptureDraft from './AudioCaptureDraft.vue';
 import AudioIvrUsages from './AudioIvrUsages.vue';
 import AudioSelectedMoveDialog from './AudioSelectedMoveDialog.vue';
@@ -208,6 +209,7 @@ const historyItem = ref(null);
 const historyLoading = ref(false);
 const historyError = ref(false);
 const historyDialog = ref(null);
+const previewItem = ref(null);
 const page = computed(() =>
   Math.max(
     1,
@@ -270,6 +272,7 @@ const clearHistory = () => {
   historyLoading.value = false;
 };
 const forget = () => {
+  previewItem.value = null;
   archive.close();
   archiveLimits.value = { max_entries: 0, max_bytes: 0 };
   metadataLimits.value = { max_entries: 0 };
@@ -343,6 +346,7 @@ const openDetails = async row => {
   }
 };
 const load = async () => {
+  previewItem.value = null;
   archive.close();
   archiveLimits.value = { max_entries: 0, max_bytes: 0 };
   metadataLimits.value = { max_entries: 0 };
@@ -571,6 +575,16 @@ onBeforeUnmount(() => {
     data-audio-asset-library
   >
     <h3 class="text-lg font-semibold text-n-slate-12">{{ label('TITLE') }}</h3>
+    <AudioLibraryPreview
+      v-if="previewItem && canManage"
+      :key="`${accountId}:${unitId}:${previewItem.id}`"
+      :account-id="accountId"
+      :unit-id="unitId"
+      :asset="previewItem"
+      :can-manage="canManage"
+      @close="previewItem = null"
+      @denied="denied"
+    />
     <p
       role="status"
       class="rounded-xl border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
@@ -861,6 +875,20 @@ onBeforeUnmount(() => {
                   {{ label('ACTIONS') }}
                 </p>
                 <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    :disabled="
+                      saving ||
+                      opening ||
+                      row.latest_version?.technical_verification?.ready !== true
+                    "
+                    :data-preview-audio-asset="row.id"
+                    class="inline-flex max-w-full items-center gap-2 rounded-lg border border-n-blue-6 px-2 py-2 text-n-blue-11 disabled:opacity-40"
+                    @click="previewItem = row"
+                  >
+                    <Icon icon="i-lucide-play" class="size-4 shrink-0" />
+                    {{ t('JRC_CONTACT_CENTER.AUDIO_ROW_PREVIEW.OPEN') }}
+                  </button>
                   <button
                     type="button"
                     :disabled="saving || opening"

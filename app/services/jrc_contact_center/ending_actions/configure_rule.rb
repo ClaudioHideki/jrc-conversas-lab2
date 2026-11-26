@@ -42,7 +42,9 @@ class JrcContactCenter::EndingActions::ConfigureRule
     JrcContactCenter::EndingActions::RuleSourceAuthority.new(account: @account, member: member).call(rule)
     rule.fetch('actions').each do |action|
       if rule.fetch('destination_schema_version', 1) == 2
-        JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: member).call(action, active: false)
+        JrcContactCenter::EndingActions::ConfiguredNativeAction.new(
+          account: @account, member: member, source_scope: rule.fetch('scope')
+        ).call(action, active: false)
       else
         raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action.fetch('kind') == 'project_task'
 

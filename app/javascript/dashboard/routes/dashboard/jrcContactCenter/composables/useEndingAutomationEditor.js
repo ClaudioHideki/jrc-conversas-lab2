@@ -31,6 +31,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
   const status = ref('all');
   const page = ref(1);
   const policy = ref(null);
+  const destinationPresentations = ref({});
   const draft = ref(null);
   const baseline = ref('');
   const persisted = ref(false);
@@ -60,12 +61,21 @@ export const useEndingAutomationEditor = ({ accountId }) => {
       ? value
       : { configuration_available: false, activity_types: [] };
   });
+  const serviceDeskOptions = computed(() => {
+    const value = source.value?.service_desk;
+    return source.value?.configuration_available === true &&
+      value?.configuration_available === true &&
+      value.unit
+      ? value
+      : { configuration_available: false };
+  });
   const reset = () => {
     sourceGeneration += 1;
     items.value = [];
     draft.value = null;
     source.value = null;
     policy.value = null;
+    destinationPresentations.value = {};
     activationRevision.value = '';
     baseline.value = '';
     reviewed.value = false;
@@ -129,6 +139,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
     loading.value = true;
     error.value = '';
     items.value = [];
+    destinationPresentations.value = {};
     try {
       const response = await API.endingRules(account, {
         q: q.value,
@@ -161,6 +172,18 @@ export const useEndingAutomationEditor = ({ accountId }) => {
             response: { status: 403 },
           }
         );
+      const labels = response.data.destination_presentations || {};
+      const missingLabels = response.data.items.some(
+        row =>
+          row.actions.some(action => action.kind === 'service_desk') &&
+          !labels[row.code]?.service_desk
+      );
+      if (missingLabels)
+        throw Object.assign(
+          new Error('Native destination reference context unavailable'),
+          { response: { status: 403 } }
+        );
+      destinationPresentations.value = labels;
       policy.value = configuration;
       items.value = response.data.items;
       meta.value = response.data.meta;
@@ -367,6 +390,8 @@ export const useEndingAutomationEditor = ({ accountId }) => {
     source,
     reasons,
     crmOptions,
+    serviceDeskOptions,
+    destinationPresentations,
     loading,
     saving,
     sourceLoading,

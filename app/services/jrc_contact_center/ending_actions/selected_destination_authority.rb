@@ -31,7 +31,9 @@ class JrcContactCenter::EndingActions::SelectedDestinationAuthority
     action = rule.fetch('actions').find { |row| row.fetch('kind') == @attempt.destination_kind }
     raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action
 
-    JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member).call(action, active: true)
+    JrcContactCenter::EndingActions::ConfiguredNativeAction.new(
+      account: @account, member: @member, source_scope: rule.fetch('scope')
+    ).call(action, active: true)
     return unless %w[crm service_desk].include?(@attempt.destination_kind)
 
     JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: @member, origin: @origin).call

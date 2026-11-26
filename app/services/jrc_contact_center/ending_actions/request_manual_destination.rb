@@ -68,8 +68,12 @@ class JrcContactCenter::EndingActions::RequestManualDestination
 
     # This is the same native destination authority as the editor, independent
     # of configure permission. CRM additionally requires the original customer.
-    JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: member).call(action, active: true)
-    JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: member, origin: origin).call if @kind == 'crm'
+    JrcContactCenter::EndingActions::ConfiguredNativeAction.new(
+      account: @account, member: member, source_scope: rule.fetch('scope')
+    ).call(action, active: true)
+    if %w[crm service_desk].include?(@kind)
+      JrcContactCenter::EndingActions::OriginalCustomerReference.new(account: @account, member: member, origin: origin).call
+    end
     readiness = readiness_for_existing_or_new_root(origin)
     triggered = JrcContactCenter::EndingActions::NativeTrigger.new(origin: origin).call(rule)
     raise JrcContactCenter::OperationError, 'ending_action_trigger_pending' unless triggered

@@ -1085,3 +1085,9 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - Recibos por destino/ad8a50a1/CI 45670540681: 82 cenários nativos novos validados, incluindo falha parcial real CRM/Service Desk, concorrência PostgreSQL e repetição selecionada sem duplicação. O aceite é interno; editor/API público, despacho durável e F10-B pela interface ainda não estão homologados.
 
 - Próximo fluxo interno: intenções duráveis após commit e entrega pelo Sidekiq próprio, com 37 cenários novos de banco, Redis e autoridade atual, incluindo vínculo CRM com a empresa original. Sem ativação pública ou alterações de grants. O editor, os eventos operacionais e F10-B pela interface continuam pendentes.
+
+
+## Control Desk — entrega funcional agrupada de 26/11/2026
+
+- [x] ACW após commit: `5d4e5b24`, CI `45768281599`, 3751 Rails distintos, 1914 Vue, 280 Chrome e 672 capturas verificadas. Projetos: agente original, rollback, retry escolhido e ação automática. Parte 1 aberta.
+- [ ] Service Desk/prévia direta de áudio: candidata seguinte exige nova CI e Chrome; ver `docs/jrc_contact_center/ending_service_desk_operational_form_candidate_20261126.json`.

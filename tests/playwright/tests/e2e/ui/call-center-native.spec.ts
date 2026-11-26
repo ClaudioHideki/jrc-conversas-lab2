@@ -1,8 +1,10 @@
+import { verifyAudioRowPreview } from './call-center-audio-row-native.mjs';
 import { isBrowserApiResponse } from './call-center-browser-api.mjs';
 import { verifyNativeQueueMembership } from './call-center-queue-membership-native.mjs';
 import { verifyAllScopePauseApproval } from './call-center-pause-approval-native.mjs';
 import { verifyEndingConfirmation } from './call-center-ending-confirmation-native.mjs';
 import { verifyEndingEditor } from './call-center-ending-editor-native.mjs';
+import { verifyEndingServiceDesk } from './call-center-ending-service-desk-native.mjs';
 import { verifyAuthorityFilterGeometry } from './call-center-authority-filter-geometry.mjs';
 import { test, expect } from './cc-native-test.mjs';
 import { verifyNativeCalendars } from './call-center-calendar-native.mjs';
@@ -9497,6 +9499,17 @@ with zipfile.ZipFile(sys.argv[1]) as archive:
     })
   );
 
+  await verifyAudioRowPreview(page, info, {
+    target,
+    asset,
+    versionId,
+    bytePath: path,
+    sha256,
+    duration,
+    expectContainedDialog,
+  });
+  expect(selectedMoveForbiddenWrites).toEqual([]);
+
   // Restore the original authorized history/player so all prior withdrawal assertions remain intact.
   await page.goto(
     `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`
@@ -10247,10 +10260,17 @@ test('confirmed ending classification native keeps incomplete ACW open, survives
 test('versioned ending automation native editor persists reviewed private rules and denies stale or unauthorized changes without executing destinations', async ({
   page,
 }, info) => {
+  test.setTimeout(180000);
   await verifyEndingEditor(
     page,
     info,
     session.pause_targets[info.project.name].ending_automations,
+    session.administrator
+  );
+  await verifyEndingServiceDesk(
+    page,
+    info,
+    session.pause_targets[info.project.name].ending_service_desk,
     session.administrator
   );
 });

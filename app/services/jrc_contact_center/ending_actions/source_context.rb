@@ -10,7 +10,7 @@ class JrcContactCenter::EndingActions::SourceContext
   def call
     @context.call do |member|
       queue, row = source_records(member)
-      present(queue, row)
+      present(queue, row, member)
     end
   end
 
@@ -26,13 +26,21 @@ class JrcContactCenter::EndingActions::SourceContext
     [queue, row]
   end
 
-  def present(queue, row)
+  def present(queue, row, member)
     catalogue = JrcContactCenter::AcwEndingReasons.new(account: @account).call
     registered = catalogue.fetch('required_queue_ids', []).include?(queue.id.to_s)
     { id: queue.id.to_s, name: queue.name, unit: { id: queue.unit.id.to_s, name: queue.unit.name },
       scope_revision: row.integrity_sha256, scope_state: row.scope_state, registered_reason_required: registered,
       configuration_available: registered && row.scope_state == 'mapped' && queue.status == 'active' && queue.unit.status == 'active',
-      execution_available: false }
+      execution_available: false, service_desk: service_desk_context(row, member) }
+  end
+
+  def service_desk_context(row, member)
+    return { configuration_available: false } unless row.scope_state == 'mapped'
+
+    context = { account: @account, account_user: member, user: member.user }
+    source = { 'issuer_company_id' => row.issuer_company_id&.to_s, 'business_unit_id' => row.business_unit_id&.to_s }
+    JrcContactCenter::EndingActions::ServiceDeskRuleParameters.new(user_context: context, source_scope: source).source_configuration
   end
 
   def identifier!(value)

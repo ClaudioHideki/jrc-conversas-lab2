@@ -17,8 +17,9 @@ class JrcContactCenter::EndingActions::RuleInput
     validate_header!(row)
     queue, scope = source_for!(row)
     validate_activation!(row, queue, scope)
-    row.except('scope_revision').merge('queue_id' => queue.id.to_s, 'actions' => actions!(row), 'conditions' => conditions!(row),
-                                       'scope' => scope_payload(scope, queue))
+    source_scope = scope_payload(scope, queue)
+    row.except('scope_revision').merge('queue_id' => queue.id.to_s, 'actions' => actions!(row, source_scope: source_scope),
+                                       'conditions' => conditions!(row), 'scope' => source_scope)
   end
 
   private
@@ -80,18 +81,21 @@ class JrcContactCenter::EndingActions::RuleInput
     invalid! unless valid && catalogue.fetch('required_queue_ids', []).include?(queue.id.to_s)
   end
 
-  def actions!(row)
+  def actions!(row, source_scope:)
     entries = row.fetch('actions')
     invalid! unless entries.is_a?(Array) && entries.length <= 5
     invalid! if row.fetch('active') && entries.empty?
     schema = row.fetch('destination_schema_version', 1)
-    result = entries.map { |entry| action!(entry, active: row.fetch('active'), schema: schema) }
+    result = entries.map { |entry| action!(entry, active: row.fetch('active'), schema: schema, source_scope: source_scope) }
     invalid! unless result.pluck('kind').uniq.length == result.length
     result
   end
 
-  def action!(input, active:, schema:)
-    return JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member).call(input, active: active) if schema == 2
+  def action!(input, active:, schema:, source_scope:)
+    if schema == 2
+      validator = JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member, source_scope: source_scope)
+      return validator.call(input, active: active)
+    end
 
     invalid! unless input.is_a?(Hash)
     entry = input.deep_stringify_keys

@@ -2579,5 +2579,13 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "current_direct_audio_preview_candidate": {
+    "document": "docs/jrc_contact_center/ending_service_desk_operational_form_candidate_20261126.json",
+    "sha256": "1c8d345d77e8af642e7d415b63d0e91b6e1734b6616ff971ab2294ac5ea463c4",
+    "literal_target": "D2-P0154-C04",
+    "new_Vue_cases": 13,
+    "native_and_real_Chrome_pending": true,
+    "whole_figure_accepted": false
+  }
 }

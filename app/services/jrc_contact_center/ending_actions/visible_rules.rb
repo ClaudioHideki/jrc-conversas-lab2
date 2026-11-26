@@ -26,7 +26,9 @@ class JrcContactCenter::EndingActions::VisibleRules
     JrcContactCenter::EndingActions::RuleSourceAuthority.new(account: @account, member: member).call(rule)
     rule.fetch('actions').each do |action|
       if rule.fetch('destination_schema_version', 1) == 2
-        JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: member).call(action, active: false)
+        JrcContactCenter::EndingActions::ConfiguredNativeAction.new(
+          account: @account, member: member, source_scope: rule.fetch('scope')
+        ).call(action, active: false)
       else
         raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action.fetch('kind') == 'project_task'
 
@@ -35,6 +37,10 @@ class JrcContactCenter::EndingActions::VisibleRules
     end
     true
   rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
+    false
+  rescue JrcContactCenter::OperationError => error
+    raise unless %w[ending_service_desk_mapping_required ending_service_desk_mapping_changed].include?(error.code)
+
     false
   end
 
@@ -62,10 +68,22 @@ class JrcContactCenter::EndingActions::VisibleRules
     size = integer_filter('per_page', 20, 50)
     ordered = rows.sort_by { |row| [row.fetch('name'), row.fetch('code')] }
     revision = JrcContactCenter::AcwPolicy.new(account: @account).revision
-    { items: ordered.slice((page - 1) * size, size) || [],
+    selected = ordered.slice((page - 1) * size, size) || []
+    { items: selected, destination_presentations: destination_presentations(selected, member),
       meta: { page: page, per_page: size, total: rows.length, pages: (rows.length.to_f / size).ceil },
       revision: revision, editor_context: editor_context(revision, member),
       execution_available: false, configuration_only: true }
+  end
+
+  def destination_presentations(rows, member)
+    context = { account: @account, account_user: member, user: member.user }
+    rows.each_with_object({}) do |rule, result|
+      action = rule.fetch('actions').find { |row| row.fetch('kind') == 'service_desk' }
+      next unless action
+
+      reader = JrcContactCenter::EndingActions::ServiceDeskRuleParameters.new(user_context: context, source_scope: rule.fetch('scope'))
+      result[rule.fetch('code')] = { service_desk: reader.presentation(action.fetch('parameters')) }
+    end
   end
 
   # The shared native reason catalogue is already selectable by agents in their
