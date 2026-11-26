@@ -3,7 +3,7 @@
 class JrcContactCenter::EndingActions::SourceContext
   def initialize(account:, member:, queue_id:)
     @account = account
-    @context = JrcContactCenter::EndingActions::ConfigurationContext.new(account: account, member: member)
+    @context = JrcContactCenter::EndingActions::ConfigurationContext.new(account: account, member: member, for_rule: true)
     @queue_id = identifier!(queue_id)
   end
 
@@ -27,9 +27,11 @@ class JrcContactCenter::EndingActions::SourceContext
   end
 
   def present(queue, row)
+    catalogue = JrcContactCenter::AcwEndingReasons.new(account: @account).call
+    registered = catalogue.fetch('required_queue_ids', []).include?(queue.id.to_s)
     { id: queue.id.to_s, name: queue.name, unit: { id: queue.unit.id.to_s, name: queue.unit.name },
-      scope_revision: row.integrity_sha256, scope_state: row.scope_state,
-      configuration_available: row.scope_state == 'mapped' && queue.status == 'active' && queue.unit.status == 'active',
+      scope_revision: row.integrity_sha256, scope_state: row.scope_state, registered_reason_required: registered,
+      configuration_available: registered && row.scope_state == 'mapped' && queue.status == 'active' && queue.unit.status == 'active',
       execution_available: false }
   end
 

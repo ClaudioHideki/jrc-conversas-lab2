@@ -3,11 +3,12 @@
 # Bounded read path; no ensure_voice!, overdue refresh, enqueue, activation or
 # implicit retry. Missing technical history is an empty list, never a fake success.
 class JrcContactCenter::EndingActions::AttemptHistory
-  def initialize(account:, member:, qualification_id:, page: 1)
+  def initialize(account:, member:, qualification_id:, page: 1, contract_version: 1)
     @account = account
     @member = member
     @qualification_id = qualification_id
     @page = page_number(page)
+    @contract_version = contract_version
   end
 
   def call
@@ -15,6 +16,13 @@ class JrcContactCenter::EndingActions::AttemptHistory
     context.call do |member, qualification|
       origins = JrcContactCenter::EndingActionOrigin.where(account: @account, source_qualification_id: qualification.id)
       records = JrcContactCenter::EndingActionAttempt.where(account: @account, origin_id: origins.select(:id))
+      if @contract_version == 2
+        native_page = JrcContactCenter::EndingActions::DestinationHistoryPage.new(
+          account: @account, member: member, origins: origins, page: @page
+        ).call
+        next native_page.merge(qualification_id: qualification.id.to_s, call_session_id: qualification.call_session_id&.to_s)
+      end
+
       total = records.count
       projection = JrcContactCenter::EndingActions::AttemptProjection.new(member: member)
       rows = records.order(id: :desc).offset((@page - 1) * 20).limit(20).includes(outcome: :execution)

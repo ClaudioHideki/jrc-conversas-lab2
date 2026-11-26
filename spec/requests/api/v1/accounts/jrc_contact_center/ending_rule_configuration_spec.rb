@@ -168,17 +168,21 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
     expect(JrcContactCenter::EndingActionVersion.where(account: account).count).to eq(1)
   end
 
-  it 'rejects tenant-wide rule reads and writes after coverage is restricted to one business unit' do
+  it 'keeps global ACW denied while allowing an owned rule under actual unit coverage and destination permission' do
     configure_native_ending_rule
     JrcCrm::UserBusinessUnit.where(account: account, user: actor, scope: 'GROUP').find_each { |row| row.update!(active: false) }
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: issuer,
                                      business_unit: business, active: true, structure_managed: true)
-    get ending_rules_path, headers: headers
+    get "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy", headers: headers
     expect(response).to have_http_status(:unauthorized)
     expect(response.body).not_to include('SYNTHETIC_PRIVATE_TEMPLATE_7f19')
-    create_ending_rule_document
-    expect(response).to have_http_status(:unauthorized)
-    expect(JrcContactCenter::EndingActionVersion.where(account: account).count).to eq(1)
+    get ending_rules_path, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items').pluck('code')).to eq([rule_input.fetch('code')])
+    create_ending_rule_document(rule_input.merge('name' => 'SYNTHETIC owned unit edit'))
+    expect(response).to have_http_status(:ok)
+    expect(JrcContactCenter::EndingActionVersion.where(account: account).count).to eq(2)
+    expect(JrcProjects::Task.where(account: account)).to be_empty
   end
 
   it 'does not overwrite an unseen private rule by replacing its destination with an accessible project' do

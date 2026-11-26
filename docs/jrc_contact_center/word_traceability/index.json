@@ -4258,5 +4258,19 @@
       10
     ],
     "whole_Part1_complete": false
+  },
+  "latest_literal_functional_progress": {
+    "path": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
+    "sha256": "78a611804c5147245ba8b2ab8c8514d2331094deb8535cf6f450af6ef947087b",
+    "formally_closed": 32,
+    "unique_requirements": 554,
+    "whole_Part1_complete": false
+  },
+  "current_public_operational_increment": {
+    "candidate": "docs/jrc_contact_center/ending_public_operational_candidate_20261125.json",
+    "parent_acceptance": "docs/jrc_contact_center/ending_original_event_native_acceptance_20261125.json",
+    "parent": "827543328439c4ab64b496c65b7a4b2300914467",
+    "new_native_cases_prepared_not_accepted": 100,
+    "whole_Part1_complete": false
   }
 }

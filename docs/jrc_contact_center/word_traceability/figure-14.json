@@ -509,7 +509,7 @@
       "figures": [
         14
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -526,7 +526,13 @@
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0290-C03",
@@ -573,7 +579,7 @@
       "figures": [
         14
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -590,7 +596,13 @@
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0290-C05",
@@ -605,7 +617,7 @@
       "figures": [
         14
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -622,7 +634,13 @@
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0290-C06",
@@ -637,7 +655,7 @@
       "figures": [
         14
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -654,7 +672,13 @@
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0291-C01",
@@ -733,7 +757,7 @@
       "figures": [
         14
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -750,7 +774,13 @@
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0292-C02",
@@ -797,7 +827,7 @@
       "figures": [
         14
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -814,7 +844,13 @@
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0292-C04",
@@ -829,7 +865,7 @@
       "figures": [
         14
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -846,7 +882,13 @@
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0293-C01",
@@ -982,5 +1024,23 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "bounded_literal_acceptance": {
+    "clauses": [
+      "D2-P0290-C02",
+      "D2-P0290-C04",
+      "D2-P0290-C05",
+      "D2-P0290-C06",
+      "D2-P0292-C01",
+      "D2-P0292-C03",
+      "D2-P0292-C04"
+    ],
+    "path": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
+    "whole_figure14_accepted": false,
+    "remaining_divergences": [
+      "Falta o fluxo correlacionado de execução e ACK/reversão externa do PABX.",
+      "Tabela compacta do Word e filtros completos de empresa/tenant ainda não têm aceite integral.",
+      "Datas do campo HTML dependem do locale do navegador; divergência visual continua registrada."
+    ]
+  }
 }

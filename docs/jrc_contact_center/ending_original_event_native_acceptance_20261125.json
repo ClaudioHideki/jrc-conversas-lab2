@@ -1,0 +1,57 @@
+{
+  "sha": "827543328439c4ab64b496c65b7a4b2300914467",
+  "run": 45719691833,
+  "artifact": 15078395871,
+  "artifact_sha256": "c54844c2539dd1ea6eebf3796d38e15df6a9bb3a41a73671de904924c52469a8",
+  "evidence_sha256": "8c32254ff8a9ca9977187fe5d32ac099afcde5f10417049dd17752c6e0f16f11",
+  "new_native_cases": 10,
+  "native_distinct_examples": 3629,
+  "Vue": 1869,
+  "Chrome_passed": 272,
+  "Chrome_failed": 4,
+  "full_CI_approved": false,
+  "pause_popup_Chrome_accepted": false,
+  "original_event_native_report_sha256": "207ecb784175f61d0d0fbd017ddcc47d10a50772fcf6fc58cc3ea64ca815f126",
+  "last_fully_approved_checkpoint": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+  "current_visual_review": {
+    "sha": "827543328439c4ab64b496c65b7a4b2300914467",
+    "artifact_sha256": "c54844c2539dd1ea6eebf3796d38e15df6a9bb3a41a73671de904924c52469a8",
+    "four_failed_captures_actually_opened": true,
+    "images": {
+      "desktop-light": {
+        "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/screenshots/call-center-native-local-p-9ea0e-licy-and-reviewed-conflicts-desktop-light/native-child-0.png",
+        "sha256": "233a97b1b93e28239f827e32a60a75a367e8777538701676c38ba20151be0542",
+        "local": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\pause-current-827-failure-review\\desktop-light.png"
+      },
+      "desktop-dark": {
+        "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/screenshots/call-center-native-local-p-9ea0e-licy-and-reviewed-conflicts-desktop-dark/native-child-0.png",
+        "sha256": "42f34af654b3939728100e826ed6d565c2fe87962bcbd397f7574d988154fa7f",
+        "local": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\pause-current-827-failure-review\\desktop-dark.png"
+      },
+      "mobile-light": {
+        "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/screenshots/call-center-native-local-p-9ea0e-licy-and-reviewed-conflicts-mobile-light/native-child-0.png",
+        "sha256": "fb51d8a425c62e1c633f085d7ed86bda7b0357750dafe2190c04ca3c899d4873",
+        "local": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\pause-current-827-failure-review\\mobile-light.png"
+      },
+      "mobile-dark": {
+        "archive_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/screenshots/call-center-native-local-p-9ea0e-licy-and-reviewed-conflicts-mobile-dark/native-child-0.png",
+        "sha256": "9fa22c081891755ee33a02f9fda48677e020c215c33e402eddace088be19b165",
+        "local": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\pause-current-827-failure-review\\mobile-dark.png"
+      }
+    },
+    "field_error_not_visible_in_current_viewport": true,
+    "actual_DOM_snapshot_contains_INVALID_SPACE_and_field_error": true,
+    "pause_popup_Chrome_accepted": false,
+    "save_recovery_assertions_not_reached_due_to_fixture_URL_mismatch": true,
+    "prepared_correction": "Reuse isBrowserApiResponse plus focus and scroll first invalid field; require error in viewport in all four modes.",
+    "whole_figure10_accepted": false,
+    "whole_Part1_accepted": false
+  },
+  "native_tested": [
+    "Original classified call event creates independent typed durable destinations under current original actor"
+  ],
+  "pending_repair": "Four pause Chrome cases stopped on the wrong-origin test response predicate; recovery/viewport not accepted.",
+  "public_manual_CRM_SD_flow_accepted": false,
+  "whole_figure10_accepted": false,
+  "whole_Part1_accepted": false
+}

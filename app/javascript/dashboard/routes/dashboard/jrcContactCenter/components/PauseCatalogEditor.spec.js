@@ -168,6 +168,7 @@ describe('native pause catalog editor', () => {
     const wrapper = render();
     await flushPromises();
     await button(wrapper, 'EDIT').trigger('click');
+    const invalidFocus = vi.spyOn(field(wrapper, 'NAME').element, 'focus');
     await field(wrapper, 'NAME').setValue('SYNTHETIC retained draft');
     await wrapper.get('textarea').setValue('SYNTHETIC retained description');
     await wrapper.get('[data-confirm]').trigger('click');
@@ -179,6 +180,7 @@ describe('native pause catalog editor', () => {
     expect(wrapper.emitted('changed')).toBeUndefined();
     expect(wrapper.get('[role="dialog"]').exists()).toBe(true);
     expect(field(wrapper, 'NAME').attributes('aria-invalid')).toBe('true');
+    expect(invalidFocus).toHaveBeenCalledWith({ preventScroll: true });
     expect(wrapper.get('textarea').element.value).toBe(
       'SYNTHETIC retained description'
     );

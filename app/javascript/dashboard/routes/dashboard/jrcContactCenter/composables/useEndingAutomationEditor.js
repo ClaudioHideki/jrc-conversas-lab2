@@ -53,6 +53,13 @@ export const useEndingAutomationEditor = ({ accountId }) => {
   const reasons = computed(
     () => policy.value?.voice_reason_catalog?.entries || []
   );
+  const crmOptions = computed(() => {
+    const value = policy.value?.destination_options?.crm;
+    return value?.configuration_available === true &&
+      Array.isArray(value.activity_types)
+      ? value
+      : { configuration_available: false, activity_types: [] };
+  });
   const reset = () => {
     sourceGeneration += 1;
     items.value = [];
@@ -123,8 +130,6 @@ export const useEndingAutomationEditor = ({ accountId }) => {
     error.value = '';
     items.value = [];
     try {
-      const configuration = await API.acwPolicy(account);
-      if (!current(request, account)) return;
       const response = await API.endingRules(account, {
         q: q.value,
         status: status.value,
@@ -133,14 +138,30 @@ export const useEndingAutomationEditor = ({ accountId }) => {
       });
       if (!current(request, account)) return;
       checkAccount(response, account);
+      const configuration = response.data.editor_context;
       if (
+        !configuration ||
+        !Array.isArray(configuration.voice_reason_catalog?.entries) ||
         !digest(response.data.revision) ||
-        response.data.revision !== configuration.data.item.revision ||
-        String(configuration.data.item.id) !== account ||
+        response.data.revision !== configuration.revision ||
+        String(configuration.id) !== account ||
         !Array.isArray(response.data.items)
       )
         throw new Error('Configuration changed while loading');
-      policy.value = configuration.data.item;
+      const hasCrm = response.data.items.some(row =>
+        row.actions.some(action => action.kind === 'crm')
+      );
+      if (
+        hasCrm &&
+        configuration.destination_options?.crm?.configuration_available !== true
+      )
+        throw Object.assign(
+          new Error('Native CRM authority context unavailable'),
+          {
+            response: { status: 403 },
+          }
+        );
+      policy.value = configuration;
       items.value = response.data.items;
       meta.value = response.data.meta;
       page.value = requestedPage;
@@ -223,7 +244,13 @@ export const useEndingAutomationEditor = ({ accountId }) => {
       ['automatic', 'agent_confirmation'].includes(row.execution_mode) &&
       digest(row.scope_revision) &&
       (!row.active || row.actions.length > 0) &&
-      row.actions.every(action => action.kind === 'project_task') &&
+      row.actions.every(
+        action =>
+          action.kind === 'project_task' ||
+          (row.destination_schema_version === 2 &&
+            action.kind === 'crm' &&
+            crmOptions.value.configuration_available)
+      ) &&
       (!row.active ||
         (source.value?.configuration_available &&
           reasons.value.some(
@@ -339,6 +366,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
     persisted,
     source,
     reasons,
+    crmOptions,
     loading,
     saving,
     sourceLoading,

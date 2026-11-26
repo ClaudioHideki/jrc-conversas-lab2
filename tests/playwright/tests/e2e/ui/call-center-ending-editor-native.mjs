@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
 import { measureTextContrast } from './call-center-text-contrast.mjs';
+import { verifyScopedEndingEditor } from './call-center-ending-scoped-editor-native.mjs';
 
 // Production Vue, real scoped APIs and PostgreSQL. No mocked response or destination execution.
 export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
@@ -147,12 +148,11 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   await editor.locator('[data-ending-rule-save]').click();
   expect((await savedResponse).status()).toBe(200);
   await expect(editor.locator('[data-ending-rule-saved]')).toBeVisible();
-  await expect(
-    editor.locator('[data-ending-manual-activation-pending]')
-  ).toBeVisible();
+  await expect(editor.locator('[data-ending-rule-activation]')).toBeVisible();
   expect(writes).toHaveLength(1);
   expect(writes[0].private_rule).toMatchObject({
     execution_mode: 'agent_confirmation',
+    destination_schema_version: 2,
     timing: 'call_end',
     active: true,
   });
@@ -203,9 +203,9 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   await editor
     .locator('[data-ending-configure-destination="project_task"]')
     .click();
-  await expect(
-    editor.locator('[data-ending-task-assignee]')
-  ).toHaveValue(target.automation_assignee_id);
+  await expect(editor.locator('[data-ending-task-assignee]')).toHaveValue(
+    target.automation_assignee_id
+  );
   await editor
     .locator('[data-ending-project-configuration]')
     .getByRole('button', { name: 'Voltar', exact: true })
@@ -258,7 +258,11 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
     headers: target.operator,
   });
   expect([401, 403, 404]).toContain(foreign.status());
-  expect([401, 403]).toContain(scoped.status());
+  expect(scoped.status()).toBe(200);
+  expect((await scoped.json()).items).toEqual([]);
+  expect(await scoped.text()).not.toContain(
+    'SYNTHETIC private persisted title'
+  );
   expect([401, 403]).toContain(operator.status());
   expect(await foreign.text()).not.toContain(
     'SYNTHETIC private persisted title'
@@ -303,6 +307,7 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
       reviewed_save: 200,
       denied_status: operator.status(),
       scoped_status: scoped.status(),
+      explicit_manual_destination_schema: current.destination_schema_version,
       foreign_status: foreign.status(),
       effects_executed: false,
       configuration_only: true,
@@ -315,5 +320,6 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
       provider_or_destination_writes: forbidden,
     })
   );
+  await verifyScopedEndingEditor(parent, info, target);
   await page.close();
 }

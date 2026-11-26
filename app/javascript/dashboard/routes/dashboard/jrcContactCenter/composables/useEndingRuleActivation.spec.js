@@ -226,7 +226,43 @@ describe('explicit prospective ending rule activation', () => {
     expect(API.activateEndingRule).not.toHaveBeenCalled();
   });
 
-  it('does not submit an inactive, manual, disabled or unversioned rule', async () => {
+  it('prepares an explicit v2 manual rule only after review without recording individual action consent', async () => {
+    const { state, inputs } = await render();
+    inputs.rule.value = {
+      ...inputs.rule.value,
+      destination_schema_version: 2,
+      execution_mode: 'agent_confirmation',
+    };
+    await flushPromises();
+    expect(state.canSubmit.value).toBe(false);
+    expect(API.activateEndingRule).not.toHaveBeenCalled();
+    state.reviewed.value = true;
+    expect(state.canSubmit.value).toBe(true);
+    await state.submit();
+    expect(API.activateEndingRule).toHaveBeenCalledExactlyOnceWith(
+      '1',
+      'SYNTHETIC_RULE',
+      revision,
+      key
+    );
+    expect(state.receipt.value).toEqual(accepted().data.item);
+  });
+
+  it('does not mistake the v2 schema marker alone for review or an operational execution mode', async () => {
+    const { state, inputs } = await render();
+    inputs.rule.value = {
+      ...inputs.rule.value,
+      destination_schema_version: 2,
+      execution_mode: 'unknown',
+    };
+    await flushPromises();
+    state.reviewed.value = true;
+    await state.submit();
+    expect(state.canSubmit.value).toBe(false);
+    expect(API.activateEndingRule).not.toHaveBeenCalled();
+  });
+
+  it('does not submit an inactive, legacy-manual, disabled or unversioned rule', async () => {
     const { state, inputs } = await render();
     inputs.rule.value.active = false;
     state.reviewed.value = true;

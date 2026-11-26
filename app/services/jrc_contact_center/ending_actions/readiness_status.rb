@@ -32,7 +32,7 @@ class JrcContactCenter::EndingActions::ReadinessStatus
 
   def initialize(account:, member:, rule_code:, expected_revision:)
     @account = account
-    @context = JrcContactCenter::EndingActions::ConfigurationContext.new(account: account, member: member)
+    @context = JrcContactCenter::EndingActions::ConfigurationContext.new(account: account, member: member, for_rule: true)
     @code = rule_code
     @revision = expected_revision
   end
@@ -63,6 +63,13 @@ class JrcContactCenter::EndingActions::ReadinessStatus
     document = JrcContactCenter::EndingActions::RuleDefinition.new.call(version.definition)
     rule = document.fetch('entries').find { |entry| entry.fetch('code') == @code }
     raise ActiveRecord::RecordNotFound unless rule
+
+    # Historical v1 activation retains its native whole-account restriction.
+    # Only the explicit v2 contract uses the already authorized per-rule scope.
+    if rule.fetch('destination_schema_version', 1) != 2
+      coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: member.user)
+      raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
+    end
 
     input = rule.except('scope').merge('scope_revision' => rule.fetch('scope').fetch('integrity_sha256'))
     checked = JrcContactCenter::EndingActions::RuleInput.new(account: @account, member: member).call(input)

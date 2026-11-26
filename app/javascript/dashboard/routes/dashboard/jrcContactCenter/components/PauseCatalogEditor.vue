@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
@@ -86,6 +86,7 @@ const input = ref({});
 const enforced = ref(false);
 const confirmed = ref(false);
 const dialog = ref(null);
+const fieldsElement = ref(null);
 const canManage = computed(
   () =>
     props.context.capabilities?.configure &&
@@ -302,6 +303,11 @@ const save = async () => {
     if (!revision.handleError(failure)) {
       invalid.value = failure.response?.data?.invalid_attributes || [];
       error.value = text('SAVE_FAILED');
+      await nextTick();
+      if (!active || version !== generation) return;
+      const field = fieldsElement.value?.querySelector('[aria-invalid="true"]');
+      field?.scrollIntoView?.({ block: 'center', inline: 'nearest' });
+      field?.focus({ preventScroll: true });
     }
   } finally {
     if (active && version === generation) saving.value = false;
@@ -497,7 +503,7 @@ onBeforeUnmount(() => {
       @confirm="save"
       @close="clearDialog"
     >
-      <div class="grid min-w-0 gap-4 sm:grid-cols-2">
+      <div ref="fieldsElement" class="grid min-w-0 gap-4 sm:grid-cols-2">
         <ConfigurationRevisionConflict
           :state="revision.state"
           :draft="draft"

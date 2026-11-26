@@ -14,6 +14,8 @@ const { t } = useI18n();
 const labels = computed(() => ({
   TITLE: t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.TITLE'),
   HINT: t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.HINT'),
+  MANUAL_HINT: t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.MANUAL_HINT'),
+  MANUAL_REVIEW: t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.MANUAL_REVIEW'),
   REVIEW: t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.REVIEW'),
   CONFIRM: t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.CONFIRM'),
   WAIT: t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.WAIT'),
@@ -28,6 +30,11 @@ const labels = computed(() => ({
   RELOAD: t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.RELOAD'),
 }));
 const text = key => labels.value[key];
+const manual = computed(
+  () =>
+    props.rule.destination_schema_version === 2 &&
+    props.rule.execution_mode === 'agent_confirmation'
+);
 const {
   reviewed,
   busy,
@@ -56,7 +63,9 @@ const {
     data-ending-rule-activation
   >
     <h4 class="break-words text-sm font-semibold">{{ text('TITLE') }}</h4>
-    <p class="break-words text-sm text-n-slate-12">{{ text('HINT') }}</p>
+    <p class="break-words text-sm text-n-slate-12">
+      {{ text(manual ? 'MANUAL_HINT' : 'HINT') }}
+    </p>
     <p v-if="loading" role="status" class="text-sm text-n-slate-11">
       {{ text('LOADING') }}
     </p>
@@ -89,7 +98,9 @@ const {
           class="mt-1 shrink-0"
           data-ending-activation-reviewed
         />
-        <span class="min-w-0 break-words">{{ text('REVIEW') }}</span>
+        <span class="min-w-0 break-words">{{
+          text(manual ? 'MANUAL_REVIEW' : 'REVIEW')
+        }}</span>
       </label>
       <div class="flex flex-wrap gap-3">
         <button

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import AcwRuleTarget from './AcwRuleTarget.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import EndingProjectTaskConfiguration from './EndingProjectTaskConfiguration.vue';
+import EndingCrmConfiguration from './EndingCrmConfiguration.vue';
 import EndingRuleActivation from './EndingRuleActivation.vue';
 import { useEndingAutomationEditor } from '../composables/useEndingAutomationEditor';
 
@@ -27,6 +28,7 @@ const {
   source,
   persisted,
   reasons,
+  crmOptions,
   loading,
   saving,
   sourceLoading,
@@ -40,6 +42,7 @@ const {
 } = editor;
 const activationBusy = ref(false);
 const taskConfiguration = ref(false);
+const crmConfiguration = ref(false);
 const discard = ref('');
 const conditions = computed({
   get: () => draft.value.conditions.outcome_codes.join('\n'),
@@ -53,6 +56,19 @@ const conditions = computed({
 const task = computed(() =>
   draft.value?.actions.find(action => action.kind === 'project_task')
 );
+const crm = computed(() =>
+  draft.value?.actions.find(action => action.kind === 'crm')
+);
+const configured = kind =>
+  draft.value?.actions.some(action => action.kind === kind);
+const destinationAllowed = kind =>
+  kind === 'project_task' ||
+  (kind === 'crm' && crmOptions.value.configuration_available);
+const configureDestination = kind => {
+  if (kind === 'project_task') taskConfiguration.value = true;
+  if (kind === 'crm' && crmOptions.value.configuration_available)
+    crmConfiguration.value = true;
+};
 const locked = computed(
   () =>
     loading.value || saving.value || sourceLoading.value || activationBusy.value
@@ -72,11 +88,40 @@ const confirmDiscard = async () => {
   discard.value = '';
   await editor.discard();
   taskConfiguration.value = false;
+  crmConfiguration.value = false;
   if (target === 'close') emit('close');
 };
 const applyTask = parameters => {
-  draft.value.actions = [{ kind: 'project_task', parameters }];
+  draft.value.actions = [
+    ...draft.value.actions.filter(action => action.kind !== 'project_task'),
+    { kind: 'project_task', parameters },
+  ];
   taskConfiguration.value = false;
+};
+const applyCrm = parameters => {
+  draft.value.destination_schema_version = 2;
+  draft.value.actions = [
+    ...draft.value.actions.filter(action => action.kind !== 'crm'),
+    { kind: 'crm', parameters },
+  ];
+  crmConfiguration.value = false;
+};
+const removeCrm = () => {
+  draft.value.actions = draft.value.actions.filter(
+    action => action.kind !== 'crm'
+  );
+  crmConfiguration.value = false;
+};
+// This is an explicit user choice. Opening a historical v1 rule never
+// upgrades it, arms it, or grants consent for an individual attendance action.
+const useManualFlow = () => {
+  if (locked.value || !draft.value) return;
+  draft.value.destination_schema_version = 2;
+  reviewed.value = false;
+};
+const executionModeChanged = () => {
+  reviewed.value = false;
+  if (draft.value?.execution_mode === 'agent_confirmation') useManualFlow();
 };
 const destinations = [
   'crm',
@@ -119,8 +164,18 @@ const destinations = [
       {{ text('RETRY') }}
     </button>
     <template v-if="error !== 'DENIED' && error !== 'LOAD_FAILED' && !loading">
+      <EndingCrmConfiguration
+        v-if="draft && crmConfiguration && crmOptions.configuration_available"
+        :key="String(accountId)"
+        :value="crm?.parameters || null"
+        :options="crmOptions"
+        :disabled="saving"
+        @save="applyCrm"
+        @cancel="crmConfiguration = false"
+        @remove="removeCrm"
+      />
       <EndingProjectTaskConfiguration
-        v-if="draft && taskConfiguration"
+        v-else-if="draft && taskConfiguration"
         :key="String(accountId)"
         :account-id="accountId"
         :value="task?.parameters || null"
@@ -200,6 +255,7 @@ const destinations = [
               required
               class="mt-1 block w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
               data-ending-execution-mode
+              @change="executionModeChanged"
             >
               <option value="">{{ text('MODE_REVIEW_REQUIRED') }}</option>
               <option value="automatic">{{ text('MODES.automatic') }}</option>
@@ -267,7 +323,7 @@ const destinations = [
             v-for="kind in destinations"
             :key="kind"
             class="min-w-0 rounded-xl border border-n-weak p-3"
-            :class="kind === 'project_task' ? 'bg-n-blue-2' : 'bg-n-solid-2'"
+            :class="destinationAllowed(kind) ? 'bg-n-blue-2' : 'bg-n-solid-2'"
           >
             <h4 class="break-words text-sm font-semibold">
               {{ text(`DESTINATIONS.${kind}`) }}
@@ -275,7 +331,7 @@ const destinations = [
             <p class="my-2 break-words text-xs text-n-slate-11">
               {{
                 text(
-                  kind === 'project_task' && task
+                  configured(kind)
                     ? 'DESTINATION_CONFIGURED'
                     : 'DESTINATION_PENDING'
                 )
@@ -283,17 +339,17 @@ const destinations = [
             </p>
             <button
               type="button"
-              :disabled="locked || kind !== 'project_task'"
+              :disabled="locked || !destinationAllowed(kind)"
               class="rounded-lg border border-n-weak px-3 py-2 text-sm disabled:opacity-40"
               :data-ending-configure-destination="kind"
-              @click="taskConfiguration = true"
+              @click="configureDestination(kind)"
             >
               {{ text('CONFIGURE') }}
             </button>
           </section>
         </div>
         <details
-          v-if="task"
+          v-if="draft.actions.length"
           class="min-w-0 rounded-lg border border-n-weak p-3 text-sm"
           data-ending-rule-preview
         >
@@ -325,7 +381,9 @@ const destinations = [
             persisted &&
             !dirty &&
             draft.active &&
-            draft.execution_mode === 'automatic'
+            (draft.execution_mode === 'automatic' ||
+              (draft.destination_schema_version === 2 &&
+                draft.execution_mode === 'agent_confirmation'))
           "
           :account-id="accountId"
           :rule="draft"
@@ -337,18 +395,33 @@ const destinations = [
           @denied="editor.deny"
           @reload="editor.discard"
         />
-        <p
+        <section
           v-if="
             persisted &&
             !dirty &&
             draft.active &&
-            draft.execution_mode === 'agent_confirmation'
+            draft.execution_mode === 'agent_confirmation' &&
+            draft.destination_schema_version !== 2
           "
           class="rounded-lg border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
           data-ending-manual-activation-pending
         >
           {{ t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.MANUAL_PENDING') }}
-        </p>
+          <span class="mt-2 block">{{
+            t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.MANUAL_VERSION_HINT')
+          }}</span>
+          <button
+            type="button"
+            :disabled="locked"
+            class="mt-3 max-w-full whitespace-normal rounded-lg border border-n-amber-7 px-3 py-2 text-sm disabled:opacity-40"
+            data-enable-ending-manual-flow
+            @click="useManualFlow"
+          >
+            {{
+              t('JRC_CONTACT_CENTER.ENDING_ACTIVATION.MANUAL_VERSION_REVIEW')
+            }}
+          </button>
+        </section>
         <div class="flex flex-wrap gap-3">
           <button
             type="button"

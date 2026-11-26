@@ -1,0 +1,57 @@
+{
+  "historical_progress_preserved": "docs/jrc_contact_center/literal_functional_progress_20261125.json",
+  "historical_progress_sha256": "f0d4f2ba8f5f5b6ce54a512d39400493e4831f7ca11d133cdc7facf935e34696",
+  "new_bounded_acceptance": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
+  "new_bounded_acceptance_sha256": "dc6466fe913b916c65c8b4d8b1823afa72e4c132023ece222870bee47f61906d",
+  "Word_requirements_unique": 554,
+  "formal_literal_reviews_closed": 32,
+  "Parte1_proven_lower_bound_percentage": 5.78,
+  "not_an_estimated_implementation_percentage": true,
+  "canonical_statuses": {
+    "concluido_com_aceite": 32,
+    "implementado_sem_aceite": 0,
+    "parcial": 452,
+    "pendente": 46,
+    "bloqueado": 24
+  },
+  "triage_466_preserved_as_historical_snapshot": true,
+  "remaining_partial_triage": {
+    "implemented_pending_homologation": 127,
+    "small_adjustments": 102,
+    "significant_development": 167,
+    "documental_not_autonomous_functions": 56
+  },
+  "new_accepted_functions": "Consulta paginada, popup antes/depois, histórico autorizado e exportação verificada da auditoria administrativa nativa.",
+  "new_tests_executed_for_this_registration": 0,
+  "evidence_reuse_requires_unchanged_source_hashes": true,
+  "whole_figure14_or_Part1_accepted": false,
+  "figure10_unchanged": {
+    "formally_closed": 5,
+    "total": 25,
+    "percentage": 20.0
+  },
+  "internal_engineering_effort_estimate_hours": {
+    "development": [
+      28,
+      44
+    ],
+    "corrections": [
+      8,
+      14
+    ],
+    "automated_tests": [
+      14,
+      22
+    ],
+    "internal_homologation": [
+      14,
+      24
+    ]
+  },
+  "estimate_not_reduced_just_by_registering_existing_evidence": true,
+  "external_contract_effort_and_CI_waiting_excluded": true,
+  "additional_permission_acceptance": {
+    "path": "docs/jrc_contact_center/literal_permissions_acceptance_20261126.json",
+    "sha256": "c90bdfcf77883fc1b23e01dff8571b33d4b68812646d31ca28022679454bb9c5"
+  }
+}

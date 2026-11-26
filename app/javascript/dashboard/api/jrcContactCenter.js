@@ -46,10 +46,35 @@ const calendarIdentity = value => {
 };
 
 export default {
+  manualEndingActions: (accountId, qualificationId, page = 1) =>
+    axios.get(
+      `${base(accountId)}/qualifications/${recordIdentity(qualificationId)}/ending_destinations`,
+      { params: { page } }
+    ),
+  requestEndingDestination: (accountId, qualificationId, input) =>
+    axios.post(
+      `${base(accountId)}/qualifications/${recordIdentity(qualificationId)}/ending_destinations`,
+      input
+    ),
+  retryEndingDestination: (accountId, qualificationId, attemptId, input) =>
+    axios.post(
+      `${base(accountId)}/qualifications/${recordIdentity(qualificationId)}/ending_destinations/${recordIdentity(attemptId)}/retry`,
+      input
+    ),
+  resumeEndingDestination: (accountId, qualificationId, attemptId, review) =>
+    axios.post(
+      `${base(accountId)}/qualifications/${recordIdentity(qualificationId)}/ending_destinations/${recordIdentity(attemptId)}/resume`,
+      { review }
+    ),
   endingAttemptHistory: (accountId, qualificationId, params = {}) =>
     axios.get(
       `${base(accountId)}/qualifications/${recordIdentity(qualificationId)}/ending_attempts`,
-      { params: { page: params.page || 1 } }
+      {
+        params: {
+          page: params.page || 1,
+          ...(params.history_contract === 2 ? { history_contract: 2 } : {}),
+        },
+      }
     ),
   runPendingEndingAttempt: (accountId, qualificationId, attemptId, review) =>
     axios.post(

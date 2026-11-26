@@ -3,11 +3,12 @@
 class Api::V1::Accounts::JrcContactCenter::EndingAttemptsController < Api::V1::Accounts::JrcContactCenter::BaseController
   def index
     response.headers['Cache-Control'] = 'no-store'
+    version = history_contract
     service = JrcContactCenter::EndingActions::AttemptHistory.new(
       account: Current.account, member: Current.account_user,
-      qualification_id: qualification_identity, page: params.fetch(:page, 1)
+      qualification_id: qualification_identity, page: params.fetch(:page, 1), contract_version: version
     )
-    render json: base_payload.merge(service.call)
+    render json: base_payload.merge(service.call).merge(contract_version: version)
   end
 
   def execute_pending
@@ -20,6 +21,14 @@ class Api::V1::Accounts::JrcContactCenter::EndingAttemptsController < Api::V1::A
   end
 
   private
+
+  def history_contract
+    value = params.fetch(:history_contract, 1)
+    return 1 if [1, '1'].include?(value)
+    return 2 if [2, '2'].include?(value)
+
+    raise JrcContactCenter::OperationError, 'invalid_ending_history_request'
+  end
 
   def attempt_identity
     JrcServiceDesk::Input.id(params[:attempt_id])

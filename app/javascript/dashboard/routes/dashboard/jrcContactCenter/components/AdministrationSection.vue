@@ -14,6 +14,7 @@ import PauseCatalogEditor from './PauseCatalogEditor.vue';
 import AcwRulesEditor from './AcwRulesEditor.vue';
 import AcwFormLibrary from './AcwFormLibrary.vue';
 import EndingReasonCatalog from './EndingReasonCatalog.vue';
+import EndingScopedRuleEditor from './EndingScopedRuleEditor.vue';
 import AudioFolderLibrary from './AudioFolderLibrary.vue';
 import CalendarLibrary from './CalendarLibrary.vue';
 import QueueWithdrawalConfirmation from './QueueWithdrawalConfirmation.vue';
@@ -140,12 +141,23 @@ const canConfigureAcw = computed(
     key.value === 'closures' &&
     props.context.capabilities.configuration_global === true
 );
+const canConfigureScopedRules = computed(
+  () =>
+    key.value === 'closures' &&
+    props.context.capabilities.configure === true &&
+    !canConfigureAcw.value
+);
 const formsOpen = ref(false);
 const reasonsOpen = ref(false);
-watch([key, () => props.accountId, canConfigureAcw], () => {
-  formsOpen.value = false;
-  reasonsOpen.value = false;
-});
+const automationOpen = ref(false);
+watch(
+  [key, () => props.accountId, canConfigureAcw, canConfigureScopedRules],
+  () => {
+    formsOpen.value = false;
+    reasonsOpen.value = false;
+    automationOpen.value = false;
+  }
+);
 const canEditRoles = computed(
   () => key.value === 'permissions' && props.context.native_links?.role_editor
 );
@@ -790,6 +802,21 @@ onBeforeUnmount(() => {
     >
       {{ t('JRC_CONTACT_CENTER.ENDING_REASONS.TITLE') }}
     </button>
+    <button
+      v-if="canConfigureScopedRules"
+      type="button"
+      class="rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11"
+      data-manage-scoped-ending-rules
+      @click="automationOpen = true"
+    >
+      {{ t('JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.TITLE') }}
+    </button>
+    <EndingScopedRuleEditor
+      v-if="canConfigureScopedRules && automationOpen"
+      :key="String(accountId)"
+      :account-id="accountId"
+      @close="automationOpen = false"
+    />
     <EndingReasonCatalog
       v-if="canConfigureAcw && reasonsOpen"
       :key="String(accountId)"

@@ -67,7 +67,18 @@ const context = {
 const mountSection = (key = 'general', state = 'available') =>
   mount(AdministrationSection, {
     props: { accountId: '1', card: { key, state }, context },
-    global: { stubs: { Dialog, RouterLink: true } },
+    global: {
+      stubs: {
+        Dialog,
+        RouterLink: true,
+        EndingScopedRuleEditor: {
+          props: ['accountId'],
+          emits: ['close'],
+          template:
+            '<section data-scoped-rule-dialog><span>{{ accountId }}</span><button data-scoped-rule-close @click="$emit(\'close\')">Close</button></section>',
+        },
+      },
+    },
   });
 beforeEach(() => {
   vi.clearAllMocks();
@@ -88,6 +99,52 @@ beforeEach(() => {
 });
 
 describe('administrative workflow', () => {
+  it('opens only the scoped rule editor and resets its reviewed context on account changes', async () => {
+    const wrapper = mountSection('closures');
+    await wrapper.setProps({
+      context: {
+        ...context,
+        capabilities: { configure: true, configuration_global: false },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-manage-ending-reasons]').exists()).toBe(false);
+    expect(wrapper.find('[data-manage-acw-forms]').exists()).toBe(false);
+    await wrapper.get('[data-manage-scoped-ending-rules]').trigger('click');
+    expect(wrapper.get('[data-scoped-rule-dialog]').text()).toContain('1');
+    await wrapper.setProps({ accountId: '2' });
+    expect(wrapper.find('[data-scoped-rule-dialog]').exists()).toBe(false);
+    await wrapper.get('[data-manage-scoped-ending-rules]').trigger('click');
+    expect(wrapper.get('[data-scoped-rule-dialog]').text()).toContain('2');
+    await wrapper.get('[data-scoped-rule-close]').trigger('click');
+    expect(wrapper.find('[data-scoped-rule-dialog]').exists()).toBe(false);
+    expect(API.acwPolicy).not.toHaveBeenCalled();
+    expect(API.updateAcwPolicy).not.toHaveBeenCalled();
+  });
+
+  it('removes an opened scoped editor when native configuration authority is withdrawn', async () => {
+    const wrapper = mountSection('closures');
+    await wrapper.setProps({
+      context: {
+        ...context,
+        capabilities: { configure: true, configuration_global: false },
+      },
+    });
+    await wrapper.get('[data-manage-scoped-ending-rules]').trigger('click');
+    expect(wrapper.find('[data-scoped-rule-dialog]').exists()).toBe(true);
+    await wrapper.setProps({
+      context: {
+        ...context,
+        capabilities: { configure: false, configuration_global: false },
+      },
+    });
+    expect(wrapper.find('[data-scoped-rule-dialog]').exists()).toBe(false);
+    expect(wrapper.find('[data-manage-scoped-ending-rules]').exists()).toBe(
+      false
+    );
+    expect(API.acwPolicy).not.toHaveBeenCalled();
+  });
+
   it('does not offer a global ACW change to an operator restricted to a unit', async () => {
     const wrapper = mountSection('closures');
     await wrapper.setProps({

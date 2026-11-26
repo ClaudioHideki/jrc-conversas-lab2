@@ -9,6 +9,7 @@ defineProps({
   busy: { type: Boolean, default: false },
   canSubmit: { type: Boolean, default: false },
   message: { type: String, default: '' },
+  labelPrefix: { type: String, default: 'JRC_CONTACT_CENTER.ENDING_PENDING' },
 });
 const emit = defineEmits(['update:reviewed', 'confirm', 'close']);
 const { t } = useI18n();
@@ -19,8 +20,8 @@ onMounted(() => dialog.value.open());
 <template>
   <Dialog
     ref="dialog"
-    :title="t('JRC_CONTACT_CENTER.ENDING_PENDING.TITLE')"
-    :description="t('JRC_CONTACT_CENTER.ENDING_PENDING.HINT')"
+    :title="t(`${labelPrefix}.TITLE`)"
+    :description="t(`${labelPrefix}.HINT`)"
     width="md"
     :show-confirm-button="false"
     :show-cancel-button="false"
@@ -35,6 +36,7 @@ onMounted(() => dialog.value.open());
         {{ message }}
       </p>
       <p class="break-words text-sm font-semibold">{{ operation.rule_code }}</p>
+      <slot />
       <dl class="grid min-w-0 gap-2 text-sm">
         <div>
           <dt class="text-n-slate-11">
@@ -59,7 +61,7 @@ onMounted(() => dialog.value.open());
           @change="emit('update:reviewed', $event.target.checked)"
         />
         <span class="min-w-0 break-words">{{
-          t('JRC_CONTACT_CENTER.ENDING_PENDING.REVIEW')
+          t(`${labelPrefix}.REVIEW`)
         }}</span>
       </label>
       <div class="flex flex-wrap gap-2">
@@ -70,11 +72,7 @@ onMounted(() => dialog.value.open());
           data-run-selected-ending-pending
           @click="emit('confirm')"
         >
-          {{
-            busy
-              ? t('JRC_CONTACT_CENTER.ENDING_PENDING.RUNNING')
-              : t('JRC_CONTACT_CENTER.ENDING_PENDING.CONFIRM')
-          }}
+          {{ busy ? t(`${labelPrefix}.RUNNING`) : t(`${labelPrefix}.CONFIRM`) }}
         </button>
         <button
           type="button"
@@ -82,7 +80,7 @@ onMounted(() => dialog.value.open());
           class="rounded-lg border border-n-weak px-3 py-2 text-sm disabled:opacity-40"
           @click="emit('close')"
         >
-          {{ t('JRC_CONTACT_CENTER.ENDING_PENDING.CANCEL') }}
+          {{ t(`${labelPrefix}.CANCEL`) }}
         </button>
       </div>
     </div>

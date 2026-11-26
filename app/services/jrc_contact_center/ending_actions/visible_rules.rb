@@ -5,7 +5,7 @@ class JrcContactCenter::EndingActions::VisibleRules
 
   def initialize(account:, member:, filters: {})
     @account = account
-    @context = JrcContactCenter::EndingActions::ConfigurationContext.new(account: account, member: member)
+    @context = JrcContactCenter::EndingActions::ConfigurationContext.new(account: account, member: member, for_rule: true)
     @filters = validate_filters!(filters)
   end
 
@@ -14,20 +14,24 @@ class JrcContactCenter::EndingActions::VisibleRules
       catalogue = JrcContactCenter::EndingActions::Catalogue.new(account: @account)
       catalogue.verify_synchronized!
       rows = catalogue.call.fetch('entries').select { |row| visible?(row, member) }
-      paginate(rows.select { |row| matching?(row) })
+      paginate(rows.select { |row| matching?(row) }, member)
     end
   end
 
   private
 
   def visible?(rule, member)
-    # The context has the same tenant-wide configure coverage as the native ACW
-    # editor. Historical source IDs are not live grants and may reference a queue
-    # already removed; replacing it still requires RuleInput's current native scope.
+    # Current source coverage and each destination policy are independent.
+    # Stored IDs and private text never grant access after revocation.
+    JrcContactCenter::EndingActions::RuleSourceAuthority.new(account: @account, member: member).call(rule)
     rule.fetch('actions').each do |action|
-      raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action.fetch('kind') == 'project_task'
+      if rule.fetch('destination_schema_version', 1) == 2
+        JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: member).call(action, active: false)
+      else
+        raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action.fetch('kind') == 'project_task'
 
-      JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: member).authorize_reference!(action.fetch('parameters'))
+        JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: member).authorize_reference!(action.fetch('parameters'))
+      end
     end
     true
   rescue ActiveRecord::RecordNotFound, Pundit::NotAuthorizedError
@@ -53,14 +57,30 @@ class JrcContactCenter::EndingActions::VisibleRules
     query.empty? || [row.fetch('code'), row.fetch('name'), row.fetch('reason_code')].any? { |value| value.downcase.include?(query) }
   end
 
-  def paginate(rows)
+  def paginate(rows, member)
     page = integer_filter('page', 1, 1_000_000)
     size = integer_filter('per_page', 20, 50)
     ordered = rows.sort_by { |row| [row.fetch('name'), row.fetch('code')] }
+    revision = JrcContactCenter::AcwPolicy.new(account: @account).revision
     { items: ordered.slice((page - 1) * size, size) || [],
       meta: { page: page, per_page: size, total: rows.length, pages: (rows.length.to_f / size).ceil },
-      revision: JrcContactCenter::AcwPolicy.new(account: @account).revision,
+      revision: revision, editor_context: editor_context(revision, member),
       execution_available: false, configuration_only: true }
+  end
+
+  # The shared native reason catalogue is already selectable by agents in their
+  # own attendance. Do not expose global ACW settings, foreign queue IDs or notes.
+  def editor_context(revision, member)
+    catalogue = JrcContactCenter::AcwEndingReasons.new(account: @account).call
+    entries = catalogue.fetch('entries').sort_by { |row| [row.fetch('order'), row.fetch('code')] }
+    { id: @account.id.to_s, revision: revision,
+      voice_reason_catalog: { version: catalogue.fetch('version'), entries: entries.map { |row| row.slice('code', 'name', 'active') } },
+      destination_options: destination_options(member) }
+  end
+
+  def destination_options(member)
+    allowed = JrcContactCenter::EndingActions::ConfiguredNativeAction.crm_available?(member)
+    { crm: { configuration_available: allowed, activity_types: allowed ? JrcCrm::Activity::ACTIVITY_TYPES : [] } }
   end
 
   def validate_filters!(input)

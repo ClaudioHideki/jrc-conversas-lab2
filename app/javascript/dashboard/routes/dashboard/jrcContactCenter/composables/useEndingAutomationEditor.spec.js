@@ -47,11 +47,26 @@ const stored = () => ({
     },
   ],
 });
-const listed = (rows = [stored()], account = '1', revision = original) => ({
+const listed = (
+  rows = [stored()],
+  account = '1',
+  revision = original,
+  contextRevision = revision
+) => ({
   data: {
     account_id: account,
     items: rows,
     revision,
+    editor_context: {
+      id: account,
+      revision: contextRevision,
+      voice_reason_catalog: {
+        version: 1,
+        entries: [
+          { code: 'SYNTHETIC_REASON', name: 'SYNTHETIC reason', active: true },
+        ],
+      },
+    },
     configuration_only: true,
     execution_available: false,
     meta: {
@@ -59,20 +74,6 @@ const listed = (rows = [stored()], account = '1', revision = original) => ({
       per_page: 10,
       total: rows.length,
       pages: rows.length ? 1 : 0,
-    },
-  },
-});
-const policy = (account = '1', revision = original) => ({
-  data: {
-    item: {
-      id: account,
-      revision,
-      voice_reason_catalog: {
-        version: 1,
-        entries: [
-          { code: 'SYNTHETIC_REASON', name: 'SYNTHETIC reason', active: true },
-        ],
-      },
     },
   },
 });
@@ -111,7 +112,7 @@ const deferred = () => {
 };
 beforeEach(() => {
   vi.clearAllMocks();
-  API.acwPolicy.mockResolvedValue(policy());
+  API.acwPolicy.mockRejectedValue({ response: { status: 401 } });
   API.endingRules.mockResolvedValue(listed());
   API.endingRuleSourceContext.mockResolvedValue(source());
   API.saveEndingRule.mockResolvedValue({
@@ -120,6 +121,66 @@ beforeEach(() => {
 });
 
 describe('authorized operational ending-rule editor', () => {
+  it('keeps explicit native CRM grammar and sibling Project parameters through a reviewed save', async () => {
+    const row = stored();
+    row.destination_schema_version = 2;
+    row.actions.push({ kind: 'crm', parameters: {} });
+    const response = listed([row]);
+    response.data.editor_context.destination_options = {
+      crm: { configuration_available: true, activity_types: ['call'] },
+    };
+    API.endingRules.mockResolvedValue(response);
+    const { editor } = mountEditor();
+    await flushPromises();
+    await editor.edit(editor.items.value[0]);
+    editor.draft.value.name = 'SYNTHETIC explicitly reviewed mixed destination';
+    await flushPromises();
+    expect(editor.canSave.value).toBe(false);
+    editor.reviewed.value = true;
+    expect(editor.canSave.value).toBe(true);
+    const updated = { ...row, name: editor.draft.value.name };
+    API.saveEndingRule.mockResolvedValueOnce({
+      data: { account_id: '1', revision: refreshed, item: updated },
+    });
+    await editor.save();
+    expect(API.saveEndingRule).toHaveBeenCalledTimes(1);
+    const body = API.saveEndingRule.mock.calls[0][1];
+    expect(body).toMatchObject({
+      destination_schema_version: 2,
+      actions: row.actions,
+    });
+    expect(API.acwPolicy).not.toHaveBeenCalled();
+  });
+
+  it('removes a private CRM response when its matching native authority context is absent or denied', async () => {
+    const row = stored();
+    row.destination_schema_version = 2;
+    row.actions = [
+      {
+        kind: 'crm',
+        parameters: {
+          operation: 'create_activity',
+          parameters: {
+            activity_type: 'call',
+            title: 'SYNTHETIC private native CRM template',
+          },
+        },
+      },
+    ];
+    const response = listed([row]);
+    response.data.editor_context.destination_options = {
+      crm: { configuration_available: false, activity_types: [] },
+    };
+    API.endingRules.mockResolvedValue(response);
+    const { editor } = mountEditor();
+    await flushPromises();
+    expect(editor.items.value).toEqual([]);
+    expect(editor.draft.value).toBeNull();
+    expect(editor.error.value).toBe('DENIED');
+    expect(editor.crmOptions.value.configuration_available).toBe(false);
+    expect(API.saveEndingRule).not.toHaveBeenCalled();
+  });
+
   it('pins activation to the actual displayed saved rule when a background list refresh sees a newer definition', async () => {
     const { editor } = mountEditor();
     await flushPromises();
@@ -128,7 +189,6 @@ describe('authorized operational ending-rule editor', () => {
       ...stored(),
       name: 'SYNTHETIC newer unreviewed definition',
     };
-    API.acwPolicy.mockResolvedValueOnce(policy('1', refreshed));
     API.endingRules.mockResolvedValueOnce(listed([newer], '1', refreshed));
     await editor.load();
     expect(editor.items.value[0].name).toBe(newer.name);
@@ -375,7 +435,6 @@ describe('authorized operational ending-rule editor', () => {
     API.endingRules.mockReturnValueOnce(pending.promise);
     const { editor, accountId } = mountEditor();
     await flushPromises();
-    API.acwPolicy.mockResolvedValueOnce(policy('2'));
     API.endingRules.mockResolvedValueOnce(listed([], '2'));
     accountId.value = '2';
     await flushPromises();
@@ -402,7 +461,9 @@ describe('authorized operational ending-rule editor', () => {
   });
 
   it('does not combine a rule list with a policy from a different revision', async () => {
-    API.endingRules.mockResolvedValueOnce(listed([stored()], '1', refreshed));
+    API.endingRules.mockResolvedValueOnce(
+      listed([stored()], '1', refreshed, original)
+    );
     const { editor } = mountEditor();
     await flushPromises();
     expect(editor.error.value).toBe('LOAD_FAILED');
@@ -426,5 +487,32 @@ describe('authorized operational ending-rule editor', () => {
     await flushPromises();
     editor.reviewed.value = true;
     expect(editor.canSave.value).toBe(true);
+  });
+
+  it('rejects a list without its authorized editor context instead of requesting the global policy', async () => {
+    const response = listed();
+    delete response.data.editor_context;
+    API.endingRules.mockResolvedValueOnce(response);
+    const { editor } = mountEditor();
+    await flushPromises();
+    expect(editor.error.value).toBe('LOAD_FAILED');
+    expect(editor.items.value).toEqual([]);
+    await editor.edit(null);
+    expect(editor.draft.value).toBeNull();
+    expect(API.acwPolicy).not.toHaveBeenCalled();
+    expect(API.saveEndingRule).not.toHaveBeenCalled();
+  });
+
+  it('rejects an embedded editor identity from another account before exposing private list data', async () => {
+    const response = listed();
+    response.data.editor_context.id = '2';
+    API.endingRules.mockResolvedValueOnce(response);
+    const { editor } = mountEditor();
+    await flushPromises();
+    expect(editor.error.value).toBe('LOAD_FAILED');
+    expect(editor.items.value).toEqual([]);
+    expect(editor.draft.value).toBeNull();
+    expect(API.acwPolicy).not.toHaveBeenCalled();
+    expect(API.saveEndingRule).not.toHaveBeenCalled();
   });
 });

@@ -5,7 +5,7 @@
 class JrcContactCenter::EndingActions::ActivateRule
   def initialize(account:, member:, rule_code:, request_key:, expected_revision:)
     @account = account
-    @context = JrcContactCenter::EndingActions::ConfigurationContext.new(account: account, member: member)
+    @context = JrcContactCenter::EndingActions::ConfigurationContext.new(account: account, member: member, for_rule: true)
     @code = rule_code
     @request_key = request_key
     @expected_revision = expected_revision
@@ -27,8 +27,16 @@ class JrcContactCenter::EndingActions::ActivateRule
     version = JrcContactCenter::EndingActionVersion.where(account: @account).order(revision: :desc).first!
     document = JrcContactCenter::EndingActions::RuleDefinition.new.call(version.definition)
     rule = document.fetch('entries').find { |entry| entry.fetch('code') == @code }
+    JrcContactCenter::EndingActions::RuleSourceAuthority.new(account: @account, member: member).call(rule) if rule
     ready = rule&.fetch('active') && rule['execution_mode'].present?
     raise JrcContactCenter::OperationError, 'ending_action_not_ready' unless ready
+
+    # Historical v1 activation retains its native whole-account restriction.
+    # Only the explicit v2 contract uses the already authorized per-rule scope.
+    if rule.fetch('destination_schema_version', 1) != 2
+      coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: member.user)
+      raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
+    end
 
     input = rule.except('scope').merge('scope_revision' => rule.fetch('scope').fetch('integrity_sha256'))
     checked = JrcContactCenter::EndingActions::RuleInput.new(account: @account, member: member).call(input)

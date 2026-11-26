@@ -454,7 +454,7 @@
         11,
         12
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -480,7 +480,13 @@
       ],
       "candidate_test_reference_ids_not_approval": [
         0
-      ]
+      ],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_permissions_acceptance_20261126.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D1-P0151-C01",
@@ -501,7 +507,7 @@
         11,
         12
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -527,7 +533,13 @@
       ],
       "candidate_test_reference_ids_not_approval": [
         0
-      ]
+      ],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_permissions_acceptance_20261126.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D1-P0152-C01",
@@ -876,7 +888,7 @@
       "figures": [
         11
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -902,7 +914,13 @@
       ],
       "candidate_test_reference_ids_not_approval": [
         0
-      ]
+      ],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_permissions_acceptance_20261126.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0247-C02",
@@ -999,7 +1017,7 @@
       "figures": [
         11
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1025,7 +1043,13 @@
       ],
       "candidate_test_reference_ids_not_approval": [
         0
-      ]
+      ],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_permissions_acceptance_20261126.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0248-C01",
@@ -1040,7 +1064,7 @@
       "figures": [
         11
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1066,7 +1090,13 @@
       ],
       "candidate_test_reference_ids_not_approval": [
         0
-      ]
+      ],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_permissions_acceptance_20261126.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0248-C02",
@@ -1081,7 +1111,7 @@
       "figures": [
         11
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1107,7 +1137,13 @@
       ],
       "candidate_test_reference_ids_not_approval": [
         0
-      ]
+      ],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_permissions_acceptance_20261126.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0250-C01",
@@ -1122,7 +1158,7 @@
       "figures": [
         11
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1148,7 +1184,13 @@
       ],
       "candidate_test_reference_ids_not_approval": [
         0
-      ]
+      ],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_permissions_acceptance_20261126.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0251-C01",

@@ -1,3 +1,4 @@
+import { isBrowserApiResponse } from './call-center-browser-api.mjs';
 import { verifyNativeQueueMembership } from './call-center-queue-membership-native.mjs';
 import { verifyAllScopePauseApproval } from './call-center-pause-approval-native.mjs';
 import { verifyEndingConfirmation } from './call-center-ending-confirmation-native.mjs';
@@ -4011,9 +4012,8 @@ test('local pause catalog editor persists HH:MM, pagination, explicit policy and
   await expect(
     dialog.getByRole('button', { name: 'Salvar', exact: true })
   ).toBeEnabled();
-  const rejectedSave = page.waitForResponse(
-    response =>
-      response.request().method() === 'PATCH' && response.url() === endpoint
+  const rejectedSave = page.waitForResponse(response =>
+    isBrowserApiResponse(response, page.url(), endpoint, 'PATCH')
   );
   await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   expect((await rejectedSave).status()).toBe(422);
@@ -4024,6 +4024,10 @@ test('local pause catalog editor persists HH:MM, pagination, explicit policy and
   await expect(dialog.locator('[data-pause-invalid-field="code"]')).toHaveText(
     'Verifique este campo antes de salvar.'
   );
+  await expect(dialog.getByLabel('Código', { exact: true })).toBeFocused();
+  await expect(
+    dialog.locator('[data-pause-invalid-field="code"]')
+  ).toBeInViewport();
   await expect(dialog.getByLabel('Nome', { exact: true })).toHaveValue(
     'SYNTHETIC created by real UI'
   );

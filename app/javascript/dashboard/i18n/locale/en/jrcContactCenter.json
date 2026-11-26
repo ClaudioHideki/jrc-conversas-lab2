@@ -3030,7 +3030,35 @@
       "ASSIGNEE": "Responsável pela tarefa",
       "UNASSIGNED": "Sem atribuição explícita",
       "EXISTING_PARAMETERS": "Conferir todos os parâmetros preservados",
-      "APPLY": "Aplicar ao rascunho"
+      "APPLY": "Aplicar ao rascunho",
+      "CRM_CONFIGURATION": {
+        "TITLE": "Configurar automação de CRM",
+        "AUTHORITY": "O contato e a empresa vêm do atendimento autorizado. O responsável será o agente original, sujeito às permissões atuais do CRM em cada execução. Salvar esta configuração não cria registros.",
+        "OPERATION": "Ação no CRM",
+        "SELECT": "Selecione uma opção",
+        "CONTACT_LEAD": "Localizar ou criar o lead do contato original",
+        "CREATE_ACTIVITY": "Registrar atividade concluída no lead do contato original",
+        "ACTIVITY_TYPE": "Tipo de atividade",
+        "ACTIVITY_TITLE": "Título da atividade",
+        "DESCRIPTION": "Descrição",
+        "REVIEW": "Revisei os parâmetros e a criação de uma nova versão prospectiva da regra. As versões e as ações anteriores serão preservadas.",
+        "APPLY": "Aplicar à regra",
+        "CANCEL": "Voltar",
+        "REMOVE": "Retirar este destino da regra",
+        "ACTIVITY_TYPES": {
+          "call": "Ligação",
+          "whatsapp": "WhatsApp",
+          "email": "E-mail",
+          "meeting": "Reunião",
+          "task": "Tarefa",
+          "follow_up": "Retorno",
+          "demonstration": "Demonstração",
+          "visit": "Visita",
+          "proposal": "Proposta",
+          "note": "Nota",
+          "system": "Sistema"
+        }
+      }
     },
     "ENDING_ACTIVATION": {
       "TITLE": "Habilitação operacional da regra",
@@ -3046,7 +3074,11 @@
       "MANUAL_PENDING": "A confirmação individual por regra ainda está pendente de implementação. Esta configuração permanece preservada e não será executada automaticamente.",
       "FAILED": "Não foi possível confirmar o resultado. Confira a conexão e tente novamente explicitamente; a mesma solicitação será preservada para evitar duplicidade.",
       "STALE": "A configuração mudou desde a revisão. Volte à lista, recarregue e revise a regra antes de habilitar.",
-      "RELOAD": "Voltar à lista e recarregar"
+      "RELOAD": "Voltar à lista e recarregar",
+      "MANUAL_HINT": "Preparar esta regra vale apenas para novos atendimentos. Cada ação exigirá a revisão e a confirmação do agente original. Nenhum destino será executado e o ACW não será concluído por este preparo.",
+      "MANUAL_REVIEW": "Revisei a origem e os parâmetros e preparo a regra para novos atendimentos, sem autorizar uma ação individual.",
+      "MANUAL_VERSION_REVIEW": "Usar confirmação individual nesta versão",
+      "MANUAL_VERSION_HINT": "Esta escolha preserva as versões anteriores. Após salvar, revise a preparação da regra. Cada ação continuará exigindo uma confirmação própria no atendimento."
     },
     "ENDING_ATTEMPTS": {
       "OPEN": "Consultar automações deste atendimento",
@@ -3079,6 +3111,14 @@
         "confirmation_required": "Confirmação do agente necessária.",
         "trigger_pending": "Evento necessário ainda não confirmado.",
         "operation_unavailable": "Operação indisponível nas condições atuais."
+      },
+      "OPEN_TARGET": "Abrir registro",
+      "OPERATIONS": {
+        "create_task": "Projetos · Criar tarefa",
+        "create_lead": "CRM · Criar ou vincular lead",
+        "create_activity": "CRM · Registrar atividade",
+        "create_ticket": "Service Desk · Criar chamado",
+        "update_ticket": "Service Desk · Atualizar chamado"
       }
     },
     "ENDING_PENDING": {
@@ -3094,6 +3134,48 @@
       "CHANGED": "Esta pendência já foi processada ou seu contexto mudou. Confira o histórico atualizado.",
       "UNKNOWN": "Não foi possível confirmar o resultado. Consulte o histórico antes de tentar novamente; nenhum resultado foi presumido.",
       "NATIVE_REFUSAL": "A tentativa registrou uma recusa ou falha. Consulte o resultado real no histórico; nenhuma outra pendência foi executada."
+    },
+    "ENDING_DESTINATION_REQUESTS": {
+      "TITLE": "Ações aguardando sua confirmação",
+      "EMPTY": "Nenhuma ação manual elegível no seu acesso atual. Isso não representa uma execução concluída.",
+      "REVIEW": "Revisar esta ação",
+      "RESUME": "Retomar esta entrega pendente",
+      "RETRY": "Revisar nova tentativa deste destino",
+      "NEW_REQUEST": "Identificação da nova solicitação",
+      "RECORDED": "Solicitação registrada. Consulte os recibos para confirmar o resultado da execução.",
+      "ERRORS": {
+        "DENIED": "Seu acesso atual não permite esta ação.",
+        "LOAD_FAILED": "Não foi possível consultar as ações disponíveis.",
+        "CHANGED": "A referência foi alterada. Feche a revisão e atualize os recibos antes de confirmar novamente.",
+        "UNKNOWN": "Não foi possível confirmar o recebimento. Revise para reenviar a mesma solicitação com segurança.",
+        "UNAVAILABLE": "Não foi possível preparar uma identificação segura para esta solicitação."
+      },
+      "PREVIOUS_ACTIONS": "Página anterior das ações disponíveis",
+      "NEXT_ACTIONS": "Próxima página das ações disponíveis"
+    },
+    "ENDING_MANUAL_ACTION": {
+      "TITLE": "Confirmar esta ação",
+      "HINT": "Será registrada somente esta ação, com suas permissões atuais. Confirmar a ação não conclui o pós-atendimento nem representa sucesso no destino.",
+      "REVIEW": "Revisei o destino e a versão e confirmo apenas esta operação.",
+      "CONFIRM": "Confirmar solicitação",
+      "RUNNING": "Registrando solicitação...",
+      "CANCEL": "Cancelar"
+    },
+    "ENDING_TYPED_RETRY": {
+      "TITLE": "Revisar nova tentativa deste destino",
+      "HINT": "Somente este destino será tentado novamente. Resultados já concluídos e outras regras permanecerão preservados.",
+      "REVIEW": "Revisei o destino e a versão e confirmo apenas esta operação.",
+      "CONFIRM": "Confirmar nova tentativa",
+      "RUNNING": "Registrando solicitação...",
+      "CANCEL": "Cancelar"
+    },
+    "ENDING_TYPED_RESUME": {
+      "TITLE": "Retomar esta entrega pendente",
+      "HINT": "Será reenviada a mesma intenção ainda pendente, sem criar outra ação ou alterar sua versão. Uma falha já encerrada exige nova tentativa explícita.",
+      "REVIEW": "Revisei o destino e a versão e confirmo apenas esta operação.",
+      "CONFIRM": "Confirmar retomada",
+      "RUNNING": "Registrando solicitação...",
+      "CANCEL": "Cancelar"
     }
   }
 }

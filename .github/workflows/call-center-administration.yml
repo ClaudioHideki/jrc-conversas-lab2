@@ -103,6 +103,21 @@ jobs:
           node --test script/validate_cc_nico_intent_admission.test.mjs
           node --test script/validate_cc_typed_destination_admission.test.mjs
           node script/validate_cc_access_migration.mjs
+      - name: Frozen frontend dependencies
+        id: frontend_dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Frontend lint of changed sources
+        id: frontend_lint
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD -- app/javascript | grep -E '\.(js|vue)$')
+          pnpm exec eslint "${files[@]}"
+      - name: Official RuboCop server parity without reducing inspected coverage
+        run: |
+          python3 -B script/jrc_call_center_lint_server_probe_test.py
+          python3 -B script/jrc_call_center_lint_server_probe.py
+      - name: Focused public ending editor and selected destination lint
+        run: |
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/ending_attempts_controller.rb app/controllers/api/v1/accounts/jrc_contact_center/ending_destinations_controller.rb app/services/jrc_contact_center/ending_actions/activate_rule.rb app/services/jrc_contact_center/ending_actions/attempt_history.rb app/services/jrc_contact_center/ending_actions/configuration_context.rb app/services/jrc_contact_center/ending_actions/configure_rule.rb app/services/jrc_contact_center/ending_actions/configured_native_action.rb app/services/jrc_contact_center/ending_actions/destination_attempt_projection.rb app/services/jrc_contact_center/ending_actions/destination_history_page.rb app/services/jrc_contact_center/ending_actions/destination_operation_availability.rb app/services/jrc_contact_center/ending_actions/destination_selection_review.rb app/services/jrc_contact_center/ending_actions/destination_target_reference.rb app/services/jrc_contact_center/ending_actions/manual_destination_page.rb app/services/jrc_contact_center/ending_actions/manual_destination_preview.rb app/services/jrc_contact_center/ending_actions/readiness_status.rb app/services/jrc_contact_center/ending_actions/request_destination_retry.rb app/services/jrc_contact_center/ending_actions/request_manual_destination.rb app/services/jrc_contact_center/ending_actions/resume_destination_delivery.rb app/services/jrc_contact_center/ending_actions/rule_input.rb app/services/jrc_contact_center/ending_actions/rule_source_authority.rb app/services/jrc_contact_center/ending_actions/selected_destination_authority.rb app/services/jrc_contact_center/ending_actions/source_context.rb app/services/jrc_contact_center/ending_actions/visible_rules.rb config/routes/jrc_contact_center_acw.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_crm_rule_configuration_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_destination_commands_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_rule_configuration_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_selected_destination_retry_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_history_spec.rb spec/services/jrc_contact_center/ending_actions/configuration_context_scoped_rules_spec.rb spec/services/jrc_contact_center/ending_actions/rule_source_authority_spec.rb --format json --out /tmp/call-center-ending-public-lint.json
       - name: Focused original-event source and legacy compatibility lint
         run: |
           bundle exec rubocop app/jobs/jrc_contact_center/ending_actions_job.rb app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb --format json --out /tmp/call-center-typed-original-event-lint.json
@@ -147,6 +162,21 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_typed_destination_schema_probe"); JrcContactCenter::SyntheticTypedDestinationSchemaProbe.record("fresh")'
           } > /tmp/call-center-initial-schema.log 2>&1
           cat /tmp/call-center-initial-schema.log
+      - name: Focused public source and CRM authorization before full regressions
+        run: |
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_crm_rule_configuration_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_rule_configuration_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb spec/services/jrc_contact_center/ending_actions/configuration_context_scoped_rules_spec.rb spec/services/jrc_contact_center/ending_actions/rule_source_authority_spec.rb --format progress --format json --out /tmp/call-center-ending-public-preflight.json
+          python3 -B - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-ending-public-preflight.json').read_text())
+          expected = {'spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_rule_configuration_spec.rb': 9, 'spec/services/jrc_contact_center/ending_actions/configuration_context_scoped_rules_spec.rb': 6, 'spec/services/jrc_contact_center/ending_actions/rule_source_authority_spec.rb': 6, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_crm_rule_configuration_spec.rb': 14, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb': 9}
+          assert report['summary']['example_count'] == len(report['examples']) == 44
+          assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == expected
+          assert len({row['id'] for row in report['examples']}) == len(report['examples'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          PY
       - name: Reload migrated schema in a separate disposable database
         id: native_reload
         env:
@@ -502,6 +532,19 @@ jobs:
         run: |
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_destination_commands_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_selected_destination_retry_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_history_spec.rb --format progress --format json --out /tmp/call-center-ending-public-committed-rspec.json
+          python3 -B - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-ending-public-committed-rspec.json').read_text())
+          expected = {'spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_history_spec.rb': 15, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_destination_commands_spec.rb': 16, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb': 13, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_selected_destination_retry_spec.rb': 12}
+          assert report['summary']['example_count'] == len(report['examples']) == 56
+          assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == expected
+          assert len({row['id'] for row in report['examples']}) == len(report['examples'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          PY
           bundle exec rspec spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb --fail-fast --format progress --format json --out /tmp/call-center-typed-original-event-rspec.json
           python3 -B - <<'PY'
           import json
@@ -664,7 +707,7 @@ jobs:
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb \
             spec/serializers/jrc_approvals/request_serializer_pause_spec.rb \
-            --exclude-pattern '**/initial_destination_attempts_spec.rb,**/queue_destination_attempt_spec.rb,**/ending_typed_delivery_transaction_spec.rb,**/ending_typed_actual_broker_concurrency_spec.rb,**/ending_typed_mixed_destinations_spec.rb,**/ending_typed_execution_concurrency_spec.rb,**/synthetic_typed_destination_upgrade_spec.rb,**/ending_native_sd_update_concurrency_spec.rb,**/ending_native_crm_activity_concurrency_spec.rb,**/ending_native_service_desk_concurrency_spec.rb,**/ending_native_nico_queue_transaction_spec.rb,**/synthetic_nico_dispatch_upgrade_spec.rb,**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
+            --exclude-pattern '**/ending_destination_commands_spec.rb,**/ending_manual_destination_intent_spec.rb,**/ending_selected_destination_retry_spec.rb,**/ending_typed_history_spec.rb,**/initial_destination_attempts_spec.rb,**/queue_destination_attempt_spec.rb,**/ending_typed_delivery_transaction_spec.rb,**/ending_typed_actual_broker_concurrency_spec.rb,**/ending_typed_mixed_destinations_spec.rb,**/ending_typed_execution_concurrency_spec.rb,**/synthetic_typed_destination_upgrade_spec.rb,**/ending_native_sd_update_concurrency_spec.rb,**/ending_native_crm_activity_concurrency_spec.rb,**/ending_native_service_desk_concurrency_spec.rb,**/ending_native_nico_queue_transaction_spec.rb,**/synthetic_nico_dispatch_upgrade_spec.rb,**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
         if: failure() && (steps.native_schema.outcome == 'failure' || steps.native_concurrency.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_fixture_core_preflight.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure' || steps.ending_history_lint.outcome == 'failure' || steps.ending_actual_broker_lint.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure' || steps.typed_destination_upgrade.outcome == 'failure' || steps.typed_destination_lint.outcome == 'failure' || steps.typed_destination_coverage.outcome == 'failure' || steps.typed_destination_concurrency.outcome == 'failure' || steps.typed_delivery_lint.outcome == 'failure' || steps.typed_delivery_commit.outcome == 'failure' || steps.typed_delivery_broker.outcome == 'failure')
@@ -905,9 +948,6 @@ jobs:
         run: |
           createdb -h 127.0.0.1 -U postgres jrc_quality_storage_synthetic
           psql -h 127.0.0.1 -U postgres -d jrc_quality_storage_synthetic -f spec/sql/voice_quality_scope_test.sql | tee /tmp/call-center-storage.txt
-      - name: Frozen frontend dependencies
-        id: frontend_dependencies
-        run: pnpm install --frozen-lockfile
       - name: Syntax and migration timestamp protections
         run: |
           node script/validate_changed_source.mjs a24adc6dd8bb660f955b76cce0172ae1638deee2
@@ -920,14 +960,10 @@ jobs:
             app/javascript/dashboard/routes/dashboard/webphone app/javascript/dashboard/routes/dashboard/settings/customRoles \
             app/javascript/dashboard/components/widgets/BackButton.spec.js \
             app/javascript/dashboard/api/specs/teams.spec.js app/javascript/dashboard/store/modules/specs/teamMembers app/javascript/dashboard/store/modules/specs/teams \
+            app/javascript/dashboard/api/specs/jrcContactCenterHistoryContract.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingDestinationHistory.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingDestinationRequests.spec.js \
             app/javascript/dashboard/routes/dashboard/inbox/usePendingEndingRun.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/EndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/PendingQualificationReasons.spec.js app/javascript/dashboard/routes/dashboard/inbox/useAttendanceClosing.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationDraftForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.spec.js app/javascript/dashboard/routes/dashboard/inbox/InboxVoicePanel.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/call-center-vitest.json
-      - name: Frontend lint of changed sources
-        id: frontend_lint
-        run: |
-          mapfile -t files < <(git diff --name-only --diff-filter=ACMR a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD -- app/javascript | grep -E '\.(js|vue)$')
-          pnpm exec eslint "${files[@]}"
       - name: Incremental Ruby lint without suppressing new offenses
         id: ruby_lint
         if: success() && steps.ruby_runtime.outcome == 'success'
@@ -992,7 +1028,7 @@ jobs:
           matrix = json.loads(source.read_text())
           assert sorted(row['figure'] for row in matrix['figures']) == list(range(1, 24))
           summaries = {}
-          for name in ['call-center-typed-original-event-rspec.json', 'call-center-typed-delivery-transaction-rspec.json', 'call-center-ending-typed-actual-broker-rspec.json', 'call-center-typed-destination-upgrade-rspec.json', 'call-center-typed-destination-concurrency-rspec.json', 'call-center-typed-destination-reload-rspec.json', 'call-center-ending-fixture-core-preflight.json', 'call-center-ending-fixture-contention-preflight.json', 'call-center-nico-native-regressions-rspec.json', 'call-center-nico-preserved-contention-rspec.json', 'call-center-nico-intent-fresh-rspec.json', 'call-center-nico-intent-reload-rspec.json', 'call-center-nico-intent-upgrade-rspec.json', 'call-center-ending-nico-queue-rspec.json', 'call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
+          for name in ['call-center-ending-public-committed-rspec.json', 'call-center-typed-original-event-rspec.json', 'call-center-typed-delivery-transaction-rspec.json', 'call-center-ending-typed-actual-broker-rspec.json', 'call-center-typed-destination-upgrade-rspec.json', 'call-center-typed-destination-concurrency-rspec.json', 'call-center-typed-destination-reload-rspec.json', 'call-center-ending-fixture-core-preflight.json', 'call-center-ending-fixture-contention-preflight.json', 'call-center-nico-native-regressions-rspec.json', 'call-center-nico-preserved-contention-rspec.json', 'call-center-nico-intent-fresh-rspec.json', 'call-center-nico-intent-reload-rspec.json', 'call-center-nico-intent-upgrade-rspec.json', 'call-center-ending-nico-queue-rspec.json', 'call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
               summary = json.loads(Path('/tmp', name).read_text())['summary']
               assert summary['example_count'] > 0
               assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0
@@ -1033,7 +1069,8 @@ jobs:
               assert flow['persisted_mode'] == 'agent_confirmation' and flow['configuration_only'] is True and flow['effects_executed'] is False
               assert flow['native_project_assignee_selected_and_reloaded'] is True
               assert str(flow['native_project_assignee_id']).isdigit() and int(flow['native_project_assignee_id']) > 0
-              assert flow['denied_status'] in [401, 403] and flow['scoped_status'] in [401, 403] and flow['foreign_status'] in [401, 403, 404]
+              assert flow['denied_status'] in [401, 403] and flow['scoped_status'] == 200 and flow['foreign_status'] in [401, 403, 404]
+              assert flow['explicit_manual_destination_schema'] == 2
               assert flow['theme_asserted_in_browser'] and flow['actual_dark_theme'] == flow['project'].endswith('dark')
               assert flow['contrast']['ratio'] >= 4.5 and len(flow['screenshots']) == 1 and Path(flow['screenshots'][0]).is_file()
               assert not flow['errors'] and not flow['provider_or_destination_writes']
@@ -1041,6 +1078,18 @@ jobs:
           for flow in ending_editor_flows:
               assert len(flow['configuration_screenshots']) == 3
               assert all(Path(path).is_file() for path in flow['configuration_screenshots'])
+          scoped_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-scoped-editor-native.json')]
+          assert len(scoped_flows) == 4 and {flow['project'] for flow in scoped_flows} == expected_projects
+          for flow in scoped_flows:
+              assert flow['sha'] == os.environ['GITHUB_SHA'] and flow['synthetic'] is True
+              assert flow['scoped_rule_saved_and_reloaded'] is True and flow['current_source_authorized'] is True
+              assert flow['other_source_status'] == 404 and flow['global_policy_status'] in [401, 403]
+              assert flow['private_project_status'] in [401, 403, 404] and flow['private_template_unexposed'] is True
+              assert flow['native_configure_not_group'] is True and flow['inactive_rule_only'] is True
+              assert flow['effects_executed'] is False and flow['horizontal_overflow_absent'] is True
+              assert flow['actual_dark_theme'] == flow['project'].endswith('dark') and flow['theme_asserted_in_browser'] is True
+              assert flow['errors'] == flow['provider_or_destination_writes'] == []
+              assert flow['contrast']['ratio'] >= 4.5 and all(Path(path).is_file() for path in flow['screenshots'])
           origin_schema = [json.loads(Path('/tmp', f'call-center-ending-origin-schema-{stage}.json').read_text()) for stage in ['fresh', 'reload', 'populated']]
           assert all(item['components'] == origin_schema[0]['components'] for item in origin_schema)
           assert all(item['product_sha'] == os.environ['GITHUB_SHA'] and set(item['stored'].values()) == {item['calculated']} for item in origin_schema)

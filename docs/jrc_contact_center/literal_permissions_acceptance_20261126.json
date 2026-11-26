@@ -1,0 +1,351 @@
+{
+  "verified_source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+  "run": 45693144825,
+  "artifact": 15065693526,
+  "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+  "current_source_ancestry_verified": {
+    "base": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+    "head": "827543328439c4ab64b496c65b7a4b2300914467",
+    "merge_base": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+    "total_commits": 3,
+    "files": [
+      {
+        "path": ".github/workflows/call-center-administration.yml",
+        "status": "modified",
+        "blob_sha": "7382aa15d5b4672e9ab26a81dba0ddc2141a880a"
+      },
+      {
+        "path": "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+        "status": "modified",
+        "blob_sha": "f4f715792ca9ad9a5628b67f0ffc635e1edd19c1"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.spec.js",
+        "status": "modified",
+        "blob_sha": "29871f44b86960234dd8f0884bf9d6d2c4c6e56c"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue",
+        "status": "modified",
+        "blob_sha": "923f280a82c90593a0413fc4f5c5f695d2961024"
+      },
+      {
+        "path": "app/jobs/jrc_contact_center/ending_actions_job.rb",
+        "status": "modified",
+        "blob_sha": "fee0b515b0cb629d613fd7d3d85a85fdc09fe44d"
+      },
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb",
+        "status": "modified",
+        "blob_sha": "404e8129851075de20726b49055d61d9d8ec1edf"
+      },
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb",
+        "status": "added",
+        "blob_sha": "595674daa34023e8b3108b7ab6e9da48cc345d37"
+      },
+      {
+        "path": "docs/jrc_contact_center/ending_typed_delivery_native_acceptance_20261125.json",
+        "status": "added",
+        "blob_sha": "9a369b3cf387b6bd5ab06fb8e8d1a447e8ee9648"
+      },
+      {
+        "path": "docs/jrc_contact_center/ending_typed_original_event_candidate_20261125.json",
+        "status": "added",
+        "blob_sha": "c72cdd5ec58f69e6f135d4427f5d08d64bba6a2f"
+      },
+      {
+        "path": "docs/jrc_contact_center/part1_functional_delivery_windows_20261125.json",
+        "status": "added",
+        "blob_sha": "f2d8ccfcf9dde2d55019705598ac83b6460adcca"
+      },
+      {
+        "path": "docs/jrc_contact_center/partial_requirements_implementation_vs_homologation_20261125.json",
+        "status": "added",
+        "blob_sha": "f81732207fc368f95f62092fb715a39e0f76078a"
+      },
+      {
+        "path": "docs/jrc_contact_center/word_traceability/index.json",
+        "status": "modified",
+        "blob_sha": "5bbee2c08080639c0537f4b6e72dff0988eca5a3"
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb",
+        "status": "added",
+        "blob_sha": "6b4a92ed61b275778b7c78ee089ad7401a02ccc9"
+      },
+      {
+        "path": "tests/playwright/tests/e2e/ui/call-center-native.spec.ts",
+        "status": "modified",
+        "blob_sha": "32041d2c0f29f7e61f8f888fad42d0f9d7168f82"
+      }
+    ]
+  },
+  "unchanged_current_source_sha256": {
+    "app/services/jrc_contact_center/grant_guard.rb": "ef5cb05a86b018689f18e3f5d135e562985e2bb3301b0f27b3deae49ec9d7468",
+    "app/services/jrc_contact_center/access_authorization.rb": "2a134d768661e2d8b45bfab0c82285ebdd5df815924d4f876f1f249c27cc89d3",
+    "app/services/jrc_contact_center/permission_sources.rb": "26db382f54f70c157a6e73884628f8117a78db0fa5b1a2dbc5d2f708c6af4da8",
+    "app/policies/jrc_contact_center/module_policy.rb": "7600c7111a23f02e6dda05a312b09d5661f3d0a285bf724dafaea99a27d0c965",
+    "app/models/jrc_contact_center/access_grant.rb": "2f3d80f71f51f8105f0d4230af2d1797f37549b3b3a534a71a48359a115eab35",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue": "a465f17b7041c5a491ac9ffda4425403143c66c7fcd6946b171dd2af8bed1da1"
+  },
+  "native_report_sha256": "4c2557f38cb624ec159ee40321af129eda63f4273d0b7c0ee61f39f61d369410",
+  "native_coverage": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb": {
+      "distinct_examples": 15,
+      "example_ids": [
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:1]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:2]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:3]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:4]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:5]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:6]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:7]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:8]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:9]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:10]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:11]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:12]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:13]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:14]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb[1:15]"
+      ],
+      "behaviours": [
+        "Call Center explicit access authorizations lists native users with bounded pagination and explicit pending state",
+        "Call Center explicit access authorizations persists eligibility and individual rights, then denies access again after suspension",
+        "Call Center explicit access authorizations does not let an administrator grant a critical power above their own authority",
+        "Call Center explicit access authorizations cannot authorize itself by persisting a grant before checking the actor",
+        "Call Center explicit access authorizations treats removing an individual denial as a grant requiring actor authority",
+        "Call Center explicit access authorizations rejects a stale revision and missing revision without overwriting state",
+        "Call Center explicit access authorizations does not grant corporate coverage when eligibility is activated",
+        "Call Center explicit access authorizations does not allow an ordinary eligible agent to manage grants",
+        "Call Center explicit access authorizations returns not found for a native member from another account",
+        "Call Center explicit access authorizations preserves an audit with actor and correlation and rolls it back on a refused grant",
+        "Call Center explicit access authorizations returns named origins only in an authorized detail without activating the recipient",
+        "Call Center explicit access authorizations rejects a malformed individual array true",
+        "Call Center explicit access authorizations rejects a malformed individual array \"true\"",
+        "Call Center explicit access authorizations rejects a malformed individual array 1",
+        "Call Center explicit access authorizations refuses a cached actor after native authentication is withdrawn before an authorization write"
+      ]
+    },
+    "spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb": {
+      "distinct_examples": 10,
+      "example_ids": [
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:1]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:2]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:3]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:4]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:5]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:6]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:7]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:8]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:9]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb[1:10]"
+      ],
+      "behaviours": [
+        "Call Center enrollment requires explicit user eligibility marks a pending native user as unavailable without treating online presence as authorization",
+        "Call Center enrollment requires explicit user eligibility rejects a new participation assignment to a pending user",
+        "Call Center enrollment requires explicit user eligibility rejects supervision without implicitly activating a pending user",
+        "Call Center enrollment requires explicit user eligibility allows an explicitly eligible user without requiring that user to be online",
+        "Call Center enrollment requires explicit user eligibility allows safe deactivation after eligibility has been revoked and prevents reactivation",
+        "Call Center enrollment requires explicit user eligibility does not move an existing assignment to a pending user even while disabling it",
+        "Call Center enrollment requires explicit user eligibility marks an unconfirmed user unavailable even when an explicit grant remains and online presence is true",
+        "Call Center enrollment requires explicit user eligibility blocks participation for an unconfirmed user without changing its real grant",
+        "Call Center enrollment requires explicit user eligibility blocks supervision for an unconfirmed user without changing its real grant",
+        "Call Center enrollment requires explicit user eligibility still allows safe deactivation for an unconfirmed recipient and refuses reactivation"
+      ]
+    },
+    "spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb": {
+      "distinct_examples": 8,
+      "example_ids": [
+        "./spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb[1:1]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb[1:2]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb[1:3]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb[1:4:1]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb[1:4:2]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb[1:4:3]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb[1:4:4]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb[1:4:5]"
+      ],
+      "behaviours": [
+        "Call Center native role boundaries returns not found for a foreign role without changing either Account",
+        "Call Center native role boundaries preserves the role and audit history when an actor cannot grant a critical power",
+        "Call Center native role boundaries serializes the native update and permits removing an existing power without automatic grants",
+        "Call Center native role boundaries with an administrator restricted to a corporate business unit denies metadata changes to an Account-wide Call Center role",
+        "Call Center native role boundaries with an administrator restricted to a corporate business unit denies removals and deletion without turning a restricted scope into global authority",
+        "Call Center native role boundaries with an administrator restricted to a corporate business unit denies creation of a global Call Center role through a direct API request",
+        "Call Center native role boundaries with an administrator restricted to a corporate business unit permits an explicitly configured synthetic Group authority to remove a power",
+        "Call Center native role boundaries with an administrator restricted to a corporate business unit preserves native editing of unrelated role capabilities"
+      ]
+    },
+    "spec/requests/api/v1/accounts/jrc_contact_center/latent_permission_effects_spec.rb": {
+      "distinct_examples": 6,
+      "example_ids": [
+        "./spec/requests/api/v1/accounts/jrc_contact_center/latent_permission_effects_spec.rb[1:1]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/latent_permission_effects_spec.rb[1:2]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/latent_permission_effects_spec.rb[1:3]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/latent_permission_effects_spec.rb[1:4]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/latent_permission_effects_spec.rb[1:5]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/latent_permission_effects_spec.rb[1:6]"
+      ],
+      "behaviours": [
+        "Call Center latent permission dependency guards does not store a critical individual grant even when it is not effective yet",
+        "Call Center latent permission dependency guards does not activate an existing individual critical grant merely by assigning a view profile",
+        "Call Center latent permission dependency guards does not activate a critical profile capability by adding only the view dependency",
+        "Call Center latent permission dependency guards does not activate a critical team grant by adding only the view dependency",
+        "Call Center latent permission dependency guards does not activate a latent profile capability through a native team membership",
+        "Call Center latent permission dependency guards allows the same transition when the actor actually holds its full effective result"
+      ]
+    }
+  },
+  "distinct_native_examples_reused": 39,
+  "actual_Chrome_cases": [
+    {
+      "title": "native access user eligibility, real pagination, denial and persistence",
+      "project": "desktop-light"
+    },
+    {
+      "title": "native access conflict preserves draft and requires explicit comparison before overwrite",
+      "project": "desktop-light"
+    },
+    {
+      "title": "profile change revalidates native grants and denies writes after revocation",
+      "project": "desktop-light"
+    },
+    {
+      "title": "native permission popup reuses the role editor and persists only explicitly selected capabilities",
+      "project": "desktop-light"
+    },
+    {
+      "title": "native access user eligibility, real pagination, denial and persistence",
+      "project": "desktop-dark"
+    },
+    {
+      "title": "native access conflict preserves draft and requires explicit comparison before overwrite",
+      "project": "desktop-dark"
+    },
+    {
+      "title": "profile change revalidates native grants and denies writes after revocation",
+      "project": "desktop-dark"
+    },
+    {
+      "title": "native permission popup reuses the role editor and persists only explicitly selected capabilities",
+      "project": "desktop-dark"
+    },
+    {
+      "title": "native access user eligibility, real pagination, denial and persistence",
+      "project": "mobile-light"
+    },
+    {
+      "title": "native access conflict preserves draft and requires explicit comparison before overwrite",
+      "project": "mobile-light"
+    },
+    {
+      "title": "profile change revalidates native grants and denies writes after revocation",
+      "project": "mobile-light"
+    },
+    {
+      "title": "native permission popup reuses the role editor and persists only explicitly selected capabilities",
+      "project": "mobile-light"
+    },
+    {
+      "title": "native access user eligibility, real pagination, denial and persistence",
+      "project": "mobile-dark"
+    },
+    {
+      "title": "native access conflict preserves draft and requires explicit comparison before overwrite",
+      "project": "mobile-dark"
+    },
+    {
+      "title": "profile change revalidates native grants and denies writes after revocation",
+      "project": "mobile-dark"
+    },
+    {
+      "title": "native permission popup reuses the role editor and persists only explicitly selected capabilities",
+      "project": "mobile-dark"
+    }
+  ],
+  "Chrome_report_sha256": "79f517502e5c11e4e49ca5f5130450c670e45718f88976cb7b4871be2963ccde",
+  "actual_visual_review": [
+    {
+      "file": "desktop-light-permissions.png",
+      "sha256": "1d4d820624903b087c657250e13cce936160fcf8fa68eb19fbb2e3b7c272808b",
+      "actually_opened": true
+    },
+    {
+      "file": "desktop-dark-access-conflict.png",
+      "sha256": "9c2231fe31c2f5be2e221fd9be15deb655cd7b0cbdaafc6c433ad925522810c1",
+      "actually_opened": true
+    },
+    {
+      "file": "mobile-light-access-user.png",
+      "sha256": "f395a065a6d690e371e8317a05fde75ebab53fb25cd057eb3ca7c555f633b191",
+      "actually_opened": true
+    },
+    {
+      "file": "mobile-dark-access-revised.png",
+      "sha256": "5dfed45cb1251afabf768028e772774353e5ebb05d0ecd1f5aade6f3e1dc0c70",
+      "actually_opened": true
+    }
+  ],
+  "accepted_literal_clauses": {
+    "D1-P0150-C01": {
+      "expected": "Um administrador nunca pode conceder privilégios acima da própria alçada.",
+      "expected_sha256": "2fea2ccc0be2efb3cc3ba2b52ca65d99df93790512f280c0a01db2bae7d7bd43",
+      "status": "implementado",
+      "literal_clause_only": true,
+      "whole_figure_accepted": false
+    },
+    "D1-P0151-C01": {
+      "expected": "Sem conceder automaticamente acesso ao Call Center ao apenas criar um usuário no sistema.",
+      "expected_sha256": "79dc4c845b748623538e3d5f106e12093e36fec3fcae4c82d1bcf0061ad9d945",
+      "status": "implementado",
+      "literal_clause_only": true,
+      "whole_figure_accepted": false
+    },
+    "D2-P0247-C01": {
+      "expected": "Regras e permissoes: Nao conceder privilegio maior que a alçada do operador.",
+      "expected_sha256": "02ba3e6a8b77cf5a4e5dc069b222973e0bfda436a148bf6139c9d592fe6abf78",
+      "status": "implementado",
+      "literal_clause_only": true,
+      "whole_figure_accepted": false
+    },
+    "D2-P0247-C04": {
+      "expected": "Criar usuario na plataforma nao ativa automaticamente Call Center.",
+      "expected_sha256": "efdd443f39b40bf62790bb8d39df36dccdb4bc1f643c2316ebfb91d5aa3ab3d9",
+      "status": "implementado",
+      "literal_clause_only": true,
+      "whole_figure_accepted": false
+    },
+    "D2-P0248-C01": {
+      "expected": "Estados de erro e excecoes: Se o perfil alvo mudou em outra sessao, exigir revisao antes de sobrescrever.",
+      "expected_sha256": "4d072656aa0ff102c0bd5702c30bc3707b9475f9a19d3935af65ff822f3921d9",
+      "status": "implementado",
+      "literal_clause_only": true,
+      "whole_figure_accepted": false
+    },
+    "D2-P0248-C02": {
+      "expected": "Uma acao negada pela API precisa ser negada mesmo quando checkbox ou rota estiver manipulada no navegador.",
+      "expected_sha256": "e7d97a294445f9c19e88b6d5df2b679c01de47af1ce3d67812532ed68e8b4b31",
+      "status": "implementado",
+      "literal_clause_only": true,
+      "whole_figure_accepted": false
+    },
+    "D2-P0250-C01": {
+      "expected": "• F11-A: Admin sem permissao de publicacao nao consegue conceder Publicar para outro perfil.",
+      "expected_sha256": "fecba9fb1f77ab65082e28dd0a3ca9e95616c6c04811080da865edc85a84b923",
+      "status": "implementado",
+      "literal_clause_only": true,
+      "whole_figure_accepted": false
+    }
+  },
+  "new_tests_executed_for_this_review": 0,
+  "functionality": "Current native grant ceiling, explicit user eligibility, stale review conflict and denied forged API commands.",
+  "whole_figure11_or_12_accepted": false,
+  "whole_Part1_accepted": false,
+  "remaining_divergences": [
+    "The complete Word category tabs and full permission matrix layout remain partial.",
+    "External PABX command/publication/ACK homologation remains pending.",
+    "Four original screenshots were reviewed; the revised mobile list image is captured while loading, not proof of its final rendered state."
+  ]
+}

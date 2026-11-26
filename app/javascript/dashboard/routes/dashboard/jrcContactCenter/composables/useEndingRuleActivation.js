@@ -55,7 +55,9 @@ export const useEndingRuleActivation = ({
       !stale.value &&
       reviewed.value &&
       rule.value?.active === true &&
-      rule.value?.execution_mode === 'automatic' &&
+      (rule.value?.execution_mode === 'automatic' ||
+        (rule.value?.destination_schema_version === 2 &&
+          rule.value?.execution_mode === 'agent_confirmation')) &&
       /^[a-f0-9]{64}$/.test(revision.value)
   );
   const load = async () => {

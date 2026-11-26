@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Input for the existing AcwPolicy writer. Its caller retains current
-# native configure/global-coverage authority and the account transaction/revision.
+# native configure/source coverage and the account transaction/revision.
 class JrcContactCenter::EndingActions::RuleInput
   FIELDS = %w[code name reason_code queue_id scope_revision timing active actions conditions].freeze
 
@@ -42,16 +42,25 @@ class JrcContactCenter::EndingActions::RuleInput
     valid &&= JrcContactCenter::EndingActions::RuleDefinition::TIMINGS.include?(row['timing'])
     invalid! unless valid
     validate_execution_mode!(row)
+    validate_destination_schema!(row)
   end
 
   def input_fields(row)
-    row.key?('execution_mode') ? FIELDS + ['execution_mode'] : FIELDS
+    optional = %w[execution_mode destination_schema_version].select { |key| row.key?(key) }
+    FIELDS + optional
   end
 
   def validate_execution_mode!(row)
     return unless row.key?('execution_mode')
 
     invalid! unless JrcContactCenter::EndingActions::RuleDefinition::EXECUTION_MODES.include?(row['execution_mode'])
+  end
+
+  def validate_destination_schema!(row)
+    return unless row.key?('destination_schema_version')
+
+    invalid! unless row['destination_schema_version'].is_a?(Integer) && row['destination_schema_version'] == 2
+    invalid! if row.fetch('active') && !row.key?('execution_mode')
   end
 
   def validate_activation!(row, queue, scope)
@@ -75,12 +84,17 @@ class JrcContactCenter::EndingActions::RuleInput
     entries = row.fetch('actions')
     invalid! unless entries.is_a?(Array) && entries.length <= 5
     invalid! if row.fetch('active') && entries.empty?
-    result = entries.map { |entry| action!(entry, active: row.fetch('active')) }
+    schema = row.fetch('destination_schema_version', 1)
+    result = entries.map { |entry| action!(entry, active: row.fetch('active'), schema: schema) }
     invalid! unless result.pluck('kind').uniq.length == result.length
     result
   end
 
-  def action!(input, active:)
+  def action!(input, active:, schema:)
+    if schema == 2
+      return JrcContactCenter::EndingActions::ConfiguredNativeAction.new(account: @account, member: @member).call(input, active: active)
+    end
+
     invalid! unless input.is_a?(Hash)
     entry = input.deep_stringify_keys
     invalid! unless entry.keys.sort == %w[kind parameters]

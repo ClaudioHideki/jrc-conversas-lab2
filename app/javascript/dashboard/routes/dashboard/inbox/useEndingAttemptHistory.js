@@ -1,5 +1,6 @@
 import { onBeforeUnmount, ref, watch } from 'vue';
 import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
+import { validDestinationHistoryRow } from './endingDestinationHistoryContract';
 
 const identifier = value =>
   typeof value === 'string' && /^[1-9]\d{0,18}$/.test(value);
@@ -34,8 +35,9 @@ const validOutcome = row => {
     : row.execution_id === null && row.target === null;
 };
 
-const validPage = (body, accountId, qualificationId, page) =>
-  body?.contract_version === 1 &&
+const validPage = (body, accountId, qualificationId, page, contractVersion) =>
+  [1, 2].includes(contractVersion) &&
+  body?.contract_version === contractVersion &&
   body.account_id === String(accountId) &&
   body.qualification_id === String(qualificationId) &&
   (body.call_session_id === null || identifier(body.call_session_id)) &&
@@ -49,20 +51,23 @@ const validPage = (body, accountId, qualificationId, page) =>
   new Set(body.items.map(row => row.id)).size === body.items.length &&
   body.items.every(
     row =>
-      identifier(row.id) &&
+      (contractVersion === 1
+        ? identifier(row.id)
+        : validDestinationHistoryRow(row)) &&
       identifier(row.origin_id) &&
       identifier(row.version_id) &&
       typeof row.rule_code === 'string' &&
       row.rule_code.length > 0 &&
       row.rule_code.length <= 100 &&
-      row.destination_kind === 'project_task' &&
+      (contractVersion === 2 || row.destination_kind === 'project_task') &&
       typeof row.can_reprocess_pending === 'boolean' &&
       (row.outcome === 'pending' || row.can_reprocess_pending === false) &&
       timestamp(row.queued_at) &&
       typeof row.request_id === 'string' &&
       /^[0-9a-f-]{36}$/.test(row.request_id) &&
       validOutcome(row) &&
-      (row.target === null ||
+      (contractVersion === 2 ||
+        row.target === null ||
         (row.target?.kind === 'project_task' &&
           identifier(row.target.id) &&
           identifier(row.target.project_id)))
@@ -74,6 +79,7 @@ export const useEndingAttemptHistory = ({
   accountId,
   qualificationId,
   authorityKey,
+  contractVersion = 1,
 }) => {
   const opened = ref(false);
   const items = ref([]);
@@ -112,10 +118,18 @@ export const useEndingAttemptHistory = ({
       const { data } = await ContactCenterAPI.endingAttemptHistory(
         accountId.value,
         qualificationId.value,
-        { page }
+        contractVersion === 2 ? { page, history_contract: 2 } : { page }
       );
       if (disposed || current !== generation || scope !== identity()) return;
-      if (!validPage(data, accountId.value, qualificationId.value, page))
+      if (
+        !validPage(
+          data,
+          accountId.value,
+          qualificationId.value,
+          page,
+          contractVersion
+        )
+      )
         throw new TypeError('Invalid native ending attempt page');
       items.value = data.items;
       callSessionId.value = data.call_session_id;
