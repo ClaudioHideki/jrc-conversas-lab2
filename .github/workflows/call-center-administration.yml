@@ -192,6 +192,60 @@ jobs:
           assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0
           assert len(report['examples']) == 20 and all(row['status'] == 'passed' for row in report['examples'])
           PY
+      - name: PABX concurrency in its explicitly guarded disposable database
+        id: native_concurrency
+        env:
+          POSTGRES_DATABASE: corporate_gratuity_disposable
+          SCHEMA: /tmp/call-center-pabx-schema.rb
+        run: |
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_destination_commands_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_selected_destination_retry_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_history_spec.rb --format progress --format json --out /tmp/call-center-ending-public-committed-rspec.json
+          python3 -B - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-ending-public-committed-rspec.json').read_text())
+          expected = {'spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_history_spec.rb': 15, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_destination_commands_spec.rb': 16, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb': 13, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_selected_destination_retry_spec.rb': 12}
+          assert report['summary']['example_count'] == len(report['examples']) == 56
+          assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == expected
+          assert len({row['id'] for row in report['examples']}) == len(report['examples'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          PY
+          bundle exec rspec spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb --fail-fast --format progress --format json --out /tmp/call-center-typed-original-event-rspec.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-typed-original-event-rspec.json').read_text())
+          summary = report['summary']
+          assert summary['example_count'] == len(report['examples']) == 10
+          assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          assert {row['file_path'].removeprefix('./') for row in report['examples']} == {'spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb'}
+          PY
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb --format progress --format json --out /tmp/call-center-ending-fixture-contention-preflight.json
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == os.environ['GITHUB_SHA']
+          assert os.environ['RAILS_ENV'] == 'test' and os.environ['RUNNER_ENVIRONMENT'] == 'github-hosted'
+          report = json.loads(Path('/tmp/call-center-ending-fixture-contention-preflight.json').read_text())
+          expected = {"spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": 6, "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb": 3}
+          assert report['summary']['example_count'] == len(report['examples']) == sum(expected.values())
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          actual, identities = {}, set()
+          for row in report['examples']:
+              assert row['status'] == 'passed'
+              path = row['file_path'].removeprefix('./')
+              identity = (path, row['line_number'], row['full_description'])
+              assert identity not in identities
+              identities.add(identity)
+              actual[path] = actual.get(path, 0) + 1
+          assert actual == expected
+          print(json.dumps({'native_fixture_preflight': 'contention', 'source_sha': os.environ['GITHUB_SHA'], 'examples': sum(expected.values())}))
+          PY
+          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
       - name: Reload migrated schema in a separate disposable database
         id: native_reload
         env:
@@ -525,60 +579,6 @@ jobs:
         id: ending_destination_schema_lint
         run: |
           bundle exec rubocop app/services/jrc_contact_center/ending_actions/rule_definition.rb app/services/jrc_contact_center/ending_actions/destination_operation_definition.rb spec/services/jrc_contact_center/ending_actions/rule_definition_explicit_destination_schema_spec.rb spec/services/jrc_contact_center/ending_actions/destination_operation_definition_spec.rb --format json --out /tmp/call-center-destination-schema-lint.json
-      - name: PABX concurrency in its explicitly guarded disposable database
-        id: native_concurrency
-        env:
-          POSTGRES_DATABASE: corporate_gratuity_disposable
-          SCHEMA: /tmp/call-center-pabx-schema.rb
-        run: |
-          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
-          bundle exec rails db:migrate
-          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_destination_commands_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_selected_destination_retry_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_history_spec.rb --format progress --format json --out /tmp/call-center-ending-public-committed-rspec.json
-          python3 -B - <<'PY'
-          import json
-          from collections import Counter
-          from pathlib import Path
-          report = json.loads(Path('/tmp/call-center-ending-public-committed-rspec.json').read_text())
-          expected = {'spec/requests/api/v1/accounts/jrc_contact_center/ending_typed_history_spec.rb': 15, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_destination_commands_spec.rb': 16, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb': 13, 'spec/requests/api/v1/accounts/jrc_contact_center/ending_selected_destination_retry_spec.rb': 12}
-          assert report['summary']['example_count'] == len(report['examples']) == 56
-          assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
-          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == expected
-          assert len({row['id'] for row in report['examples']}) == len(report['examples'])
-          assert all(row['status'] == 'passed' for row in report['examples'])
-          PY
-          bundle exec rspec spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb --fail-fast --format progress --format json --out /tmp/call-center-typed-original-event-rspec.json
-          python3 -B - <<'PY'
-          import json
-          from pathlib import Path
-          report = json.loads(Path('/tmp/call-center-typed-original-event-rspec.json').read_text())
-          summary = report['summary']
-          assert summary['example_count'] == len(report['examples']) == 10
-          assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0
-          assert all(row['status'] == 'passed' for row in report['examples'])
-          assert {row['file_path'].removeprefix('./') for row in report['examples']} == {'spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb'}
-          PY
-          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb --format progress --format json --out /tmp/call-center-ending-fixture-contention-preflight.json
-          python3 -B - <<'PY'
-          import json, os, subprocess
-          from pathlib import Path
-          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == os.environ['GITHUB_SHA']
-          assert os.environ['RAILS_ENV'] == 'test' and os.environ['RUNNER_ENVIRONMENT'] == 'github-hosted'
-          report = json.loads(Path('/tmp/call-center-ending-fixture-contention-preflight.json').read_text())
-          expected = {"spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb": 6, "spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb": 3}
-          assert report['summary']['example_count'] == len(report['examples']) == sum(expected.values())
-          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
-          actual, identities = {}, set()
-          for row in report['examples']:
-              assert row['status'] == 'passed'
-              path = row['file_path'].removeprefix('./')
-              identity = (path, row['line_number'], row['full_description'])
-              assert identity not in identities
-              identities.add(identity)
-              actual[path] = actual.get(path, 0) + 1
-          assert actual == expected
-          print(json.dumps({'native_fixture_preflight': 'contention', 'source_sha': os.environ['GITHUB_SHA'], 'examples': sum(expected.values())}))
-          PY
-          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_service_desk_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_crm_activity_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_native_sd_update_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
       - name: Native NICO committed transaction boundaries with actual own Redis
         id: nico_intent_queue
         env:

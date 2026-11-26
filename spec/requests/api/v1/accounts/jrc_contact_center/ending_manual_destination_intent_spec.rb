@@ -165,10 +165,11 @@ RSpec.describe 'Native manual ending intent request boundary' do
   end
 
   it 'keeps a previously pending root blocked after deactivation and later reactivation without minting fresh consent' do
-    first = command.call
+    review = native_review
+    first = command(review: review).call
     publish_typed_schema_definition('active' => false)
     publish_typed_schema_definition('active' => true)
-    expect { command.call }.to raise_error(JrcContactCenter::OperationError) do |error|
+    expect { command(review: review).call }.to raise_error(JrcContactCenter::OperationError) do |error|
       expect(error.code).to eq('ending_action_pending_permanently_blocked')
     end
     expect(intent_counts).to eq([1, 1, 0])

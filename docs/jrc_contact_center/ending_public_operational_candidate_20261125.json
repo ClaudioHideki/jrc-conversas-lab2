@@ -272,6 +272,17 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb": "8c6d1fd9cae868c3f47efdf7221ed892114e3dbb543b8b52fd89aed513aafe3a",
         ".github/workflows/call-center-administration.yml": "9359b4dcbaf40265a6786548fedffa54748e6e22c8d15e85790ab0081966c9f2"
       }
+    },
+    {
+      "name": "exact_replay_of_predeactivation_review_and_earlier_identical_committed_checks",
+      "source_sha256": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb": "691a78dce3a7f4ed4ad7a89959620a24614710d5c9c171dbc917d0e30f85eaac",
+        ".github/workflows/call-center-administration.yml": "22179e25cdc31eb4ca15b9d53dfbf895527b99317d4f598e448d2d649eb227e8"
+      },
+      "parent_sources": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_manual_destination_intent_spec.rb": "d298e92c255cf20ead6f4a569da52d6898e0a73c2e61b7ed5f56d580c32a6e9f",
+        ".github/workflows/call-center-administration.yml": "2fd6922a544072fe4850cb53e117886640837c74054fe2d67e47bbcaad011405"
+      }
     }
   ],
   "lint_parent": {
@@ -316,6 +327,21 @@
     "historical_editor_failures": 1,
     "production_permission_or_ACW_behavior_changed": false,
     "every_workflow_step_block_preserved_only_focused_test_order_changed": true,
+    "all_quality_gates_still_required": true,
+    "new_native_or_browser_acceptance": false
+  },
+  "committed_manual_replay_parent": {
+    "sha": "c0f6564b27a1977b3a22d4cb6e32e6495f7a5a50",
+    "run": 45741241761,
+    "conclusion": "failure",
+    "public_authorization_examples_passed": 44,
+    "historical_editor_examples_passed": 20,
+    "committed_examples": 56,
+    "committed_failures": 1,
+    "actual_SQL_permanent_deactivation_barrier_still_enforced": true,
+    "replay_test_now_uses_the_unchanged_review_captured_before_deactivation": true,
+    "production_permission_ACW_or_SQL_behavior_changed": false,
+    "every_workflow_step_block_preserved_only_order_changed": true,
     "all_quality_gates_still_required": true,
     "new_native_or_browser_acceptance": false
   }
