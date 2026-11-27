@@ -106,7 +106,7 @@ class JrcCampaigns::DispatchStepService
 
   def sending_rejection
     campaign.reload.ensure_approved!
-    return JrcCampaigns::AudienceConfirmation::MESSAGE unless JrcCampaigns::AudienceConfirmation.new(campaign).includes_recipient?(recipient)
+    raise ArgumentError, JrcCampaigns::AudienceConfirmation::MESSAGE unless JrcCampaigns::AudienceConfirmation.new(campaign).includes_recipient?(recipient)
     return 'A mensagem não pertence à campanha aprovada.' unless step.campaign_id == campaign.id
 
     return 'Contato bloqueado.' if recipient.contact&.reload&.blocked?
@@ -306,7 +306,8 @@ class JrcCampaigns::DispatchStepService
     @provider_attempted = true
     raw_id = client.send_message(
       phone_number: recipient.phone_number, kind: step.kind, body: renderer.render(effective_value('body', step.body)),
-      media_url: effective_value('media_url', step.media_url), file_name: effective_value('file_name', step.file_name)
+      media_url: effective_value('media_url', step.media_url), file_name: effective_value('file_name', step.file_name),
+      media_asset_id: effective_value('media_asset_id', step.media_asset_id)
     )
     @accepted_external_id = "evolution:#{inbox.account_id}:#{inbox.id}:#{raw_id}"
     delivery.update!(metadata: delivery.metadata.to_h.merge('evolution_id' => raw_id))
@@ -318,6 +319,7 @@ class JrcCampaigns::DispatchStepService
     message = JrcCampaigns::EvolutionMessageRecorder.call(
       account: campaign.account, inbox: inbox, phone_number: recipient.phone_number, external_id: raw_id,
       kind: step.kind, body: renderer.render(effective_value('body', step.body)), media_url: effective_value('media_url', step.media_url),
+      media_asset_id: effective_value('media_asset_id', step.media_asset_id),
       attributes: { 'jrc_campaign_id' => campaign.id, 'jrc_campaign_execution_id' => recipient.execution_id, 'jrc_campaign_step_id' => step.id }
     )
     recipient.update!(contact: message.conversation.contact, conversation: message.conversation)

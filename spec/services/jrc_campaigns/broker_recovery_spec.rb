@@ -79,6 +79,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
         protocol: 'chatwoot-campaigns/v1', intentId: intent_id, state: 'RESERVED', expiresAt: 5.minutes.from_now.iso8601, replayed: false
       }.to_json)
     step
+    contact
     campaign.request_review!
     campaign.approve!(admin, campaign.review_digest)
     campaign.update!(status: 'running')

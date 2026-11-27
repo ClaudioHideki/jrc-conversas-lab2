@@ -10,7 +10,7 @@ class AddMetaCampaignTracking < ActiveRecord::Migration[7.1]
     end
     add_index :jrc_campaign_test_deliveries, [:inbox_id, :external_id], name: 'idx_campaign_test_wamid'
     create_table :jrc_campaign_status_events do |t|
-      t.references :inbox, null: false, foreign_key: true
+      t.references :inbox, null: false, foreign_key: { on_delete: :cascade }
       t.string :external_id, null: false
       t.string :status, null: false
       t.string :fingerprint, null: false

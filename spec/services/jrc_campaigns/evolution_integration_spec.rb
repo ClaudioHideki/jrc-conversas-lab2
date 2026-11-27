@@ -254,7 +254,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       authorization
     end
 
-    it 'preserves optional single-test history and the operational interval without requiring another grant' do
+    it 'preserves the recorded single-test limit and the operational interval' do
       consent = JrcCampaigns::Consent.find_by!(account: account, phone_number: contact.phone_number)
       historical_attributes = consent.attributes
       first = JrcCampaigns::TestMessageService.new(**test_options).perform
@@ -263,7 +263,8 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       expect(consent.reload.attributes).to eq(historical_attributes)
       expect(JrcCampaigns::AudienceResolver.new(campaign).entries.map(&:phone_number)).to include(contact.phone_number)
       expect(JrcCampaigns::TestMessageService.new(**test_options).perform[:test_delivery_id]).to eq(first[:test_delivery_id])
-      expect(JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform[:status]).to eq('failed')
+      expect { JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform }
+        .to raise_error(ArgumentError, /Autorização de teste/)
       expect(a_request(:post, send_url)).to have_been_made.once
     end
 
@@ -281,7 +282,8 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       stub_request(:post, send_url).to_return(status: 429)
       expect(JrcCampaigns::TestMessageService.new(**test_options).perform[:status]).to eq('failed')
       expect(authorization.reload.consumed_at).to be_present
-      expect(JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform[:status]).to eq('failed')
+      expect { JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform }
+        .to raise_error(ArgumentError, /Autorização de teste/)
       expect(a_request(:post, send_url)).to have_been_made.once
     end
 

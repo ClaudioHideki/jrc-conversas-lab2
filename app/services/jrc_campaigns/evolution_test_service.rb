@@ -47,7 +47,7 @@ class JrcCampaigns::EvolutionTestService
     gate.reserve!
     eligibility!
     @provider_attempted = true
-    external_id = client.send_message(phone_number: phone_number, **step.symbolize_keys.slice(:kind, :body, :media_url, :file_name))
+    external_id = client.send_message(phone_number: phone_number, **step.symbolize_keys.slice(:kind, :body, :media_url, :file_name, :media_asset_id))
     delivery.update!(status: 'sent', external_id: external_id)
     gate.complete!
     record_message
@@ -113,7 +113,8 @@ class JrcCampaigns::EvolutionTestService
   def record_message
     message = JrcCampaigns::EvolutionMessageRecorder.call(
       account: account, inbox: connector.inbox, phone_number: phone_number, external_id: delivery.external_id,
-      kind: step['kind'], body: step['body'], media_url: step['media_url'], attributes: { 'jrc_campaign_test_delivery_id' => delivery.id }
+      kind: step['kind'], body: step['body'], media_url: step['media_url'], media_asset_id: step['media_asset_id'],
+      attributes: { 'jrc_campaign_test_delivery_id' => delivery.id }
     )
     delivery.update!(metadata: delivery.metadata.merge('message_id' => message.id))
   end

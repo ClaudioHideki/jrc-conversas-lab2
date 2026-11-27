@@ -7190,7 +7190,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_25_190100) do
   add_foreign_key "jrc_campaign_sanitized_lists", "accounts"
   add_foreign_key "jrc_campaign_sanitized_lists", "users", column: "created_by_id"
   add_foreign_key "jrc_campaign_steps", "jrc_campaign_media_assets", column: "media_asset_id", on_delete: :nullify
-  add_foreign_key "jrc_campaign_status_events", "inboxes"
+  add_foreign_key "jrc_campaign_status_events", "inboxes", on_delete: :cascade
   add_foreign_key "jrc_campaign_steps", "jrc_campaigns", column: "campaign_id"
   add_foreign_key "jrc_campaign_test_authorizations", "accounts"
   add_foreign_key "jrc_campaign_test_authorizations", "inboxes"

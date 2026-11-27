@@ -1,5 +1,5 @@
 class JrcCampaigns::EvolutionMessageRecorder
-  def self.call(account:, inbox:, phone_number:, external_id:, kind:, body:, attributes:, media_url: nil)
+  def self.call(account:, inbox:, phone_number:, external_id:, kind:, body:, attributes:, media_url: nil, media_asset_id: nil)
     # Evolution may have already mirrored the direct API send into this inbox.
     message = account.messages.find_by(inbox_id: inbox.id, source_id: "WAID:#{external_id}")
     return message if message
@@ -13,7 +13,15 @@ class JrcCampaigns::EvolutionMessageRecorder
       additional_attributes: attributes.merge('jrc_campaign_evolution' => true)
     )
     if kind.in?(%w[image document video audio])
-      message.attachments.build(account: account, file_type: { 'image' => 'image', 'video' => 'video' }.fetch(kind, 'file'), external_url: media_url)
+      attachment = message.attachments.build(account: account, file_type: { 'image' => 'image', 'video' => 'video' }.fetch(kind, 'file'))
+      if media_asset_id.present?
+        asset = account.jrc_campaign_media_assets.find(media_asset_id)
+        raise ArgumentError, 'Arquivo incompatível com a mensagem.' unless asset.kind == kind && asset.file.attached?
+
+        attachment.file.attach(asset.file.blob)
+      else
+        attachment.external_url = media_url
+      end
     end
     message.save!
     message

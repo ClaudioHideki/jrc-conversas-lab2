@@ -17,7 +17,8 @@ class JrcCampaigns::EvolutionStatusJob < ApplicationJob
       step = delivery.metadata.fetch('step')
       message = JrcCampaigns::EvolutionMessageRecorder.call(
         account: delivery.account, inbox: delivery.inbox, phone_number: delivery.phone_number, external_id: raw_id,
-        kind: step['kind'], body: step['body'], media_url: step['media_url'], attributes: { 'jrc_campaign_test_delivery_id' => delivery.id }
+        kind: step['kind'], body: step['body'], media_url: step['media_url'], media_asset_id: step['media_asset_id'],
+        attributes: { 'jrc_campaign_test_delivery_id' => delivery.id }
       )
       delivery.update!(metadata: delivery.metadata.merge('message_id' => message.id))
     end

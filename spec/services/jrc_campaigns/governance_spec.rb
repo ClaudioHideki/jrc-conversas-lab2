@@ -273,7 +273,8 @@ RSpec.describe 'Campaign sending governance' do # rubocop:disable RSpec/Describe
 
   it 'preserves the official freeform window without requiring positive consent' do
     service = JrcCampaigns::TestMessageService.new(account: account, user: admin, phone_number: contact.phone_number,
-                                                   inbox_id: inbox.id, step: { kind: 'text', body: 'Hello' })
+                                                   inbox_id: inbox.id, step: { kind: 'text', body: 'Hello' },
+                                                   idempotency_key: SecureRandom.uuid, operator_confirmed: true)
     expect { service.perform }.to raise_error(ArgumentError, /janela/i)
   end
 end

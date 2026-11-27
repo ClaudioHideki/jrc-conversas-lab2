@@ -50,6 +50,8 @@ class JrcCampaigns::ApprovalService
   # Read-only presentation of the human approval; remote sender readiness is checked at execution.
   def locally_valid?
     approved? && current_review?(configuration.local_configuration, local: true)
+  rescue ArgumentError
+    false
   rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound, ActionController::BadRequest, JrcCustomers::CampaignFilter::InvalidFilter
     raise unless JrcCustomers::CampaignSegment.new(campaign).selected?
 

@@ -1,4 +1,5 @@
 require 'base64'
+require 'vips'
 
 class JrcCampaigns::EvolutionClient
   class Rejected < StandardError; end
@@ -18,9 +19,9 @@ class JrcCampaigns::EvolutionClient
     end
   end
 
-  def send_message(phone_number:, kind:, body:, media_url: nil, file_name: nil)
+  def send_message(phone_number:, kind:, body:, media_url: nil, file_name: nil, media_asset_id: nil)
     raise Rejected, 'Mensagem de texto vazia.' if kind == 'text' && body.blank?
-    if kind.in?(%w[image document video audio])
+    if kind.in?(%w[image document video audio]) && media_asset_id.blank?
       uri = URI.parse(media_url.to_s)
       raise Rejected, 'A mídia Evolution exige uma URL HTTPS válida.' unless uri.scheme == 'https' && uri.host.present? && uri.userinfo.nil?
     end
@@ -29,11 +30,12 @@ class JrcCampaigns::EvolutionClient
                     when 'text'
                       ['/message/sendText', { number: number, text: body, linkPreview: false }]
                     when 'image', 'document', 'video'
-                      content = media_content(media_url, kind)
-                      payload = content.merge(number: number, mediatype: kind, caption: body, fileName: file_name.presence || content[:fileName])
+                      content = media_content(media_url, kind, media_asset_id)
+                      filename = kind == 'image' && media_asset_id.present? ? content[:fileName] : file_name.presence || content[:fileName]
+                      payload = content.merge(number: number, mediatype: kind, caption: body, fileName: filename)
                       ['/message/sendMedia', payload]
                     when 'audio'
-                      ['/message/sendWhatsAppAudio', { number: number, audio: media_content(media_url, kind).fetch(:media) }]
+                      ['/message/sendWhatsAppAudio', { number: number, audio: media_content(media_url, kind, media_asset_id).fetch(:media) }]
                     else
                       raise Rejected, 'Tipo de mensagem não suportado pela Evolution; templates Meta exigem caixa oficial.'
                     end
@@ -65,7 +67,10 @@ class JrcCampaigns::EvolutionClient
 
   attr_reader :connector
 
-  def media_content(url, kind)
+  def media_content(url, kind, media_asset_id)
+    return uploaded_media_content(media_asset_id, kind) if media_asset_id.present?
+
+
     # Download through the application's SSRF guard, then send bytes. Passing the
     # URL to Evolution would let an account operator request its internal network.
     prefixes = kind == 'document' ? ['application/'] : ["#{kind}/"]
@@ -75,6 +80,36 @@ class JrcCampaigns::EvolutionClient
     end
   rescue SafeFetch::Error, Timeout::Error
     raise Rejected, 'Não foi possível obter a mídia pública no tipo esperado e no limite de 10 MB. Nenhum envio foi solicitado à Evolution.'
+  end
+
+  def uploaded_media_content(id, kind)
+    asset = connector.inbox.account.jrc_campaign_media_assets.find(id)
+    raise Rejected, 'Arquivo incompatível ou maior que 10 MB.' unless asset.kind == kind && asset.file.attached? && asset.file.byte_size <= 10.megabytes
+
+    bytes = asset.file.open { |io| io.read(10.megabytes + 1) }
+    raise Rejected, 'Arquivo maior que 10 MB.' if bytes.bytesize > 10.megabytes
+
+    if kind == 'image'
+      return { media: Base64.strict_encode64(campaign_jpeg(bytes)), mimetype: 'image/jpeg', fileName: 'image.jpg' }
+    end
+
+    { media: Base64.strict_encode64(bytes), mimetype: asset.file.content_type, fileName: asset.file.filename.to_s }
+  rescue ActiveRecord::RecordNotFound, ActiveStorage::FileNotFoundError, ActiveStorage::IntegrityError
+    raise Rejected, 'Arquivo importado indisponível nesta conta. Nenhum envio foi solicitado à Evolution.'
+  end
+
+  def campaign_jpeg(bytes)
+    image = Vips::Image.new_from_buffer(bytes, '', access: :sequential, fail_on: :error)
+    raise Rejected, 'Imagem excede o limite de 20 milhões de pixels.' if image.width * image.height > 20_000_000
+
+    image = image.autorot
+    image = image.flatten(background: [255, 255, 255]) if image.has_alpha?
+    jpeg = image.jpegsave_buffer(Q: 85, strip: true)
+    raise Rejected, 'Imagem JPEG convertida maior que 5 MB.' if jpeg.bytesize > 5.megabytes
+
+    jpeg
+  rescue Vips::Error
+    raise Rejected, 'Imagem inválida ou corrompida. Nenhum envio foi solicitado à Evolution.'
   end
 
   def request(method, path, payload = nil)
