@@ -199,7 +199,7 @@ jobs:
           bundle exec rubocop app/jobs/jrc_contact_center/ending_actions_job.rb app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb --format json --out /tmp/call-center-typed-original-event-lint.json
       - name: Focused native recording source lint before legacy overlap
         run: |
-          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb app/services/jrc_contact_center/recorded_calls.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb script/jrc_call_center_recordings_seed.rb script/jrc_call_center_recordings_evidence.rb spec/integration/jrc_contact_center/owned_recording_media.rb spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb spec/integration/jrc_contact_center/owned_recording_reproduction_failure.rb script/jrc_call_center_recording_reproduction_failure.rb app/services/jrc_contact_center/recording_audit.rb app/services/jrc_contact_center/configuration_audit_scope.rb --format json --out /tmp/call-center-recordings-lint.json
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb app/services/jrc_contact_center/recorded_calls.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb script/jrc_call_center_recordings_seed.rb script/jrc_call_center_recordings_evidence.rb spec/integration/jrc_contact_center/owned_recording_media.rb spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb spec/integration/jrc_contact_center/owned_recording_reproduction_failure.rb script/jrc_call_center_recording_reproduction_failure.rb app/services/jrc_contact_center/recording_audit.rb app/services/jrc_contact_center/configuration_audit_scope.rb script/jrc_call_center_pause_seed.rb spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb --format json --out /tmp/call-center-recordings-lint.json
       - name: Focused lint of new private ending version sources
         id: ending_version_lint
         run: |
@@ -275,17 +275,17 @@ jobs:
           PY
       - name: Focused real recording scopes and private provider byte boundary
         run: |
-          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb --format progress --format json --out /tmp/call-center-recordings-preflight.json
+          bundle exec rspec spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb --format progress --format json --out /tmp/call-center-recordings-preflight.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight.json').read_text())
-          assert report['summary']['example_count'] == len(report['examples']) == 33
+          assert report['summary']['example_count'] == len(report['examples']) == 36
           assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
-          assert len({row['id'] for row in report['examples']}) == 33
+          assert len({row['id'] for row in report['examples']}) == 36
           from collections import Counter
           assert all(row['status'] == 'passed' for row in report['examples'])
-          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb': 30, 'spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb': 3}
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb': 30, 'spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb': 3, 'spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb': 3}
           PY
       - name: Focused public source and CRM authorization before full regressions
         run: |

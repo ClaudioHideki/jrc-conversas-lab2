@@ -18,7 +18,14 @@ class JrcContactCenter::SyntheticPauseSeed
     -acw_draft -acw_review -acw_navigation -deferred_pause -deferred_pause_retry -operational_forms -form_bindings -hoya_forms -approval
   ].freeze
 
-  def self.call(projects:)
+  SCENARIOS = %w[
+    editor operations withdrawal duration acw routing state_history
+    team_withdrawal team_activity acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
+    operational_forms form_bindings hoya_forms required_endings ending_confirmation membership_eligibility audio_folders team_supervision approval
+    ending_automations ending_activation ending_history ending_pending ending_operational ending_service_desk recordings
+  ].freeze
+
+  def self.call(projects:, scenarios: SCENARIOS)
     config = ActiveRecord::Base.connection_db_config
     owned = [
       ENV['GITHUB_ACTIONS'] == 'true', ENV['RUNNER_ENVIRONMENT'] == 'github-hosted', Rails.env.test?,
@@ -26,14 +33,10 @@ class JrcContactCenter::SyntheticPauseSeed
       ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'
     ].all?
     raise 'Owned synthetic pause runner required' unless owned
+    raise 'Unknown synthetic scenarios' unless scenarios.is_a?(Array) && !scenarios.empty? && (scenarios - SCENARIOS).empty?
 
     projects.index_with do |project|
-      %w[
-        editor operations withdrawal duration acw routing state_history
-        team_withdrawal team_activity acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
-        operational_forms form_bindings hoya_forms required_endings ending_confirmation membership_eligibility audio_folders team_supervision approval
-        ending_automations ending_activation ending_history ending_pending ending_operational ending_service_desk recordings
-      ].index_with do |kind|
+      scenarios.index_with do |kind|
         new("#{project}-#{kind}").call
       end
     end

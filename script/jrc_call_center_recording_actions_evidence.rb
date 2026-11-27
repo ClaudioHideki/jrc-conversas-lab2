@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'digest'
+require 'json'
+
 # Read-only SQL witness of one existing owned fixture, never a setup or execution command.
 class JrcContactCenter::SyntheticRecordingActionsEvidence
   def self.call(account_id, recording_id, qualification_id)
@@ -19,11 +22,17 @@ class JrcContactCenter::SyntheticRecordingActionsEvidence
     row = JrcContactCenter::Qualification.where(account: @account, call_session: call).find(@qualification_id)
     { source_sha: ENV.fetch('GITHUB_SHA'), account_id: @account.id.to_s, recording_id: record.id.to_s,
       call_session_id: call.id.to_s, qualification_id: row.id.to_s,
-      account_user_id: row.account_user_id.to_s, started_at: row.started_at, completed_at: row.completed_at,
-      read_only_witness: true, no_external_homologation: true }.merge(native_counts)
+      account_user_id: row.account_user_id.to_s,
+      read_only_witness: true, no_external_homologation: true }.merge(native_counts, qualification_state(row))
   end
 
   private
+
+  def qualification_state(row)
+    values = row.attributes.except('updated_at', 'overdue', 'exceeded_seconds').sort.to_h
+    { started_at: row.started_at&.iso8601, completed_at: row.completed_at&.iso8601,
+      qualification_semantic_sha256: Digest::SHA256.hexdigest(JSON.generate(values)) }
+  end
 
   def native_counts
     { native_qualification_count: JrcContactCenter::Qualification.where(account: @account).count,

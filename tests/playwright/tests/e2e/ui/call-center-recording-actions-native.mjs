@@ -30,6 +30,29 @@ export async function verifyNativeRecordingActions(
   expect(source.recording_id).toBe(target.quality_history_record.id);
   const contextPath = `/api/v1/accounts/${account}/jrc_contact_center/recordings/${source.recording_id}/ending_context`;
   const endpoint = `http://127.0.0.1:5387${contextPath}`;
+  const readNative = () => {
+    const raw = execFileSync(
+      'bundle',
+      [
+        'exec',
+        'rails',
+        'runner',
+        'script/jrc_call_center_recording_actions_evidence.rb',
+        account,
+        source.recording_id,
+        source.qualification_id,
+      ],
+      {
+        cwd: process.env.GITHUB_WORKSPACE,
+        env: process.env,
+        timeout: 45000,
+        maxBuffer: 64 * 1024,
+        encoding: 'utf8',
+      }
+    );
+    return JSON.parse(raw.trim().split('\n').at(-1));
+  };
+  const nativeBefore = readNative();
   const denied = await parent.request.get(endpoint, { headers: target.scoped });
   expect(denied.status()).toBe(401);
   const deniedBody = await denied.json();
@@ -52,8 +75,8 @@ export async function verifyNativeRecordingActions(
     {
       id: source.qualification_id,
       account_user_id: source.account_user_id,
-      started_at: null,
-      completed_at: null,
+      started_at: nativeBefore.started_at,
+      completed_at: nativeBefore.completed_at,
     },
   ]);
   expect(context.meta).toEqual({ page: 1, per_page: 20, total: 1, pages: 1 });
@@ -95,31 +118,12 @@ export async function verifyNativeRecordingActions(
   expect(await (await refresh).json()).toEqual(context);
   await reloaded.scrollIntoViewIfNeeded();
   await capture(page, 'existing-native-ending-context-reloaded');
-  const raw = execFileSync(
-    'bundle',
-    [
-      'exec',
-      'rails',
-      'runner',
-      'script/jrc_call_center_recording_actions_evidence.rb',
-      account,
-      source.recording_id,
-      source.qualification_id,
-    ],
-    {
-      cwd: process.env.GITHUB_WORKSPACE,
-      env: process.env,
-      timeout: 45000,
-      maxBuffer: 64 * 1024,
-      encoding: 'utf8',
-    }
-  );
-  const native = JSON.parse(raw.trim().split('\n').at(-1));
+  const native = readNative();
   expect(native.source_sha).toBe(process.env.GITHUB_SHA);
   expect(native.qualification_id).toBe(source.qualification_id);
-  expect(native.native_qualification_count).toBe(1);
-  expect(native.started_at).toBeNull();
-  expect(native.completed_at).toBeNull();
+  expect(nativeBefore.native_qualification_count).toBeGreaterThan(0);
+  expect(native).toEqual(nativeBefore);
+  expect(native.qualification_semantic_sha256).toMatch(/^[a-f0-9]{64}$/);
   expect(native.native_action_origin_count).toBe(0);
   expect(native.provider_command_count).toBe(0);
   page.off('request', observe);
@@ -135,6 +139,7 @@ export async function verifyNativeRecordingActions(
         source,
         context,
         native,
+        native_before_read: nativeBefore,
         receipt,
         contrast,
         actual_dark_theme: await page.evaluate(() =>
@@ -142,6 +147,7 @@ export async function verifyNativeRecordingActions(
         ),
         existing_controls_and_current_native_policies_reused: true,
         reading_did_not_start_or_complete_ACW_or_create_actions: true,
+        existing_committed_native_ACW_baseline_preserved: true,
         read_only_native_receipt_widget: true,
         unexpectedOperations,
         no_new_task_creation_or_full_figure22_acceptance_claimed: true,

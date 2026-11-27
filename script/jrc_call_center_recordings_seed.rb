@@ -36,11 +36,11 @@ class JrcContactCenter::SyntheticRecordingsSeed
     { id: record.id.to_s, call_id: record.external_unique_id }
   end
 
-  # Explicit owned browser fixture only. Pending source, no reason confirmation, completion or automation dispatch.
+  # Reuse the committed native lifecycle record. Capturing a baseline must never create, start, complete or replace ACW.
   def owned_ending_context(record)
     call = JrcContactCenter::CallSession.find_by!(account: @account, provider: record.provider,
                                                   external_session_id: record.external_unique_id)
-    qualification = JrcContactCenter::Qualification.create!(account: @account, account_user: @operator, call_session: call, channel: 'voice')
+    qualification = JrcContactCenter::Qualification.find_by!(account: @account, account_user: @operator, call_session: call, channel: 'voice')
     { recording_id: record.id.to_s, call_id: record.external_unique_id, call_session_id: call.id.to_s,
       qualification_id: qualification.id.to_s, account_user_id: @operator.id.to_s }
   end

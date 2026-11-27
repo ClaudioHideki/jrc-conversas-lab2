@@ -1,0 +1,44 @@
+{
+  "parent": "4cc1a63358da39a2562562fdfeff022fb69afd0b",
+  "failed_run": 45931594830,
+  "failed_job": 140285243614,
+  "artifact": 15170064846,
+  "artifact_sha256": "f3d052e53ef437ac7cef0341b0957c5761ca51a126224264643d6b4ec36ee63d",
+  "failed_parent_evidence_sha256": "78798c32673367801fa60db7a939becbd5094cc22bb784bdbad6a47e18642347",
+  "sanitized_log_sha256": "3a1ff2297e81a17aab6f7a27ce6b573b571e862cfa477ca9035072a09ea7db0e",
+  "source_sha256": {
+    "script/jrc_call_center_pause_seed.rb": "efc932ff0496ee7feca9509222eeb600039cb87b3f05d7cd64060fbc7694980a",
+    "script/jrc_call_center_recordings_seed.rb": "c2440f045390f56091563d2541448d0c3f60d3548a0ffcff14436cb966ff77ec",
+    "script/jrc_call_center_recording_actions_evidence.rb": "c34b91f285a708ef63ea64bb4e2b9aff9348d1a7be7ccd0de4f30c96993feb15",
+    ".github/workflows/call-center-administration.yml": "5e09b7be4500a267af2bf8fd13da07c9b240d21896ab58a4619133a5728aa6d8",
+    "spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb": "88339d0374e103f21e5d41f41afe22d3db799a3e435e03b0c7a702a91fd48ab8",
+    "tests/playwright/tests/e2e/ui/call-center-recording-actions-native.mjs": "9521791f4da2033fe2bf854d5aeaaa45aab004383d8736d885875db07685a9ea"
+  },
+  "parent_sources": {
+    "script/jrc_call_center_pause_seed.rb": "2f05e388879aec06cf66ebdf47aac01de572ccb7fa4d365f4070e3ca7123aef3",
+    "script/jrc_call_center_recordings_seed.rb": "dbbc6065a95d2910eaa66f207c247ba11863e2119886c989fdece32ba45fa100",
+    "script/jrc_call_center_recording_actions_evidence.rb": "d128dbb87eea110c25eb6db1432011a0801357e5c189c2643ae5f72d0b1aa262",
+    ".github/workflows/call-center-administration.yml": "ffc27f7075c726919589ee9013b6447a98ff4d254c86b1c3c71d1c847057f161",
+    "spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb": null,
+    "tests/playwright/tests/e2e/ui/call-center-recording-actions-native.mjs": "6a3f9c400d1990a14f7ffb9ecfa1abd7d93b48171e1d460e5b8c5cd5e222ccae"
+  },
+  "root_cause": "Call-leg commit already creates native voice Qualification. The fixture incorrectly attempted a duplicate per-account/member/call record.",
+  "native_qualification_uniqueness_unchanged": true,
+  "reuse_existing_qualification_without_any_creation_or_clock_mutation": true,
+  "actual_before_after_browser_semantic_witness": true,
+  "derived_fields_excluded_only_from_browser_hash": [
+    "updated_at",
+    "overdue",
+    "exceeded_seconds"
+  ],
+  "full_qualification_attributes_still_compared_in_real_committed_API_regression": true,
+  "new_committed_regressions": 3,
+  "focused_RSpec_expected": 36,
+  "focused_Ruby_lint_expected": 13,
+  "old_33_native_examples_and_all_288_Chrome_cases_retained": true,
+  "default_31_scenarios_unchanged": true,
+  "product_API_models_permissions_migrations_unchanged": true,
+  "private_only_not_staged": true,
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false
+}
