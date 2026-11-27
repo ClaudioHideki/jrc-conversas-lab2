@@ -50,7 +50,8 @@ RSpec.describe 'Native scoped institutional audio filters use only the latest ve
 
   [
     { source_kind: 'nico' }, { source_kind: false }, { source_kind: ['user_upload'] },
-    { source_kind: { name: 'browser_capture' } }, { content_type: 'audio/x-wav' }, { content_type: ['audio/wav'] }
+    { source_kind: { name: 'browser_capture' } }, { content_type: 'audio/x-wav' }, { content_type: ['audio/wav'] },
+    { purpose: ['ivr'] }, { purpose: { name: 'ivr' } }, { purpose: 'x' * 161 }
   ].each do |filters|
     it "rejects malformed or unsupported filters #{filters.inspect} without returning an unfiltered fallback" do
       get base, headers: headers, params: { unit_id: unit.id }.merge(filters)
@@ -97,14 +98,5 @@ RSpec.describe 'Native scoped institutional audio filters use only the latest ve
     member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_recordings_listen])
     get base, headers: headers, params: { unit_id: unit.id, purpose: 'URA' }
     expect(response).to have_http_status(:unauthorized)
-  end
-
-  [{ purpose: ['ivr'] }, { purpose: { name: 'ivr' } }, { purpose: 'x' * 161 }].each do |filters|
-    it "rejects malformed institutional usage search #{filters.inspect} without unfiltered fallback" do
-      get base, headers: headers, params: { unit_id: unit.id }.merge(filters)
-      expect(response).to have_http_status(:unprocessable_entity)
-      expect(response.parsed_body.fetch('error')).to eq('invalid_institutional_audio_filter')
-      expect(response.parsed_body).not_to have_key('items')
-    end
   end
 end

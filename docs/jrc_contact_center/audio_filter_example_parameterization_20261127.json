@@ -1,0 +1,22 @@
+{
+  "parent": "cf110966ad37a557e64a0df8789b05874ed7314b",
+  "failed_run": 45982809979,
+  "actual_failure": {
+    "cop": "RSpec/RepeatedExample",
+    "offenses": 2,
+    "file": "spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_filters_spec.rb"
+  },
+  "correction": "One shared example body over the existing six invalid source/format inputs plus the three invalid purpose inputs.",
+  "native_cases_preserved": 16,
+  "invalid_filter_cases_preserved": 9,
+  "all_HTTP_422_error_and_no_items_assertions_preserved": true,
+  "no_lint_rule_or_config_changed": true,
+  "no_production_behavior_changed": true,
+  "before_sha256": "1547fd783f8847f93b08af045bae29bbd7468e0b11bc97f36e8125c7eb3669e1",
+  "after_sha256": "dd4d00fe9daad75f55460a8f89625e81eb3a3ae7b7d546a869befade2ba233d4",
+  "actual_targeted_Vue_passed_in_parent": {
+    "SD_audio": 114,
+    "recordings": 208
+  },
+  "full_native_and_Chrome_acceptance_of_parent": false
+}
