@@ -40,6 +40,9 @@ describe('native contact dialog full-page target', () => {
     expect(link.attributes('target')).toBeUndefined();
     expect(link.attributes('rel')).toBeUndefined();
     expect(wrapper.getComponent(Contact360Panel).props('contactId')).toBe('2');
+    expect(wrapper.getComponent(Contact360Panel).props('initialTab')).toBe(
+      'overview'
+    );
   });
   it('lets an attendance caller opt into an independent page without changing the native contact route', () => {
     const wrapper = render({ openFullPageInNewTab: true });
@@ -50,5 +53,18 @@ describe('native contact dialog full-page target', () => {
     });
     expect(link.attributes('target')).toBe('_blank');
     expect(link.attributes('rel')).toBe('noopener noreferrer');
+  });
+  it('forwards the explicit native history section without changing the contact identity or full-page route', () => {
+    const wrapper = render({
+      initialTab: 'history',
+      openFullPageInNewTab: true,
+    });
+    expect(wrapper.getComponent(Contact360Panel).props()).toMatchObject({
+      contactId: '2',
+      initialTab: 'history',
+    });
+    expect(
+      wrapper.findComponent(RouterLinkStub).props('to').params.contactId
+    ).toBe('2');
   });
 });

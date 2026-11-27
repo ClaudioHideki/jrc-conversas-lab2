@@ -2386,5 +2386,11 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "native_audio_filter_layout_QA_not_acceptance": {
+    "document": "docs/jrc_contact_center/native_audio_filter_layout_candidate_20261127.json",
+    "sha256": "f960faf6cceac473741411201305d90f28627873e1368535af06883e1c6d5b68",
+    "actual_parent_desktop_overlap_requires_correction": true,
+    "formal_clauses_not_promoted": true
+  }
 }

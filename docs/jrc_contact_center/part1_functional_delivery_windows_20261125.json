@@ -206,5 +206,68 @@
     "prepared_new_Vue_cases_total": 11,
     "one_own_CI_at_a_time": true,
     "usable_delivery_not_test_count_is_acceptance_unit": true
+  },
+  "next_bounded_native_signal_delivery": {
+    "document": "docs/jrc_contact_center/native_nico_supervision_signal_candidate_20261127.json",
+    "sha256": "b8544c78dcd94f3fc9096912a1b506a19c277aef890dd8e6e6a688f832b845c2",
+    "figures": [
+      19,
+      20,
+      23
+    ],
+    "functionality": "Show actual Nico supervision signal and its original reason in the existing authorized five-tab popup.",
+    "development_prepared_native_and_browser_approval_pending": true,
+    "same_four_cases_and_one_own_CI_at_a_time": true,
+    "effective_hours_not_measured_not_fabricated": true,
+    "independent_of_full_sentiment_dashboard_or_external_provider": true
+  },
+  "next_usable_native_delivery": {
+    "figures": [
+      19,
+      20,
+      21,
+      23
+    ],
+    "functions": [
+      "Read actual original Nico supervision signal separately from sentiment",
+      "Open the existing authorized complete customer timeline directly from the linked recording contact",
+      "Preserve the human review draft through an actual audited-write rollback and explicit successful retry"
+    ],
+    "documents": [
+      "docs/jrc_contact_center/native_contact_history_shortcut_candidate_20261127.json",
+      "docs/jrc_contact_center/native_nico_supervision_signal_candidate_20261127.json",
+      "docs/jrc_contact_center/native_quality_persistence_recovery_candidate_20261127.json"
+    ],
+    "one_own_CI_at_a_time_and_existing_cases_extended": true,
+    "native_and_browser_acceptance_pending": true,
+    "effective_hours_not_measured_not_fabricated": true,
+    "no_wait_for_checkpoint_or_24_effective_hour_boundary_to_continue": true,
+    "inherited_privacy_fix_native_QA": {
+      "document": "docs/jrc_contact_center/native_legacy_profile_browser_candidate_20261127.json",
+      "sha256": "cee3537340b6365136ed56c782e6d0f606632409586e3d19e1eab081f808bb3f",
+      "new_full_CI_or_Chrome_cases_not_added": true,
+      "whole_profile_menu_or_same_Actor_role_homologation_claimed": false
+    }
+  },
+  "next_audio_filter_layout_QA_not_acceptance": {
+    "document": "docs/jrc_contact_center/native_audio_filter_layout_candidate_20261127.json",
+    "sha256": "f960faf6cceac473741411201305d90f28627873e1368535af06883e1c6d5b68",
+    "parent_full_CI_success_not_whole_visual_acceptance": true
+  },
+  "latest_verified_literal_delivery": {
+    "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+    "sha256": "f4aa21310e2f01dd2e0eb37d40a5daeb2ec7f09039a9317e269ca7e6bef83105",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "whole_figure_or_Part1_accepted": false,
+    "unique_clauses": 28,
+    "current_counts": {
+      "parcial": 416,
+      "bloqueado": 24,
+      "implementado": 80,
+      "pendente": 33,
+      "implementado_sem_aceite": 1
+    },
+    "next_functional_payload_still_requires_its_own_CI_and_Chrome": true,
+    "effective_work_hours_not_inferred_from_CI_wait_or_example_count": true
   }
 }

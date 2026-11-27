@@ -338,7 +338,14 @@
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "next_native_signal_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/native_nico_supervision_signal_candidate_20261127.json",
+        "sha256": "b8544c78dcd94f3fc9096912a1b506a19c277aef890dd8e6e6a688f832b845c2",
+        "scope": "Read-only original analysis flag/reason, unknown distinct from false; sentiment is an AI estimate, never inferred criticality.",
+        "native_and_Chrome_acceptance": false,
+        "aggregate_dashboard_and_whole_figure_accepted": false
+      }
     },
     {
       "id": "D1-P0214-C01",
@@ -363,7 +370,7 @@
         22,
         23
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -375,10 +382,18 @@
         1
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
+      "divergences": [],
+      "candidate_test_reference_ids_not_approval": [],
+      "historical_status_before_literal_acceptance": "parcial",
+      "historical_preacceptance_divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
+      }
     },
     {
       "id": "D1-P0215-C01",
@@ -886,5 +901,12 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "whole_figure_accepted": false,
+  "latest_literal_functional_acceptance": {
+    "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+    "sha256": "f4aa21310e2f01dd2e0eb37d40a5daeb2ec7f09039a9317e269ca7e6bef83105",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "whole_figure_or_Part1_accepted": false
+  }
 }

@@ -1,0 +1,21 @@
+{
+  "source_parent": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "parent_CI_success_is_not_visual_acceptance": true,
+  "observed_original_capture": "desktop-light-audio-purpose-filter.png",
+  "actual_parent_defect": "Search/purpose controls shrink to about 30px and their desktop labels overlap; mobile controls remain separate.",
+  "minimal_correction": "Existing six filters use a responsive one/two/three-column grid and the same three existing actions occupy a separate wrapping row.",
+  "same_native_fields_requests_permissions_and_55_Vue_cases": true,
+  "same_four_Chrome_cases_and_all_original_purpose_assertions_retained": true,
+  "new_real_geometry_checks": [
+    "six controls each at least 160px wide",
+    "labels stay inside their cells",
+    "no label rectangle overlap",
+    "actual dark class measured"
+  ],
+  "test_only_extraction_reason": "Keep the preserved TypeScript test below the 400000-byte transport bound; add no framework or case.",
+  "literal_requirements": [
+    "D2-P0155-C01",
+    "D2-P0337-C02"
+  ],
+  "native_or_Chrome_acceptance": false
+}

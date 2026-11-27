@@ -406,7 +406,14 @@
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "next_native_signal_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/native_nico_supervision_signal_candidate_20261127.json",
+        "sha256": "b8544c78dcd94f3fc9096912a1b506a19c277aef890dd8e6e6a688f832b845c2",
+        "scope": "Read-only original analysis flag/reason, unknown distinct from false; sentiment is an AI estimate, never inferred criticality.",
+        "native_and_Chrome_acceptance": false,
+        "aggregate_dashboard_and_whole_figure_accepted": false
+      }
     },
     {
       "id": "D1-P0214-C01",
@@ -431,7 +438,7 @@
         22,
         23
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -446,9 +453,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "grouped_functional_candidate_not_acceptance": {
         "document": "docs/jrc_contact_center/quality_history_read_candidate_20261126.json",
@@ -477,6 +482,16 @@
         ],
         "prepared_real_Chrome": "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs",
         "native_permissions_reused_without_automatic_grants": true
+      },
+      "historical_status_before_literal_acceptance": "parcial",
+      "historical_preacceptance_divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -578,7 +593,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -593,9 +608,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -623,6 +636,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -638,7 +661,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -653,9 +676,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -682,6 +703,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -697,7 +728,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -712,9 +743,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -740,6 +769,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -755,7 +794,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -770,9 +809,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -799,6 +836,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -814,7 +861,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -829,9 +876,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -859,6 +904,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -874,7 +929,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -889,9 +944,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -918,6 +971,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -1034,7 +1097,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1049,9 +1112,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -1106,6 +1167,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -1121,7 +1192,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1136,9 +1207,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -1166,6 +1235,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -1181,7 +1260,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1196,9 +1275,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -1254,6 +1331,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -1269,7 +1356,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1284,9 +1371,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -1313,6 +1398,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -1378,7 +1473,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1393,9 +1488,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -1423,6 +1516,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -1482,6 +1585,11 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "next_actual_persistence_failure_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/native_quality_persistence_recovery_candidate_20261127.json",
+        "sha256": "0684c57ceef11403d3be488682affa07c94025b249b43eccc51b9426b4e0c838",
+        "native_and_four_mode_Chrome_approval_pending": true
       }
     },
     {
@@ -1497,7 +1605,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1512,9 +1620,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -1543,6 +1649,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     },
     {
@@ -1558,7 +1674,7 @@
       "figures": [
         23
       ],
-      "status": "implementado_sem_aceite",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1573,9 +1689,7 @@
         4
       ],
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
-      "divergences": [
-        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
-      ],
+      "divergences": [],
       "candidate_test_reference_ids_not_approval": [],
       "previous_divergences_before_human_revision_candidate": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
@@ -1604,6 +1718,16 @@
         "native_Rails_and_Vue_passed_but_parent_workflow_failed": true,
         "four_mode_full_quality_case_acceptance": false,
         "native_subsets_are_not_complete_browser_acceptance": true
+      },
+      "historical_status_before_literal_acceptance": "implementado_sem_aceite",
+      "historical_preacceptance_divergences": [
+        "Implementation candidate prepared; native SQL, authorization, concurrency and real four-mode Chrome acceptance remain required."
+      ],
+      "bounded_native_acceptance": {
+        "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "family": "native_human_review",
+        "new_followup_behaviour_not_accepted_by_this_record": true
       }
     }
   ],
@@ -1700,5 +1824,11 @@
     "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
     "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
     "native_or_browser_accepted": false
+  },
+  "latest_literal_functional_acceptance": {
+    "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+    "sha256": "f4aa21310e2f01dd2e0eb37d40a5daeb2ec7f09039a9317e269ca7e6bef83105",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "whole_figure_or_Part1_accepted": false
   }
 }

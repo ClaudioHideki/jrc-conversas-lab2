@@ -2615,5 +2615,11 @@
     "sha256": "cfa49091def321faa6d88f166cdaf086fbce75e4d341bc6b56bf01d862400d31",
     "native_or_browser_accepted": false,
     "no_new_fields_catalog_or_permission": true
+  },
+  "native_audio_filter_layout_QA_not_acceptance": {
+    "document": "docs/jrc_contact_center/native_audio_filter_layout_candidate_20261127.json",
+    "sha256": "f960faf6cceac473741411201305d90f28627873e1368535af06883e1c6d5b68",
+    "actual_parent_desktop_overlap_requires_correction": true,
+    "formal_clauses_not_promoted": true
   }
 }

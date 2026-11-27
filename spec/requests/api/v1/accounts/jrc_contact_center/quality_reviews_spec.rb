@@ -53,10 +53,13 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
   end
 
   it 'rejects foreign accounts and forbids changing the actor or operational scope in the review envelope' do
+    analysis[:alerta_supervisao] = true
+    analysis[:motivo_alerta] = 'SYNTHETIC restricted supervision signal'
     foreign = create(:account)
     get path.sub("accounts/#{account.id}", "accounts/#{foreign.id}"), headers: headers, as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(response.parsed_body).not_to have_key('original')
+    expect(response.body).not_to include('SYNTHETIC restricted supervision signal')
     post path, headers: headers, params: { quality_review: values.merge('account_id' => foreign.id, 'user_id' => actor.id) }, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcContactCenter::QualityReviewRevision.where(account: account)).to be_empty
@@ -158,5 +161,43 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
     expect(response.parsed_body.fetch('items')).to be_empty
     expect(JrcContactCenter::QualityReviewRevision.where(account: account).count).to eq(1)
     expect(response.body).not_to include('SYNTHETIC human reason', 'SYNTHETIC reviewed summary')
+  end
+
+  it 'returns the actual supervision flag and reason separately from positive sentiment and real quality zero' do
+    analysis[:alerta_supervisao] = true
+    analysis[:motivo_alerta] = 'SYNTHETIC explicit source signal'
+    get path, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('original')).to include('sentimento_cliente' => 'positivo', 'nota_final' => 0,
+                                                            'alerta_supervisao' => true, 'motivo_alerta' => analysis[:motivo_alerta])
+    expect(JrcContactCenter::QualityReviewRevision.where(account: account)).to be_empty
+  end
+
+  it 'does not turn negative sentiment into an alert when the source explicitly supplies false' do
+    analysis[:sentimento_cliente] = 'negativo'
+    analysis[:alerta_supervisao] = false
+    analysis[:motivo_alerta] = nil
+    get path, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('original')).to include('sentimento_cliente' => 'negativo', 'alerta_supervisao' => false,
+                                                            'motivo_alerta' => nil)
+  end
+
+  it 'preserves absent legacy supervision fields instead of inventing a negative boolean value' do
+    get path, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('original')).not_to have_key('alerta_supervisao')
+    expect(response.parsed_body.fetch('original')).not_to have_key('motivo_alerta')
+  end
+
+  it 'retains the original supervision evidence in an immutable revision independently of a human sentiment correction' do
+    analysis[:alerta_supervisao] = true
+    analysis[:motivo_alerta] = 'SYNTHETIC source reason retained after correction'
+    post path, headers: headers, params: { quality_review: values }, as: :json
+    expect(response).to have_http_status(:ok)
+    row = JrcContactCenter::QualityReviewRevision.where(account: account).sole
+    expect(row.original_analysis).to include('sentimento_cliente' => 'positivo', 'alerta_supervisao' => true,
+                                           'motivo_alerta' => analysis[:motivo_alerta])
+    expect(row.reviewed_values.fetch('classification')).to eq('negative')
   end
 end

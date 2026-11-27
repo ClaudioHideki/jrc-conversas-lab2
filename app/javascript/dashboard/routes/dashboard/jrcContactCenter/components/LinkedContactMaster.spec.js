@@ -10,10 +10,11 @@ vi.mock(
       props: {
         contactId: { type: [String, Number], required: true },
         openFullPageInNewTab: { type: Boolean, default: false },
+        initialTab: { type: String, default: 'overview' },
       },
       emits: ['close', 'updated'],
       template:
-        '<div data-native-master :data-independent-full-page="openFullPageInNewTab">{{ contactId }}<button data-close @click="$emit(\'close\')" /><button data-updated @click="$emit(\'updated\')" /></div>',
+        '<div data-native-master :data-independent-full-page="openFullPageInNewTab" :data-initial-tab="initialTab">{{ contactId }}<button data-close @click="$emit(\'close\')" /><button data-updated @click="$emit(\'updated\')" /></div>',
     },
   })
 );
@@ -99,5 +100,30 @@ describe('explicit native master entry from a call', () => {
     await wrapper.get('[data-updated]').trigger('click');
     expect(wrapper.emitted('updated')).toHaveLength(1);
     expect(wrapper.emitted('created')).toBeUndefined();
+  });
+
+  it('opens the exact native history section only after an explicit scoped history click', async () => {
+    const wrapper = render({ showHistory: true });
+    expect(wrapper.find('[data-native-master]').exists()).toBe(false);
+    await wrapper.get('[data-open-linked-history]').trigger('click');
+    await flushPromises();
+    expect(
+      wrapper.get('[data-native-master]').attributes('data-initial-tab')
+    ).toBe('history');
+    expect(wrapper.get('[data-native-master]').text()).toBe('2');
+    await wrapper.setProps({ enabled: false });
+    expect(wrapper.find('[data-open-linked-history]').exists()).toBe(false);
+    expect(wrapper.find('[data-native-master]').exists()).toBe(false);
+  });
+
+  it('does not expose a history shortcut by default or without the native directory authorization', async () => {
+    const wrapper = render();
+    expect(wrapper.find('[data-open-linked-history]').exists()).toBe(false);
+    await wrapper.setProps({
+      showHistory: true,
+      customer: { ...customer(), directory: null },
+    });
+    expect(wrapper.find('[data-open-linked-history]').exists()).toBe(false);
+    expect(wrapper.find('[data-open-linked-master]').exists()).toBe(false);
   });
 });

@@ -151,4 +151,86 @@ describe('authorized original analysis in the existing recording popup', () => {
     expect(wrapper.get('[role="alert"]').text()).toContain('DENIED');
     expect(wrapper.text()).not.toContain('SYNTHETIC original');
   });
+
+  it('presents the explicit native alert independently of positive sentiment and escapes its source reason', async () => {
+    const data = body();
+    data.original.alerta_supervisao = true;
+    data.original.motivo_alerta = 'SYNTHETIC <script>source reason</script>';
+    api.qualityReview.mockResolvedValue({ data });
+    const wrapper = create();
+    await flushPromises();
+    expect(wrapper.get('[data-analysis-supervision-state]').text()).toContain(
+      'SUPERVISION_PRESENT'
+    );
+    expect(wrapper.get('[data-analysis-supervision-reason]').text()).toContain(
+      data.original.motivo_alerta
+    );
+    expect(wrapper.get('[data-analysis-original-sentiment]').text()).toBe(
+      'positivo'
+    );
+    expect(wrapper.find('script, form, input').exists()).toBe(false);
+    expect(wrapper.get('[data-analysis-original-score]').text()).toBe('0');
+  });
+
+  it('preserves an actual false flag when the original sentiment is negative without inferring criticality', async () => {
+    const data = body();
+    Object.assign(data.original, {
+      sentimento_cliente: 'negativo',
+      alerta_supervisao: false,
+    });
+    api.qualityReview.mockResolvedValue({ data });
+    const wrapper = create();
+    await flushPromises();
+    expect(wrapper.get('[data-analysis-supervision-state]').text()).toContain(
+      'SUPERVISION_ABSENT'
+    );
+    expect(wrapper.get('[data-analysis-original-sentiment]').text()).toBe(
+      'negativo'
+    );
+    expect(wrapper.find('[data-analysis-supervision-reason]').exists()).toBe(
+      false
+    );
+  });
+
+  it('does not treat an absent or malformed flag as false or use JavaScript truthiness', async () => {
+    const wrappers = [undefined, null, 'false', 0].map(value => {
+      const data = body();
+      data.original.alerta_supervisao = value;
+      api.qualityReview.mockResolvedValueOnce({ data });
+      return create();
+    });
+    await flushPromises();
+    wrappers.forEach(wrapper => {
+      expect(wrapper.get('[data-analysis-supervision-state]').text()).toContain(
+        'UNKNOWN'
+      );
+      expect(wrapper.find('button').exists()).toBe(false);
+      wrapper.unmount();
+    });
+  });
+
+  it('does not replace the source alert with a human sentiment revision', async () => {
+    const data = body();
+    data.original.alerta_supervisao = false;
+    data.latest_review = {
+      revision: 1,
+      source_sha256: data.source_sha256,
+      values: {
+        classification: 'negative',
+        adjusted_summary: 'SYNTHETIC revised summary',
+      },
+    };
+    api.qualityReview.mockResolvedValue({ data });
+    const wrapper = create();
+    await flushPromises();
+    expect(wrapper.get('[data-analysis-latest-human]').text()).toContain(
+      'SYNTHETIC revised summary'
+    );
+    expect(wrapper.get('[data-analysis-supervision-state]').text()).toContain(
+      'SUPERVISION_ABSENT'
+    );
+    expect(wrapper.get('[data-analysis-original-sentiment]').text()).toBe(
+      'positivo'
+    );
+  });
 });

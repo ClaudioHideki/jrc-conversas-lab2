@@ -1,0 +1,17 @@
+{
+  "source_parent": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "figure": 23,
+  "literal_requirement": "D2-P0430-C02",
+  "functional_behavior": "An actual PostgreSQL audit rejection rolls back the revision and returns a specific safe 503; the existing popup keeps the draft and request UUID for an explicit retry.",
+  "only_create_action_StatementInvalid_response_handled": true,
+  "existing_source_unavailable_authority_conflict_and_validation_errors_preserved": true,
+  "native_writer_Account_mutex_immutable_revisions_audits_and_permissions_unchanged": true,
+  "new_native_cases_prepared": 3,
+  "new_Vue_cases_prepared": 1,
+  "committed_request_case_runs_with_existing_three_committed_concurrency_cases": true,
+  "same_new_case_not_duplicated_in_main_fixture_transaction": true,
+  "test_only_failure_control": "Named extra CHECK on audits, guarded by the exact GitHub-hosted synthetic database, loopback, Redis 15, branch/SHA, fixture nonce and owned recording. It is removed after the expected rollback, never a migration constraint or production setting.",
+  "existing_four_Chrome_flows_extended_without_new_scenarios": true,
+  "actual_DB_and_Chrome_acceptance": false,
+  "provider_or_whole_figure_accepted": false
+}

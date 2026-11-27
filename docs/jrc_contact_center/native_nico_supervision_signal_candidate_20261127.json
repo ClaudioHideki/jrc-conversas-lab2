@@ -1,0 +1,26 @@
+{
+  "source_parent": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "figures": [
+    19,
+    20,
+    23
+  ],
+  "literal_requirement": "D1-P0213-C01",
+  "flow": "Existing authorized original analysis read → explicit native supervision flag/reason → read-only independent signal, unknown distinct from false and human sentiment revision.",
+  "not_inferred_criticality_or_new_AI_inference": true,
+  "no_new_endpoint_permission_model_migration_provider_call_or_operational_action": true,
+  "existing_original_analysis_and_historical_revisions_not_rewritten": true,
+  "new_native_cases_prepared": 4,
+  "new_Vue_cases_prepared": 4,
+  "native_or_Chrome_acceptance": false,
+  "full_sentiment_dashboard_or_whole_figures_accepted": false,
+  "remaining": [
+    "Full scoped aggregate sentiment dashboard",
+    "Provider-supplied real temporal segments",
+    "External Nico homologation"
+  ],
+  "existing_four_native_Chrome_cases_extended_not_duplicated": true,
+  "nineteen_quality_capture_stages_per_mode_preserved": true,
+  "strict_true_false_unknown_with_no_inferred_criticality": true,
+  "new_external_provider_homologation": false
+}

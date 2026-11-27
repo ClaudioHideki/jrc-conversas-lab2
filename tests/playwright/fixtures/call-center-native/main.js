@@ -155,6 +155,20 @@ const store = createStore({
       state.nativeAccount.features[feature] === true,
   },
 });
+// Test-only refresh of the same real authenticated APIs used by navigation; accepts no profile or grants as input.
+const refreshNativeActor = async accountId => {
+  const [account, profile] = await Promise.all([
+    axios.get(`/api/v1/accounts/${accountId}`),
+    axios.get('/api/v1/profile'),
+  ]);
+  store.commit('setNativeAccount', account.data);
+  store.commit('setNativeUser', profile.data);
+  return { account_id: account.data.id, user_id: profile.data.id };
+};
+Reflect.set(window, '__REFRESH_CC_NATIVE_ACTOR__', () =>
+  refreshNativeActor(router.currentRoute.value.params.accountId)
+);
+
 // Native permission consumer and production layout, backed by fresh authenticated APIs.
 router.beforeEach(async to => {
   if (
@@ -169,12 +183,7 @@ router.beforeEach(async to => {
   )
     return true;
   if (to.name === 'synthetic_access_denied') return true;
-  const [account, profile] = await Promise.all([
-    axios.get(`/api/v1/accounts/${to.params.accountId}`),
-    axios.get('/api/v1/profile'),
-  ]);
-  store.commit('setNativeAccount', account.data);
-  store.commit('setNativeUser', profile.data);
+  await refreshNativeActor(to.params.accountId);
   if (to.name === 'settings_teams_list') await store.dispatch('teams/get');
   return validateLoggedInRoutes(to, store.getters.getCurrentUser)
     ? { name: 'synthetic_access_denied' }
@@ -202,14 +211,7 @@ app.component('woot-input', WootInput);
 app.component('woot-loading-state', LoadingState);
 router.isReady().then(async () => {
   if (!nativeNavigation && !store.state.nativeAccount) {
-    const [account, profile] = await Promise.all([
-      axios.get(
-        `/api/v1/accounts/${router.currentRoute.value.params.accountId}`
-      ),
-      axios.get('/api/v1/profile'),
-    ]);
-    store.commit('setNativeAccount', account.data);
-    store.commit('setNativeUser', profile.data);
+    await refreshNativeActor(router.currentRoute.value.params.accountId);
   }
   // The popup and full-page link use the product's actual contact routes.
   // Load that native graph only for an account whose real API enables it.

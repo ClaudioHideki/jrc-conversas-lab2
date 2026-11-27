@@ -24,6 +24,7 @@ import { T, errorMessage } from '../copy';
 
 const props = defineProps({
   contactId: { type: [Number, String], required: true },
+  initialTab: { type: String, default: 'overview' },
 });
 const emit = defineEmits(['updated', 'denied']);
 const CompanyDetailsDialog = defineAsyncComponent(
@@ -99,10 +100,11 @@ const updated = async () => {
   if ((await load()) && context === identity.value) emit('updated');
 };
 watch(
-  [identity, () => props.contactId],
+  [identity, () => props.contactId, () => props.initialTab],
   () => {
     companyDialog.value = false;
-    tab.value = 'overview';
+    tab.value = props.initialTab === 'history' ? 'history' : 'overview';
+    if (tab.value === 'history') historySection.value = 'timeline';
     commercialKind.value = 'leads';
     load();
   },
@@ -308,6 +310,7 @@ onBeforeUnmount(() => {
       <section
         v-else-if="tab === 'history'"
         class="space-y-4"
+        data-native-contact-history
       >
         <nav
           class="flex flex-wrap gap-2"

@@ -3,7 +3,7 @@
 # No media URL, raw transcript, provider credential or inferred model provenance is returned.
 class JrcContactCenter::QualityReviewPresentation
   ORIGINAL_FIELDS = %w[id chamada_id call_id status nota_final classificacao_ligacao sentimento_cliente sentimento_atendente
-                       resumo_conversa confianca_transcricao created_at].freeze
+                       resumo_conversa confianca_transcricao created_at alerta_supervisao motivo_alerta].freeze
   THEME_FIELDS = %w[assuntos_abordados temas_principais].freeze
 
   def self.original(snapshot)

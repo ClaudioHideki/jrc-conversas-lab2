@@ -57,6 +57,31 @@ export async function verifyNativeRecordingContext(
     })
   ).toBeVisible();
   await capture(page, 'existing-native-customer-master');
+  await master.press('Escape');
+  const historyButton = panel.locator('[data-open-linked-history]');
+  await expect(historyButton).toBeVisible();
+  const historyContrast = await measureTextContrast(historyButton);
+  expect(historyContrast.ratio).toBeGreaterThanOrEqual(4.5);
+  const timelinePath = `/api/v1/accounts/${target.account_id}/customers/contacts/${context.item.contact_id}/timeline`;
+  const timelineResponse = page.waitForResponse(
+    item =>
+      item.request().method() === 'GET' &&
+      new URL(item.url()).pathname === timelinePath
+  );
+  await historyButton.click();
+  const nativeHistoryResponse = await timelineResponse;
+  expect(nativeHistoryResponse.status()).toBe(200);
+  const nativeHistory = await nativeHistoryResponse.json();
+  expect(Array.isArray(nativeHistory.payload)).toBe(true);
+  const nativeHistoryPanel = page.locator('[data-native-contact-history]');
+  await expect(nativeHistoryPanel).toBeVisible();
+  await expect(nativeHistoryPanel.locator('ol > li')).toHaveCount(
+    nativeHistory.payload.length
+  );
+  await capture(page, 'existing-native-customer-history');
+  await page.getByRole('dialog').last().press('Escape');
+  await expect(panel).toBeVisible();
+
   // Real browser resource failure, not an intercepted API or a manufactured error event.
   // This proves local media/transcript independence, never external PABX availability.
   const mediaFailure = await listener
@@ -86,6 +111,7 @@ export async function verifyNativeRecordingContext(
   const denied = listener.locator('[data-recording-call-context]');
   await expect(denied.getByRole('alert')).toContainText('não está autorizado');
   await expect(denied.locator('[data-open-linked-master]')).toHaveCount(0);
+  await expect(denied.locator('[data-open-linked-history]')).toHaveCount(0);
   await expect(denied).not.toContainText('SYNTHETIC linked recording customer');
   expect(reads).toEqual([]);
   await capture(listener, 'native-call-context-restricted');
@@ -107,6 +133,15 @@ export async function verifyNativeRecordingContext(
         explicit_native_call_contact_link_verified: true,
         native_directory_permission_separate_from_recording_listen: true,
         real_existing_master_dialog_loaded: true,
+        native_full_history: {
+          exact_account_and_contact_path: timelinePath,
+          actual_native_GET: true,
+          status: nativeHistoryResponse.status(),
+          items: nativeHistory.payload.length,
+          native_panel_items_match_response: true,
+          no_new_customer_module_route_or_grant: true,
+          contrast: historyContrast,
+        },
         media_failure: mediaFailure,
         authorized_transcript_remained_visible_after_actual_blob_failure: true,
         listener_without_operate_received_no_customer_context: true,
@@ -114,6 +149,7 @@ export async function verifyNativeRecordingContext(
         screenshots: [
           'native-call-context',
           'existing-native-customer-master',
+          'existing-native-customer-history',
           'transcript-after-real-media-resource-failure',
           'native-call-context-restricted',
         ].map(

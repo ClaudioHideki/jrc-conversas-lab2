@@ -28,6 +28,7 @@ module SyntheticRecordedCallQuality
       'id' => "SYNTHETIC-analysis-#{record.id}", 'chamada_id' => "SYNTHETIC-original-#{record.id}", 'call_id' => record.external_unique_id,
       'status' => 'completed', 'sentimento_cliente' => 'positivo', 'classificacao_ligacao' => 'excelente', 'nota_final' => 0,
       'confianca_transcricao' => nil, 'resumo_conversa' => 'SYNTHETIC original immutable summary',
+      'alerta_supervisao' => true, 'motivo_alerta' => 'SYNTHETIC explicit source signal independent of sentiment',
       'texto_transcrito' => 'SYNTHETIC original transcript never changed', 'created_at' => '2026-11-26T12:00:00Z',
       'payload_completo' => { 'assuntos_abordados' => ['SYNTHETIC service'], 'oportunidades_melhoria' => ['SYNTHETIC suggestion only'] }
     }

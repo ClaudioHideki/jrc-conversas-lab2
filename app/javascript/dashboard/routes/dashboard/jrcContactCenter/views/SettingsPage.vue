@@ -122,6 +122,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
+    data-native-legacy-settings
     class="min-h-full bg-[radial-gradient(circle_at_12%_0%,rgba(8,124,240,.08),transparent_28%)] p-4 sm:p-6"
   >
     <header
@@ -169,12 +170,14 @@ onBeforeUnmount(() => {
       <VisualMetricCard
         v-for="item in metrics"
         :key="item.label"
+        :data-legacy-settings-metric="item.label"
         v-bind="item"
       />
     </div>
 
     <div
       v-if="failed"
+      data-legacy-settings-error
       class="mt-5 rounded-2xl border border-n-ruby-6 bg-n-ruby-2 p-4 text-sm text-n-ruby-11"
     >
       {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}

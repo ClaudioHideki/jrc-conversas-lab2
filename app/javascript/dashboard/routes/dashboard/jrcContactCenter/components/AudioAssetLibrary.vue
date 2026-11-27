@@ -606,7 +606,8 @@ onBeforeUnmount(() => {
     </p>
     <form
       v-if="canManage"
-      class="flex flex-wrap items-end gap-3"
+      class="grid min-w-0 grid-cols-1 items-end gap-4 sm:grid-cols-2 xl:grid-cols-3"
+      data-audio-filter-form
       @submit.prevent="applyFilters"
     >
       <label class="w-full min-w-0 text-sm text-n-slate-12 sm:flex-1">
@@ -676,12 +677,6 @@ onBeforeUnmount(() => {
           </option>
         </select>
       </div>
-      <button
-        type="submit"
-        class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
-      >
-        {{ label('FILTER') }}
-      </button>
       <div class="block min-w-0 text-sm text-n-slate-12">
         <label :for="filterIds.size">{{ label('PAGE_SIZE') }}</label>
         <select
@@ -701,22 +696,32 @@ onBeforeUnmount(() => {
           </option>
         </select>
       </div>
-      <button
-        type="button"
-        class="rounded-lg px-3 py-2 text-sm text-n-blue-11"
-        @click="clearFilters"
+      <div
+        class="flex flex-wrap items-center gap-3 sm:col-span-2 xl:col-span-3"
       >
-        {{ label('CLEAR') }}
-      </button>
-      <button
-        type="button"
-        :disabled="loading || !maxBytes || saving || opening"
-        data-new-audio-asset
-        class="rounded-lg bg-n-blue-9 px-3 py-2 text-sm text-white"
-        @click="editor.open('upload')"
-      >
-        {{ label('NEW') }}
-      </button>
+        <button
+          type="submit"
+          class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+        >
+          {{ label('FILTER') }}
+        </button>
+        <button
+          type="button"
+          class="rounded-lg px-3 py-2 text-sm text-n-blue-11"
+          @click="clearFilters"
+        >
+          {{ label('CLEAR') }}
+        </button>
+        <button
+          type="button"
+          :disabled="loading || !maxBytes || saving || opening"
+          data-new-audio-asset
+          class="rounded-lg bg-n-blue-9 px-3 py-2 text-sm text-white"
+          @click="editor.open('upload')"
+        >
+          {{ label('NEW') }}
+        </button>
+      </div>
     </form>
     <p
       v-if="canManage"

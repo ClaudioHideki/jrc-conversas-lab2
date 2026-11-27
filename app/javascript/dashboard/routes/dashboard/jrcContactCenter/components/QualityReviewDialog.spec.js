@@ -375,4 +375,32 @@ describe('native recording human quality review dialog', () => {
     );
     expect(wrapper.find('[data-quality-save]').exists()).toBe(false);
   });
+
+  it('keeps the complete draft and the same request identity after a native persistence error until an explicit retry', async () => {
+    API.saveQualityReview.mockRejectedValueOnce({
+      response: {
+        status: 503,
+        data: { error: 'quality_review_persistence_failed' },
+      },
+    });
+    const wrapper = create();
+    await flushPromises();
+    await fill(wrapper);
+    await wrapper.get('[data-quality-save]').trigger('click');
+    await flushPromises();
+    const first = API.saveQualityReview.mock.calls[0][2];
+    expect(wrapper.get('[role="alert"]').text()).toContain('PERSISTENCE_ERROR');
+    expect(wrapper.get('[data-quality-summary]').element.value).toBe(
+      'SYNTHETIC reviewed text'
+    );
+    expect(wrapper.get('[data-quality-justification]').element.value).toBe(
+      'SYNTHETIC explicit justification'
+    );
+    expect(wrapper.emitted('close')).toBeUndefined();
+    expect(API.saveQualityReview).toHaveBeenCalledTimes(1);
+    await wrapper.get('[data-quality-save]').trigger('click');
+    await flushPromises();
+    expect(API.saveQualityReview.mock.calls[1][2]).toEqual(first);
+    expect(wrapper.emitted('saved')).toHaveLength(1);
+  });
 });

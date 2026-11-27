@@ -8,10 +8,12 @@ const props = defineProps({
   call: { type: Object, default: null },
   customer: { type: Object, default: null },
   enabled: { type: Boolean, default: false },
+  showHistory: { type: Boolean, default: false },
 });
 const emit = defineEmits(['updated', 'closed']);
 const { t } = useI18n();
 const visible = ref(false);
+const initialTab = ref('overview');
 const opening = ref(false);
 const failed = ref(false);
 const dialogComponent = shallowRef(null);
@@ -49,7 +51,7 @@ const closeDialog = () => {
   close();
   emit('closed');
 };
-const open = async () => {
+const open = async (requestedTab = 'overview') => {
   if (!contactId.value || opening.value || visible.value) return;
   generation += 1;
   const version = generation;
@@ -62,6 +64,7 @@ const open = async () => {
     );
     if (version !== generation || source !== identity.value || !contactId.value)
       return;
+    initialTab.value = requestedTab === 'history' ? 'history' : 'overview';
     dialogComponent.value = module.default;
     visible.value = true;
   } catch {
@@ -86,7 +89,14 @@ onBeforeUnmount(close);
           : t('CRM.CONTACT_MASTER_360.TITLE')
       "
       :disabled="opening"
-      @click="open"
+      @click="open('overview')"
+    />
+    <Button
+      v-if="contactId && showHistory"
+      data-open-linked-history
+      :label="t('JRC_CONTACT_CENTER.RECORDINGS.CONTEXT.FULL_HISTORY')"
+      :disabled="opening || visible"
+      @click="open('history')"
     />
     <p v-if="failed" role="alert" class="text-sm text-n-ruby-11">
       {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
@@ -96,6 +106,7 @@ onBeforeUnmount(close);
       v-if="visible && dialogComponent && contactId"
       :key="identity"
       :contact-id="contactId"
+      :initial-tab="initialTab"
       open-full-page-in-new-tab
       @close="closeDialog"
       @updated="emit('updated')"

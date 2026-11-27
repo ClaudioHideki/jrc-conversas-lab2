@@ -77,6 +77,7 @@ const labels = computed(() => ({
   DENIED: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.DENIED'),
   CONFLICT: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.CONFLICT'),
   SOURCE_UNAVAILABLE: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.SOURCE_UNAVAILABLE'),
+  PERSISTENCE_ERROR: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.PERSISTENCE_ERROR'),
   REASON_REQUIRED: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.REASON_REQUIRED'),
   CLASS_REQUIRED: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.CLASS_REQUIRED'),
   ERROR: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.ERROR'),
@@ -154,8 +155,9 @@ function errorKey(failure) {
   const status = failure.response?.status;
   if ([401, 403, 404].includes(status)) return 'DENIED';
   if (status === 409) return 'CONFLICT';
-  if (status === 503) return 'SOURCE_UNAVAILABLE';
   const code = failure.response?.data?.error;
+  if (code === 'quality_review_persistence_failed') return 'PERSISTENCE_ERROR';
+  if (status === 503) return 'SOURCE_UNAVAILABLE';
   if (code === 'quality_analysis_source_unavailable')
     return 'SOURCE_UNAVAILABLE';
   if (code === 'quality_review_justification_required')

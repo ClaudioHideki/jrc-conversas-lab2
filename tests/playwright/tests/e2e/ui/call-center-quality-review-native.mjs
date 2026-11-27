@@ -86,7 +86,38 @@ export async function verifyNativeQualityReview(parent, info, target) {
     );
     await expect(page.locator('[data-recording-row]')).toHaveCount(1);
     await page.locator('[data-recording-details]').click();
+    const sourceResponse = page.waitForResponse(
+      response =>
+        response.request().method() === 'GET' &&
+        new URL(response.url()).pathname === path
+    );
     await page.locator('[data-recording-analysis-open]').click();
+    const nativeSourceResponse = await sourceResponse;
+    expect(nativeSourceResponse.status()).toBe(200);
+    const nativeSource = await nativeSourceResponse.json();
+    expect(nativeSource).toMatchObject({
+      account_id: account,
+      recording_id: record.id,
+      original: {
+        sentimento_cliente: 'positivo',
+        nota_final: 0,
+        alerta_supervisao: true,
+        motivo_alerta:
+          'SYNTHETIC explicit source signal independent of sentiment',
+      },
+    });
+    await expect(page.locator('[data-analysis-supervision-state]')).toHaveText(
+      'Alerta informado pelo Nico'
+    );
+    await expect(page.locator('[data-analysis-supervision-reason]')).toHaveText(
+      nativeSource.original.motivo_alerta
+    );
+    const signal = page.locator('[data-analysis-supervision-signal]');
+    await expect(signal.locator('button, input, form, a')).toHaveCount(0);
+    const signalContrast = await measureTextContrast(
+      page.locator('[data-analysis-supervision-state]')
+    );
+    expect(signalContrast.ratio).toBeGreaterThanOrEqual(4.5);
     const tabs = page.locator('[data-recording-tabs] [role="tab"]');
     await expect(tabs).toHaveCount(5);
     await expect(
@@ -118,7 +149,17 @@ export async function verifyNativeQualityReview(parent, info, target) {
         labels: labels.map(label => label.trim()),
         contrasts,
         real_original_summary_loaded: true,
+        original_supervision_signal: {
+          actual_native_GET: true,
+          flag: nativeSource.original.alerta_supervisao,
+          reason: nativeSource.original.motivo_alerta,
+          original_sentiment: nativeSource.original.sentimento_cliente,
+          original_quality: nativeSource.original.nota_final,
+          independent_of_sentiment_and_no_write_controls: true,
+          contrast: signalContrast,
+        },
       };
+      await signal.scrollIntoViewIfNeeded();
       await capture(page, 'five-native-tabs-analysis');
     }
     await page.locator('[data-recording-quality-open]').click();
@@ -126,6 +167,32 @@ export async function verifyNativeQualityReview(parent, info, target) {
       'SYNTHETIC original immutable summary'
     );
     return page;
+  };
+  const persistenceControl = action => {
+    const raw = execFileSync(
+      'bundle',
+      [
+        'exec',
+        'rails',
+        'runner',
+        'script/jrc_call_center_quality_persistence_failure.rb',
+        action,
+        account,
+        String(record.id),
+      ],
+      {
+        cwd: process.env.GITHUB_WORKSPACE,
+        env: process.env,
+        timeout: 45000,
+        maxBuffer: 256 * 1024,
+        encoding: 'utf8',
+      }
+    );
+    const receipt = JSON.parse(raw.trim().split('\n').at(-1));
+    expect(receipt.source_sha).toBe(process.env.GITHUB_SHA);
+    expect(receipt.account_id).toBe(account);
+    expect(receipt.recording_id).toBe(String(record.id));
+    return receipt;
   };
   const submit = async (page, status) => {
     const response = page.waitForResponse(
@@ -190,7 +257,51 @@ export async function verifyNativeQualityReview(parent, info, target) {
     await page
       .locator('[data-quality-justification]')
       .fill('SYNTHETIC first explicit reason');
+    let persistenceFailure;
+    let failedPayload;
+    let rejectionActive = false;
+    try {
+      const enabled = persistenceControl('enable');
+      rejectionActive = true;
+      expect(enabled).toMatchObject({
+        constraint_active: true,
+        revisions: 0,
+        audits: 0,
+      });
+      const rejected = await submit(page, 503);
+      expect(rejected).toEqual({ error: 'quality_review_persistence_failed' });
+      failedPayload = posts.at(-1);
+      await expect(
+        page.locator('[data-quality-review] [role="alert"]')
+      ).toContainText('Não foi possível salvar a revisão');
+      await expect(page.locator('[data-quality-summary]')).toHaveValue(
+        'SYNTHETIC first human summary'
+      );
+      await expect(page.locator('[data-quality-justification]')).toHaveValue(
+        'SYNTHETIC first explicit reason'
+      );
+      await expect(page.locator('[data-quality-save]')).toBeEnabled();
+      expect(posts).toHaveLength(1);
+      persistenceFailure = persistenceControl('inspect');
+      expect(persistenceFailure).toMatchObject({
+        constraint_active: true,
+        revisions: 0,
+        audits: 0,
+      });
+      await capture(page, 'native-persistence-failure-retained-draft');
+    } finally {
+      if (rejectionActive) {
+        const restored = persistenceControl('disable');
+        expect(restored).toMatchObject({
+          constraint_active: false,
+          revisions: 0,
+          audits: 0,
+        });
+      }
+    }
     const first = await submit(page, 200);
+    expect(posts.at(-1)).toEqual(failedPayload);
+    expect(first.item.request_id).toBe(failedPayload.request_id);
     expect(first.item).toMatchObject({
       revision: 1,
       origin: 'human',
@@ -371,6 +482,16 @@ export async function verifyNativeQualityReview(parent, info, target) {
           real_native_persistence_and_reload: true,
           original_operator_nonadministrator: true,
           explicit_conflict_review_preserved_draft: true,
+          native_persistence_failure_recovery: {
+            rejected: persistenceFailure,
+            actual_POST_status: 503,
+            error: 'quality_review_persistence_failed',
+            native_draft_retained_and_no_automatic_retry: true,
+            explicit_retry_same_request_id:
+              first.item.request_id === failedPayload.request_id,
+            recovered_revision: first.item.revision,
+            recovered_request_id: first.item.request_id,
+          },
           explicit_cancel_and_keep_editing_preserved_native_revision: true,
           nativeTabReceipt,
           cancelState: {

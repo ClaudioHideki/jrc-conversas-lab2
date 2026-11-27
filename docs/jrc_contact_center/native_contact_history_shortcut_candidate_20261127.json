@@ -1,0 +1,17 @@
+{
+  "source_parent": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "figure": 21,
+  "literal_requirement": "D2-P0405-C03",
+  "usable_flow": "Authorized explicit call/contact/directory link → Ver histórico completo → existing native Customer 360 history section and TimelinePanel → same authorized customer timeline API.",
+  "native_sources_reused_without_a_new_API_model_migration_permission_provider_or_customer_copy": true,
+  "default_existing_callers_still_open_overview": true,
+  "unknown_initial_sections_fall_back_to_overview": true,
+  "authority_or_identity_change_removes_previous_context": true,
+  "new_Vue_cases_prepared": 6,
+  "old_panel_cases_added_to_directed_regression": 4,
+  "existing_native_timeline_cases_added_as_regression_not_new_cases": 5,
+  "existing_four_Chrome_flows_extended": true,
+  "new_native_history_capture_per_mode": 1,
+  "native_or_Chrome_acceptance": false,
+  "whole_figure_or_external_Nico_homologation": false
+}

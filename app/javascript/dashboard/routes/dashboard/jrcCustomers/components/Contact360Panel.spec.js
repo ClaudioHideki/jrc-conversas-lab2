@@ -31,9 +31,9 @@ const summary = {
   pending_activities: 3,
   capabilities: { crm: true },
 };
-const render = () =>
+const render = (props = {}) =>
   mount(Panel, {
-    props: { contactId: 42 },
+    props: { contactId: 42, ...props },
     global: {
       stubs: {
         MasterTicketAction: true,
@@ -144,5 +144,38 @@ it('discards a previous account response and clears details after a current deni
   expect(wrapper.text()).not.toContain(person.name);
   expect(wrapper.emitted('denied')).toHaveLength(1);
   expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+  wrapper.unmount();
+});
+
+it('opens the existing current-scope timeline directly when explicitly requested by an attendance caller', async () => {
+  const wrapper = render({ initialTab: 'history' });
+  await flushPromises();
+  expect(
+    wrapper.findComponent({ name: 'TimelinePanel' }).props()
+  ).toMatchObject({ resourceId: 42, resourceType: 'contacts' });
+  expect(
+    wrapper.findComponent({ name: 'CompanyContactHistoryPanel' }).exists()
+  ).toBe(false);
+  wrapper.unmount();
+});
+
+it('does not turn an unknown initial section into an arbitrary module view', async () => {
+  const wrapper = render({ initialTab: 'private-projects' });
+  await flushPromises();
+  expect(wrapper.findComponent({ name: 'TimelinePanel' }).exists()).toBe(false);
+  expect(wrapper.findComponent({ name: 'RecordsPanel' }).exists()).toBe(false);
+  wrapper.unmount();
+});
+
+it('clears the selected native history after a same-account profile recheck is denied', async () => {
+  const wrapper = render({ initialTab: 'history' });
+  await flushPromises();
+  expect(wrapper.findComponent({ name: 'TimelinePanel' }).exists()).toBe(true);
+  mocks.contact.mockRejectedValueOnce({ response: { status: 403 } });
+  mocks.state.role = 'restricted';
+  await flushPromises();
+  expect(wrapper.findComponent({ name: 'TimelinePanel' }).exists()).toBe(false);
+  expect(wrapper.text()).not.toContain(person.name);
+  expect(wrapper.emitted('denied')).toHaveLength(1);
   wrapper.unmount();
 });

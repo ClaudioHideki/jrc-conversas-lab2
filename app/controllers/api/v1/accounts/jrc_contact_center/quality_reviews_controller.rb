@@ -24,6 +24,8 @@ class Api::V1::Accounts::JrcContactCenter::QualityReviewsController < Api::V1::A
     writer = JrcContactCenter::QualityReviewWrite.new(account: Current.account, member: Current.account_user)
     row = writer.call(params[:recording_id], input)
     render json: base_payload.merge(recording_id: row.recording_id.to_s, item: present(row))
+  rescue ActiveRecord::StatementInvalid
+    render json: { error: 'quality_review_persistence_failed' }, status: :service_unavailable
   end
 
   def transcript

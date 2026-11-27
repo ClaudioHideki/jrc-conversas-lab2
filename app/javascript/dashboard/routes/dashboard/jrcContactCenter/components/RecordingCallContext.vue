@@ -150,6 +150,7 @@ onBeforeUnmount(() => {
         :call="call"
         :customer="customer"
         :enabled="operationalContextAllowed"
+        show-history
         @updated="load"
       />
       <p class="text-xs text-n-slate-11">{{ text('NATIVE_MASTER_LIMIT') }}</p>

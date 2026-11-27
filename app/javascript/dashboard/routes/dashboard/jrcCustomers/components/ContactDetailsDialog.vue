@@ -7,6 +7,7 @@ import { useCustomerMaster } from '../useCustomerMaster';
 
 defineProps({
   contactId: { type: [Number, String], required: true },
+  initialTab: { type: String, default: 'overview' },
   openFullPageInNewTab: { type: Boolean, default: false },
 });
 const emit = defineEmits(['close', 'updated']);
@@ -39,6 +40,7 @@ onMounted(() => dialog.value.open());
     </RouterLink>
     <Contact360Panel
       :contact-id="contactId"
+      :initial-tab="initialTab"
       @updated="emit('updated')"
       @denied="emit('close')"
     />

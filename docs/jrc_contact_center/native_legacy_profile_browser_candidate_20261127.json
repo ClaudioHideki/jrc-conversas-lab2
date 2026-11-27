@@ -1,0 +1,11 @@
+{
+  "source_parent": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "existing_fix": "docs/jrc_contact_center/native_legacy_settings_context_candidate_20261127.json",
+  "bounded_flow": "The existing settings view keeps its local 541 draft on a same-profile native refresh, clears old metrics before held real reads after an authenticated actor switch in the same account, and displays the current server-authorized counts or unknown state.",
+  "fixture_refresh_boundary": "Test-only callback reads real Account/Profile APIs and commits their actual native DTOs using the existing fixture store. It accepts no forged profile/permission object. Production has no such hook.",
+  "held_reads_are_released_through_existing_routes_without_a_fulfilled_response": true,
+  "same_Actor_role_and_full_product_profile_menu_homologation_not_claimed": true,
+  "existing_four_Chrome_cases_extended_and_old_assertions_retained": true,
+  "no_new_case_or_model_route_permission_PABX_action": true,
+  "native_and_Chrome_acceptance": false
+}

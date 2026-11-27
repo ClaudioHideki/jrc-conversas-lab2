@@ -62,6 +62,7 @@ describe('current native call context inside recording details', () => {
       call: result().item,
       customer: result().item.customer,
       enabled: true,
+      showHistory: true,
     });
   });
 

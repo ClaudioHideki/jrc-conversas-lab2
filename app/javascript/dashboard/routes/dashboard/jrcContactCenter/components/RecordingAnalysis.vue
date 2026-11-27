@@ -32,6 +32,13 @@ const labels = computed(() => ({
     'JRC_CONTACT_CENTER.QUALITY_REVIEW.OLDER_SOURCE_REVIEW'
   ),
   REVISION: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.REVISION'),
+  SUPERVISION_ALERT: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.SUPERVISION_ALERT'),
+  SUPERVISION_PRESENT: t(
+    'JRC_CONTACT_CENTER.QUALITY_REVIEW.SUPERVISION_PRESENT'
+  ),
+  SUPERVISION_ABSENT: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.SUPERVISION_ABSENT'),
+  SUPERVISION_NOTE: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.SUPERVISION_NOTE'),
+  SUPERVISION_REASON: t('JRC_CONTACT_CENTER.QUALITY_REVIEW.SUPERVISION_REASON'),
 }));
 const text = key => labels.value[key];
 const source = ref(null);
@@ -39,6 +46,19 @@ const loading = ref(false);
 const error = ref('');
 let generation = 0;
 const original = computed(() => source.value?.original || {});
+const supervisionSignal = computed(() => {
+  const value = original.value.alerta_supervisao;
+  return typeof value === 'boolean' ? value : null;
+});
+const supervisionLabel = computed(() => {
+  if (supervisionSignal.value === true) return 'SUPERVISION_PRESENT';
+  if (supervisionSignal.value === false) return 'SUPERVISION_ABSENT';
+  return 'UNKNOWN';
+});
+const supervisionReason = computed(() => {
+  const value = original.value.motivo_alerta;
+  return typeof value === 'string' && value.trim() ? value : null;
+});
 const shown = value =>
   value === null || value === undefined || value === ''
     ? text('UNKNOWN')
@@ -124,6 +144,30 @@ onBeforeUnmount(() => {
           <dd class="break-all">{{ shown(original.model) }}</dd>
         </div>
       </dl>
+      <section
+        class="min-w-0 space-y-2 rounded-lg border p-3"
+        :class="
+          supervisionSignal === true
+            ? 'border-n-ruby-6 bg-n-ruby-2'
+            : 'border-n-weak bg-n-solid-2'
+        "
+        data-analysis-supervision-signal
+      >
+        <h3 class="font-semibold">{{ text('SUPERVISION_ALERT') }}</h3>
+        <p data-analysis-supervision-state>{{ text(supervisionLabel) }}</p>
+        <p class="text-xs text-n-slate-11">{{ text('SUPERVISION_NOTE') }}</p>
+        <div v-if="supervisionReason">
+          <h4 class="text-xs text-n-slate-11">
+            {{ text('SUPERVISION_REASON') }}
+          </h4>
+          <p
+            class="whitespace-pre-wrap break-words"
+            data-analysis-supervision-reason
+          >
+            {{ supervisionReason }}
+          </p>
+        </div>
+      </section>
       <div>
         <h3 class="font-semibold text-n-violet-11">
           {{ text('ORIGINAL_SUMMARY') }}

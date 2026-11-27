@@ -3303,7 +3303,8 @@
         "UNKNOWN": "Não informado pela origem",
         "AMBIGUOUS": "A identificação está ambígua. Nenhum candidato foi escolhido automaticamente.",
         "UNLINKED": "Não há contato explicitamente vinculado e autorizado nesta chamada.",
-        "NATIVE_MASTER_LIMIT": "Contratos, atendimentos e histórico continuam no Cliente 360º de origem, conforme suas permissões. Acesso a esta gravação não concede acesso ao cadastro."
+        "NATIVE_MASTER_LIMIT": "Contratos, atendimentos e histórico continuam no Cliente 360º de origem, conforme suas permissões. Acesso a esta gravação não concede acesso ao cadastro.",
+        "FULL_HISTORY": "Ver histórico completo"
       },
       "ACTIONS": {
         "TITLE": "Ações e histórico do atendimento",
@@ -3390,7 +3391,13 @@
       "REASON_REQUIRED": "Preencha a justificativa da correção.",
       "CLASS_REQUIRED": "Selecione uma classificação válida.",
       "ERROR": "Não foi possível concluir. O rascunho foi preservado; confira o resultado antes de tentar novamente.",
-      "SEPARATOR": "·"
+      "SEPARATOR": "·",
+      "SUPERVISION_ALERT": "Alerta de supervisão na análise original",
+      "SUPERVISION_PRESENT": "Alerta informado pelo Nico",
+      "SUPERVISION_ABSENT": "A fonte informou ausência de alerta",
+      "SUPERVISION_NOTE": "O sentimento é uma estimativa de IA. Este alerta é informado separadamente pela fonte; sentimento negativo não significa criticidade.",
+      "SUPERVISION_REASON": "Motivo informado na origem",
+      "PERSISTENCE_ERROR": "Não foi possível salvar a revisão. Seus dados continuam no formulário. Tente novamente quando o serviço estiver disponível."
     },
     "QUALITY_HISTORY": {
       "TITLE": "Histórico das revisões",
