@@ -1,0 +1,18 @@
+{
+  "source_parent": "dda547f7a2edff4ef38244875504174d6ef82ff1",
+  "failed_run": 46073324052,
+  "artifact": 15233797250,
+  "artifact_sha256": "5431d74e2e96caba615778302637e5287e6e461a1b5675833ddd3d222d4ed1d1",
+  "report": {
+    "path": "tmp/call-center-recordings-preflight-vitest.json",
+    "sha256": "01e9e0cbb17cbeb32870c5c6ad3f8955949896b39cb885ec88c0d34dfcf0e4ce",
+    "346_assertions_passed_but_process_failed_on_unhandled_error": true,
+    "real_TicketAction_cases_retained": 12
+  },
+  "confirmed_root_cause": "The new parent test provides recordingId for an already linked contact, which mounts the unrelated real RecordingTicketAction. This focused parent fixture supplies no Vuex store. Its async watcher then reads store.getters after the assertion completes.",
+  "minimum_correction": "Declare the existing child prop contract in the focused parent stub; assert exact account, call, recording, contact and enabled delegation. Keep every independent real child and integration test.",
+  "all_previous_14_parent_and_19_manual_link_and_12_real_TicketAction_cases_retained": true,
+  "ignored_unhandled_errors_or_weakened_exit_status": false,
+  "application_or_workflow_or_permission_change": false,
+  "native_or_visual_acceptance": false
+}

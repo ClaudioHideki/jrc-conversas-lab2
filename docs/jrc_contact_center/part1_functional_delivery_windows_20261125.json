@@ -448,5 +448,11 @@
     "same_288_cases_retained_plus_four_new_manual_link_cases": true,
     "native_or_visual_acceptance": false,
     "real_pending_source_not_configuration_catalog": true
+  },
+  "native_parent_child_fixture_pending_correction": {
+    "document": "docs/jrc_contact_center/native_parent_child_fixture_correction_20261127.json",
+    "process_result": "failed",
+    "all_346_assertions_passed_is_not_an_approval": true,
+    "zero_outside_errors_still_required": true
   }
 }

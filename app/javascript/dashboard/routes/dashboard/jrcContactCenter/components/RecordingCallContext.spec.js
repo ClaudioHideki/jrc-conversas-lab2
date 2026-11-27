@@ -40,6 +40,18 @@ const render = (props = {}) =>
     global: {
       stubs: {
         LinkedContactMaster: true,
+        RecordingTicketAction: {
+          name: 'RecordingTicketAction',
+          props: [
+            'accountId',
+            'recordingId',
+            'callSessionId',
+            'callId',
+            'contactId',
+            'enabled',
+          ],
+          template: '<div data-native-ticket-action-stub />',
+        },
         RecordingCustomerLink: {
           name: 'RecordingCustomerLink',
           props: [
@@ -276,4 +288,14 @@ it('never offers the manual flow as a replacement for an existing explicit call 
   expect(
     wrapper.findComponent({ name: 'RecordingCustomerLink' }).exists()
   ).toBe(false);
+  expect(
+    wrapper.getComponent({ name: 'RecordingTicketAction' }).props()
+  ).toMatchObject({
+    accountId: '1',
+    recordingId: '8',
+    callSessionId: '7',
+    callId: result().item.external_session_id,
+    contactId: '2',
+    enabled: true,
+  });
 });
