@@ -1,0 +1,171 @@
+{
+  "sha": "a815499d485422562c334794e7a91ee9c88fe002",
+  "run": 45918717686,
+  "artifact": 15166693515,
+  "artifact_sha256": "644f09ea417c974bae7e73f93688b69da241ce1b73672bc101f372db407070b8",
+  "failure_report_sha256": "5c4e2282ade6bd3e715e8b2ec3cc7db5c9dec369ad5e996e2a59418b8c3814af",
+  "Chrome_report_sha256": "4ac685f74be8c175b13e77e0f42d77cedcec9a00024b282a8b36b75215ca2fdd",
+  "native_distinct_examples_passed": 3882,
+  "main_Vue_passed": 2053,
+  "focused_recording_Vue_passed": 106,
+  "SD_audio_Vue_passed": 110,
+  "Chrome_passed": 284,
+  "Chrome_failed": 4,
+  "failed_cases": [
+    {
+      "title": "native human Nico correction preserves immutable source, reviewed conflicts and independent authority",
+      "project": "desktop-light",
+      "status": "timedOut",
+      "errors": [
+        "Test timeout of 180000ms exceeded.",
+        "Error: locator.evaluate: Test timeout of 180000ms exceeded.\n\n   at call-center-recording-context-native.mjs:63\n\n  61 |   const mediaFailure = await listener\n  62 |     .locator('[data-recording-selected] audio')\n> 63 |     .evaluate(audio => {\n     |      ^\n  64 |       const resource = audio.currentSrc;\n  65 |       if (!resource.startsWith('blob:'))\n  66 |         throw new Error('Expected the owned native media blob');\n    at verifyNativeRecordingContext (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs:63:6)\n    at verifyNativeQualityReview (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs:235:5)\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts:25:3"
+      ]
+    },
+    {
+      "title": "native human Nico correction preserves immutable source, reviewed conflicts and independent authority",
+      "project": "desktop-dark",
+      "status": "timedOut",
+      "errors": [
+        "Test timeout of 180000ms exceeded.",
+        "Error: locator.evaluate: Test timeout of 180000ms exceeded.\n\n   at call-center-recording-context-native.mjs:63\n\n  61 |   const mediaFailure = await listener\n  62 |     .locator('[data-recording-selected] audio')\n> 63 |     .evaluate(audio => {\n     |      ^\n  64 |       const resource = audio.currentSrc;\n  65 |       if (!resource.startsWith('blob:'))\n  66 |         throw new Error('Expected the owned native media blob');\n    at verifyNativeRecordingContext (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs:63:6)\n    at verifyNativeQualityReview (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs:235:5)\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts:25:3"
+      ]
+    },
+    {
+      "title": "native human Nico correction preserves immutable source, reviewed conflicts and independent authority",
+      "project": "mobile-light",
+      "status": "timedOut",
+      "errors": [
+        "Test timeout of 180000ms exceeded.",
+        "Error: locator.evaluate: Test timeout of 180000ms exceeded.\n\n   at call-center-recording-context-native.mjs:63\n\n  61 |   const mediaFailure = await listener\n  62 |     .locator('[data-recording-selected] audio')\n> 63 |     .evaluate(audio => {\n     |      ^\n  64 |       const resource = audio.currentSrc;\n  65 |       if (!resource.startsWith('blob:'))\n  66 |         throw new Error('Expected the owned native media blob');\n    at verifyNativeRecordingContext (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs:63:6)\n    at verifyNativeQualityReview (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs:235:5)\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts:25:3"
+      ]
+    },
+    {
+      "title": "native human Nico correction preserves immutable source, reviewed conflicts and independent authority",
+      "project": "mobile-dark",
+      "status": "timedOut",
+      "errors": [
+        "Test timeout of 180000ms exceeded.",
+        "Error: locator.evaluate: Test timeout of 180000ms exceeded.\n\n   at call-center-recording-context-native.mjs:63\n\n  61 |   const mediaFailure = await listener\n  62 |     .locator('[data-recording-selected] audio')\n> 63 |     .evaluate(audio => {\n     |      ^\n  64 |       const resource = audio.currentSrc;\n  65 |       if (!resource.startsWith('blob:'))\n  66 |         throw new Error('Expected the owned native media blob');\n    at verifyNativeRecordingContext (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs:63:6)\n    at verifyNativeQualityReview (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs:235:5)\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts:25:3"
+      ]
+    }
+  ],
+  "native_reports": [
+    {
+      "name": "call-center-corporate-rspec.json",
+      "examples": 85,
+      "sha256": "591f09101708315653f098a2c8a1d1b26765fdfdb2ad031d916d336647529fe7"
+    },
+    {
+      "name": "call-center-ending-actual-broker-rspec.json",
+      "examples": 3,
+      "sha256": "59aacc5dd3b4843bdd491d8d66acb07f3e230fc4c84446f83e1bc72fa84664c9"
+    },
+    {
+      "name": "call-center-ending-completion-projection-rspec.json",
+      "examples": 4,
+      "sha256": "f535bca4bdf0e1a514b26ee06085f0a7779247d6e53d3cacac78e454a72dcc84"
+    },
+    {
+      "name": "call-center-ending-nico-queue-rspec.json",
+      "examples": 14,
+      "sha256": "09749a459b9c0cf2d836db033543a37ed5db52feb34ed67f4baddb804be73616"
+    },
+    {
+      "name": "call-center-ending-pending-rspec.json",
+      "examples": 15,
+      "sha256": "7f1dc2a4e28a1860e14aff7cf0fefd25f2eaef45bfb8444a77d7eaddd37264d6"
+    },
+    {
+      "name": "call-center-ending-public-committed-rspec.json",
+      "examples": 56,
+      "sha256": "296649854c3a213ae9fbf53d5eb7f8a23207f5e05f7bc68c2cec55fc723d881f"
+    },
+    {
+      "name": "call-center-ending-sd-public-pipeline-rspec.json",
+      "examples": 3,
+      "sha256": "4ee5470815fc13d1e488791a9da7c836b33d2d4219db41bc497b4047474c399e"
+    },
+    {
+      "name": "call-center-ending-typed-actual-broker-rspec.json",
+      "examples": 3,
+      "sha256": "ae5a08ac9b3e72b2916c7f134110a95806404d6ef0f4a26d957a78a4bd3dcdaf"
+    },
+    {
+      "name": "call-center-ivr-schema-reload-rspec.json",
+      "examples": 252,
+      "sha256": "542fac49d0e750aa67e9e4bca3188640df93878c013159cc0932484e3b2e161a"
+    },
+    {
+      "name": "call-center-nico-intent-fresh-rspec.json",
+      "examples": 6,
+      "sha256": "e67f326394d022a91cb9c803ac9a36bb495b902bdeb78d1148fd883c0afb598b"
+    },
+    {
+      "name": "call-center-nico-intent-reload-rspec.json",
+      "examples": 6,
+      "sha256": "6a2d1674d82cac55590b0f8fb3f295184467e978662b69eadd1b0ea24e0a1419"
+    },
+    {
+      "name": "call-center-nico-intent-upgrade-rspec.json",
+      "examples": 1,
+      "sha256": "4a3a35e4d30b5a8792eb63086926e0c67505c0d2d6006210fc4b2a0df5cd81a9"
+    },
+    {
+      "name": "call-center-nico-native-regressions-rspec.json",
+      "examples": 87,
+      "sha256": "805bbc6f6b8f20d92ff2639ddd939ad9ba6dbb6b09210f4b3dd3ff9755d9e232"
+    },
+    {
+      "name": "call-center-nico-preserved-contention-rspec.json",
+      "examples": 2,
+      "sha256": "40b73bf70e1d4fc9c4db2f1832d4d83c9c094e4d155652335a92f0104f42d9df"
+    },
+    {
+      "name": "call-center-pabx-rspec.json",
+      "examples": 253,
+      "sha256": "22a52726e04ef89bcf1d0e401f8fec68c33fb29bb082c219b93cdce807d51564"
+    },
+    {
+      "name": "call-center-quality-review-concurrency-rspec.json",
+      "examples": 3,
+      "sha256": "f3ebec74aa2cfe05cd6433083143e8a5c43f123c4c6e03de38f3f7db6701c9ba"
+    },
+    {
+      "name": "call-center-rspec.json",
+      "examples": 3289,
+      "sha256": "d27b22dda5091a74a3ca722430af8d55921bc1137f1290ef31c93a98fb8c7870"
+    },
+    {
+      "name": "call-center-typed-delivery-transaction-rspec.json",
+      "examples": 20,
+      "sha256": "8295e060a9af7ff113beb8994189481a794a957e1374751096dca2adf2f613fd"
+    },
+    {
+      "name": "call-center-typed-destination-concurrency-rspec.json",
+      "examples": 25,
+      "sha256": "10a2422806057e210966abe50c3b5c634e222f2762f1473de8a844eab3c0e2c2"
+    },
+    {
+      "name": "call-center-typed-destination-reload-rspec.json",
+      "examples": 11,
+      "sha256": "08d6963541cb282280e5d9a0ee07187e1abc18e4860c19361b8fff8f6d214d9d"
+    },
+    {
+      "name": "call-center-typed-destination-upgrade-rspec.json",
+      "examples": 3,
+      "sha256": "e22a03f0061f9e4cac2db2580d23e047e07b4bae5d737c9ae5041cd1861373b0"
+    },
+    {
+      "name": "call-center-typed-original-event-rspec.json",
+      "examples": 10,
+      "sha256": "40d5264df05c7246744d2ee27405549f2b56d328bf3a02d7c2730d2d17a15d72"
+    }
+  ],
+  "only_four_same_native_media_observation_timeouts": true,
+  "old_procedure_reloaded_an_already_consumed_revoked_blob_without_observing_an_error": true,
+  "exact_QA_repair_prepared_plan_sha256": "2ce02928336d355256bcda24510d1ffe44f4b1857830d291d0246ddc2c51b31c",
+  "whole_parent_accepted": false,
+  "failed_cases_or_whole_figure_accepted": false,
+  "fresh_native_and_all_288_Chrome_required_on_successor": true,
+  "purpose": "Group the exact real-media QA repair with related prepared functionality; no inherited or failed result becomes acceptance."
+}

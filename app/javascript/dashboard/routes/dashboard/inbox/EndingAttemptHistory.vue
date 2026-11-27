@@ -11,6 +11,7 @@ const props = defineProps({
   accountId: { type: [String, Number], required: true },
   qualificationId: { type: [String, Number], required: true },
   authorityKey: { type: String, required: true },
+  readOnly: { type: Boolean, default: false },
 });
 const { t } = useI18n();
 const labels = computed(() => ({
@@ -75,7 +76,7 @@ const pending = usePendingEndingRun({
   accountId: computed(() => props.accountId),
   qualificationId: computed(() => props.qualificationId),
   authorityKey: computed(() => props.authorityKey),
-  enabled: opened,
+  enabled: computed(() => opened.value && !props.readOnly),
   onComplete: () => history.load(meta.value?.page || 1),
   onDenied: () => history.close(),
 });
@@ -90,7 +91,7 @@ const manual = useEndingDestinationRequests({
   accountId: computed(() => props.accountId),
   qualificationId: computed(() => props.qualificationId),
   authorityKey: computed(() => props.authorityKey),
-  enabled: opened,
+  enabled: computed(() => opened.value && !props.readOnly),
   onAccepted: () => history.load(meta.value?.page || 1),
   onDenied: () => history.close(),
 });
@@ -171,7 +172,7 @@ const operationLabel = row =>
       {{ pendingMessage }}
     </p>
     <PendingEndingReview
-      v-if="selected"
+      v-if="!readOnly && selected"
       v-model:reviewed="reviewed"
       :operation="selected"
       :busy="pendingBusy"
@@ -181,7 +182,7 @@ const operationLabel = row =>
       @close="pending.cancel()"
     />
     <PendingEndingReview
-      v-if="manualSelected"
+      v-if="!readOnly && manualSelected"
       v-model:reviewed="manualReviewed"
       :operation="manualReviewOperation"
       :busy="manualBusy"
@@ -270,7 +271,7 @@ const operationLabel = row =>
             </div>
           </dl>
           <button
-            v-if="row.can_reprocess_pending"
+            v-if="!readOnly && row.can_reprocess_pending"
             type="button"
             :disabled="controlsLocked"
             class="max-w-full whitespace-normal rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11 disabled:opacity-40"
@@ -280,7 +281,7 @@ const operationLabel = row =>
             {{ pendingLabels.RUN }}
           </button>
           <button
-            v-if="row.can_resume_pending"
+            v-if="!readOnly && row.can_resume_pending"
             type="button"
             :disabled="controlsLocked"
             class="max-w-full whitespace-normal rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11 disabled:opacity-40"
@@ -290,7 +291,7 @@ const operationLabel = row =>
             {{ t('JRC_CONTACT_CENTER.ENDING_DESTINATION_REQUESTS.RESUME') }}
           </button>
           <button
-            v-if="row.can_retry_selected"
+            v-if="!readOnly && row.can_retry_selected"
             type="button"
             :disabled="controlsLocked"
             class="max-w-full whitespace-normal rounded-lg border border-n-amber-7 bg-n-amber-2 px-3 py-2 text-sm text-n-amber-12 dark:text-n-amber-11 disabled:opacity-40"
@@ -319,7 +320,11 @@ const operationLabel = row =>
           </p>
         </article>
       </template>
-      <section class="min-w-0 space-y-2" data-manual-ending-actions>
+      <section
+        v-if="!readOnly"
+        class="min-w-0 space-y-2"
+        data-manual-ending-actions
+      >
         <h5 class="text-sm font-semibold">
           {{ t('JRC_CONTACT_CENTER.ENDING_DESTINATION_REQUESTS.TITLE') }}
         </h5>

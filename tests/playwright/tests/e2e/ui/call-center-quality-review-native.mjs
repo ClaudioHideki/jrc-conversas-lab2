@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { verifyNativeRecordingActions } from './call-center-recording-actions-native.mjs';
 import fs from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -20,6 +21,17 @@ export async function verifyNativeQualityReview(parent, info, target) {
   const prohibited = [];
   const posts = [];
   const pages = [];
+  let nativeTabReceipt = null;
+  const capture = async (page, name) => {
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth
+      )
+    ).toBe(true);
+    const filename = `.codex/call-center-native-e2e/${info.project.name}-quality-${name}.png`;
+    await page.screenshot({ path: filename, fullPage: true });
+    screenshots.push(filename);
+  };
   const open = async auth => {
     const page = await parent.context().newPage();
     pages.push(page);
@@ -73,21 +85,46 @@ export async function verifyNativeQualityReview(parent, info, target) {
     );
     await expect(page.locator('[data-recording-row]')).toHaveCount(1);
     await page.locator('[data-recording-details]').click();
+    await page.locator('[data-recording-analysis-open]').click();
+    const tabs = page.locator('[data-recording-tabs] [role="tab"]');
+    await expect(tabs).toHaveCount(5);
+    await expect(
+      page.locator('[data-analysis-original-summary]')
+    ).toContainText('SYNTHETIC original immutable summary');
+    if (pages.length === 1) {
+      const labels = await tabs.allTextContents();
+      expect(labels.map(label => label.trim())).toEqual([
+        'Análise do Nico',
+        'Transcrição',
+        'Gravação',
+        'Contexto',
+        'Ações e Histórico',
+      ]);
+      const contrasts = await Promise.all(
+        Array.from({ length: 5 }, (_, index) =>
+          measureTextContrast(tabs.nth(index))
+        )
+      );
+      contrasts.forEach(contrast =>
+        expect(contrast.ratio).toBeGreaterThanOrEqual(4.5)
+      );
+      expect(
+        await page
+          .locator('[data-recording-selected]')
+          .evaluate(element => element.scrollWidth <= element.clientWidth)
+      ).toBe(true);
+      nativeTabReceipt = {
+        labels: labels.map(label => label.trim()),
+        contrasts,
+        real_original_summary_loaded: true,
+      };
+      await capture(page, 'five-native-tabs-analysis');
+    }
     await page.locator('[data-recording-quality-open]').click();
     await expect(page.locator('[data-quality-original-summary]')).toContainText(
       'SYNTHETIC original immutable summary'
     );
     return page;
-  };
-  const capture = async (page, name) => {
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= window.innerWidth
-      )
-    ).toBe(true);
-    const filename = `.codex/call-center-native-e2e/${info.project.name}-quality-${name}.png`;
-    await page.screenshot({ path: filename, fullPage: true });
-    screenshots.push(filename);
   };
   const submit = async (page, status) => {
     const response = page.waitForResponse(
@@ -214,6 +251,45 @@ export async function verifyNativeQualityReview(parent, info, target) {
       'positivo'
     );
     await capture(page, 'persisted');
+    const postsBeforeCancel = posts.length;
+    await page
+      .locator('[data-quality-summary]')
+      .fill('SYNTHETIC canceled unsaved summary');
+    await page
+      .locator('[data-quality-review]')
+      .getByRole('button', { name: 'Cancelar', exact: true })
+      .click();
+    await expect(page.locator('[data-quality-discard]')).toBeVisible();
+    await expect(page.locator('[data-quality-summary]')).toHaveValue(
+      'SYNTHETIC canceled unsaved summary'
+    );
+    await page.locator('[data-quality-discard] button').first().click();
+    await expect(page.locator('[data-quality-discard]')).toHaveCount(0);
+    await expect(page.locator('[data-quality-summary]')).toHaveValue(
+      'SYNTHETIC canceled unsaved summary'
+    );
+    await page
+      .locator('[data-quality-review]')
+      .getByRole('button', { name: 'Cancelar', exact: true })
+      .click();
+    await page.locator('[data-quality-discard] button').last().click();
+    await expect(page.locator('[data-quality-review]')).toHaveCount(0);
+    expect(posts).toHaveLength(postsBeforeCancel);
+    const canceledResponse = await parent.request.get(endpoint, {
+      headers: target.operator,
+    });
+    expect(canceledResponse.status()).toBe(200);
+    const cancelState = await canceledResponse.json();
+    expect(cancelState.revision).toBe(3);
+    expect(cancelState.latest_review.values.adjusted_summary).toBe(
+      'SYNTHETIC first human summary'
+    );
+    await page.locator('[data-recording-quality-open]').click();
+    await expect(page.locator('[data-quality-summary]')).toHaveValue(
+      cancelState.latest_review.values.adjusted_summary
+    );
+    await expect(page.locator('[data-quality-justification]')).toHaveValue('');
+    await capture(page, 'restored-after-explicit-cancel');
     const denied = await parent.request.post(endpoint, {
       headers: target.scoped,
       data: {
@@ -234,6 +310,7 @@ export async function verifyNativeQualityReview(parent, info, target) {
     await verifyNativeTranscript(parent, viewer, info, target, capture);
     await verifyNativeRecordingContext(page, viewer, info, target, capture);
     await verifyNativeQualityHistory(parent, page, info, target, capture);
+    await verifyNativeRecordingActions(parent, page, info, target, capture);
     const raw = execFileSync(
       'bundle',
       [
@@ -292,6 +369,13 @@ export async function verifyNativeQualityReview(parent, info, target) {
           real_native_persistence_and_reload: true,
           original_operator_nonadministrator: true,
           explicit_conflict_review_preserved_draft: true,
+          explicit_cancel_and_keep_editing_preserved_native_revision: true,
+          nativeTabReceipt,
+          cancelState: {
+            revision: cancelState.revision,
+            adjusted_summary: cancelState.latest_review.values.adjusted_summary,
+            no_additional_POST: posts.length === postsBeforeCancel,
+          },
           listener_without_own_review_permission_denied: true,
           no_recommendation_or_PABX_operation: true,
           screenshots,

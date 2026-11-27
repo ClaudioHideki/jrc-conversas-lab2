@@ -38,13 +38,44 @@ const create = overrides =>
         CallRecordingPlayer: true,
         RecordingAccessHistory: true,
         RecordingTranscript: true,
+        RecordingAnalysis: true,
         RecordingCallContext: true,
         QualityReviewHistory: true,
+        RecordingEndingActions: true,
       },
     },
   });
 
 describe('authorized native recording details popup', () => {
+  it('reuses native ending controls only explicitly and removes them when listening or operation authority is withdrawn', async () => {
+    const wrapper = create({
+      capabilities: { recordings_listen: true, operate: true, audit: false },
+    });
+    expect(
+      wrapper.findComponent({ name: 'RecordingEndingActions' }).exists()
+    ).toBe(false);
+    await wrapper.get('[data-recording-actions-open]').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'RecordingEndingActions' }).props()
+    ).toMatchObject({
+      accountId: 1,
+      recordingId: item.id,
+      callSessionId: item.call_session_id,
+      callId: item.unique_id,
+    });
+    await wrapper.setProps({
+      capabilities: { recordings_listen: true, operate: false, audit: false },
+    });
+    expect(wrapper.find('[data-recording-actions-open]').exists()).toBe(false);
+    expect(
+      wrapper.findComponent({ name: 'RecordingEndingActions' }).exists()
+    ).toBe(false);
+    await wrapper.setProps({
+      capabilities: { recordings_listen: false, operate: true, audit: true },
+    });
+    expect(wrapper.find('[data-recording-actions-open]').exists()).toBe(false);
+    expect(wrapper.emitted('playback')).toBeUndefined();
+  });
   it('shows existing authorized metadata and honest storage limits without fetching or exposing a provider reference', () => {
     const wrapper = create({ formattedDuration: '00:00' });
     expect(wrapper.text()).toContain(item.unique_id);
@@ -214,5 +245,101 @@ describe('authorized native recording details popup', () => {
       wrapper.findComponent({ name: 'QualityReviewHistory' }).exists()
     ).toBe(false);
     expect(wrapper.emitted('playback')).toBeUndefined();
+  });
+
+  it('groups the five authorized Word panels without resetting the existing shared media player', async () => {
+    const wrapper = create({
+      url: 'blob:owned',
+      capabilities: { recordings_listen: true, operate: true, audit: true },
+    });
+    const player = wrapper.getComponent({ name: 'CallRecordingPlayer' }).vm;
+    expect(wrapper.findAll('[role="tab"]')).toHaveLength(5);
+    expect(
+      wrapper.get('[data-recording-audio-open]').attributes('aria-selected')
+    ).toBe('true');
+    await wrapper.get('[data-recording-analysis-open]').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'RecordingAnalysis' }).props()
+    ).toMatchObject({ accountId: 1, recordingId: item.id });
+    expect(
+      wrapper.get('[data-recording-analysis-open]').attributes('aria-selected')
+    ).toBe('true');
+    expect(wrapper.getComponent({ name: 'CallRecordingPlayer' }).vm).toBe(
+      player
+    );
+    await wrapper.get('[data-recording-context-open]').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'RecordingCallContext' }).props('callId')
+    ).toBe(item.unique_id);
+    await wrapper.get('[data-recording-actions-open]').trigger('click');
+    expect(
+      wrapper
+        .getComponent({ name: 'RecordingEndingActions' })
+        .props('recordingId')
+    ).toBe(item.id);
+    expect(
+      wrapper
+        .getComponent({ name: 'QualityReviewHistory' })
+        .props('recordingId')
+    ).toBe(item.id);
+    expect(wrapper.emitted('playback')).toBeUndefined();
+    expect(wrapper.emitted('download')).toBeUndefined();
+  });
+
+  it('supports bounded keyboard navigation and removes original analysis on identity or listening-authority withdrawal', async () => {
+    const wrapper = create();
+    await wrapper
+      .get('[data-recording-tabs]')
+      .trigger('keydown', { key: 'Home' });
+    expect(
+      wrapper.get('[data-recording-analysis-open]').attributes('aria-selected')
+    ).toBe('true');
+    await wrapper
+      .get('[data-recording-tabs]')
+      .trigger('keydown', { key: 'ArrowRight' });
+    expect(
+      wrapper
+        .get('[data-recording-transcript-open]')
+        .attributes('aria-selected')
+    ).toBe('true');
+    await wrapper
+      .get('[data-recording-tabs]')
+      .trigger('keydown', { key: 'End' });
+    expect(
+      wrapper
+        .get('[data-recording-quality-history-open]')
+        .attributes('aria-selected')
+    ).toBe('true');
+    await wrapper.get('[data-recording-analysis-open]').trigger('click');
+    await wrapper.setProps({ item: { ...item, id: '16' } });
+    expect(wrapper.findComponent({ name: 'RecordingAnalysis' }).exists()).toBe(
+      false
+    );
+    expect(
+      wrapper.get('[data-recording-audio-open]').attributes('aria-selected')
+    ).toBe('true');
+    await wrapper.get('[data-recording-analysis-open]').trigger('click');
+    await wrapper.setProps({
+      capabilities: { recordings_listen: false, audit: false },
+    });
+    expect(wrapper.findComponent({ name: 'RecordingAnalysis' }).exists()).toBe(
+      false
+    );
+    expect(wrapper.findAll('[role="tab"]')).toHaveLength(1);
+    expect(wrapper.find('[data-recording-analysis-open]').exists()).toBe(false);
+    await wrapper.setProps({
+      capabilities: { recordings_listen: false, audit: true },
+    });
+    await wrapper.get('[data-recording-audit-open]').trigger('click');
+    expect(
+      wrapper.get('[data-recording-audit-open]').attributes('aria-selected')
+    ).toBe('true');
+    await wrapper.setProps({
+      capabilities: { recordings_listen: false, audit: false },
+    });
+    expect(
+      wrapper.get('[data-recording-audio-open]').attributes('aria-selected')
+    ).toBe('true');
+    expect(wrapper.findAll('[role="tab"]')).toHaveLength(1);
   });
 });

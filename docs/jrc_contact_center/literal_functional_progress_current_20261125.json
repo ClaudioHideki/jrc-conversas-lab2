@@ -9,16 +9,16 @@
   "not_an_estimated_implementation_percentage": true,
   "canonical_statuses": {
     "concluido_com_aceite": 51,
-    "implementado_sem_aceite": 0,
-    "parcial": 435,
-    "pendente": 44,
+    "implementado_sem_aceite": 22,
+    "parcial": 417,
+    "pendente": 40,
     "bloqueado": 24
   },
   "triage_466_preserved_as_historical_snapshot": true,
   "remaining_partial_triage": {
-    "implemented_pending_homologation": 117,
-    "small_adjustments": 96,
-    "significant_development": 166,
+    "implemented_pending_homologation": 116,
+    "small_adjustments": 94,
+    "significant_development": 151,
     "documental_not_autonomous_functions": 56
   },
   "new_accepted_functions": "Seleção/persistência de supervisores elegíveis; seleção de classificação existente e tempo de ACW em HH:MM com persistência/recarga reais.",
@@ -104,5 +104,37 @@
     "document": "docs/jrc_contact_center/literal_mixed_and_recording_popup_acceptance_20261126.json",
     "sha256": "fd50084899063b1f1123802c2dbe302e06234d7e043c66107cafb7be71b39aae",
     "source_sha": "d881005fb837f49cbc045d92759b231c985b36f2"
-  }
+  },
+  "current_implementation_without_final_quality_case_acceptance": {
+    "document": "docs/jrc_contact_center/recording_actions_and_pause_candidate_20261126.json",
+    "sha256": "99f21ef149728c5e1116ae602d3565039d813eb5664ab6f9f65f056daa3eb59b",
+    "native_or_browser_accepted": false,
+    "unique_literal_IDs": [
+      "D1-P0131-C01",
+      "D1-P0135-C01",
+      "D2-P0223-C02",
+      "D2-P0396-C02",
+      "D2-P0396-C03",
+      "D2-P0397-C01",
+      "D2-P0397-C02",
+      "D2-P0405-C02",
+      "D2-P0426-C01",
+      "D2-P0427-C01",
+      "D2-P0427-C02",
+      "D2-P0427-C03",
+      "D2-P0427-C04",
+      "D2-P0427-C05",
+      "D2-P0428-C02",
+      "D2-P0429-C01",
+      "D2-P0429-C02",
+      "D2-P0429-C03",
+      "D2-P0430-C01",
+      "D2-P0430-C02",
+      "D2-P0432-C01",
+      "D2-P0433-C01"
+    ],
+    "formal_accepted_count_unchanged": 51,
+    "reason": "The native services and directed Vue subsets passed; four full browser quality flows timed out in their media observation procedure."
+  },
+  "estimate_not_reduced_just_by_test_counts": true
 }

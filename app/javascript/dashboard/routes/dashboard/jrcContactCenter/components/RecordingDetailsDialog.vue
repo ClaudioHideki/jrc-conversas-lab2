@@ -8,6 +8,8 @@ import QualityReviewDialog from './QualityReviewDialog.vue';
 import RecordingTranscript from './RecordingTranscript.vue';
 import RecordingCallContext from './RecordingCallContext.vue';
 import QualityReviewHistory from './QualityReviewHistory.vue';
+import RecordingEndingActions from './RecordingEndingActions.vue';
+import RecordingAnalysis from './RecordingAnalysis.vue';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -22,15 +24,22 @@ const props = defineProps({
 const emit = defineEmits(['close', 'playback', 'download', 'playback-error']);
 const { t } = useI18n();
 const dialog = ref(null);
+const activeTab = ref('recording');
 const showHistory = ref(false);
 const showQuality = ref(false);
-const showTranscript = ref(false);
-const showContext = ref(false);
 const showQualityHistory = ref(false);
+const showActions = ref(false);
 watch(
   () => props.capabilities.audit,
   allowed => {
-    if (!allowed) showHistory.value = false;
+    if (!allowed) {
+      showHistory.value = false;
+      if (
+        !props.capabilities.recordings_listen &&
+        activeTab.value === 'actions'
+      )
+        activeTab.value = 'recording';
+    }
   }
 );
 watch(
@@ -40,20 +49,25 @@ watch(
     () => props.capabilities.recordings_listen,
   ],
   () => {
-    showTranscript.value = false;
-    showContext.value = false;
+    activeTab.value = 'recording';
+    showQuality.value = false;
     showQualityHistory.value = false;
+    showActions.value = false;
   },
   { flush: 'sync' }
 );
 const labels = computed(() => ({
   AUDIT_HISTORY: t('JRC_CONTACT_CENTER.RECORDINGS.ACCESS_HISTORY.TITLE'),
   QUALITY: t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY'),
-  TRANSCRIPT: t('JRC_CONTACT_CENTER.RECORDINGS.TRANSCRIPT.TITLE'),
+  TRANSCRIPT: t('JRC_CONTACT_CENTER.RECORDINGS.TABS.TRANSCRIPT'),
   VOLUME: t('JRC_CONTACT_CENTER.RECORDINGS.TRANSCRIPT.VOLUME'),
-  CONTEXT: t('JRC_CONTACT_CENTER.RECORDINGS.CONTEXT.TITLE'),
+  CONTEXT: t('JRC_CONTACT_CENTER.RECORDINGS.TABS.CONTEXT'),
   QUALITY_HISTORY: t('JRC_CONTACT_CENTER.QUALITY_HISTORY.TITLE'),
+  ACTIONS: t('JRC_CONTACT_CENTER.RECORDINGS.ACTIONS.TITLE'),
   DETAILS: t('JRC_CONTACT_CENTER.RECORDINGS.DETAILS'),
+  ANALYSIS_TAB: t('JRC_CONTACT_CENTER.RECORDINGS.TABS.ANALYSIS'),
+  RECORDING_TAB: t('JRC_CONTACT_CENTER.RECORDINGS.TABS.RECORDING'),
+  ACTIONS_TAB: t('JRC_CONTACT_CENTER.RECORDINGS.TABS.ACTIONS'),
   CALL: t('JRC_CONTACT_CENTER.RECORDINGS.CALL'),
   CALL_ID: t('JRC_CONTACT_CENTER.RECORDINGS.CALL_ID'),
   RECORDING_ID: t('JRC_CONTACT_CENTER.RECORDINGS.RECORDING_ID'),
@@ -79,6 +93,72 @@ const labels = computed(() => ({
 }));
 const text = key => labels.value[key];
 const available = computed(() => props.item.recording_state === 'requestable');
+const tabs = computed(() => [
+  ...(props.capabilities.recordings_listen
+    ? [
+        {
+          key: 'analysis',
+          label: 'ANALYSIS_TAB',
+          color: 'border-n-violet-6 text-n-violet-11',
+        },
+        {
+          key: 'transcript',
+          label: 'TRANSCRIPT',
+          color: 'border-n-cyan-6 text-n-cyan-11',
+        },
+      ]
+    : []),
+  {
+    key: 'recording',
+    label: 'RECORDING_TAB',
+    color: 'border-n-blue-6 text-n-blue-11',
+  },
+  ...(props.capabilities.recordings_listen
+    ? [
+        {
+          key: 'context',
+          label: 'CONTEXT',
+          color: 'border-n-teal-6 text-n-teal-11',
+        },
+      ]
+    : []),
+  ...(props.capabilities.recordings_listen || props.capabilities.audit
+    ? [
+        {
+          key: 'actions',
+          label: 'ACTIONS_TAB',
+          color: 'border-n-amber-6 text-n-amber-12 dark:text-n-amber-11',
+        },
+      ]
+    : []),
+]);
+const identity = (kind, key) =>
+  `recording-${props.accountId}-${props.item.id}-${kind}-${key}`;
+function selectTab(key) {
+  activeTab.value = key;
+  if (key === 'actions') {
+    showQualityHistory.value = props.capabilities.recordings_listen === true;
+    showHistory.value = props.capabilities.audit === true;
+    showActions.value =
+      props.capabilities.recordings_listen &&
+      (props.capabilities.operate || props.capabilities.audit);
+  }
+}
+function navigateTabs(event) {
+  const keys = tabs.value.map(tab => tab.key);
+  const position = keys.indexOf(activeTab.value);
+  let next;
+  if (event.key === 'ArrowRight') next = (position + 1) % keys.length;
+  else if (event.key === 'ArrowLeft')
+    next = (position + keys.length - 1) % keys.length;
+  else if (event.key === 'Home') next = 0;
+  else if (event.key === 'End') next = keys.length - 1;
+  else return;
+  event.preventDefault();
+  selectTab(keys[next]);
+  event.currentTarget.querySelectorAll('[role="tab"]')[next]?.focus();
+}
+
 // Only the existing authorized public DTO is presented. No storage URL,
 // provider reference, inferred legal retention, or invented integrity status.
 const metadata = computed(() => [
@@ -111,18 +191,80 @@ onMounted(() => dialog.value.open());
       class="min-w-0 space-y-4 text-sm text-n-slate-12"
       data-recording-selected
     >
-      <dl class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
-        <div v-for="[key, value] in metadata" :key="key" class="min-w-0">
-          <dt class="text-xs text-n-slate-11">{{ text(key) }}</dt>
-          <dd class="break-all">{{ value || text('NO_MEASUREMENT') }}</dd>
-        </div>
-      </dl>
-      <p class="text-n-slate-11">
-        {{ text(available ? 'AVAILABLE' : 'PENDING') }}
-      </p>
-      <p class="rounded-lg border border-n-weak p-3 text-n-slate-11">
-        {{ text('STORAGE_NOT_CONFIRMED') }}
-      </p>
+      <nav
+        class="flex flex-wrap gap-2"
+        role="tablist"
+        :aria-label="text('DETAILS')"
+        data-recording-tabs
+        @keydown="navigateTabs"
+      >
+        <button
+          v-for="tab in tabs"
+          :id="identity('tab', tab.key)"
+          :key="tab.key"
+          type="button"
+          role="tab"
+          :aria-controls="identity('panel', tab.key)"
+          :aria-selected="activeTab === tab.key"
+          :tabindex="activeTab === tab.key ? 0 : -1"
+          :class="[
+            tab.color,
+            activeTab === tab.key
+              ? 'bg-n-alpha-2 ring-1 ring-current'
+              : 'bg-n-solid-1',
+          ]"
+          class="min-w-0 rounded-lg border px-3 py-2 text-left text-sm font-medium"
+          :data-recording-analysis-open="tab.key === 'analysis' ? '' : null"
+          :data-recording-audio-open="tab.key === 'recording' ? '' : null"
+          :data-recording-transcript-open="tab.key === 'transcript' ? '' : null"
+          :data-recording-context-open="tab.key === 'context' ? '' : null"
+          :data-recording-quality-history-open="
+            tab.key === 'actions' && capabilities.recordings_listen ? '' : null
+          "
+          :data-recording-actions-open="
+            tab.key === 'actions' &&
+            capabilities.recordings_listen &&
+            (capabilities.operate || capabilities.audit)
+              ? ''
+              : null
+          "
+          :data-recording-audit-open="
+            tab.key === 'actions' && capabilities.audit ? '' : null
+          "
+          @click="selectTab(tab.key)"
+        >
+          {{ text(tab.label) }}
+        </button>
+      </nav>
+      <RecordingAnalysis
+        v-if="activeTab === 'analysis' && capabilities.recordings_listen"
+        :id="identity('panel', 'analysis')"
+        :key="`${accountId}-${item.id}`"
+        role="tabpanel"
+        :aria-labelledby="identity('tab', 'analysis')"
+        :account-id="accountId"
+        :recording-id="item.id"
+      />
+      <div
+        v-if="activeTab === 'recording'"
+        :id="identity('panel', 'recording')"
+        role="tabpanel"
+        :aria-labelledby="identity('tab', 'recording')"
+        class="space-y-4"
+      >
+        <dl class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+          <div v-for="[key, value] in metadata" :key="key" class="min-w-0">
+            <dt class="text-xs text-n-slate-11">{{ text(key) }}</dt>
+            <dd class="break-all">{{ value || text('NO_MEASUREMENT') }}</dd>
+          </div>
+        </dl>
+        <p class="text-n-slate-11">
+          {{ text(available ? 'AVAILABLE' : 'PENDING') }}
+        </p>
+        <p class="rounded-lg border border-n-weak p-3 text-n-slate-11">
+          {{ text('STORAGE_NOT_CONFIRMED') }}
+        </p>
+      </div>
       <p v-if="error" role="alert" class="break-words text-n-ruby-11">
         {{ text(error) }}
       </p>
@@ -157,19 +299,12 @@ onMounted(() => dialog.value.open());
       >
         {{ text('QUALITY') }}
       </button>
-      <button
-        v-if="capabilities.recordings_listen"
-        type="button"
-        class="rounded-lg border border-n-violet-6 px-3 py-2 text-n-violet-11"
-        data-recording-transcript-open
-        :aria-expanded="showTranscript"
-        @click="showTranscript = !showTranscript"
-      >
-        {{ text('TRANSCRIPT') }}
-      </button>
       <RecordingTranscript
-        v-if="showTranscript && capabilities.recordings_listen"
+        v-if="activeTab === 'transcript' && capabilities.recordings_listen"
+        :id="identity('panel', 'transcript')"
         :key="`${accountId}-${item.id}`"
+        role="tabpanel"
+        :aria-labelledby="identity('tab', 'transcript')"
         :account-id="accountId"
         :recording-id="item.id"
         :call-id="item.unique_id"
@@ -184,56 +319,50 @@ onMounted(() => dialog.value.open());
         :before-playback="authorizePlayback"
         @error="emit('playback-error')"
       />
-      <button
-        v-if="capabilities.recordings_listen"
-        type="button"
-        class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
-        data-recording-context-open
-        :aria-expanded="showContext"
-        @click="showContext = !showContext"
-      >
-        {{ text('CONTEXT') }}
-      </button>
       <RecordingCallContext
-        v-if="showContext && capabilities.recordings_listen"
+        v-if="activeTab === 'context' && capabilities.recordings_listen"
+        :id="identity('panel', 'context')"
         :key="`${accountId}-${item.id}`"
+        role="tabpanel"
+        :aria-labelledby="identity('tab', 'context')"
         :account-id="accountId"
         :call-session-id="item.call_session_id"
         :call-id="item.unique_id"
         :operational-context-allowed="capabilities.operate === true"
       />
-      <button
-        v-if="capabilities.recordings_listen"
-        type="button"
-        class="rounded-lg border border-n-violet-6 px-3 py-2 text-n-violet-11"
-        data-recording-quality-history-open
-        :aria-expanded="showQualityHistory"
-        @click="showQualityHistory = !showQualityHistory"
+      <section
+        v-if="activeTab === 'actions'"
+        :id="identity('panel', 'actions')"
+        role="tabpanel"
+        :aria-labelledby="identity('tab', 'actions')"
+        class="space-y-4"
       >
-        {{ text('QUALITY_HISTORY') }}
-      </button>
-      <QualityReviewHistory
-        v-if="showQualityHistory && capabilities.recordings_listen"
-        :key="`${accountId}-${item.id}`"
-        :account-id="accountId"
-        :recording-id="item.id"
-      />
-      <button
-        v-if="capabilities.audit"
-        type="button"
-        class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
-        data-recording-audit-open
-        :aria-expanded="showHistory"
-        @click="showHistory = !showHistory"
-      >
-        {{ text('AUDIT_HISTORY') }}
-      </button>
-      <RecordingAccessHistory
-        v-if="showHistory && capabilities.audit"
-        :key="`${accountId}-${item.id}`"
-        :account-id="accountId"
-        :recording-id="item.id"
-      />
+        <QualityReviewHistory
+          v-if="showQualityHistory && capabilities.recordings_listen"
+          :key="`${accountId}-${item.id}`"
+          :account-id="accountId"
+          :recording-id="item.id"
+        />
+        <RecordingEndingActions
+          v-if="
+            showActions &&
+            capabilities.recordings_listen &&
+            (capabilities.operate || capabilities.audit)
+          "
+          :key="`${accountId}-${item.id}`"
+          :account-id="accountId"
+          :recording-id="item.id"
+          :call-session-id="item.call_session_id"
+          :call-id="item.unique_id"
+          :authority-key="JSON.stringify([accountId, item.id, capabilities])"
+        />
+        <RecordingAccessHistory
+          v-if="showHistory && capabilities.audit"
+          :key="`${accountId}-${item.id}`"
+          :account-id="accountId"
+          :recording-id="item.id"
+        />
+      </section>
       <button
         type="button"
         class="rounded-lg border border-n-weak px-3 py-2 text-n-slate-12"

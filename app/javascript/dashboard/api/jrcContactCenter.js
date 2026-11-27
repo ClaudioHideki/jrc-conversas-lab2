@@ -525,6 +525,11 @@ export default {
       { quality_review: values },
       { timeout: 30000 }
     ),
+  recordingEndingContext: (accountId, id, page = 1) =>
+    axios.get(
+      `${base(accountId)}/recordings/${recordIdentity(id)}/ending_context`,
+      { params: { page } }
+    ),
   qualityReviewHistory: (accountId, id, params = {}) =>
     axios.get(
       `${base(accountId)}/recordings/${recordIdentity(id)}/quality_review/history`,

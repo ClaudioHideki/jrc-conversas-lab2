@@ -1,3 +1,4 @@
+import { proveOwnedMediaFailure } from './call-center-owned-media-failure.mjs';
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
 import { measureLocatorTextContrast as measureTextContrast } from './call-center-text-contrast.mjs';
@@ -60,26 +61,12 @@ export async function verifyNativeRecordingContext(
   // This proves local media/transcript independence, never external PABX availability.
   const mediaFailure = await listener
     .locator('[data-recording-selected] audio')
-    .evaluate(audio => {
-      const resource = audio.currentSrc;
-      if (!resource.startsWith('blob:'))
-        throw new Error('Expected the owned native media blob');
-      return new Promise(resolve => {
-        audio.addEventListener(
-          'error',
-          () =>
-            resolve({
-              source: 'revoked_owned_browser_blob',
-              code: audio.error?.code,
-            }),
-          { once: true }
-        );
-        URL.revokeObjectURL(resource);
-        audio.load();
-      });
-    });
+    .evaluate(proveOwnedMediaFailure);
   expect(Number.isInteger(mediaFailure.code)).toBe(true);
   expect(mediaFailure.code).toBeGreaterThan(0);
+  expect(mediaFailure.trusted_browser_event).toBe(true);
+  expect(mediaFailure.actual_authorized_audio_bytes).toBeGreaterThan(0);
+  expect(mediaFailure.revoked_before_first_load).toBe(true);
   await expect(listener.locator('[data-recording-selected] audio')).toHaveCount(
     0
   );

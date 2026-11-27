@@ -105,6 +105,7 @@ namespace :api, defaults: { format: 'json' } do
             get :history
             get :transcript
           end
+          resource :ending_context, only: [:show], controller: 'recording_ending_contexts'
           get :access_history, on: :member
         end
         resource :deferred_pause_request, only: %i[create destroy], controller: 'deferred_pause_requests' do

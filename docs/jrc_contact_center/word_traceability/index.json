@@ -4289,7 +4289,7 @@
   },
   "latest_literal_functional_progress": {
     "document": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
-    "sha256": "c47a39d1400ffc42b1579649640a7d41b3d8486eb39e09a68592808b6d5e0279",
+    "sha256": "013cd55ecf39d9754b11f2e72122ef32757e2a411977badb107aef243df6a9d2",
     "unique_closed": 51,
     "total_unique": 554,
     "whole_Part1_accepted": false
@@ -4371,30 +4371,16 @@
     "native_or_browser_accepted": false
   },
   "next_grouped_recording_user_delivery": {
-    "parent_proven_source_sha": "9fdae9e50e9945c844b1d3accd6672afcc81407f",
-    "documents": [
-      "docs/jrc_contact_center/authorized_transcript_candidate_20261126.json",
-      "docs/jrc_contact_center/native_recording_context_candidate_20261126.json",
-      "docs/jrc_contact_center/quality_history_read_candidate_20261126.json",
-      "docs/jrc_contact_center/browser_contrast_dispatch_correction_20261126.json",
-      "docs/jrc_contact_center/grouped_recording_failed_parent_reconciliation_20261126.json"
+    "document": "docs/jrc_contact_center/recording_actions_and_pause_candidate_20261126.json",
+    "sha256": "99f21ef149728c5e1116ae602d3565039d813eb5664ab6f9f65f056daa3eb59b",
+    "native_or_browser_accepted": false,
+    "figures": [
+      8,
+      20,
+      21,
+      22,
+      23
     ],
-    "figure_documents": [
-      {
-        "path": "docs/jrc_contact_center/word_traceability/figure-20.json",
-        "sha256": "9f0b545d8a28522a492d36d5a2b2944906101f239c255a64f7e7f5a52dfdb1bc"
-      },
-      {
-        "path": "docs/jrc_contact_center/word_traceability/figure-21.json",
-        "sha256": "9a4a3a6a46651641d6ac2f1cd0f4ff5615bf6cdb060631987ed074f65e5a8d92"
-      },
-      {
-        "path": "docs/jrc_contact_center/word_traceability/figure-23.json",
-        "sha256": "810792e5c392296431cfc7380e3949b5ae33b56ecd8c407a9dea020c52249c33"
-      }
-    ],
-    "native_or_Chrome_accepted": false,
-    "complete_five_tab_composition_accepted": false,
-    "no_external_provider_homologation": true
+    "parent_failed_not_accepted": true
   }
 }

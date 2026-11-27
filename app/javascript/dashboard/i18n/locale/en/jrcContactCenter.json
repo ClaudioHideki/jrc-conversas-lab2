@@ -3293,6 +3293,30 @@
         "AMBIGUOUS": "A identificação está ambígua. Nenhum candidato foi escolhido automaticamente.",
         "UNLINKED": "Não há contato explicitamente vinculado e autorizado nesta chamada.",
         "NATIVE_MASTER_LIMIT": "Contratos, atendimentos e histórico continuam no Cliente 360º de origem, conforme suas permissões. Acesso a esta gravação não concede acesso ao cadastro."
+      },
+      "ACTIONS": {
+        "TITLE": "Ações e histórico do atendimento",
+        "SOURCE": "Vínculos e recibos nativos do atendimento desta gravação. Cada destino mantém suas próprias permissões.",
+        "LOAD": "Consultar atendimentos e atualizar",
+        "LOADING": "Consultando vínculos autorizados…",
+        "EMPTY": "Nenhum atendimento vinculado disponível no seu escopo. A consulta não inicia nem encerra o pós-atendimento.",
+        "DENIED": "Seu acesso atual não permite consultar estes vínculos.",
+        "ERROR": "Não foi possível consultar os vínculos. Tente novamente sem repetir ações já registradas.",
+        "ATTENDANCE": "Atendimento",
+        "ACW_COMPLETED": "Pós-atendimento concluído",
+        "ACW_PENDING": "Pós-atendimento pendente",
+        "OPEN": "Consultar ações e recibos",
+        "PREVIOUS": "Anterior",
+        "NEXT": "Próxima",
+        "LIMIT": "Consulta dos recibos existentes. Ler ou corrigir a análise não executa providências nem conclui tarefas, chamados ou o pós-atendimento. As ações operacionais continuam disponíveis no atendimento de origem, com revisão e confirmação explícitas.",
+        "ACW_NOT_STARTED": "Pós-atendimento não iniciado"
+      },
+      "TABS": {
+        "ANALYSIS": "Análise do Nico",
+        "RECORDING": "Gravação",
+        "ACTIONS": "Ações e Histórico",
+        "TRANSCRIPT": "Transcrição",
+        "CONTEXT": "Contexto"
       }
     },
     "QUALITY_REVIEW": {
