@@ -18,7 +18,8 @@ class JrcContactCenter::SyntheticPauseSeed
     -acw_draft -acw_review -acw_navigation -deferred_pause -deferred_pause_retry -operational_forms -form_bindings -hoya_forms -approval
   ].freeze
 
-  SCENARIOS = %w[editor operations withdrawal duration acw routing state_history
+  SCENARIOS = %w[
+    editor operations withdrawal duration acw routing state_history
     team_withdrawal team_activity acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
     operational_forms form_bindings hoya_forms required_endings ending_confirmation membership_eligibility audio_folders team_supervision approval
     ending_automations ending_activation ending_history ending_pending ending_operational ending_service_desk recordings
@@ -191,8 +192,7 @@ class JrcContactCenter::SyntheticPauseSeed
   def session_payload(units, queues, admin, scoped, operator)
     { account_id: @account.id, unit_id: units.first.id, denied_unit_id: units.last.id, queue_id: queues.first.id,
       denied_queue_id: queues.last.id, operator_id: operator.id, operator_role_id: operator.custom_role_id,
-      administrator: admin.user.create_new_auth_token, operator: operator.user.create_new_auth_token,
-      scoped: scoped.user.create_new_auth_token }
+      administrator: admin.user.create_new_auth_token, operator: operator.user.create_new_auth_token, scoped: scoped.user.create_new_auth_token }
   end
 
   def create_units(company)

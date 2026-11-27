@@ -1,0 +1,18 @@
+{
+  "parent": "9ee598e2ea39e88dfef2a9190a73b151b467ebe0",
+  "failed_run": 45939710926,
+  "failed_job": 140310961321,
+  "artifact": 15172193077,
+  "artifact_sha256": "cc42b7a547dcca641c7c627ae7dc754e253d0c9d2fdfeec9b229854166fd50d2",
+  "lint_report_sha256": "bc3f9e7950d93623f0d3e0de8def1c8e693a17457cf70f701a8d409d01b70a99",
+  "source_sha256": {
+    "script/jrc_call_center_pause_seed.rb": "87ec1739dbe3252acd680e07aa62ef0fc353ee0177f3bd533dc7d5e2dd4012c8"
+  },
+  "parent_sources": {
+    "script/jrc_call_center_pause_seed.rb": "571a3b3124a37ea99ce7bfe64e04dae4b9dc34e1ce20feabe0eda6babb0bb958"
+  },
+  "only_array_layout_and_same_hash_literal_reflow": true,
+  "all_31_scenarios_and_every_auth_header_preserved": true,
+  "no_lint_rule_or_assertion_removed": true,
+  "native_or_Chrome_acceptance": false
+}
