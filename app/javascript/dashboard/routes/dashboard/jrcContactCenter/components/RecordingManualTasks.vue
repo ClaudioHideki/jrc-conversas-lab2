@@ -197,6 +197,7 @@ onBeforeUnmount(() => {
       </dl>
       <template v-if="row.target">
         <EndingTaskState
+          load-on-open
           :account-id="accountId"
           :project-id="row.target.project_id"
           :task-id="row.target.id"

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatDate, request } from '../jrcOperations/api';
 import { projectTaskStatuses } from '../jrcProjects/taskBoard';
@@ -9,6 +9,7 @@ const props = defineProps({
   projectId: { type: [String, Number], required: true },
   taskId: { type: [String, Number], required: true },
   authorityKey: { type: String, required: true },
+  loadOnOpen: { type: Boolean, default: false },
 });
 const { t } = useI18n();
 const labels = computed(() => ({
@@ -48,7 +49,7 @@ const validTask = task =>
   Object.hasOwn(projectTaskStatuses, task.status) &&
   (task.due_on === null || /^\d{4}-\d{2}-\d{2}$/.test(task.due_on)) &&
   (task.assignee_id === null
-    ? task.assignee === null
+    ? task.assignee == null
     : identifier(task.assignee_id) &&
       String(task.assignee?.id) === String(task.assignee_id) &&
       typeof task.assignee.name === 'string');
@@ -98,6 +99,9 @@ const load = async () => {
 };
 const statusLabel = computed(() => projectTaskStatuses[state.value?.status]);
 watch(identity, reset, { flush: 'sync' });
+onMounted(() => {
+  if (props.loadOnOpen) load();
+});
 onBeforeUnmount(() => {
   disposed = true;
   reset();

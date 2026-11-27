@@ -45,6 +45,7 @@ const showQualityHistory = ref(false);
 const showActions = ref(false);
 const showTaskCreate = ref(false);
 const manualTasksRevision = ref(0);
+const qualityReadRevision = ref(0);
 const closeDetails = () => {
   if (!showTaskCreate.value) emit('close');
 };
@@ -58,6 +59,7 @@ const createManualTask = () => {
 const closeTaskCreate = async () => {
   if (!showTaskCreate.value) return;
   showTaskCreate.value = false;
+  manualTasksRevision.value += 1;
   await nextTick();
   if (props.capabilities.recordings_listen) dialog.value?.open();
 };
@@ -272,7 +274,7 @@ onMounted(() => dialog.value.open());
       <RecordingAnalysis
         v-if="activeTab === 'analysis' && capabilities.recordings_listen"
         :id="identity('panel', 'analysis')"
-        :key="`${accountId}-${item.id}`"
+        :key="`${accountId}-${item.id}-${qualityReadRevision}`"
         role="tabpanel"
         :aria-labelledby="identity('tab', 'analysis')"
         :account-id="accountId"
@@ -383,7 +385,7 @@ onMounted(() => dialog.value.open());
         />
         <QualityReviewHistory
           v-if="showQualityHistory && capabilities.recordings_listen"
-          :key="`${accountId}-${item.id}`"
+          :key="`${accountId}-${item.id}-${qualityReadRevision}`"
           :account-id="accountId"
           :recording-id="item.id"
         />
@@ -424,7 +426,6 @@ onMounted(() => dialog.value.open());
     :recording-id="item.id"
     :authority-key="JSON.stringify([accountId, item.id, capabilities])"
     @close="closeTaskCreate"
-    @changed="manualTasksRevision += 1"
   />
   <QualityReviewDialog
     v-if="showQuality && capabilities.recordings_listen"
@@ -433,5 +434,6 @@ onMounted(() => dialog.value.open());
     :recording="item"
     :formatted-duration="formattedDuration"
     @close="showQuality = false"
+    @saved="qualityReadRevision += 1"
   />
 </template>

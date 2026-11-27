@@ -1,0 +1,86 @@
+{
+  "approved_base": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+  "current_source_sha": "6fb6713f593bd7af0c7894f92cd0514a14e9c0b2",
+  "run": 45693144825,
+  "artifact": 15065693526,
+  "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+  "unchanged_source_sha256": {
+    "app/services/jrc_contact_center/team_supervisions.rb": "323ef213d69d8200236c9704d42031f14788ca3d5e5e0ee285350df1f709886b",
+    "app/services/jrc_contact_center/team_supervisor_eligibility.rb": "f5e87013def0e40f720a2fc3dfb9168323705259a9089db1acdd71dd3c87d4cc",
+    "app/models/jrc_contact_center/team_supervision.rb": "84c8313e6fe0cfe39e38213ceed150d39195326f7eb179f2c07da324f3e6b2f7",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/TeamSupervisionEditor.vue": "a28990a0fbab7d0eee574481522fb8686d2c749dc497cfbe349c10297d80e244",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useTeamSupervisionEditor.js": "dbdf8b9b3c410f54b260cf82d06d14c0f8e59a99ad67e57139e64fd37976178b",
+    "app/services/jrc_contact_center/access_authorization.rb": "2a134d768661e2d8b45bfab0c82285ebdd5df815924d4f876f1f249c27cc89d3",
+    "app/policies/jrc_contact_center/module_policy.rb": "7600c7111a23f02e6dda05a312b09d5661f3d0a285bf724dafaea99a27d0c965",
+    "spec/requests/api/v1/accounts/jrc_contact_center/team_supervisions_spec.rb": "930feb824e8081b382376dc8df2899c7d26052121c88c2b7eedcf1e5e77a14e3"
+  },
+  "images": [
+    {
+      "file": "desktop-dark-team-supervision-reviewed.png",
+      "sha256": "278cbb65ceccb7b653e6c76b504ce55676aad96f9628bf512dabd9e68566355c",
+      "actually_opened": true
+    },
+    {
+      "file": "desktop-light-team-supervision-reviewed.png",
+      "sha256": "c48a914e8ab85e786a0a0ad39ce29a237a05ff1cb15f2c2e4f582bb27e14241d",
+      "actually_opened": true
+    },
+    {
+      "file": "mobile-dark-team-supervision-reviewed.png",
+      "sha256": "af2ea1948aeb6269b9a6e6bfc74992109c470d76eaa3012e1421ee4c58f47bae",
+      "actually_opened": true
+    },
+    {
+      "file": "mobile-light-team-supervision-reviewed.png",
+      "sha256": "997b910b702be6b5f921bb08fb2d0e9bf4f6e0557f5f237fbff8f3483f98cfca",
+      "actually_opened": true
+    }
+  ],
+  "no_new_test_execution": true,
+  "acceptance_not_registered": false,
+  "actual_visual_observation": "Four original screenshots inspected: native principal/additional users, explicit no-permission/no-recording/no-queue participation notice; desktop and 390px mobile, light/dark. This is not full Figure 12 fidelity or external PABX acceptance.",
+  "accepted_literal_candidate_only": [
+    "D2-P0258-C02"
+  ],
+  "literal_expected": "Supervisao nao da automaticamente ramal, acesso a gravacoes ou inclusao em fila.",
+  "literal_expected_sha256": "1a24dd5f43cd770baab38d460d8d5ae70d0863edb178e676f3f842e89fb0f1ea",
+  "native_report_sha256": "4c2557f38cb624ec159ee40321af129eda63f4273d0b7c0ee61f39f61d369410",
+  "specific_passed_native_example": {
+    "id": "./spec/requests/api/v1/accounts/jrc_contact_center/team_supervisions_spec.rb[1:2]",
+    "description": "saves and reloads primary/additional native members without adding distribution, recording or Nico rights",
+    "full_description": "Call Center native team supervision metadata saves and reloads primary/additional native members without adding distribution, recording or Nico rights",
+    "status": "passed",
+    "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/team_supervisions_spec.rb",
+    "line_number": 48,
+    "run_time": 0.484215075,
+    "pending_message": null
+  },
+  "preserved_twenty_native_cases": 20,
+  "four_existing_Chrome_cases": [
+    {
+      "title": "team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes",
+      "project": "desktop-light"
+    },
+    {
+      "title": "team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes",
+      "project": "desktop-dark"
+    },
+    {
+      "title": "team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes",
+      "project": "mobile-light"
+    },
+    {
+      "title": "team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes",
+      "project": "mobile-dark"
+    }
+  ],
+  "no_automatic_SIP_creation_static_trace": "Only TeamSupervision selection metadata and its existing audit are written; the exact model/service callbacks do not create users, SIP credentials, queue memberships or access grants.",
+  "whole_figure12_accepted": false,
+  "external_PABX_or_other_team_requirements_accepted": false,
+  "review_sha256": "5a3324c4e8dc5f89d7935272bbb45ed17efa3e56018623f015a8d4ff0363f95a",
+  "accepted_literal_IDs": [
+    "D2-P0258-C02"
+  ],
+  "whole_Part1_accepted": false,
+  "not_a_claim_of_external_PABX_delivery": true
+}

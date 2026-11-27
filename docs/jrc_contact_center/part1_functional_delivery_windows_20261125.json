@@ -180,5 +180,15 @@
     "native_or_Chrome_acceptance": false,
     "literal_requirement": "D2-P0349-C02",
     "no_capacity_retention_or_provider_claim": true
+  },
+  "active_grouped_increment": {
+    "document": "docs/jrc_contact_center/grouped_task_review_supervisor_candidate_20261127.json",
+    "sha256": "dcc0fba7f1d552a3e68a7b9a749757e46bd8f2bba05fbb40411ce78f77cc6681",
+    "parent": "6fb6713f593bd7af0c7894f92cd0514a14e9c0b2",
+    "parent_accepted": false,
+    "next_validation": "One isolated native/Vue/assets/288-Chrome run; heavy work stays on GitHub.",
+    "usable_delivery_requires_native_and_browser_acceptance": true,
+    "previous_checkpoints_and_554_ids_preserved": true,
+    "effective_hours_not_measured_not_fabricated": true
   }
 }

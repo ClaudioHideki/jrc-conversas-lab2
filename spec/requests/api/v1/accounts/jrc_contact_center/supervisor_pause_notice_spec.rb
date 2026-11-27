@@ -30,6 +30,15 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
     { 'code' => 'synthetic_duration', 'name' => 'SYNTHETIC PRIVATE duration name', 'category' => 'SYNTHETIC', 'active' => true,
       'minimum_minutes' => 0, 'default_minutes' => 1, 'maximum_minutes' => 1, 'unit_ids' => [pause_queue.unit_id], 'custom_role_ids' => [] }
   end
+  let(:qualifying_call) do
+    JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,
+                                          direction: 'inbound', status: 'ended', started_at: 1.minute.ago, ended_at: Time.current,
+                                          current_unit: pause_queue.unit, current_queue: pause_queue)
+  end
+  let(:native_pending) do
+    JrcContactCenter::Qualification.create!(account: account, account_user: member, call_session: qualifying_call,
+                                            channel: 'voice', started_at: Time.current, acw_limit_seconds: 60)
+  end
   let(:endpoint) { "/api/v1/accounts/#{account.id}/jrc_contact_center/supervisor" }
   let(:event) do
     JrcContactCenter::AgentStateManager.new(account: account, account_user: member).transition(
@@ -93,6 +102,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
     JrcContactCenter::AccessGrant.find_by!(account: account, account_user: member).update!(eligible: false)
     get endpoint, headers: observer.create_new_auth_token
     expect(response.parsed_body.fetch('agents').sole.fetch('pause_notice')).to be_nil
+    expect(response.parsed_body.fetch('agents').sole.fetch('state_notice')).to be_nil
   end
 
   it 'does not derive a duration notice after the current queue membership is withdrawn' do
@@ -104,6 +114,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
     get endpoint, headers: observer.create_new_auth_token
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('agents').sole.fetch('pause_notice')).to be_nil
+    expect(response.parsed_body.fetch('agents').sole.fetch('state_notice')).to be_nil
     expect(response.body).not_to include('SYNTHETIC PRIVATE pause duration explanation')
   end
 
@@ -116,6 +127,75 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
     expect(response.parsed_body.fetch('agents').sole.fetch('pause_notice')).to be_nil
   end
 
+  it 'observes a real elapsed legacy provider pause without inventing an informational limit' do
+    current = JrcContactCenter::AgentStateManager.new(account: account, account_user: member).record_provider_event(
+      state: 'paused', occurred_at: event.started_at + 1.second, external_event_id: SecureRandom.uuid,
+      provider: 'synthetic-provider', queue_id: pause_queue.id, reason_code: 'synthetic_external'
+    )
+    previous = current.attributes.deep_dup
+    travel_to(Time.zone.at((current.started_at + 61.seconds).to_f.ceil)) do
+      get endpoint, headers: observer.create_new_auth_token
+      data = response.parsed_body.fetch('agents').sole
+      expect(data.fetch('state_notice')).to eq('state' => 'paused', 'state_version' => current.id.to_s, 'elapsed_seconds' => 61)
+      expect(data.fetch('pause_notice')).to be_nil
+      expect(current.reload.attributes).to eq(previous)
+    end
+  end
+
+  it 'observes elapsed local availability without announcing confirmed PABX eligibility' do
+    current = JrcContactCenter::AgentStateManager.new(account: account, account_user: member).transition(
+      state: 'available', queue_id: pause_queue.id, command_id: SecureRandom.uuid, expected_state_version: event.id.to_s
+    )
+    travel_to(Time.zone.at((current.started_at + 61.seconds).to_f.ceil)) do
+      get endpoint, headers: observer.create_new_auth_token
+      data = response.parsed_body.fetch('agents').sole
+      expect(data.fetch('state_notice')).to eq('state' => 'available', 'state_version' => current.id.to_s, 'elapsed_seconds' => 61)
+      expect(data.values_at('eligible', 'provider_confirmed')).to eq([false, false])
+    end
+  end
+
+  it 'keeps a real observed offline zero distinct from a missing state event' do
+    current = JrcContactCenter::AgentStateManager.new(account: account, account_user: member).record_provider_event(
+      state: 'offline', occurred_at: event.started_at + 1.second, external_event_id: SecureRandom.uuid,
+      provider: 'synthetic-provider', queue_id: pause_queue.id
+    )
+    travel_to(Time.zone.at(current.started_at.to_f.ceil)) do
+      get endpoint, headers: observer.create_new_auth_token
+      data = response.parsed_body.fetch('agents').sole
+      expect(data.fetch('state_notice')).to eq('state' => 'offline', 'state_version' => current.id.to_s, 'elapsed_seconds' => 0)
+    end
+  end
+
+  it 'does not present an old pause timestamp as the duration of projected pending ACW' do
+    native_pending
+    get endpoint, headers: observer.create_new_auth_token
+    data = response.parsed_body.fetch('agents').sole
+    expect(data.fetch('state')).to eq('acw')
+    expect(data.fetch('state_notice')).to be_nil
+    expect(native_pending.reload.completed_at).to be_nil
+    expect(JrcContactCenter::AgentStateSnapshot.new(account_user: member).current.id).to eq(event.id)
+  end
+
+  it 'does not invent zero seconds or an observation for a member with no native state event' do
+    new_actor = create(:user, :contact_center_eligible, account: account, role: :agent)
+    new_member = account.account_users.find_by!(user: new_actor)
+    JrcContactCenter::QueueMembership.create!(account: account, queue: pause_queue, account_user: new_member)
+    get endpoint, headers: observer.create_new_auth_token
+    data = response.parsed_body.fetch('agents').find { |row| row.fetch('account_user_id') == new_member.id.to_s }
+    expect(data).to include('state' => 'offline', 'state_version' => '0', 'state_notice' => nil)
+    expect(JrcContactCenter::AgentStateEvent.where(account_user: new_member)).not_to exist
+  end
+
+  it 'does not count a supervision-only queue participant as an operational agent' do
+    supervisor = create(:user, :contact_center_eligible, account: account, role: :agent)
+    supervisor_member = account.account_users.find_by!(user: supervisor)
+    link = JrcContactCenter::QueueMembership.create!(account: account, queue: pause_queue, account_user: supervisor_member, role: 'supervisor')
+    get endpoint, headers: observer.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('agents').pluck('account_user_id')).to eq([member.id.to_s])
+    expect(link.reload.role).to eq('supervisor')
+  end
+
   context 'when the current pause belongs to Unit B' do
     let(:pause_queue) { queues.last }
 
@@ -123,6 +203,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
       get endpoint, headers: observer.create_new_auth_token
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body.fetch('agents').sole.fetch('pause_notice')).to be_nil
+      expect(response.parsed_body.fetch('agents').sole.fetch('state_notice')).to be_nil
       expect(response.body).not_to include('SYNTHETIC PRIVATE pause duration explanation')
     end
 

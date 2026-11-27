@@ -4,19 +4,19 @@
   "new_bounded_acceptance": "docs/jrc_contact_center/literal_administrative_acceptance_20261125.json",
   "new_bounded_acceptance_sha256": "dc6466fe913b916c65c8b4d8b1823afa72e4c132023ece222870bee47f61906d",
   "Word_requirements_unique": 554,
-  "formal_literal_reviews_closed": 51,
-  "Parte1_proven_lower_bound_percentage": 9.21,
+  "formal_literal_reviews_closed": 52,
+  "Parte1_proven_lower_bound_percentage": 9.39,
   "not_an_estimated_implementation_percentage": true,
   "canonical_statuses": {
-    "concluido_com_aceite": 51,
+    "concluido_com_aceite": 52,
     "implementado_sem_aceite": 22,
-    "parcial": 417,
+    "parcial": 416,
     "pendente": 40,
     "bloqueado": 24
   },
   "triage_466_preserved_as_historical_snapshot": true,
   "remaining_partial_triage": {
-    "implemented_pending_homologation": 116,
+    "implemented_pending_homologation": 115,
     "small_adjustments": 94,
     "significant_development": 151,
     "documental_not_autonomous_functions": 56
@@ -136,5 +136,11 @@
     "formal_accepted_count_unchanged": 51,
     "reason": "The native services and directed Vue subsets passed; four full browser quality flows timed out in their media observation procedure."
   },
-  "estimate_not_reduced_just_by_test_counts": true
+  "estimate_not_reduced_just_by_test_counts": true,
+  "latest_supervision_no_automatic_access_acceptance": {
+    "document": "docs/jrc_contact_center/literal_supervision_no_automatic_access_acceptance_20261127.json",
+    "sha256": "239886ab86574dfe12dfbf5396ec39b88e32fb126e4f778aac3ac800c333a2a9",
+    "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+    "new_tests": 0
+  }
 }

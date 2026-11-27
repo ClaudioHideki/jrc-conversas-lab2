@@ -1,0 +1,27 @@
+{
+  "parent": "6fb6713f593bd7af0c7894f92cd0514a14e9c0b2",
+  "functional_scope": "When the user opens recording Actions, manual task cards display current authorized native status, owner and deadline without a second consult click. Existing immutable automatic receipt widgets retain explicit-read behavior. Return from the native Task editor, including Cancel, refreshes linked tasks once without clearing source history.",
+  "literal_clauses_prepared_not_accepted": [
+    "D2-P0416-C01",
+    "D2-P0418-C03",
+    "D2-P0422-C01",
+    "D2-P0419-C02"
+  ],
+  "old_default_explicit_read_preserved": true,
+  "only_authorized_manual_Task_targets_opt_in": true,
+  "profile_or_account_change_aborts_and_clears_native_state": true,
+  "new_Backend_models_migrations_permissions_dependencies_or_write_routes": [],
+  "same_four_real_Chrome_flows_extended_not_a_new_matrix": true,
+  "expected_not_results": {
+    "new_directed_Vue": 6,
+    "directed_Vue": 178,
+    "Rails_distinct": 3935,
+    "Chrome": 288,
+    "PNG": 840,
+    "main_Vue": 2108
+  },
+  "native_or_browser_acceptance": false,
+  "whole_figure22_or_Part1_accepted": false,
+  "native_create_success_closes_then_reloads_once": true,
+  "Cancel_reloads_authorized_links_without_creating_a_Task": true
+}

@@ -133,7 +133,8 @@
       "LOCAL_SOURCE": "Fonte: eventos locais no escopo autorizado",
       "UNOBSERVED": "Nenhuma leitura atual disponível.",
       "OBSERVED_AGENTS": "{available} disponíveis · {inCall} em chamada (estado local)",
-      "RATE_PENDING": "Taxa pendente de definição e fonte operacional; nenhum percentual estimado."
+      "RATE_PENDING": "Taxa pendente de definição e fonte operacional; nenhum percentual estimado.",
+      "STATE_DURATION": "Tempo no estado: {elapsed}"
     },
     "CONTROL_DESK": {
       "UNVERIFIED": "Eventos sem assinatura verificada: {count}",

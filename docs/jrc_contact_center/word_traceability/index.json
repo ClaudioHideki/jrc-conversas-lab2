@@ -4289,10 +4289,11 @@
   },
   "latest_literal_functional_progress": {
     "document": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
-    "sha256": "013cd55ecf39d9754b11f2e72122ef32757e2a411977badb107aef243df6a9d2",
+    "sha256": "acd9ce46db35889fb85d9ac62695cc3258c7d531c6f9357990c36d5667dcded6",
     "unique_closed": 51,
     "total_unique": 554,
-    "whole_Part1_accepted": false
+    "whole_Part1_accepted": false,
+    "formally_closed": 52
   },
   "current_public_operational_increment": {
     "candidate": "docs/jrc_contact_center/ending_public_operational_candidate_20261125.json",
@@ -4394,5 +4395,10 @@
     "native_or_Chrome_acceptance": false,
     "literal_requirement": "D2-P0349-C02",
     "no_capacity_retention_or_provider_claim": true
+  },
+  "latest_supervision_no_automatic_access_acceptance": {
+    "document": "docs/jrc_contact_center/literal_supervision_no_automatic_access_acceptance_20261127.json",
+    "sha256": "239886ab86574dfe12dfbf5396ec39b88e32fb126e4f778aac3ac800c333a2a9",
+    "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
   }
 }

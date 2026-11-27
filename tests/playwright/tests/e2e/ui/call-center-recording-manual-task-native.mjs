@@ -112,9 +112,10 @@ export async function verifyNativeManualRecordingTask(parent, info, target) {
     await expect(editor).toBeVisible();
     const title = `SYNTHETIC authored recording task ${info.project.name}`;
     await editor.getByLabel(/^Título/).fill(title);
-    await editor
-      .getByLabel('Responsável', { exact: true })
-      .selectOption(destination.assignee_id);
+    const assignee = editor.getByLabel(/^Responsável/);
+    await expect(assignee).toHaveCount(1);
+    await expect(assignee).toBeEnabled({ timeout: 10000 });
+    await assignee.selectOption(destination.assignee_id, { timeout: 10000 });
     await editor.getByLabel('Prazo', { exact: true }).fill('2026-12-02');
     await capture('existing-native-task-editor');
     const createdResponse = page.waitForResponse(
@@ -158,6 +159,7 @@ export async function verifyNativeManualRecordingTask(parent, info, target) {
       accountId: account,
       projectId: destination.project_id,
       taskId: targetTask.id,
+      loadedOnOpen: true,
     };
     const currentState = await verifyNativeTaskCurrentState(
       page,
@@ -208,6 +210,11 @@ export async function verifyNativeManualRecordingTask(parent, info, target) {
     await page
       .locator('[data-quality-justification]')
       .fill('SYNTHETIC conclude review while native task remains pending');
+    const historyResponse = page.waitForResponse(
+      response =>
+        response.request().method() === 'GET' &&
+        new URL(response.url()).pathname === reviewPath + '/history'
+    );
     const savedResponse = page.waitForResponse(
       response =>
         response.request().method() === 'POST' &&
@@ -220,6 +227,24 @@ export async function verifyNativeManualRecordingTask(parent, info, target) {
     await expect(page.locator('[data-quality-review]')).toHaveCount(0);
     expect(reviewPosts).toHaveLength(1);
     expect((await read(reviewPath)).revision).toBe(beforeReview.revision + 1);
+    const refreshedHistory = await historyResponse;
+    expect(refreshedHistory.status()).toBe(200);
+    const refreshedBody = await refreshedHistory.json();
+    expect(refreshedBody.recording_id).toBe(source.recording_id);
+    expect(refreshedBody.items[0].revision).toBe(beforeReview.revision + 1);
+    await expect(
+      page.locator(
+        `[data-quality-history-revision="${beforeReview.revision + 1}"]`
+      )
+    ).toBeVisible();
+    await expect(
+      page.locator(
+        `[data-quality-history-revision="${beforeReview.revision + 1}"]`
+      )
+    ).toContainText(
+      'SYNTHETIC conclude review while native task remains pending'
+    );
+
     const after = (await read(nativePath)).data;
     [
       'id',
@@ -304,6 +329,7 @@ export async function verifyNativeManualRecordingTask(parent, info, target) {
           explicit_same_key_retry_reused_receipt_and_only_one_native_Task: true,
           restricted_listener_gained_no_destination_rights: true,
           review_did_not_complete_or_hide_native_Task: true,
+          actual_native_human_history_read_after_save_without_reopening: true,
           receipt,
           persisted_link: persisted.items[0],
           native_task: {
@@ -329,6 +355,15 @@ export async function verifyNativeManualRecordingTask(parent, info, target) {
         2
       ) + '\n'
     );
+  } catch (error) {
+    await page
+      .screenshot({
+        path: `.codex/call-center-native-e2e/${info.project.name}-recording-manual-task-failure-before-close.png`,
+        fullPage: true,
+        timeout: 5000,
+      })
+      .catch(() => null);
+    throw error;
   } finally {
     await page.close();
   }

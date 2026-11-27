@@ -1,0 +1,23 @@
+{
+  "product_parent": "6fb6713f593bd7af0c7894f92cd0514a14e9c0b2",
+  "predecessor_private_plan_sha256": "a8e13371ce4c54fde96c759f2d23a2f98c35a82b5fe3c842f7ad24f9f216b3f2",
+  "scope": "Show current native state duration when the actor can currently supervise that exact queue; preserve legacy/variable pauses without inventing a maximum or PABX confirmation.",
+  "only_agent_role_in_operational_counts": true,
+  "existing_PABX_confirmation_and_pause_limit_logic_preserved": true,
+  "no_browser_clock_or_unscoped_started_at_fallback": true,
+  "no_new_queries_routes_models_migrations_permissions_or_timers": true,
+  "native_or_Chrome_acceptance": false,
+  "whole_figure_or_Part1_accepted": false,
+  "literal_clause_prepared_not_accepted": {
+    "id": "D1-P0115-C01",
+    "expected": "Tela da equipe: estados disponível, em atendimento, pausa, offline e duração do estado.",
+    "expected_sha256": "17751bd3bb6ec5b6609430832a9feca8d6dad9be0b212ec2318c97b77005b076"
+  },
+  "expected_not_results": {
+    "native_Rails": 3941,
+    "main_Vue": 2116,
+    "directed_Vue": 198,
+    "Chrome": 288,
+    "PNG": 844
+  }
+}

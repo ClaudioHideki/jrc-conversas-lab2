@@ -43,6 +43,12 @@ const create = overrides =>
         RecordingAnalysis: true,
         RecordingCallContext: true,
         QualityReviewHistory: true,
+        QualityReviewDialog: {
+          name: 'QualityReviewDialog',
+          props: ['accountId', 'recording', 'formattedDuration'],
+          emits: ['close', 'saved'],
+          template: '<section />',
+        },
         RecordingEndingActions: true,
         RecordingManualTasks: true,
         RecordingTaskCreate: {
@@ -369,12 +375,90 @@ describe('authorized native recording details popup', () => {
     await flushPromises();
     expect(openDialog).toHaveBeenCalledTimes(2);
     expect(
+      wrapper.getComponent({ name: 'RecordingManualTasks' }).props('revision')
+    ).toBe(1);
+    expect(
       wrapper
         .getComponent({ name: 'RecordingManualTasks' })
         .props('recordingId')
     ).toBe(item.id);
     expect(wrapper.emitted('close')).toBeUndefined();
     expect(wrapper.emitted('playback')).toBeUndefined();
+  });
+
+  it('refreshes linked Tasks exactly once on return after create and retains the same source history', async () => {
+    const wrapper = create({
+      capabilities: { recordings_listen: true, operate: true },
+    });
+    await wrapper.get('[data-recording-actions-open]').trigger('click');
+    const tasks = wrapper.getComponent({ name: 'RecordingManualTasks' });
+    expect(tasks.props('revision')).toBe(0);
+    tasks.vm.$emit('create');
+    await flushPromises();
+    const creator = wrapper.getComponent({ name: 'RecordingTaskCreate' });
+    creator.vm.$emit('changed');
+    await flushPromises();
+    expect(tasks.props('revision')).toBe(0);
+    creator.vm.$emit('close');
+    await flushPromises();
+    expect(tasks.props('revision')).toBe(1);
+    expect(tasks.props('recordingId')).toBe(item.id);
+    expect(openDialog).toHaveBeenCalledTimes(2);
+    expect(wrapper.emitted('close')).toBeUndefined();
+    expect(wrapper.emitted('playback')).toBeUndefined();
+  });
+
+  it('refreshes the current human revision history only on an acknowledged save, preserving linked Tasks and playback', async () => {
+    const wrapper = create({
+      url: 'blob:owned',
+      capabilities: { recordings_listen: true, operate: true },
+    });
+    await wrapper.get('[data-recording-actions-open]').trigger('click');
+    const history = wrapper.getComponent({ name: 'QualityReviewHistory' }).vm;
+    const tasks = wrapper.getComponent({ name: 'RecordingManualTasks' }).vm;
+    const player = wrapper.getComponent({ name: 'CallRecordingPlayer' }).vm;
+    await wrapper.get('[data-recording-quality-open]').trigger('click');
+    const review = wrapper.getComponent({ name: 'QualityReviewDialog' });
+    review.vm.$emit('close');
+    await flushPromises();
+    expect(wrapper.getComponent({ name: 'QualityReviewHistory' }).vm).toBe(
+      history
+    );
+    await wrapper.get('[data-recording-quality-open]').trigger('click');
+    wrapper.getComponent({ name: 'QualityReviewDialog' }).vm.$emit('saved');
+    await flushPromises();
+    expect(wrapper.getComponent({ name: 'QualityReviewHistory' }).vm).not.toBe(
+      history
+    );
+    expect(wrapper.getComponent({ name: 'RecordingManualTasks' }).vm).toBe(
+      tasks
+    );
+    expect(wrapper.getComponent({ name: 'CallRecordingPlayer' }).vm).toBe(
+      player
+    );
+    expect(wrapper.emitted('playback')).toBeUndefined();
+    expect(wrapper.emitted('close')).toBeUndefined();
+  });
+
+  it('reloads current original/human analysis after save without remounting the media player', async () => {
+    const wrapper = create({ url: 'blob:owned' });
+    await wrapper.get('[data-recording-analysis-open]').trigger('click');
+    const analysis = wrapper.getComponent({ name: 'RecordingAnalysis' }).vm;
+    const player = wrapper.getComponent({ name: 'CallRecordingPlayer' }).vm;
+    await wrapper.get('[data-recording-quality-open]').trigger('click');
+    wrapper.getComponent({ name: 'QualityReviewDialog' }).vm.$emit('saved');
+    await flushPromises();
+    expect(wrapper.getComponent({ name: 'RecordingAnalysis' }).vm).not.toBe(
+      analysis
+    );
+    expect(wrapper.getComponent({ name: 'CallRecordingPlayer' }).vm).toBe(
+      player
+    );
+    expect(
+      wrapper.get('[data-recording-analysis-open]').attributes('aria-selected')
+    ).toBe('true');
+    expect(wrapper.emitted('playback')).toBeUndefined();
+    expect(wrapper.emitted('download')).toBeUndefined();
   });
 
   it('removes the native Task creator immediately when source listening authority is withdrawn', async () => {

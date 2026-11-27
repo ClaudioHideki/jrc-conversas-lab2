@@ -20,13 +20,14 @@ const task = () => ({
   description: 'SYNTHETIC undisplayed details',
   comments: ['SYNTHETIC undisplayed comment'],
 });
-const create = () =>
+const create = (overrides = {}) =>
   mount(EndingTaskState, {
     props: {
       accountId: '1',
       projectId: '9',
       taskId: '15',
       authorityKey: 'profile-1',
+      ...overrides,
     },
   });
 const load = async wrapper => {
@@ -63,6 +64,24 @@ describe('current native Project task state alongside immutable call receipts', 
     expect(wrapper.text()).not.toContain('undisplayed');
     expect(wrapper.find('input, textarea, form').exists()).toBe(false);
     expect(wrapper.findAll('button')).toHaveLength(1);
+  });
+
+  it('reads the actual native unassigned DTO when Rails omits its nil association, retaining only authorized state', async () => {
+    const native = { ...task(), assignee_id: null, due_on: null };
+    delete native.assignee;
+    request.mockResolvedValueOnce({ data: native });
+    const wrapper = create();
+    await load(wrapper);
+    expect(wrapper.get('[data-native-task-status]').text()).toBe(
+      'Em andamento'
+    );
+    expect(wrapper.get('[data-native-task-assignee]').text()).toContain(
+      'UNASSIGNED'
+    );
+    expect(wrapper.get('[data-native-task-due]').text()).toContain('NO_DUE');
+    expect(wrapper.text()).not.toContain('undisplayed');
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(request.mock.calls[0][2]).not.toHaveProperty('method');
   });
 
   it('refreshes actual changed state, owner and deadline without issuing a write', async () => {
@@ -139,7 +158,15 @@ describe('current native Project task state alongside immutable call receipts', 
     expect(wrapper.text()).not.toContain('SYNTHETIC current owner');
   });
 
-  it.each([{ project_id: 10 }, { id: 18 }, { status: 'fabricated_state' }])(
+  it.each([
+    { project_id: 10 },
+    { id: 18 },
+    { status: 'fabricated_state' },
+    {
+      assignee_id: null,
+      assignee: { id: 4, name: 'SYNTHETIC mismatched owner' },
+    },
+  ])(
     'rejects a mismatched or unsupported native response %s',
     async invalid => {
       request.mockResolvedValueOnce({ data: { ...task(), ...invalid } });
@@ -171,5 +198,64 @@ describe('current native Project task state alongside immutable call receipts', 
       'Em andamento'
     );
     expect(request).toHaveBeenCalledTimes(2);
+  });
+
+  it('loads current native status owner and deadline once when an explicitly opened recording panel opts in', async () => {
+    const wrapper = create({ loadOnOpen: true });
+    await flushPromises();
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledWith('1', 'projects/projects/9/tasks/15', {
+      signal: expect.any(AbortSignal),
+    });
+    expect(wrapper.get('[data-native-task-status]').text()).toBe(
+      'Em andamento'
+    );
+    expect(wrapper.get('[data-native-task-assignee]').text()).toBe(
+      'SYNTHETIC current owner'
+    );
+    expect(wrapper.get('[data-native-task-due]').text()).toBe('30/11/2026');
+    expect(wrapper.text()).not.toContain('undisplayed');
+    expect(
+      request.mock.calls.every(args => !args[2].method && !args[2].data)
+    ).toBe(true);
+  });
+
+  it.each([401, 403, 404])(
+    'keeps an opted-in native denial %s empty without an automatic read retry or copied old status',
+    async status => {
+      request.mockRejectedValueOnce({ response: { status } });
+      const wrapper = create({ loadOnOpen: true });
+      await flushPromises();
+      expect(request).toHaveBeenCalledTimes(1);
+      expect(wrapper.get('[role="alert"]').text()).toContain('DENIED');
+      expect(wrapper.find('[data-native-task-status]').exists()).toBe(false);
+      expect(wrapper.find('time').exists()).toBe(false);
+      expect(
+        wrapper.get('[data-load-native-task-state]').attributes('disabled')
+      ).toBeDefined();
+    }
+  );
+
+  it('aborts an opted-in pending read on profile change and requires a fresh explicit read before showing any state', async () => {
+    let finish;
+    request.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    const wrapper = create({ loadOnOpen: true });
+    const signal = request.mock.calls[0][2].signal;
+    await wrapper.setProps({ authorityKey: 'SYNTHETIC-new-profile' });
+    expect(signal.aborted).toBe(true);
+    finish({ data: task() });
+    await flushPromises();
+    expect(wrapper.find('[data-native-task-status]').exists()).toBe(false);
+    expect(request).toHaveBeenCalledTimes(1);
+    await load(wrapper);
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(wrapper.get('[data-native-task-status]').text()).toBe(
+      'Em andamento'
+    );
   });
 });

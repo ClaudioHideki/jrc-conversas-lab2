@@ -6,7 +6,7 @@ import { measureTextContrast } from './call-center-text-contrast.mjs';
 export async function verifyNativeTaskCurrentState(
   page,
   panel,
-  { accountId, projectId, taskId }
+  { accountId, projectId, taskId, loadedOnOpen = false }
 ) {
   const identifiers = [accountId, projectId, taskId].map(String);
   expect(identifiers.every(value => /^[1-9][0-9]*$/.test(value))).toBe(true);
@@ -14,7 +14,9 @@ export async function verifyNativeTaskCurrentState(
   const path = `/api/v1/accounts/${account}/projects/projects/${project}/tasks/${task}`;
   const state = panel.locator('[data-ending-task-current-state]');
   await expect(state).toHaveCount(1);
-  await expect(state.locator('[data-native-task-status]')).toHaveCount(0);
+  if (loadedOnOpen)
+    await expect(state.locator('[data-native-task-status]')).toBeVisible();
+  else await expect(state.locator('[data-native-task-status]')).toHaveCount(0);
   const read = async () => {
     const [response] = await Promise.all([
       page.waitForResponse(
@@ -63,6 +65,7 @@ export async function verifyNativeTaskCurrentState(
         native.assignee_id === null ? null : String(native.assignee_id),
       due_on: native.due_on,
       actual_native_GET: true,
+      native_assignee_association_present: Object.hasOwn(native, 'assignee'),
       state_contrast_ratio: contrast.ratio,
     };
   };
@@ -71,6 +74,7 @@ export async function verifyNativeTaskCurrentState(
   expect(refreshed).toEqual(first);
   return {
     ...refreshed,
+    ...(loadedOnOpen ? { observed_loaded_on_open: true } : {}),
     explicit_read_and_refresh: true,
     no_task_write_or_receipt_rewrite: true,
   };

@@ -5185,6 +5185,89 @@ test('local pause duration supervisor shows authorized real elapsed evidence wit
     eligible: false,
   });
   expect(writes).toEqual([]);
+  // Explicit owned-fixture transition, never an automatic resume or PABX command.
+  const resumed = await page.request.patch(api + '/agent_state', {
+    headers: target.operator,
+    data: {
+      agent_state: {
+        state: 'available',
+        queue_id: target.queue_id,
+        command_id: randomUUID(),
+        expected_state_version: version,
+      },
+    },
+  });
+  expect(resumed.status()).toBe(200);
+  const local = (await resumed.json()).item;
+  expect(local).toMatchObject({
+    state: 'available',
+    eligible: false,
+    provider_confirmed: false,
+  });
+  const response = await page.waitForResponse(
+    async item => {
+      if (
+        item.request().method() !== 'GET' ||
+        new URL(item.url()).pathname !==
+          new URL(api).pathname + '/supervisor' ||
+        item.status() !== 200
+      )
+        return false;
+      const data = await item.json();
+      return data.agents.some(
+        agent =>
+          agent.state_notice?.state_version === local.state_version &&
+          agent.state_notice?.state === 'available'
+      );
+    },
+    { timeout: 15000 }
+  );
+  const observedState = (await response.json()).agents.find(
+    agent => agent.state_notice?.state_version === local.state_version
+  );
+  expect(observedState.account_user_id).toBe(local.account_user_id);
+  expect(Number.isSafeInteger(observedState.state_notice.elapsed_seconds)).toBe(
+    true
+  );
+  expect(observedState.state_notice.elapsed_seconds).toBeGreaterThanOrEqual(0);
+  const duration = page.locator('[data-supervisor-native-state-duration]');
+  await expect(duration).toHaveCount(1);
+  await expect(duration).toContainText('Tempo no estado:');
+  const measured = await contrast(duration);
+  expect(measured.ratio).toBeGreaterThanOrEqual(4.5);
+  await duration.scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  const screenshot = `.codex/call-center-native-e2e/${info.project.name}-supervisor-native-state-duration.png`;
+  await page.screenshot({ path: screenshot, fullPage: false });
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-supervisor-native-state-duration.json`,
+    JSON.stringify(
+      {
+        sha: process.env.GITHUB_SHA,
+        project: info.project.name,
+        account_id: String(target.account_id),
+        synthetic: true,
+        actual_dark_theme: info.project.name.endsWith('dark'),
+        actual_native_supervisor_GET: true,
+        native_state: observedState.state_notice,
+        state_version: local.state_version,
+        observed_UI_text: await duration.textContent(),
+        explicit_owned_fixture_local_transition: true,
+        no_automatic_UI_write_or_PABX_command: writes.length === 0,
+        provider_confirmed: local.provider_confirmed,
+        contrast: measured,
+        screenshot,
+        whole_figure_or_Part1_accepted: false,
+      },
+      null,
+      2
+    ) + '\n'
+  );
+  expect(writes).toEqual([]);
 });
 
 test('pending ACW native draft persists incomplete answers and completes only after explicit tabulation', async ({

@@ -48,13 +48,16 @@ const button = (wrapper, suffix) =>
   wrapper.findAll('button').find(item => item.text().endsWith(suffix));
 
 describe('native manual task links in recording Actions', () => {
-  it('reads current native links without creating tasks or loading every target automatically', async () => {
+  it('reads current native links without writing and opts in only the authorized native task-state reader', async () => {
     API.recordingTasks.mockResolvedValue({ data: body() });
     const wrapper = render();
     await flushPromises();
     expect(API.recordingTasks).toHaveBeenCalledTimes(1);
     expect(API.recordingTasks).toHaveBeenCalledWith('1', '5', 1);
     expect(API.createRecordingTask).not.toHaveBeenCalled();
+    expect(
+      wrapper.getComponent({ name: 'EndingTaskState' }).props('loadOnOpen')
+    ).toBe(true);
     expect(wrapper.findAll('[data-recording-manual-task-row]')).toHaveLength(1);
     expect(wrapper.get('time').text()).toContain('09:00');
     expect(

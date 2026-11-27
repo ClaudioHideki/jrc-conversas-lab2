@@ -44,6 +44,17 @@ const clearObserved = () => {
   queues.value = [];
 };
 
+const stateDuration = agent => {
+  const notice = agent.state_notice;
+  return notice &&
+    notice.state === agent.state &&
+    notice.state_version === agent.state_version &&
+    Number.isSafeInteger(notice.elapsed_seconds) &&
+    notice.elapsed_seconds >= 0
+    ? formatDuration(notice.elapsed_seconds)
+    : null;
+};
+
 const agentTone = state => {
   if (state === 'available') return 'emerald';
   if (state === 'in_call') return 'blue';
@@ -265,6 +276,17 @@ onBeforeUnmount(() => {
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-semibold text-n-slate-12">
                   {{ agent.name }}
+                </p>
+                <p
+                  v-if="!agent.pause_notice && stateDuration(agent) !== null"
+                  class="mt-1 text-xs text-n-slate-11"
+                  data-supervisor-native-state-duration
+                >
+                  {{
+                    t('JRC_CONTACT_CENTER.SUPERVISOR.STATE_DURATION', {
+                      elapsed: stateDuration(agent),
+                    })
+                  }}
                 </p>
                 <p class="mt-1 text-xs text-n-slate-10">
                   {{

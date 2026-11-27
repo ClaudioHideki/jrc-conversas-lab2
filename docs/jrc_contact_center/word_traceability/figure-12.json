@@ -1945,7 +1945,7 @@
       "figures": [
         12
       ],
-      "status": "parcial",
+      "status": "implementado",
       "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
       "code_reference_ids": [
         0,
@@ -1985,7 +1985,13 @@
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_supervision_no_automatic_access_acceptance_20261127.json",
+        "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1",
+        "artifact_sha256": "5d3236326f42568586ae771821d1fb6bb3119ddc6a3c642d2423e4afc71d347c",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0258-C03",

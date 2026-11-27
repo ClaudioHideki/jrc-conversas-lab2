@@ -232,3 +232,6 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 ### Entrega funcional Control Desk — 26/11/2026
 
 Priorizar grupos utilizáveis e reaproveitar provas: ACW/ações nativas, Service Desk e prévia de áudio. Acompanhamento em blocos de 24 horas efetivas. Dependências PABX/NICO externas separadas; checkpoint e candidata discriminados em TASKS.md e na matriz dos554 requisitos.
+
+
+- Incremento funcional agrupado após a CI 45951177734 (280 Chrome aprovados, oito falhas; candidata não homologada): corrigida a compatibilidade da leitura de tarefa sem responsável e a localização do campo de atribuição no editor nativo. O retorno do editor passa a atualizar as tarefas; a revisão humana atualiza histórico e análise sem reabrir a gravação. A supervisão exibe duração do estado nativo autorizado e exclui participantes exclusivamente supervisores da contagem operacional. Seis casos Rails e 16 Vue novos preparados; aceite depende da nova CI e das capturas reais. Reutilizado o aceite literal D2-P0258-C02 do checkpoint C1, sem refazer módulo ou alegar aceite integral da figura. Registro: docs/jrc_contact_center/grouped_task_review_supervisor_candidate_20261127.json. Sem novas migrations, concessões, comandos PABX, publicação ou deploy.

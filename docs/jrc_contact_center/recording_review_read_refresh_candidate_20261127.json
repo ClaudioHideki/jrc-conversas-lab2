@@ -1,0 +1,21 @@
+{
+  "product_parent": "6fb6713f593bd7af0c7894f92cd0514a14e9c0b2",
+  "private_predecessor_plan_sha256": "e98990cfc14d4029d3bb5e7cf1942f2e5b525905facbaf832410689441ababf1",
+  "scope": "The existing acknowledged saved event reloads only the authorized analysis/history components; cancel does not reload them, and linked tasks and the player remain mounted.",
+  "Word_clauses_prepared_not_accepted": [
+    "D2-P0419-C02",
+    "D2-P0428-C02"
+  ],
+  "no_new_API_model_migration_permission_or_provider_operation": true,
+  "new_Vue_examples_prepared_not_run": 2,
+  "same_four_real_Chrome_cases_extended": true,
+  "expected_not_results": {
+    "directed_Vue": 180,
+    "main_Vue": 2110,
+    "Rails": 3935,
+    "Chrome": 288,
+    "PNG": 840
+  },
+  "native_or_Chrome_acceptance": false,
+  "whole_figure_or_Part1_accepted": false
+}

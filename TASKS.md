@@ -1097,3 +1097,6 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 
 - [x] ACW após commit: `5d4e5b24`, CI `45768281599`, 3751 Rails distintos, 1914 Vue, 280 Chrome e 672 capturas verificadas. Projetos: agente original, rollback, retry escolhido e ação automática. Parte 1 aberta.
 - [ ] Service Desk/prévia direta de áudio: candidata seguinte exige nova CI e Chrome; ver `docs/jrc_contact_center/ending_service_desk_operational_form_candidate_20261126.json`.
+
+
+- Incremento funcional agrupado após a CI 45951177734 (280 Chrome aprovados, oito falhas; candidata não homologada): corrigida a compatibilidade da leitura de tarefa sem responsável e a localização do campo de atribuição no editor nativo. O retorno do editor passa a atualizar as tarefas; a revisão humana atualiza histórico e análise sem reabrir a gravação. A supervisão exibe duração do estado nativo autorizado e exclui participantes exclusivamente supervisores da contagem operacional. Seis casos Rails e 16 Vue novos preparados; aceite depende da nova CI e das capturas reais. Reutilizado o aceite literal D2-P0258-C02 do checkpoint C1, sem refazer módulo ou alegar aceite integral da figura. Registro: docs/jrc_contact_center/grouped_task_review_supervisor_candidate_20261127.json. Sem novas migrations, concessões, comandos PABX, publicação ou deploy.

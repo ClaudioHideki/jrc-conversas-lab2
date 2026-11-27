@@ -172,19 +172,19 @@ jobs:
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.spec.js \
             app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingEndingActions.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAnalysis.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            --reporter=default app/javascript/dashboard/routes/dashboard/inbox/EndingTaskState.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingManualTasks.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTaskCreate.spec.js --reporter=json --outputFile=/tmp/call-center-recordings-preflight-vitest.json
+            --reporter=default app/javascript/dashboard/routes/dashboard/inbox/EndingTaskState.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingManualTasks.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTaskCreate.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/SupervisorPage.spec.js --reporter=json --outputFile=/tmp/call-center-recordings-preflight-vitest.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 172
+          assert report['numTotalTests'] == report['numPassedTests'] == 200
           assert report['numFailedTests'] == report['numPendingTests'] == 0
-          assert len(report['testResults']) == 14 and all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useScopedRecordings.spec.js': 28, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 13, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 10, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 8}
-          expected.update({'EndingTaskState.spec.js': 12, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9})
+          assert len(report['testResults']) == 15 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'useScopedRecordings.spec.js': 28, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 16, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 10, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 8}
+          expected.update({'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9, 'SupervisorPage.spec.js': 18})
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
-          expected_new = {'EndingTaskState.spec.js': 12, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9}
+          expected_new = {'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9}
           for name, count in expected_new.items():
               row, = [entry for entry in report['testResults'] if Path(entry['name']).name == name]
               assert row['status'] == 'passed' and len(row['assertionResults']) == count
@@ -296,6 +296,20 @@ jobs:
           assert all(row['status'] == 'passed' for row in report['examples'])
           assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == expected
           assert len({row['id'] for row in report['examples']}) == 35
+          PY
+          bundle exec rubocop app/services/jrc_contact_center/supervisor_snapshot.rb spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb --format json --out /tmp/call-center-supervisor-state-lint.json
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb --format progress --format json --out /tmp/call-center-supervisor-state-preflight.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          lint = json.loads(Path('/tmp/call-center-supervisor-state-lint.json').read_text())
+          assert lint['summary']['offense_count'] == 0 and len(lint['files']) == 2
+          assert {row['path'].removeprefix('./') for row in lint['files']} == {'app/services/jrc_contact_center/supervisor_snapshot.rb', 'spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb'}
+          report = json.loads(Path('/tmp/call-center-supervisor-state-preflight.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) == 14
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' and row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb' for row in report['examples'])
+          assert len({row['id'] for row in report['examples']}) == 14
           PY
       - name: Focused real recording scopes and private provider byte boundary
         env:
@@ -1414,7 +1428,7 @@ jobs:
           matrix = json.loads(source.read_text())
           assert sorted(row['figure'] for row in matrix['figures']) == list(range(1, 24))
           summaries = {}
-          for name in ['call-center-recording-task-concurrency-rspec.json', 'call-center-recording-task-reload-rspec.json', 'call-center-quality-review-concurrency-rspec.json', 'call-center-mixed-ending-preflight.json', 'call-center-ending-sd-public-pipeline-rspec.json', 'call-center-ending-completion-projection-rspec.json', 'call-center-ending-sd-public-preflight.json', 'call-center-ending-sd-configuration-preflight.json', 'call-center-ending-public-committed-rspec.json', 'call-center-typed-original-event-rspec.json', 'call-center-typed-delivery-transaction-rspec.json', 'call-center-ending-typed-actual-broker-rspec.json', 'call-center-typed-destination-upgrade-rspec.json', 'call-center-typed-destination-concurrency-rspec.json', 'call-center-typed-destination-reload-rspec.json', 'call-center-ending-fixture-core-preflight.json', 'call-center-ending-fixture-contention-preflight.json', 'call-center-nico-native-regressions-rspec.json', 'call-center-nico-preserved-contention-rspec.json', 'call-center-nico-intent-fresh-rspec.json', 'call-center-nico-intent-reload-rspec.json', 'call-center-nico-intent-upgrade-rspec.json', 'call-center-ending-nico-queue-rspec.json', 'call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
+          for name in ['call-center-supervisor-state-preflight.json', 'call-center-recording-task-concurrency-rspec.json', 'call-center-recording-task-reload-rspec.json', 'call-center-quality-review-concurrency-rspec.json', 'call-center-mixed-ending-preflight.json', 'call-center-ending-sd-public-pipeline-rspec.json', 'call-center-ending-completion-projection-rspec.json', 'call-center-ending-sd-public-preflight.json', 'call-center-ending-sd-configuration-preflight.json', 'call-center-ending-public-committed-rspec.json', 'call-center-typed-original-event-rspec.json', 'call-center-typed-delivery-transaction-rspec.json', 'call-center-ending-typed-actual-broker-rspec.json', 'call-center-typed-destination-upgrade-rspec.json', 'call-center-typed-destination-concurrency-rspec.json', 'call-center-typed-destination-reload-rspec.json', 'call-center-ending-fixture-core-preflight.json', 'call-center-ending-fixture-contention-preflight.json', 'call-center-nico-native-regressions-rspec.json', 'call-center-nico-preserved-contention-rspec.json', 'call-center-nico-intent-fresh-rspec.json', 'call-center-nico-intent-reload-rspec.json', 'call-center-nico-intent-upgrade-rspec.json', 'call-center-ending-nico-queue-rspec.json', 'call-center-ending-pending-rspec.json', 'call-center-ending-actual-broker-rspec.json', 'call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
               summary = json.loads(Path('/tmp', name).read_text())['summary']
               assert summary['example_count'] > 0
               assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0

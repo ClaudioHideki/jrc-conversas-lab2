@@ -20,7 +20,7 @@ class JrcContactCenter::SupervisorSnapshot
   def agents
     return @agents if @agents
 
-    member_ids = JrcContactCenter::QueueMembership.where(account: @account, queue_id: @access.queues.select(:id), active: true)
+    member_ids = JrcContactCenter::QueueMembership.where(account: @account, queue_id: @access.queues.select(:id), active: true, role: 'agent')
                                                   .select(:account_user_id)
     @agents = @account.account_users.where(id: member_ids).includes(:user).order(:id).map do |member|
       scoped_agent_data(member).merge(name: member.user.available_name)
@@ -34,10 +34,21 @@ class JrcContactCenter::SupervisorSnapshot
     data[:queues] = data[:queues].select { |queue| permitted.include?(queue[:id]) }
     data[:eligible_queue_ids] &= permitted
     data[:reason_code] = nil if hidden_pause_reason?(snapshot, permitted)
+    data[:state_notice] = scoped_state_notice(snapshot, data)
     data[:pause_notice] = scoped_pause_notice(snapshot, member, data, permitted)
     data[:deferred_pause_notice] = scoped_deferred_pause_notice(member, permitted)
     data[:pending_qualifications] = scoped_pending_qualifications(data[:pending_qualifications])
     data
+  end
+
+  # Reuse the already filtered current memberships. Never derive the time of
+  # a hidden queue or reuse an old state timestamp for projected pending ACW.
+  def scoped_state_notice(snapshot, data)
+    event = snapshot.current
+    return unless event && event.state == data[:state] && data[:queues].any? { |queue| queue[:id] == event.queue_id.to_s }
+    return if data[:eligibility_reason] == 'access_revoked'
+
+    { state: event.state, state_version: event.id.to_s, elapsed_seconds: [Time.current - event.started_at, 0].max.floor }
   end
 
   def scoped_pending_qualifications(records)

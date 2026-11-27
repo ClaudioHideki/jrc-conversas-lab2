@@ -384,4 +384,124 @@ describe('native supervisor observed data', () => {
     expect(notices[1].text()).toContain('revisão');
     expect(wrapper.find('[data-own-pause-justification]').exists()).toBe(false);
   });
+  it.each([
+    ['available', 0, '00:00'],
+    ['paused', 61, '01:01'],
+    ['in_call', 3661, '01:01:01'],
+    ['offline', 0, '00:00'],
+  ])(
+    'shows only native observed %s duration with real seconds %s',
+    async (state, elapsed, expected) => {
+      JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+        data: {
+          agents: [
+            {
+              account_user_id: '42',
+              name: 'SYNTHETIC local state',
+              state,
+              state_version: '7',
+              state_notice: {
+                state,
+                state_version: '7',
+                elapsed_seconds: elapsed,
+              },
+            },
+          ],
+          queues: [],
+        },
+      });
+      wrapper = shallowMount(SupervisorPage, {
+        global: {
+          stubs: {
+            VisualSectionCard: { template: '<section><slot /></section>' },
+          },
+        },
+      });
+      await flushPromises();
+      expect(
+        wrapper.get('[data-supervisor-native-state-duration]').text()
+      ).toBe('Tempo no estado: ' + expected);
+      expect(wrapper.find('[data-supervisor-pause-notice]').exists()).toBe(
+        false
+      );
+    }
+  );
+
+  it('never derives a visible duration from raw timestamps, mismatched versions, states or invalid counts', async () => {
+    const notices = [
+      null,
+      { state: 'available', state_version: 'old', elapsed_seconds: 5 },
+      { state: 'paused', state_version: '7', elapsed_seconds: 5 },
+      { state: 'available', state_version: '7', elapsed_seconds: -1 },
+      { state: 'available', state_version: '7', elapsed_seconds: null },
+    ];
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: {
+        agents: notices.map((notice, index) => ({
+          account_user_id: String(index + 42),
+          name: 'SYNTHETIC missing evidence',
+          state: 'available',
+          state_version: '7',
+          started_at: '2026-11-01T00:00:00Z',
+          state_notice: notice,
+        })),
+        queues: [],
+      },
+    });
+    wrapper = shallowMount(SupervisorPage, {
+      global: {
+        stubs: {
+          VisualSectionCard: { template: '<section><slot /></section>' },
+        },
+      },
+    });
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-supervisor-native-state-duration]')
+    ).toHaveLength(0);
+  });
+
+  it('removes the previous observed duration when the next authorized poll has no state observation', async () => {
+    const agent = {
+      account_user_id: '42',
+      name: 'SYNTHETIC scoped state',
+      state: 'available',
+      state_version: '7',
+    };
+    JrcContactCenterAPI.supervisor
+      .mockResolvedValueOnce({
+        data: {
+          agents: [
+            {
+              ...agent,
+              state_notice: {
+                state: 'available',
+                state_version: '7',
+                elapsed_seconds: 61,
+              },
+            },
+          ],
+          queues: [],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: { agents: [{ ...agent, state_notice: null }], queues: [] },
+      });
+    wrapper = shallowMount(SupervisorPage, {
+      global: {
+        stubs: {
+          VisualSectionCard: { template: '<section><slot /></section>' },
+        },
+      },
+    });
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-supervisor-native-state-duration]')
+    ).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(5000);
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-supervisor-native-state-duration]')
+    ).toHaveLength(0);
+  });
 });

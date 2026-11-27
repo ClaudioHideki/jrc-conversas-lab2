@@ -1,0 +1,34 @@
+{
+  "failed_parent": "6fb6713f593bd7af0c7894f92cd0514a14e9c0b2",
+  "failed_run": 45951177734,
+  "failed_job": 140347157629,
+  "parent_not_accepted": true,
+  "native_contract_sha256": {
+    "app/controllers/jrc_projects/api/v1/tasks_controller.rb": "e75d37519d1e5e675b6fcdb94f38bbab4133dc9f215dd4d55755c967d85d0e66",
+    "app/javascript/dashboard/routes/dashboard/jrcProjects/en.json": "71e5484d2ec7d8af6d7cf22a5461a7c5c913d21841217b3cef0e589ef8e7040f",
+    "app/javascript/dashboard/routes/dashboard/jrcProjects/useProjects.js": "57af6347f10fb69e9767ed44fb3437b714ff1b560a0351d9cd06a09b3fedd3be",
+    "app/javascript/dashboard/routes/dashboard/jrcOperations/api.js": "cef7acf881a5964ad76fa6df29a2e10b306ee70c6bd9925e6af30249a4ea07fc"
+  },
+  "correction": [
+    "An explicit null assignee_id accepts only a null or omitted native nil association; mismatched populated owners remain rejected.",
+    "The actual native implicit label contains the field help text; select it by the anchored Portuguese label and still require the authorized option and native persistence."
+  ],
+  "all_existing_authority_identity_and_status_checks_preserved": true,
+  "native_shared_Task_editor_unchanged": true,
+  "new_Vue_cases_prepared_not_executed": 2,
+  "all_288_Chrome_cases_still_required": true,
+  "expected_not_results": {
+    "Rails": 3941,
+    "main_Vue": 2116,
+    "directed_Vue": 200,
+    "Chrome": 288,
+    "PNG": 844
+  },
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false,
+  "actual_failure_proof_sha256": "a6fc872012ba5b111c49eb618d8339f821b6368c3459eba990480f0dfa50d3f0",
+  "actual_original_image_review_sha256": "84d2b19d3cb79c728d1988289a412e01a2d342ba58cabdd1f6e1fa290fb875a2",
+  "actual_network_DTO_not_available_in_failed_artifact": true,
+  "future_real_DTO_shape_must_be_recorded": true,
+  "bounded_failure_before_child_page_close_capture_added": true
+}
