@@ -271,41 +271,38 @@
     "effective_work_hours_not_inferred_from_CI_wait_or_example_count": true
   },
   "current_24_effective_hour_delivery": {
-    "parent": "63c1a52abdc572590cb12255162ddc7f3bd93eaa",
-    "status": "native_targeted_gates_passed_committed_ticket_job_refused_inherited_default_database_full_browser_not_run",
+    "candidate_source_parent": "38e297bf2fa6292193267ea6a62ede65fd883a26",
+    "status": "prepared_not_natively_or_visually_accepted",
     "figures": [
       21,
-      22,
-      23
+      22
     ],
-    "document": "docs/jrc_contact_center/native_manual_recording_ticket_candidate_20261127.json",
-    "user_outcome": "Open the existing Service Desk form from a permitted recording, create one real ticket with requester/call origin, reopen it and preserve current scope and independent review/ACW. Return to recording Actions, paginate authorized linked Tickets and navigate to their current native status/detail.",
-    "grouped_with": "Repair the final exact report inventory against the real d236 artifact; no criterion removed.",
+    "document": "docs/jrc_contact_center/native_recording_customer_records_candidate_20261127.json",
+    "user_outcome": "Consult the exact caller native CRM contracts and opportunities, permitted Projects, native Tickets and unified timeline inside recording Context, with original paging and current permissions.",
+    "grouped_with": "Minimum correction of the nine confirmed shared Ticket lint findings; existing last-agent review accepted from unchanged verified evidence.",
+    "one_own_CI_at_a_time": true,
     "planned_not_results": {
-      "new_native_since_d236": 36,
-      "new_Vue_since_d236": 72,
-      "existing_Chrome_extended": 4
+      "new_Vue": 18,
+      "main_Vue_expected": 2247,
+      "directed_Vue_expected": 320,
+      "customer_focused_Vue_expected": 41,
+      "customer_native_preflight_expected": 12,
+      "new_guard_native_examples": 2,
+      "existing_native_contact_examples_newly_covered": 5,
+      "existing_Chrome_cases_extended": 4,
+      "new_original_screenshots": 20
     },
-    "last_complete_accepted": {
-      "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
-      "run": 45984659600
-    },
-    "remaining_development": [
-      "Full native CRM/Relationship context and combined chronology",
-      "Bounded administrative gaps from the literal Word clauses"
+    "effort_recording": "Effective work hours are not inferred from elapsed time or CI duration.",
+    "external_dependencies_separate": [
+      "PABX commands, publication and ACK",
+      "External Nico provider execution",
+      "Real retention and commercial policy configuration"
     ],
-    "remaining_homologation": [
-      "Native and four-mode browser validation of current and preceding grouped flows"
+    "remaining_internal_work": [
+      "Literal remaining administrative and sentiment-dashboard gaps",
+      "Full visual acceptance of the current and new grouped flows"
     ],
-    "effort_recording": "No verified active-work time ledger exists; calendar elapsed time is not represented as engineering hours.",
-    "scope_and_acceptance_not_reduced": true,
-    "native_prepared_since_d236": 37,
-    "single_CI_run": 46030112268,
-    "exact_SHA_for_the_running_delivery": "63c1a52abdc572590cb12255162ddc7f3bd93eaa",
-    "do_not_treat_plan_or_in_progress_CI_as_acceptance": true,
-    "current_correction": "docs/jrc_contact_center/native_recording_ticket_owned_runner_correction_20261127.json",
-    "existing_ownership_guard_retained": true,
-    "both_independent_usable_deliveries_grouped_into_one_following_CI": true
+    "whole_Part1_accepted": false
   },
   "following_independent_functional_delivery": {
     "figures": [
@@ -333,5 +330,25 @@
     "no_scope_extension_architecture_framework_or_wait_for_report_boundary": true,
     "time_accounting": "No historical active-work ledger was captured; CI waiting, calendar elapsed time and case counts are not invented as engineering hours.",
     "reusable_verified_sources_not_repeated_without_technical_cause": true
+  },
+  "last_team_agent_review_reused_acceptance": {
+    "document": "docs/jrc_contact_center/literal_last_team_agent_acceptance_20261127.json",
+    "sha256": "3c6cabb18c28c9a4dd107b297752a079793287584c76e888058c29b8315a4e69",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "whole_figure_or_Part1_accepted": false,
+    "current_counts": {
+      "parcial": 415,
+      "bloqueado": 24,
+      "implementado": 81,
+      "pendente": 33,
+      "implementado_sem_aceite": 1
+    },
+    "no_application_tests_repeated_for_this_literal_registration": true
+  },
+  "preceding_delivery_result": {
+    "sha": "38e297bf2fa6292193267ea6a62ede65fd883a26",
+    "run": 46034015466,
+    "status": "native_and_Vue_passed_nine_shared_Ticket_lint_findings_build_and_Chrome_not_run",
+    "diagnosis": "docs/jrc_contact_center/native_ticket_workflow_lint_correction_20261127.json"
   }
 }

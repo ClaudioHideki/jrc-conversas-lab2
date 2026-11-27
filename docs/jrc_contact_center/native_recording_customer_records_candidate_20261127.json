@@ -1,0 +1,61 @@
+{
+  "source_parent": "38e297bf2fa6292193267ea6a62ede65fd883a26",
+  "figures": [
+    21,
+    22
+  ],
+  "clauses": [
+    "D1-P0210-C01"
+  ],
+  "delivery": "Read native CRM contracts/opportunities, Service Desk tickets, permitted Projects and the existing unified customer timeline directly from an exactly linked recording context.",
+  "reuse": [
+    "Native Call API and exact directory identity",
+    "Customer contactOverview capability projection",
+    "Existing RecordsPanel with original pagination, routes and authorization",
+    "Existing TimelinePanel and signed per-user cursors including permitted Relationship sources"
+  ],
+  "no_new_endpoints_models_permissions_or_provider_operations": true,
+  "small_required_API_fix": "Preserve bigint call-session identity as an exact string using the existing validated recordIdentity helper.",
+  "native_or_browser_accepted": false,
+  "runtime_source_staged": false,
+  "remaining_work": [
+    "Focused Vue and API identity regressions",
+    "Native existing customer API regressions",
+    "Four-mode real browser persistence, paging, source scope and destination denial"
+  ],
+  "synthetic_only_preparation": {
+    "native_CRM_opportunities": 26,
+    "same_account_other_owner_hidden": 1,
+    "real_financial_or_customer_parameters_invented": false,
+    "explicit_existing_rights_for_owned_actor_only": [
+      "jrc_crm",
+      "jrc_service_desk_history_view"
+    ],
+    "same_original_owned_runtime_marker_database_and_24_record_checks": true,
+    "no_external_call_or_permanent_infrastructure": true,
+    "native_private_Projects": {
+      "permitted": 1,
+      "hidden": 1,
+      "creation": "Unchanged native JrcProjects::Projects::Create and current owner authorization"
+    }
+  },
+  "static_frontend_files_with_zero_lint_errors": 6,
+  "native_page_size_reused_not_reimplemented": 25,
+  "source_read_confirms_native_Customer360_timeline_and_private_project_policies": true,
+  "prepared_not_results": {
+    "new_Vue": 18,
+    "main_Vue_expected": 2247,
+    "directed_Vue_expected": 320,
+    "customer_focused_Vue_expected": 41,
+    "customer_native_preflight_expected": 12,
+    "new_guard_native_examples": 2,
+    "existing_native_contact_examples_newly_covered": 5,
+    "existing_Chrome_cases_extended": 4,
+    "new_original_screenshots": 20
+  },
+  "all_existing_96_steps_retained": true,
+  "added_focused_steps": 2,
+  "remaining_visual_divergences": [
+    "Existing shared native RecordsPanel still uses raw status keys; full native CRM destination navigation has not been visually accepted."
+  ]
+}

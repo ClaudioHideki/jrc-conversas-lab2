@@ -280,6 +280,21 @@ router.isReady().then(async () => {
     )
       throw new Error('Native contact route missing from fixture source');
     routes.forEach(route => router.addRoute(route));
+    // Register the unchanged product routes so native customer-list links
+    // resolve to their actual destinations; all native guards are retained.
+    const { default: crm } = await import(
+      'dashboard/routes/dashboard/crm/crm.routes'
+    );
+    const names = crm.routes
+      .flatMap(parent => parent.children || [])
+      .map(row => row.name);
+    if (
+      !['crm_deals', 'crm_contracts', 'crm_activities'].every(name =>
+        names.includes(name)
+      )
+    )
+      throw new Error('Required native CRM record routes missing');
+    crm.routes.forEach(route => router.addRoute(route));
   }
   const registeredSD = await registerNativeServiceDesk();
   if (sdAccount && registeredSD && !router.currentRoute.value.name)

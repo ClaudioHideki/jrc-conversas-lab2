@@ -482,7 +482,7 @@ export default {
   calls: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/call_sessions`, { params, timeout: 30000 }),
   call: (accountId, id) =>
-    axios.get(`${base(accountId)}/call_sessions/${Number(id)}`),
+    axios.get(`${base(accountId)}/call_sessions/${recordIdentity(id)}`),
   saveCallObservations: (accountId, id, observations) =>
     axios.patch(`${base(accountId)}/call_sessions/${Number(id)}/observations`, {
       observations,

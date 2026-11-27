@@ -2116,8 +2116,8 @@
       "figures": [
         12
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "status": "implementado",
+      "verification": "Actual scoped impact, explicit manager review, denial, atomic native persistence, reload and eight original images reviewed; external PABX operation not inferred.",
       "code_reference_ids": [
         0,
         1,
@@ -2156,7 +2156,13 @@
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_last_team_agent_acceptance_20261127.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "artifact_sha256": "949211f5d1f3b7f4b1cf40649ddbfb15262889427d3f97096cca34d6aa160ae3",
+        "whole_figure_accepted": false
+      }
     },
     {
       "id": "D2-P0261-C01",
@@ -2301,5 +2307,12 @@
     ],
     "no_permissions_or_write_flow_changed": true,
     "whole_figure_accepted": false
+  },
+  "bounded_last_agent_manager_review_acceptance": {
+    "path": "docs/jrc_contact_center/literal_last_team_agent_acceptance_20261127.json",
+    "sha256": "3c6cabb18c28c9a4dd107b297752a079793287584c76e888058c29b8315a4e69",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "one_existing_literal_clause_closed": true,
+    "new_CI_not_required_for_this_registration": true
   }
 }

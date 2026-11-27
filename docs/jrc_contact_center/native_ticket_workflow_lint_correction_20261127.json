@@ -1,0 +1,169 @@
+{
+  "failed_source": "38e297bf2fa6292193267ea6a62ede65fd883a26",
+  "run": 46034015466,
+  "artifact": 15218249778,
+  "artifact_sha256": "e7a579849157641654e8dd7bd7c18ffd6ca8505d86dc6aac8d2903fcd6c8ce8d",
+  "confirmed_new_offenses": {
+    "app/controllers/api/v1/accounts/jrc_service_desk/tickets_controller.rb": [
+      {
+        "severity": "convention",
+        "message": "Align `.find` with `.where` on line 117.",
+        "cop_name": "Layout/MultilineMethodCallIndentation",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 118,
+          "start_column": 7,
+          "last_line": 118,
+          "last_column": 11,
+          "length": 5,
+          "line": 118,
+          "column": 7
+        }
+      }
+    ],
+    "app/services/jrc_service_desk/create_ticket_workflow_service.rb": [
+      {
+        "severity": "convention",
+        "message": "Cyclomatic complexity for `recording_origin` is too high. [9/7]",
+        "cop_name": "Metrics/CyclomaticComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 45,
+          "start_column": 3,
+          "last_line": 58,
+          "last_column": 5,
+          "length": 691,
+          "line": 45,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Perceived complexity for `recording_origin` is too high. [9/8]",
+        "cop_name": "Metrics/PerceivedComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 45,
+          "start_column": 3,
+          "last_line": 58,
+          "last_column": 5,
+          "length": 691,
+          "line": 45,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Add empty line after guard clause.",
+        "cop_name": "Layout/EmptyLineAfterGuardClause",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 51,
+          "start_column": 5,
+          "last_line": 51,
+          "last_column": 98,
+          "length": 94,
+          "line": 51,
+          "column": 5
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Cyclomatic complexity for `same_creation_context?` is too high. [14/7]",
+        "cop_name": "Metrics/CyclomaticComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 88,
+          "start_column": 3,
+          "last_line": 95,
+          "last_column": 5,
+          "length": 606,
+          "line": 88,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Perceived complexity for `same_creation_context?` is too high. [14/8]",
+        "cop_name": "Metrics/PerceivedComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 88,
+          "start_column": 3,
+          "last_line": 95,
+          "last_column": 5,
+          "length": 606,
+          "line": 88,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Assignment Branch Condition size for initialize_workflow is too high. [<6, 32, 9> 33.78/26]",
+        "cop_name": "Metrics/AbcSize",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 104,
+          "start_column": 3,
+          "last_line": 121,
+          "last_column": 5,
+          "length": 1017,
+          "line": 104,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Cyclomatic complexity for `initialize_workflow` is too high. [9/7]",
+        "cop_name": "Metrics/CyclomaticComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 104,
+          "start_column": 3,
+          "last_line": 121,
+          "last_column": 5,
+          "length": 1017,
+          "line": 104,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Perceived complexity for `initialize_workflow` is too high. [9/8]",
+        "cop_name": "Metrics/PerceivedComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 104,
+          "start_column": 3,
+          "last_line": 121,
+          "last_column": 5,
+          "length": 1017,
+          "line": 104,
+          "column": 3
+        }
+      }
+    ]
+  },
+  "small_corrections": [
+    "Align the existing related-item query chain.",
+    "Keep the exact recording call-ID validation in a small native helper.",
+    "Compare the same five normalized creation-context fields as a hash, preserving nil/false defaults and historical service fallback.",
+    "Extract unchanged creation-marker construction from the existing workflow method."
+  ],
+  "transactions_authorization_idempotence_and_native_side_effects_unchanged": true,
+  "no_lint_rules_or_native_assertions_removed": true,
+  "native_regression_required": [
+    "Native recording Ticket preflight and real PostgreSQL rollback/contention",
+    "Existing CP4 transactional workflow, employee intake, files and contextual replay regressions"
+  ],
+  "current_native_and_Chrome_acceptance": false
+}

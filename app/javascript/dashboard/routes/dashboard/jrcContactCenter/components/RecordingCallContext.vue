@@ -1,5 +1,11 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import {
+  computed,
+  defineAsyncComponent,
+  onBeforeUnmount,
+  ref,
+  watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcContactCenter';
 import LinkedContactMaster from './LinkedContactMaster.vue';
@@ -12,6 +18,9 @@ const props = defineProps({
   recordingId: { type: [String, Number], default: null },
   operationalContextAllowed: { type: Boolean, default: false },
 });
+const RecordingCustomerRecords = defineAsyncComponent(
+  () => import('./RecordingCustomerRecords.vue')
+);
 const { t } = useI18n();
 const labels = computed(() => ({
   TITLE: t('JRC_CONTACT_CENTER.RECORDINGS.CONTEXT.TITLE'),
@@ -154,6 +163,18 @@ onBeforeUnmount(() => {
         :enabled="operationalContextAllowed"
         show-history
         @updated="load"
+      />
+      <RecordingCustomerRecords
+        v-if="
+          linked &&
+          String(customer.directory?.contact_id) === String(call.contact_id)
+        "
+        :key="`customer-records-${accountId}-${callSessionId}-${call.contact_id}`"
+        :account-id="accountId"
+        :contact-id="call.contact_id"
+        :call-session-id="callSessionId"
+        :call-id="callId"
+        :enabled="operationalContextAllowed"
       />
       <RecordingTicketAction
         v-if="linked && recordingId"

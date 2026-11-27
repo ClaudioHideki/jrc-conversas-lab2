@@ -3478,6 +3478,19 @@
       "LINKED_DENIED": "Sem acesso aos chamados vinculados neste contexto.",
       "LINKED_ERROR": "Não foi possível consultar os chamados. Atualize para tentar novamente.",
       "LINKED_LABEL": "#{number} — {title}"
+    },
+    "CUSTOMER_RECORDS": {
+      "TITLE": "Registros e histórico do cliente",
+      "LOAD": "Consultar registros",
+      "SCOPE": "Listas e histórico do Cadastro Mestre, com as permissões atuais de cada módulo. Acesso à gravação não concede acesso aos demais registros.",
+      "DENIED": "Sem acesso aos registros do cliente neste contexto.",
+      "ERROR": "Não foi possível consultar os registros do cliente. Tente novamente.",
+      "DEALS": "Oportunidades",
+      "CONTRACTS": "Contratos",
+      "ACTIVITIES": "Atividades",
+      "TICKETS": "Chamados",
+      "PROJECTS": "Projetos",
+      "HISTORY": "Histórico unificado"
     }
   }
 }

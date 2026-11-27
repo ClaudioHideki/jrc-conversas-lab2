@@ -2,7 +2,7 @@
   "format_version": 1,
   "review_at": "2026-11-23T20:15:50.371122+00:00",
   "validated_base_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
-  "candidate_source_parent_sha": "62363de150ee452c2e7d93a509e3c4f4cb108206",
+  "candidate_source_parent_sha": "38e297bf2fa6292193267ea6a62ede65fd883a26",
   "candidate_not_yet_validated": true,
   "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
@@ -4238,7 +4238,7 @@
     "not_full_global_implementation_estimate": true
   },
   "figure10_proven_literal_percentage": 56.0,
-  "Parte1_proven_formal_lower_bound_percentage": 14.44,
+  "Parte1_proven_formal_lower_bound_percentage": 14.62,
   "full_global_reaudit_complete": false,
   "typed_durable_delivery_candidate": {
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
@@ -4289,14 +4289,15 @@
     "whole_Part1_complete": false
   },
   "latest_literal_functional_progress": {
-    "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
-    "sha256": "f4aa21310e2f01dd2e0eb37d40a5daeb2ec7f09039a9317e269ca7e6bef83105",
+    "document": "docs/jrc_contact_center/literal_last_team_agent_acceptance_20261127.json",
+    "sha256": "3c6cabb18c28c9a4dd107b297752a079793287584c76e888058c29b8315a4e69",
     "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
     "whole_figure_or_Part1_accepted": false,
-    "unique_closed": 80,
-    "formally_closed": 80,
+    "unique_closed": 81,
+    "formally_closed": 81,
     "total_unique": 554,
-    "whole_Part1_accepted": false
+    "whole_Part1_accepted": false,
+    "prior_80_acceptances_preserved": true
   },
   "current_public_operational_increment": {
     "candidate": "docs/jrc_contact_center/ending_public_operational_candidate_20261125.json",
@@ -4458,13 +4459,13 @@
     "whole_figure_or_Part1_accepted": false
   },
   "current_unique_requirement_counts": {
-    "parcial": 416,
+    "parcial": 415,
     "bloqueado": 24,
-    "implementado": 80,
+    "implementado": 81,
     "pendente": 33,
     "implementado_sem_aceite": 1
   },
-  "current_literal_acceptance_percentage": 14.44,
+  "current_literal_acceptance_percentage": 14.62,
   "historical_literal_functional_progress_before_this_acceptance": {
     "document": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
     "sha256": "acd9ce46db35889fb85d9ac62695cc3258c7d531c6f9357990c36d5667dcded6",
@@ -4494,5 +4495,16 @@
     "current_native_Ruby_gate_remaining": 1,
     "previous_27_findings_corrected": true,
     "305_directed_Vue_and_3995_distinct_Rails_are_planned_not_results": true
+  },
+  "latest_last_team_agent_literal_acceptance": {
+    "document": "docs/jrc_contact_center/literal_last_team_agent_acceptance_20261127.json",
+    "sha256": "3c6cabb18c28c9a4dd107b297752a079793287584c76e888058c29b8315a4e69",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "whole_figure_or_Part1_accepted": false
+  },
+  "next_native_customer_records_group": {
+    "document": "docs/jrc_contact_center/native_recording_customer_records_candidate_20261127.json",
+    "failed_parent_lint_correction": "docs/jrc_contact_center/native_ticket_workflow_lint_correction_20261127.json",
+    "native_or_Chrome_accepted": false
   }
 }

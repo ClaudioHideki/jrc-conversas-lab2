@@ -115,7 +115,7 @@ class Api::V1::Accounts::JrcServiceDesk::TicketsController < Api::V1::Accounts::
     kind = params[:kind].to_s
     model = { 'notes' => ::JrcServiceDesk::TicketNote, 'conversations' => ::JrcServiceDesk::TicketConversation }.fetch(kind)
     record = model.where(account_id: Current.account.id, unit_id: strict_ticket.unit_id, ticket_id: strict_ticket.id)
-      .find(::JrcServiceDesk::Input.id(params[:record_id]))
+                  .find(::JrcServiceDesk::Input.id(params[:record_id]))
     authorize record, :show?
     render json: base_payload.merge(ticket_id: strict_ticket.id.to_s, kind: kind, item: presenter.related(record, kind))
   end

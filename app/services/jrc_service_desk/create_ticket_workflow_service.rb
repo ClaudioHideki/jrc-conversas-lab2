@@ -49,12 +49,16 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
     fields = ids + %w[queue_id schema_version call_id]
     origin = JrcServiceDesk::Input.attributes(value, fields)
     raise ArgumentError unless origin.keys.sort == fields.sort && origin['schema_version'].eql?(1)
-    call_id = origin['call_id']
-    raise ArgumentError unless call_id.is_a?(String) && call_id.valid_encoding? && call_id.present? && !call_id.match?(/[\x00-\x1f\x7f]/)
+
+    validate_recording_call_id!(origin['call_id'])
 
     ids.each { |key| origin[key] = JrcServiceDesk::Input.id(origin.fetch(key)) }
     origin['queue_id'] = optional_id(origin['queue_id'])
     origin
+  end
+
+  def validate_recording_call_id!(call_id)
+    raise ArgumentError unless call_id.is_a?(String) && call_id.valid_encoding? && call_id.present? && !call_id.match?(/[\x00-\x1f\x7f]/)
   end
 
   def optional_id(value)
@@ -86,12 +90,16 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
   end
 
   def same_creation_context?(ticket, marker, inputs)
-    return false unless marker&.data&.fetch('recording_origin', nil) == inputs[:recording_origin]
-
-    previous = marker&.data&.fetch('conversation_id', nil)
-    files = marker&.data&.fetch('file_fingerprints', []) || []
-    input_service_id = marker&.data&.key?('input_service_id') ? marker.data['input_service_id'] : ticket.service_id
-    (marker&.data&.fetch('internal_request', false) || false) == inputs[:internal_request] && previous == inputs[:conversation_id] && input_service_id == inputs[:service_id] && files == inputs[:file_fingerprints]
+    data = marker&.data
+    data = {} if data.nil?
+    previous = {
+      recording_origin: data.fetch('recording_origin', nil),
+      conversation_id: data.fetch('conversation_id', nil),
+      file_fingerprints: data.fetch('file_fingerprints', []) || [],
+      service_id: data.fetch('input_service_id', ticket.service_id),
+      internal_request: data.fetch('internal_request', false) || false
+    }
+    previous == inputs.slice(*previous.keys)
   end
 
   def create_ticket(unit, attributes, key, inputs)
@@ -106,11 +114,7 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
     if conversation_id
       JrcServiceDesk::LinkConversationService.new(user_context: context.to_h).call(ticket_id: ticket.id, conversation_id: conversation_id)
     end
-    marker = { 'conversation_id' => conversation_id }
-    marker['recording_origin'] = inputs[:recording_origin] if inputs[:recording_origin]
-    marker['internal_request'] = true if inputs[:internal_request]
-    marker['input_service_id'] = inputs[:service_id] if ticket.service_id != inputs[:service_id]
-    marker['file_fingerprints'] = inputs[:file_fingerprints] if inputs[:files].any?
+    marker = creation_marker(ticket, inputs)
     append_event!(ticket, 'creation_context_recorded', marker)
     attach_opening_files(ticket, inputs[:files], key) if inputs[:files].any?
     JrcServiceDesk::OlaTracker.sync!(ticket)
@@ -118,6 +122,15 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
     return unless ticket.queue
 
     JrcServiceDesk::AutomaticRoutingService.new(user_context: context.to_h).call(ticket_id: ticket.id)
+  end
+
+  def creation_marker(ticket, inputs)
+    marker = { 'conversation_id' => inputs[:conversation_id] }
+    marker['recording_origin'] = inputs[:recording_origin] if inputs[:recording_origin]
+    marker['internal_request'] = true if inputs[:internal_request]
+    marker['input_service_id'] = inputs[:service_id] if ticket.service_id != inputs[:service_id]
+    marker['file_fingerprints'] = inputs[:file_fingerprints] if inputs[:files].any?
+    marker
   end
 
   def attach_opening_files(ticket, files, key)

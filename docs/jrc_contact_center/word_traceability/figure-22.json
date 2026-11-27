@@ -1243,5 +1243,29 @@
     "document": "docs/jrc_contact_center/native_recording_linked_ticket_list_candidate_20261127.json",
     "status": "implemented_pending_native_and_four_mode_Chrome",
     "no_literal_requirement_status_changed": true
+  },
+  "next_native_customer_context_not_yet_accepted": {
+    "document": "docs/jrc_contact_center/native_recording_customer_records_candidate_20261127.json",
+    "literal_clause": "D1-P0210-C01",
+    "new_component": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCustomerRecords.vue",
+    "reuse": [
+      "Native Call API and exact directory identity",
+      "Customer contactOverview capability projection",
+      "Existing RecordsPanel with original pagination, routes and authorization",
+      "Existing TimelinePanel and signed per-user cursors including permitted Relationship sources"
+    ],
+    "prepared_not_results": {
+      "new_Vue": 18,
+      "main_Vue_expected": 2247,
+      "directed_Vue_expected": 320,
+      "customer_focused_Vue_expected": 41,
+      "customer_native_preflight_expected": 12,
+      "new_guard_native_examples": 2,
+      "existing_native_contact_examples_newly_covered": 5,
+      "existing_Chrome_cases_extended": 4,
+      "new_original_screenshots": 20
+    },
+    "current_literal_status_preserved_until_native_and_visual_acceptance": true,
+    "existing_status_translation_and_full_CRM_destination_navigation_not_accepted": true
   }
 }

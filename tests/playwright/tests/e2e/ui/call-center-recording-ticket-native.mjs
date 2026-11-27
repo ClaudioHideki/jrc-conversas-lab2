@@ -1,3 +1,4 @@
+import { verifyNativeCustomerRecords } from './call-center-customer-records-native.mjs';
 import { expect } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -248,6 +249,10 @@ export async function verifyNativeRecordingTicket(parent, info, target) {
     const linkedTicket = list.getByRole('link').filter({ hasText: title });
     await expect(linkedTicket).toBeVisible();
     await capture('linked-native-ticket-in-recording-actions');
+    await verifyNativeCustomerRecords(page, info, target, {
+      id: native.id,
+      title,
+    });
     await linkedTicket.click();
     await expect(page.getByText(title, { exact: true }).first()).toBeVisible();
     const deniedList = await parent.request.get(origin + listPath, {

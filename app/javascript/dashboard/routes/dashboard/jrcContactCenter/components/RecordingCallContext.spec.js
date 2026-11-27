@@ -37,7 +37,9 @@ const render = (props = {}) =>
       operationalContextAllowed: true,
       ...props,
     },
-    global: { stubs: { LinkedContactMaster: true } },
+    global: {
+      stubs: { LinkedContactMaster: true, RecordingCustomerRecords: true },
+    },
   });
 enableAutoUnmount(afterEach);
 afterEach(() => vi.resetAllMocks());
@@ -186,6 +188,34 @@ describe('current native call context inside recording details', () => {
     );
     expect(
       wrapper.findComponent({ name: 'LinkedContactMaster' }).exists()
+    ).toBe(false);
+  });
+});
+
+describe('native customer records follow the exact authorized recording contact', () => {
+  it('passes the exact original account, call and directory contact to the reused module host', async () => {
+    API.call.mockResolvedValue({ data: result() });
+    const wrapper = render();
+    await flushPromises();
+    expect(
+      wrapper.getComponent({ name: 'RecordingCustomerRecords' }).props()
+    ).toMatchObject({
+      accountId: '1',
+      contactId: '2',
+      callSessionId: '7',
+      callId: 'SYNTHETIC-recorded-call',
+      enabled: true,
+    });
+  });
+
+  it('does not open native customer lists when the directory identity differs from the selected call contact', async () => {
+    const data = result();
+    data.item.customer.directory.contact_id = '99';
+    API.call.mockResolvedValue({ data });
+    const wrapper = render();
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: 'RecordingCustomerRecords' }).exists()
     ).toBe(false);
   });
 });
