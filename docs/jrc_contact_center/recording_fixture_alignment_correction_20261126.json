@@ -1,0 +1,24 @@
+{
+  "parent": "8f1c80ca240b116931ce2acf23bfba3d99669c4e",
+  "failed_run": 45930013527,
+  "failed_job": 140280227450,
+  "source_sha256": {
+    "script/jrc_call_center_recordings_seed.rb": "dbbc6065a95d2910eaa66f207c247ba11863e2119886c989fdece32ba45fa100"
+  },
+  "parent_sources": {
+    "script/jrc_call_center_recordings_seed.rb": "b202e0a4511dafd424c037c9c17843fadd35ce41f1ba34352fc802f9c2f3fd02"
+  },
+  "only_whitespace_changed": true,
+  "all_gates_retained": true,
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false,
+  "root_cause": "Both ArgumentAlignment and HashAlignment flag the same over-indented continuation in the new synthetic recording fixture.",
+  "verified_parent_focused_Vue": {
+    "examples": 128,
+    "files": 11,
+    "failures": 0,
+    "pending": 0,
+    "report_sha256": "9af00be66ff484b25bec7853f63fe2e69c80a7ecb57168806ea06f741bf5f30d"
+  },
+  "failed_lint_report_sha256": "cdd5c5860f055a306694daa17f1eb7f1ccc69d62c1a313622b9d74617f61b232"
+}
