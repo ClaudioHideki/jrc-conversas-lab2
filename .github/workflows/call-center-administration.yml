@@ -103,6 +103,7 @@ jobs:
           node --test script/validate_cc_nico_intent_admission.test.mjs
           node --test script/validate_cc_typed_destination_admission.test.mjs
           node --test script/validate_cc_quality_review_admission.test.mjs
+          node --test script/validate_cc_recording_task_admission.test.mjs
           node script/validate_cc_access_migration.mjs
       - name: Frozen frontend dependencies
         id: frontend_dependencies
@@ -171,17 +172,22 @@ jobs:
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.spec.js \
             app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingEndingActions.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAnalysis.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            --reporter=default --reporter=json --outputFile=/tmp/call-center-recordings-preflight-vitest.json
+            --reporter=default app/javascript/dashboard/routes/dashboard/inbox/EndingTaskState.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingManualTasks.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTaskCreate.spec.js --reporter=json --outputFile=/tmp/call-center-recordings-preflight-vitest.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 128
+          assert report['numTotalTests'] == report['numPassedTests'] == 166
           assert report['numFailedTests'] == report['numPendingTests'] == 0
-          assert len(report['testResults']) == 11 and all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useScopedRecordings.spec.js': 22, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 10, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 10, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 8}
+          assert len(report['testResults']) == 14 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'useScopedRecordings.spec.js': 22, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 13, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 10, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 8}
+          expected.update({'EndingTaskState.spec.js': 12, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9})
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
+          expected_new = {'EndingTaskState.spec.js': 12, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9}
+          for name, count in expected_new.items():
+              row, = [entry for entry in report['testResults'] if Path(entry['name']).name == name]
+              assert row['status'] == 'passed' and len(row['assertionResults']) == count
           PY
       - name: Official RuboCop server parity without reducing inspected coverage
         run: |
@@ -197,6 +203,9 @@ jobs:
       - name: Focused original-event source and legacy compatibility lint
         run: |
           bundle exec rubocop app/jobs/jrc_contact_center/ending_actions_job.rb app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb app/services/jrc_contact_center/ending_actions/initial_destination_attempts.rb spec/services/jrc_contact_center/ending_actions/initial_destination_attempts_spec.rb --format json --out /tmp/call-center-typed-original-event-lint.json
+      - name: Manual recording task native source lint
+        run: |
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recording_tasks_controller.rb app/models/jrc_contact_center/recording_task_link.rb app/services/jrc_contact_center/recording_task_input.rb app/services/jrc_contact_center/recording_task_list.rb app/services/jrc_contact_center/recording_task_scope.rb app/services/jrc_contact_center/recording_task_write.rb config/initializers/contact_center_recording_task_privacy.rb config/routes/jrc_contact_center.rb db/migrate/20261127003000_create_contact_center_recording_task_links.rb lib/jrc_contact_center/recording_task_schema_receipt.rb script/jrc_call_center_recording_task_seed.rb script/jrc_call_center_recording_task_upgrade.rb script/jrc_call_center_recordings_seed.rb spec/models/jrc_contact_center/recording_task_link_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_task_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_tasks_spec.rb spec/services/jrc_contact_center/create_contact_center_recording_task_links_spec.rb spec/services/jrc_contact_center/recording_task_write_spec.rb spec/services/jrc_contact_center/synthetic_recording_task_upgrade_spec.rb spec/support/contact_center_recording_tasks.rb --format json --out /tmp/call-center-recording-task-lint.json
       - name: Focused native recording source lint before legacy overlap
         run: |
           bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb app/services/jrc_contact_center/recorded_calls.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb script/jrc_call_center_recordings_seed.rb script/jrc_call_center_recordings_evidence.rb spec/integration/jrc_contact_center/owned_recording_media.rb spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb spec/integration/jrc_contact_center/owned_recording_reproduction_failure.rb script/jrc_call_center_recording_reproduction_failure.rb app/services/jrc_contact_center/recording_audit.rb app/services/jrc_contact_center/configuration_audit_scope.rb script/jrc_call_center_pause_seed.rb spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb --format json --out /tmp/call-center-recordings-lint.json
@@ -273,8 +282,30 @@ jobs:
           assert len(report['examples']) == 8 and all(row['status'] == 'passed' for row in report['examples'])
           assert {row['file_path'].removeprefix('./') for row in report['examples']} == {'spec/services/jrc_contact_center/synthetic_mixed_ending_seed_scope_spec.rb', 'spec/services/jrc_contact_center/synthetic_public_ending_process_evidence_spec.rb'}
           PY
-      - name: Focused real recording scopes and private provider byte boundary
+      - name: Native recording task creation permission persistence and migration preflight
         run: |
+          bundle exec rspec spec/services/jrc_contact_center/recording_task_write_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_tasks_spec.rb spec/models/jrc_contact_center/recording_task_link_spec.rb spec/services/jrc_contact_center/create_contact_center_recording_task_links_spec.rb spec/services/jrc_contact_center/synthetic_recording_task_upgrade_spec.rb --format progress --format json --out /tmp/call-center-recording-task-preflight.json
+          python3 -B - <<'PY'
+          from collections import Counter
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-recording-task-preflight.json').read_text())
+          expected = {'spec/services/jrc_contact_center/recording_task_write_spec.rb': 14, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_tasks_spec.rb': 9, 'spec/models/jrc_contact_center/recording_task_link_spec.rb': 5, 'spec/services/jrc_contact_center/create_contact_center_recording_task_links_spec.rb': 4, 'spec/services/jrc_contact_center/synthetic_recording_task_upgrade_spec.rb': 3}
+          assert report['summary']['example_count'] == len(report['examples']) == 35
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == expected
+          assert len({row['id'] for row in report['examples']}) == 35
+          PY
+      - name: Focused real recording scopes and private provider byte boundary
+        env:
+          POSTGRES_DATABASE: jrc_cc_recording_fixture_committed_test
+          JRC_CC_COMMITTED_RECORDING_FIXTURE: 'true'
+        run: |
+          test "$POSTGRES_DATABASE" = jrc_cc_recording_fixture_committed_test
+          test "$JRC_CC_COMMITTED_RECORDING_FIXTURE" = true
+          test -s "$SCHEMA"
+          bundle exec rails db:create db:schema:load
           bundle exec rspec spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb --format progress --format json --out /tmp/call-center-recordings-preflight.json
           python3 -B - <<'PY'
           import json
@@ -287,6 +318,7 @@ jobs:
           assert all(row['status'] == 'passed' for row in report['examples'])
           assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb': 30, 'spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb': 3, 'spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb': 3}
           PY
+          POSTGRES_DATABASE=jrc_sd_bc_portal_concurrency_20261025_test JRC_CC_COMMITTED_RECORDING_FIXTURE=false bundle exec rails runner 'config = ApplicationRecord.connection_db_config; actual = ApplicationRecord.connection.current_database; owned = Rails.env.test? && ENV["GITHUB_ACTIONS"] == "true" && ENV["RUNNER_ENVIRONMENT"] == "github-hosted" && config.configuration_hash[:host] == "127.0.0.1" && actual == "jrc_sd_bc_portal_concurrency_20261025_test"; raise "Owned shared database required" unless owned; raise "Committed fixtures polluted native role regressions" unless CustomRole.count.zero?; File.write("/tmp/call-center-recording-fixture-isolation.json", JSON.generate({sha: ENV.fetch("GITHUB_SHA"), synthetic: true, native_main_database: actual, preserved_custom_role_count: 0, no_cleanup_or_permission_change: true}))'
       - name: Focused public source and CRM authorization before full regressions
         run: |
           bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_crm_rule_configuration_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_rule_configuration_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scoped_typed_readiness_spec.rb spec/services/jrc_contact_center/ending_actions/configuration_context_scoped_rules_spec.rb spec/services/jrc_contact_center/ending_actions/rule_source_authority_spec.rb --format progress --format json --out /tmp/call-center-ending-public-preflight.json
@@ -454,6 +486,17 @@ jobs:
           bundle exec rspec spec/models/jrc_nico/helpdesk/dispatch_intent_spec.rb --format progress --format json --out /tmp/call-center-nico-intent-reload-rspec.json
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_typed_destination_schema_probe"); JrcContactCenter::SyntheticTypedDestinationSchemaProbe.record("reload")'
           bundle exec rspec spec/services/jrc_contact_center/create_contact_center_typed_destinations_spec.rb --format progress --format json --out /tmp/call-center-typed-destination-reload-rspec.json
+          bundle exec rspec spec/models/jrc_contact_center/recording_task_link_spec.rb spec/services/jrc_contact_center/create_contact_center_recording_task_links_spec.rb --format progress --format json --out /tmp/call-center-recording-task-reload-rspec.json
+          python3 -B - <<'PY'
+          from collections import Counter
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-recording-task-reload-rspec.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) == 9
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/models/jrc_contact_center/recording_task_link_spec.rb': 5, 'spec/services/jrc_contact_center/create_contact_center_recording_task_links_spec.rb': 4}
+          PY
       - name: Human quality review exported schema reload and immutability
         id: quality_review_reload
         env:
@@ -648,8 +691,8 @@ jobs:
           python3 -B - <<'PY'
           from pathlib import Path
           values = sorted(int(path.name.split('_')[0]) for path in Path('db/migrate').glob('[0-9]*_*.rb'))
-          assert values[-1] == 20261126193000 and values.count(20261126193000) == 1
-          Path('/tmp/call-center-quality-baseline.txt').write_text(str(values[-2]))
+          assert values[-1] == 20261127003000 and values.count(20261127003000) == values.count(20261126193000) == 1
+          Path('/tmp/call-center-quality-baseline.txt').write_text(str(max(value for value in values if value < 20261126193000)))
           PY
           baseline=$(cat /tmp/call-center-quality-baseline.txt)
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
@@ -658,6 +701,40 @@ jobs:
           bundle exec rails db:migrate
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_quality_review_upgrade"); JrcContactCenter::SyntheticQualityReviewUpgrade.verify!'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_quality_schema_probe"); JrcContactCenter::SyntheticQualitySchemaProbe.record("populated")'
+      - name: Recording task populated upgrade preserves native history
+        id: recording_task_upgrade
+        env:
+          POSTGRES_DATABASE: jrc_cc_recording_task_upgrade_synthetic
+          SCHEMA: /tmp/call-center-recording-task-upgrade-schema.rb
+        run: |
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = jrc_cc_recording_task_upgrade_synthetic
+          test "$REDIS_URL" = redis://127.0.0.1:6379/15
+          python3 -B - <<'PY'
+          from pathlib import Path
+          values = sorted(int(path.name.split('_')[0]) for path in Path('db/migrate').glob('[0-9]*_*.rb'))
+          assert values[-1] == 20261127003000 and values.count(20261127003000) == values.count(20261126193000) == 1
+          Path('/tmp/call-center-recording-task-baseline.txt').write_text(str(max(value for value in values if value < 20261127003000)))
+          PY
+          baseline=$(cat /tmp/call-center-recording-task-baseline.txt)
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate VERSION="$baseline"
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_recording_task_upgrade"); JrcContactCenter::SyntheticRecordingTaskUpgrade.prepare!'
+          bundle exec rails db:migrate
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_recording_task_upgrade"); JrcContactCenter::SyntheticRecordingTaskUpgrade.verify!'
+          python3 -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          before = json.loads(Path('/tmp/call-center-recording-task-before.json').read_text())
+          proof = json.loads(Path('/tmp/call-center-recording-task-upgrade.json').read_text())
+          assert before['sha'] == proof['sha'] == os.environ['GITHUB_SHA'] and before['synthetic'] is proof['synthetic'] is True
+          assert proof['preserved_records'] == before['records']
+          assert proof['exact_old_columns_and_values_preserved'] is proof['rerun_idempotent'] is True
+          assert proof['existing_native_tasks'] == 2 and proof['existing_v1_successes'] == 1
+          assert proof['recording_task_links'] == 0 and proof['automatic_grants_or_retroactive_work'] is False
+          PY
       - name: Native ending origin and actual ACW completion preflight
         id: ending_origin_preflight
         run: |
@@ -917,6 +994,25 @@ jobs:
               actual[path] = actual.get(path, 0) + 1
           assert actual == expected
           PY
+      - name: Native recording task actual PostgreSQL idempotence and permission withdrawal
+        env:
+          POSTGRES_DATABASE: corporate_gratuity_disposable
+        run: |
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = corporate_gratuity_disposable
+          test "$REDIS_URL" = redis://127.0.0.1:6379/15
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recording_task_concurrency_spec.rb --format progress --format json --out /tmp/call-center-recording-task-concurrency-rspec.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-recording-task-concurrency-rspec.json').read_text())
+          assert report['summary']['example_count'] == len(report['examples']) == 2
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' and row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/recording_task_concurrency_spec.rb' for row in report['examples'])
+          assert len({row['id'] for row in report['examples']}) == 2
+          PY
       - name: Human quality review actual PostgreSQL conflicts and revocation
         id: quality_review_concurrency
         env:
@@ -963,7 +1059,7 @@ jobs:
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb \
             spec/serializers/jrc_approvals/request_serializer_pause_spec.rb \
-            --exclude-pattern '**/quality_review_concurrency_spec.rb,**/ending_service_desk_public_pipeline_spec.rb,**/ending_completion_projection_commit_spec.rb,**/ending_destination_commands_spec.rb,**/ending_manual_destination_intent_spec.rb,**/ending_selected_destination_retry_spec.rb,**/ending_typed_history_spec.rb,**/initial_destination_attempts_spec.rb,**/queue_destination_attempt_spec.rb,**/ending_typed_delivery_transaction_spec.rb,**/ending_typed_actual_broker_concurrency_spec.rb,**/ending_typed_mixed_destinations_spec.rb,**/ending_typed_execution_concurrency_spec.rb,**/synthetic_typed_destination_upgrade_spec.rb,**/ending_native_sd_update_concurrency_spec.rb,**/ending_native_crm_activity_concurrency_spec.rb,**/ending_native_service_desk_concurrency_spec.rb,**/ending_native_nico_queue_transaction_spec.rb,**/synthetic_nico_dispatch_upgrade_spec.rb,**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
+            --exclude-pattern '**/recording_task_concurrency_spec.rb,**/quality_review_concurrency_spec.rb,**/ending_service_desk_public_pipeline_spec.rb,**/ending_completion_projection_commit_spec.rb,**/ending_destination_commands_spec.rb,**/ending_manual_destination_intent_spec.rb,**/ending_selected_destination_retry_spec.rb,**/ending_typed_history_spec.rb,**/initial_destination_attempts_spec.rb,**/queue_destination_attempt_spec.rb,**/ending_typed_delivery_transaction_spec.rb,**/ending_typed_actual_broker_concurrency_spec.rb,**/ending_typed_mixed_destinations_spec.rb,**/ending_typed_execution_concurrency_spec.rb,**/synthetic_typed_destination_upgrade_spec.rb,**/ending_native_sd_update_concurrency_spec.rb,**/ending_native_crm_activity_concurrency_spec.rb,**/ending_native_service_desk_concurrency_spec.rb,**/ending_native_nico_queue_transaction_spec.rb,**/synthetic_nico_dispatch_upgrade_spec.rb,**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
         if: failure() && (steps.native_schema.outcome == 'failure' || steps.native_concurrency.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_fixture_core_preflight.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure' || steps.ending_history_lint.outcome == 'failure' || steps.ending_actual_broker_lint.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure' || steps.typed_destination_upgrade.outcome == 'failure' || steps.typed_destination_lint.outcome == 'failure' || steps.typed_destination_coverage.outcome == 'failure' || steps.typed_destination_concurrency.outcome == 'failure' || steps.typed_delivery_lint.outcome == 'failure' || steps.typed_delivery_commit.outcome == 'failure' || steps.typed_delivery_broker.outcome == 'failure')

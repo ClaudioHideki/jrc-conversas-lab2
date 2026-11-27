@@ -139,8 +139,8 @@
     "targeted_composable_functional_regressions_passed": 3
   },
   "next_grouped_increment": {
-    "document": "docs/jrc_contact_center/recording_actions_and_pause_candidate_20261126.json",
-    "sha256": "99f21ef149728c5e1116ae602d3565039d813eb5664ab6f9f65f056daa3eb59b",
+    "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+    "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
     "native_or_browser_accepted": false,
     "figures": [
       8,
@@ -149,8 +149,17 @@
       22,
       23
     ],
-    "single_sequential_CI": true,
-    "all_native_and_Chrome_on_new_SHA_required": true
+    "user_flow": "Consulta → Nova ação → tarefa nativa → persistência → revisão concluída com tarefa pendente → estado alterado no módulo de origem → navegação à tarefa.",
+    "reuse": "Editor/API/serviço/autorizações/recibo de idempotência nativos de Projetos; sem catálogo paralelo.",
+    "acceptance_requires": [
+      "35 novos exemplos Rails",
+      "2 cenários de concorrência PostgreSQL real",
+      "166 Vue direcionados",
+      "288 cenários Chrome em quatro modos",
+      "836 capturas verificadas e revisão visual representativa"
+    ],
+    "same_runner_separate_test_database_for_committed_fixture": true,
+    "do_not_wait_for_report_boundary_to_continue": true
   },
   "effective_hours_not_measured_not_fabricated": true,
   "grouped_delivery_status_is_bounded_not_whole_figure_acceptance": true,
@@ -163,5 +172,6 @@
     "Chrome_passed": 284,
     "Chrome_failed": 4,
     "whole_parent_accepted": false
-  }
+  },
+  "external_dependencies_separately_preserved": true
 }

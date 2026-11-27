@@ -1,1 +1,1168 @@
-{"figure": 22, "title": "Ações e histórico", "status": "pendente", "expected_functionality": "Detalhes - acoes e historico de providencias", "image": {"sha256": "c086ad15201f32e84d0226c78690700dbb8d1c0274fa451f730865be90b8695d", "duplicate_of": null, "actually_visually_read": true, "present_in_both_verified_documents": true}, "code": [{"path": "app/services/jrc_contact_center/quality_analysis_snapshot.rb", "git_blob_at_validated_base": "9e316ad13bf4e1516f70ebd5766d172caf49fbe3", "state": "presente_na_base_validada", "current_sha256": "03b41b93b6349f4162e8de1030d84819cd02a0a1c1baca67e53bb01e54d450cc"}, {"path": "app/services/jrc_projects/tasks/create.rb", "git_blob_at_validated_base": "d6f4b8a3dab909081cc283f37d633e4ad07a2759", "state": "presente_na_base_validada", "current_sha256": null}, {"path": "app/services/jrc_crm/activity_dispatch_service.rb", "git_blob_at_validated_base": "ba38aff7d3700c46498e970653ac0fdaa6d06ca0", "state": "presente_na_base_validada", "current_sha256": null}], "planned_not_present": [], "tests_native_related": [{"path": "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb", "passed_examples": 10, "sample_behaviours": ["JrcContactCenter::EndingActions::BlockingRevision leaves an enabled original rule eligible without changing its exact template or creating an effect", "JrcContactCenter::EndingActions::BlockingRevision blocks old pending work at the first disabled revision while retaining the immutable original history", "JrcContactCenter::EndingActions::BlockingRevision does not revive old blocked work after reactivation but permits origins pinned to the new active version"], "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a", "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"}, {"path": "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb", "passed_examples": 1, "sample_behaviours": ["JrcContactCenter::EndingActions::Catalogue puts only revision and a random nonce in the public head without a private template or dictionary-testable definition hash"], "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a", "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"}, {"path": "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb", "passed_examples": 13, "sample_behaviours": ["JrcContactCenter::EndingActions::ConfigureRule persists an explicitly authorized private rule and native audit without exposing its template through account settings", "JrcContactCenter::EndingActions::ConfigureRule keeps the same exact rule retry as a no-op without a second version or audit", "JrcContactCenter::EndingActions::ConfigureRule audits an authorized deactivation while keeping prior definitions and an identical inactive retry unchanged"], "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a", "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"}, {"path": "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb", "passed_examples": 34, "sample_behaviours": ["JrcContactCenter::EndingActions::RuleDefinition accepts an explicitly typed stored definition without creating native destination records", "JrcContactCenter::EndingActions::RuleDefinition preserves an explicitly disabled rule instead of dropping false or activating it", "JrcContactCenter::EndingActions::RuleDefinition accepts explicit outcome conditions only after actual ACW completion"], "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a", "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"}, {"path": "spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb", "passed_examples": 25, "sample_behaviours": ["JrcContactCenter::EndingActions::TaskDefinition preserves explicit literal values without creating a task or copying attendance content", "JrcContactCenter::EndingActions::TaskDefinition preserves an explicit zero-day offset and zero estimated minutes instead of treating them as absent", "JrcContactCenter::EndingActions::TaskDefinition normalizes only canonical positive integer references, retaining an explicit unassigned native task"], "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a", "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"}, {"path": "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb", "passed_examples": 30, "sample_behaviours": ["JrcContactCenter::QualityAnalysisSnapshot keeps actual quality, sentiment, zero score, missing confidence and original transcript distinct", "JrcContactCenter::QualityAnalysisSnapshot does not let mutation of the reader DTO change the captured original or fingerprint", "JrcContactCenter::QualityAnalysisSnapshot fingerprints the same native JSON independently of top-level symbol or object-key order"], "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a", "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"}], "tests_vue_related_not_browser_proof": [], "chrome_related_titles_not_complete_figure_acceptance": ["confirmed ending classification native keeps incomplete ACW open, survives reload and rejects changed reasons and foreign actors", "ending reason native catalogue persists revisions and deactivation with filtering paging and authorized rule selection", "fifteen permission-bound cards, actual CSS, honest pending states and no overflow", "pending ACW native draft persists incomplete answers and completes only after explicit tabulation", "pending ACW native navigation reviews unsaved edits preserves saved state and leaves other modules untouched", "pending ACW native review preserves local answers blocks stale writes and requires explicit reconciliation", "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya", "versioned ending automation native editor persists reviewed private rules and denies stale or unauthorized changes without executing destinations"], "requirements": [{"id": "D1-P0205-C01", "expected": "Utilizar o layout da área existente de Gravações e Qualidade como referência, com linguagem roxa e azul e popup de detalhes.", "sources": [{"document": "doc1", "paragraph": 205, "clause": 1}, {"document": "doc2", "paragraph": 356, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D1-P0207-C01", "expected": "Visão principal: totais, percentuais positivo/neutro/negativo, filtros, interações, distribuição e insights.", "sources": [{"document": "doc1", "paragraph": 207, "clause": 1}, {"document": "doc2", "paragraph": 358, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D1-P0208-C01", "expected": "Popup: abas Análise do Nico, Transcrição, Gravação, Contexto e Ações e Histórico.", "sources": [{"document": "doc1", "paragraph": 208, "clause": 1}, {"document": "doc2", "paragraph": 359, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D1-P0209-C01", "expected": "Análise por trecho ligada a timestamps, playback e transcrição; nota de qualidade separada do sentimento.", "sources": [{"document": "doc1", "paragraph": 209, "clause": 1}, {"document": "doc2", "paragraph": 360, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D1-P0210-C01", "expected": "Contexto usa cadastro de cliente, contratos, Service Desk, CRM e Relacionamento, com acesso limitado por perfil.", "sources": [{"document": "doc1", "paragraph": 210, "clause": 1}, {"document": "doc2", "paragraph": 361, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D1-P0211-C01", "expected": "Ações e Histórico utilizam tarefas existentes, responsáveis, prazos, vinculação de chamados e revisões auditadas.", "sources": [{"document": "doc1", "paragraph": 211, "clause": 1}, {"document": "doc2", "paragraph": 362, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D1-P0213-C01", "expected": "Sentimento é estimativa de IA; distinguir negativo de crítico.", "sources": [{"document": "doc1", "paragraph": 213, "clause": 1}, {"document": "doc2", "paragraph": 364, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D1-P0214-C01", "expected": "Classificação corrigida por humano convive com resultado original imutável e justificativa.", "sources": [{"document": "doc1", "paragraph": 214, "clause": 1}, {"document": "doc2", "paragraph": 365, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D1-P0215-C01", "expected": "A seleção de fala ou ponto do gráfico move o player ao timestamp correspondente.", "sources": [{"document": "doc1", "paragraph": 215, "clause": 1}, {"document": "doc2", "paragraph": 366, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D1-P0216-C01", "expected": "Salvar e Concluir encerra somente a revisão da análise, não as tarefas/chamados pendentes.", "sources": [{"document": "doc1", "paragraph": 216, "clause": 1}, {"document": "doc2", "paragraph": 367, "clause": 1}], "figures": [18, 19, 20, 21, 22, 23], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0415-C01", "expected": "Acompanhar plano de acoes, tarefas, responsaveis, prazos, status e integracoes a partir da analise.", "sources": [{"document": "doc2", "paragraph": 415, "clause": 1}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0416-C01", "expected": "Acoes e resultado do clique: Aba Acoes e Historico: listar acoes vinculadas, status, responsavel e prazo.", "sources": [{"document": "doc2", "paragraph": 416, "clause": 1}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0416-C02", "expected": "Nova Acao: usar modulo de tarefas/projetos ja existente e salvar vinculo ao call_id.", "sources": [{"document": "doc2", "paragraph": 416, "clause": 2}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0416-C03", "expected": "Abrir tarefa, chamado ou registro de Relacionamento: navegar ao objeto existente.", "sources": [{"document": "doc2", "paragraph": 416, "clause": 3}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0416-C04", "expected": "Corrigir Analise: iniciar revisao;", "sources": [{"document": "doc2", "paragraph": 416, "clause": 4}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0416-C05", "expected": "Salvar e Concluir: encerrar somente revisao da analise, sem finalizar tarefas ou chamados pendentes.", "sources": [{"document": "doc2", "paragraph": 416, "clause": 5}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0417-C01", "expected": "Campos e dados apresentados: Historico cronologico de eventos do Nico, intervencao humana, criacao/vinculo de tarefa, atualizacao de responsavel, notificacao e conclusao.", "sources": [{"document": "doc2", "paragraph": 417, "clause": 1}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0417-C02", "expected": "Cada item deve ter autoria, data, origem, id de correlacao e estado consultado no modulo de origem.", "sources": [{"document": "doc2", "paragraph": 417, "clause": 2}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0418-C01", "expected": "Regras e permissoes: Evitar tarefas duplicadas ao repetir clique ou reprocessar analise; usar idempotencia e identificar vinculo existente.", "sources": [{"document": "doc2", "paragraph": 418, "clause": 1}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0418-C02", "expected": "Nico pode recomendar, mas nao executar providencias restritas sem permissao/fluxo de aprovacao.", "sources": [{"document": "doc2", "paragraph": 418, "clause": 2}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0418-C03", "expected": "Status de tarefa nao e controlado apenas pelo popup.", "sources": [{"document": "doc2", "paragraph": 418, "clause": 3}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0419-C01", "expected": "Estados de erro e excecoes: Ao falhar criacao de chamado/tarefa, indicar falha sem mostrar numero inexistente.", "sources": [{"document": "doc2", "paragraph": 419, "clause": 1}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0419-C02", "expected": "Ao voltar ao popup, atualizar estados sem perder historico.", "sources": [{"document": "doc2", "paragraph": 419, "clause": 2}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0419-C03", "expected": "Nao ocultar pendencias por finalizar revisao.", "sources": [{"document": "doc2", "paragraph": 419, "clause": 3}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0421-C01", "expected": "• F22-A: repetir Nova Acao com a mesma requisicao nao gera duplicidade de tarefa.", "sources": [{"document": "doc2", "paragraph": 421, "clause": 1}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}, {"id": "D2-P0422-C01", "expected": "• F22-B: Salvar e Concluir finaliza a revisao mas preserva tarefa Pendente com seu responsavel e prazo.", "sources": [{"document": "doc2", "paragraph": 422, "clause": 1}], "figures": [22], "status": "pendente", "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.", "code_reference_ids": [0, 1, 2], "test_reference_ids": [0, 1, 2, 3, 4, 5], "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.", "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "candidate_test_reference_ids_not_approval": []}], "divergences": ["Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."], "previous_matrix_is_historical_not_acceptance": true, "complete_figure_accepted": false, "tests_candidate_not_validated": [], "next_grouped_native_user_delivery_not_acceptance": {"document": "docs/jrc_contact_center/recording_actions_and_pause_candidate_20261126.json", "sha256": "99f21ef149728c5e1116ae602d3565039d813eb5664ab6f9f65f056daa3eb59b", "native_or_browser_accepted": false}, "whole_figure_accepted": false}
+{
+  "figure": 22,
+  "title": "Ações e histórico",
+  "status": "pendente",
+  "expected_functionality": "Detalhes - acoes e historico de providencias",
+  "image": {
+    "sha256": "c086ad15201f32e84d0226c78690700dbb8d1c0274fa451f730865be90b8695d",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/services/jrc_contact_center/quality_analysis_snapshot.rb",
+      "git_blob_at_validated_base": "9e316ad13bf4e1516f70ebd5766d172caf49fbe3",
+      "state": "presente_na_base_validada",
+      "current_sha256": "03b41b93b6349f4162e8de1030d84819cd02a0a1c1baca67e53bb01e54d450cc"
+    },
+    {
+      "path": "app/services/jrc_projects/tasks/create.rb",
+      "git_blob_at_validated_base": "d6f4b8a3dab909081cc283f37d633e4ad07a2759",
+      "state": "presente_na_base_validada",
+      "current_sha256": null
+    },
+    {
+      "path": "app/services/jrc_crm/activity_dispatch_service.rb",
+      "git_blob_at_validated_base": "ba38aff7d3700c46498e970653ac0fdaa6d06ca0",
+      "state": "presente_na_base_validada",
+      "current_sha256": null
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::BlockingRevision leaves an enabled original rule eligible without changing its exact template or creating an effect",
+        "JrcContactCenter::EndingActions::BlockingRevision blocks old pending work at the first disabled revision while retaining the immutable original history",
+        "JrcContactCenter::EndingActions::BlockingRevision does not revive old blocked work after reactivation but permits origins pinned to the new active version"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb",
+      "passed_examples": 1,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::Catalogue puts only revision and a random nonce in the public head without a private template or dictionary-testable definition hash"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb",
+      "passed_examples": 13,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::ConfigureRule persists an explicitly authorized private rule and native audit without exposing its template through account settings",
+        "JrcContactCenter::EndingActions::ConfigureRule keeps the same exact rule retry as a no-op without a second version or audit",
+        "JrcContactCenter::EndingActions::ConfigureRule audits an authorized deactivation while keeping prior definitions and an identical inactive retry unchanged"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb",
+      "passed_examples": 34,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::RuleDefinition accepts an explicitly typed stored definition without creating native destination records",
+        "JrcContactCenter::EndingActions::RuleDefinition preserves an explicitly disabled rule instead of dropping false or activating it",
+        "JrcContactCenter::EndingActions::RuleDefinition accepts explicit outcome conditions only after actual ACW completion"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb",
+      "passed_examples": 25,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::TaskDefinition preserves explicit literal values without creating a task or copying attendance content",
+        "JrcContactCenter::EndingActions::TaskDefinition preserves an explicit zero-day offset and zero estimated minutes instead of treating them as absent",
+        "JrcContactCenter::EndingActions::TaskDefinition normalizes only canonical positive integer references, retaining an explicit unassigned native task"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+      "passed_examples": 30,
+      "sample_behaviours": [
+        "JrcContactCenter::QualityAnalysisSnapshot keeps actual quality, sentiment, zero score, missing confidence and original transcript distinct",
+        "JrcContactCenter::QualityAnalysisSnapshot does not let mutation of the reader DTO change the captured original or fingerprint",
+        "JrcContactCenter::QualityAnalysisSnapshot fingerprints the same native JSON independently of top-level symbol or object-key order"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "confirmed ending classification native keeps incomplete ACW open, survives reload and rejects changed reasons and foreign actors",
+    "ending reason native catalogue persists revisions and deactivation with filtering paging and authorized rule selection",
+    "fifteen permission-bound cards, actual CSS, honest pending states and no overflow",
+    "pending ACW native draft persists incomplete answers and completes only after explicit tabulation",
+    "pending ACW native navigation reviews unsaved edits preserves saved state and leaves other modules untouched",
+    "pending ACW native review preserves local answers blocks stale writes and requires explicit reconciliation",
+    "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya",
+    "versioned ending automation native editor persists reviewed private rules and denies stale or unauthorized changes without executing destinations"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0205-C01",
+      "expected": "Utilizar o layout da área existente de Gravações e Qualidade como referência, com linguagem roxa e azul e popup de detalhes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 205,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 356,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0207-C01",
+      "expected": "Visão principal: totais, percentuais positivo/neutro/negativo, filtros, interações, distribuição e insights.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 207,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 358,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0208-C01",
+      "expected": "Popup: abas Análise do Nico, Transcrição, Gravação, Contexto e Ações e Histórico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 208,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 359,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0209-C01",
+      "expected": "Análise por trecho ligada a timestamps, playback e transcrição; nota de qualidade separada do sentimento.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 209,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 360,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0210-C01",
+      "expected": "Contexto usa cadastro de cliente, contratos, Service Desk, CRM e Relacionamento, com acesso limitado por perfil.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 210,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 361,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0211-C01",
+      "expected": "Ações e Histórico utilizam tarefas existentes, responsáveis, prazos, vinculação de chamados e revisões auditadas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 211,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 362,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0213-C01",
+      "expected": "Sentimento é estimativa de IA; distinguir negativo de crítico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 213,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 364,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0214-C01",
+      "expected": "Classificação corrigida por humano convive com resultado original imutável e justificativa.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 214,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 365,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0215-C01",
+      "expected": "A seleção de fala ou ponto do gráfico move o player ao timestamp correspondente.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 215,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 366,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0216-C01",
+      "expected": "Salvar e Concluir encerra somente a revisão da análise, não as tarefas/chamados pendentes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 216,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 367,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0415-C01",
+      "expected": "Acompanhar plano de acoes, tarefas, responsaveis, prazos, status e integracoes a partir da analise.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 415,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0416-C01",
+      "expected": "Acoes e resultado do clique: Aba Acoes e Historico: listar acoes vinculadas, status, responsavel e prazo.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 416,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0416-C02",
+      "expected": "Nova Acao: usar modulo de tarefas/projetos ja existente e salvar vinculo ao call_id.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 416,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0416-C03",
+      "expected": "Abrir tarefa, chamado ou registro de Relacionamento: navegar ao objeto existente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 416,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0416-C04",
+      "expected": "Corrigir Analise: iniciar revisao;",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 416,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0416-C05",
+      "expected": "Salvar e Concluir: encerrar somente revisao da analise, sem finalizar tarefas ou chamados pendentes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 416,
+          "clause": 5
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0417-C01",
+      "expected": "Campos e dados apresentados: Historico cronologico de eventos do Nico, intervencao humana, criacao/vinculo de tarefa, atualizacao de responsavel, notificacao e conclusao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 417,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0417-C02",
+      "expected": "Cada item deve ter autoria, data, origem, id de correlacao e estado consultado no modulo de origem.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 417,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0418-C01",
+      "expected": "Regras e permissoes: Evitar tarefas duplicadas ao repetir clique ou reprocessar analise; usar idempotencia e identificar vinculo existente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 418,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0418-C02",
+      "expected": "Nico pode recomendar, mas nao executar providencias restritas sem permissao/fluxo de aprovacao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 418,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0418-C03",
+      "expected": "Status de tarefa nao e controlado apenas pelo popup.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 418,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0419-C01",
+      "expected": "Estados de erro e excecoes: Ao falhar criacao de chamado/tarefa, indicar falha sem mostrar numero inexistente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 419,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0419-C02",
+      "expected": "Ao voltar ao popup, atualizar estados sem perder historico.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 419,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0419-C03",
+      "expected": "Nao ocultar pendencias por finalizar revisao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 419,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0421-C01",
+      "expected": "• F22-A: repetir Nova Acao com a mesma requisicao nao gera duplicidade de tarefa.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 421,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    },
+    {
+      "id": "D2-P0422-C01",
+      "expected": "• F22-B: Salvar e Concluir finaliza a revisao mas preserva tarefa Pendente com seu responsavel e prazo.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 422,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        22
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ],
+      "candidate_test_reference_ids_not_approval": [],
+      "prepared_current_implementation_not_native_acceptance": {
+        "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+        "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+        "native_or_browser_accepted": false
+      }
+    }
+  ],
+  "divergences": [
+    "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": [],
+  "next_grouped_native_user_delivery_not_acceptance": {
+    "document": "docs/jrc_contact_center/recording_actions_and_pause_candidate_20261126.json",
+    "sha256": "99f21ef149728c5e1116ae602d3565039d813eb5664ab6f9f65f056daa3eb59b",
+    "native_or_browser_accepted": false
+  },
+  "whole_figure_accepted": false,
+  "next_native_manual_Task_and_current_state_candidate": {
+    "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+    "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+    "native_or_browser_accepted": false
+  }
+}

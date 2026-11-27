@@ -1,0 +1,28 @@
+{
+  "parent": "4814a73c87d99206862e72946859bf1f68e0e9f3",
+  "failed_run": 45941076722,
+  "failed_job": 140315275947,
+  "artifact": 15174071373,
+  "artifact_sha256": "4f633bc292a66f53505833d91d6526e5e8b6099c8d7dd5df22424473cd73b756",
+  "sanitized_log_sha256": "6477d869d95049c662edf6413271fe7a3c3ef4e38dd63c91631eb03be28e16e5",
+  "cause": "Committed recording fixtures correctly preserved six native CustomRoles in the shared database; unrelated existing CustomRoles API regression expects global count zero.",
+  "source_sha256": {
+    "script/jrc_call_center_pause_seed.rb": "4fd21318e7aba52768e84ed96395208272ea4439fd7ef823296a15d55a4d863a",
+    "script/jrc_call_center_recordings_seed.rb": "0c3081f63f0b945cf8180644e9b51afb04a17df2dafc968267b0e6a05e1338e4",
+    "spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb": "e662f3c33b51805e0b1b4d574c4f23565ac4f08f0b8244045a85598641030e6d",
+    ".github/workflows/call-center-administration.yml": "798ec902526c2190f47d650073f7ba33849f3e510b14f1f6e6e6b0901b4223a7"
+  },
+  "parent_sources": {
+    "script/jrc_call_center_pause_seed.rb": "87ec1739dbe3252acd680e07aa62ef0fc353ee0177f3bd533dc7d5e2dd4012c8",
+    "script/jrc_call_center_recordings_seed.rb": "c2440f045390f56091563d2541448d0c3f60d3548a0ffcff14436cb966ff77ec",
+    "spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb": "8c2bb1e825719d1658b734d0dac912b1908644f18bfa6b417d63010cfc60c963",
+    ".github/workflows/call-center-administration.yml": "5e09b7be4500a267af2bf8fd13da07c9b240d21896ab58a4619133a5728aa6d8"
+  },
+  "separate_database": "jrc_cc_recording_fixture_committed_test",
+  "existing_PostgreSQL_service_reused": true,
+  "default_database_and_all31_scenarios_preserved": true,
+  "separate_database_requires_explicit_flag_actual_database_and_recording_only": true,
+  "all_36_preflight_examples_and_original_role_count_assertion_preserved": true,
+  "no_account_history_cleanup_or_product_permission_changes": true,
+  "native_or_Chrome_acceptance": false
+}

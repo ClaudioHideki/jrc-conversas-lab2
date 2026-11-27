@@ -29,11 +29,11 @@ class JrcContactCenter::SyntheticPauseSeed
     config = ActiveRecord::Base.connection_db_config
     owned = [
       ENV['GITHUB_ACTIONS'] == 'true', ENV['RUNNER_ENVIRONMENT'] == 'github-hosted', Rails.env.test?,
-      config.database == 'jrc_sd_bc_portal_concurrency_20261025_test', config.configuration_hash[:host] == '127.0.0.1',
+      JrcContactCenter::SyntheticRecordingsSeed.owned_database?(config), config.configuration_hash[:host] == '127.0.0.1',
       ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'
     ].all?
     raise 'Owned synthetic pause runner required' unless owned
-    raise 'Unknown synthetic scenarios' unless scenarios.is_a?(Array) && !scenarios.empty? && (scenarios - SCENARIOS).empty?
+    raise 'Unknown synthetic scenarios' unless JrcContactCenter::SyntheticRecordingsSeed.allowed_scenarios?(scenarios, SCENARIOS)
 
     projects.index_with do |project|
       scenarios.index_with do |kind|

@@ -1,5 +1,12 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import CallRecordingPlayer from 'dashboard/components-next/Calls/CallRecordingPlayer.vue';
@@ -10,6 +17,7 @@ import RecordingCallContext from './RecordingCallContext.vue';
 import QualityReviewHistory from './QualityReviewHistory.vue';
 import RecordingEndingActions from './RecordingEndingActions.vue';
 import RecordingAnalysis from './RecordingAnalysis.vue';
+import RecordingManualTasks from './RecordingManualTasks.vue';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -21,7 +29,13 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   error: { type: String, default: '' },
 });
+
 const emit = defineEmits(['close', 'playback', 'download', 'playback-error']);
+
+const RecordingTaskCreate = defineAsyncComponent(
+  () => import('./RecordingTaskCreate.vue')
+);
+
 const { t } = useI18n();
 const dialog = ref(null);
 const activeTab = ref('recording');
@@ -29,6 +43,24 @@ const showHistory = ref(false);
 const showQuality = ref(false);
 const showQualityHistory = ref(false);
 const showActions = ref(false);
+const showTaskCreate = ref(false);
+const manualTasksRevision = ref(0);
+const closeDetails = () => {
+  if (!showTaskCreate.value) emit('close');
+};
+const createManualTask = () => {
+  if (!props.capabilities.recordings_listen) return;
+  // Native HTML dialog top-layer must be suspended before the existing
+  // Projects modal opens. Keep the selected recording and history mounted.
+  showTaskCreate.value = true;
+  dialog.value.close();
+};
+const closeTaskCreate = async () => {
+  if (!showTaskCreate.value) return;
+  showTaskCreate.value = false;
+  await nextTick();
+  if (props.capabilities.recordings_listen) dialog.value?.open();
+};
 watch(
   () => props.capabilities.audit,
   allowed => {
@@ -53,6 +85,7 @@ watch(
     showQuality.value = false;
     showQualityHistory.value = false;
     showActions.value = false;
+    showTaskCreate.value = false;
   },
   { flush: 'sync' }
 );
@@ -185,7 +218,7 @@ onMounted(() => dialog.value.open());
     :use-form="false"
     :close-on-click-outside="false"
     contained
-    @close="emit('close')"
+    @close="closeDetails"
   >
     <div
       class="min-w-0 space-y-4 text-sm text-n-slate-12"
@@ -337,6 +370,17 @@ onMounted(() => dialog.value.open());
         :aria-labelledby="identity('tab', 'actions')"
         class="space-y-4"
       >
+        <RecordingManualTasks
+          v-if="capabilities.recordings_listen"
+          :key="`${accountId}-${item.id}`"
+          :account-id="accountId"
+          :recording-id="item.id"
+          :call-session-id="item.call_session_id"
+          :call-id="item.unique_id"
+          :authority-key="JSON.stringify([accountId, item.id, capabilities])"
+          :revision="manualTasksRevision"
+          @create="createManualTask"
+        />
         <QualityReviewHistory
           v-if="showQualityHistory && capabilities.recordings_listen"
           :key="`${accountId}-${item.id}`"
@@ -373,6 +417,15 @@ onMounted(() => dialog.value.open());
       </button>
     </div>
   </Dialog>
+  <RecordingTaskCreate
+    v-if="showTaskCreate && capabilities.recordings_listen"
+    :key="`${accountId}-${item.id}`"
+    :account-id="accountId"
+    :recording-id="item.id"
+    :authority-key="JSON.stringify([accountId, item.id, capabilities])"
+    @close="closeTaskCreate"
+    @changed="manualTasksRevision += 1"
+  />
   <QualityReviewDialog
     v-if="showQuality && capabilities.recordings_listen"
     :key="`${accountId}-${item.id}`"

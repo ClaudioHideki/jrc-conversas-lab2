@@ -4382,5 +4382,10 @@
       23
     ],
     "parent_failed_not_accepted": true
+  },
+  "next_native_manual_Task_delivery": {
+    "document": "docs/jrc_contact_center/manual_recording_task_candidate_20261127.json",
+    "sha256": "8874729d776f25ed09be7af4133a9d9960c383697fdab3ab4cef9be4a6314252",
+    "native_or_browser_accepted": false
   }
 }

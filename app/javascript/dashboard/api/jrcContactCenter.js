@@ -46,6 +46,14 @@ const calendarIdentity = value => {
 };
 
 export default {
+  recordingTasks: (accountId, id, page = 1) =>
+    axios.get(`${base(accountId)}/recordings/${recordIdentity(id)}/tasks`, {
+      params: { page },
+    }),
+  createRecordingTask: (accountId, id, input) =>
+    axios.post(`${base(accountId)}/recordings/${recordIdentity(id)}/tasks`, {
+      recording_task: input,
+    }),
   manualEndingActions: (accountId, qualificationId, page = 1) =>
     axios.get(
       `${base(accountId)}/qualifications/${recordIdentity(qualificationId)}/ending_destinations`,

@@ -1,0 +1,31 @@
+{
+  "sha": "4814a73c87d99206862e72946859bf1f68e0e9f3",
+  "run": 45941076722,
+  "job": 140315275947,
+  "artifact": 15174071373,
+  "artifact_sha256": "4f633bc292a66f53505833d91d6526e5e8b6099c8d7dd5df22424473cd73b756",
+  "complete_failed_report_sha256": "8d0a1a87cc72965976d3f3dcae645cf0131b89152625b54020e560588d41e91f",
+  "native_examples_in_available_reports": 3696,
+  "single_failed_completed_RSpec_report": {
+    "path": "tmp/call-center-rspec.json",
+    "summary": {
+      "duration": 716.698160099,
+      "example_count": 3298,
+      "failure_count": 1,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "failures": [
+      {
+        "description": "Custom Roles API DELETE #destroy when it is an authenticated administrator deletes the custom role",
+        "location": "./spec/enterprise/controllers/api/v1/accounts/custom_roles_controller_spec.rb",
+        "line": 149,
+        "class": "RSpec::Expectations::ExpectationNotMetError",
+        "message": "\nexpected: 0\n     got: 6\n\n(compared using ==)\n"
+      }
+    ]
+  },
+  "main_Rails_total": 3298,
+  "unexecuted_assets_Chrome_and_later_gates_not_accepted": true,
+  "correction": "Separate owned database for committed fixtures; no cleanup and no weakened global role-count assertion."
+}

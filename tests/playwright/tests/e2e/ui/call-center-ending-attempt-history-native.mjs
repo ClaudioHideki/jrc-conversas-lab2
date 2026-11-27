@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { openLoadedNativeTask } from './call-center-native-loaded-task-view.mjs';
+import { verifyNativeTaskCurrentState } from './call-center-native-task-state.mjs';
 import fs from 'node:fs';
 import { measureTextContrast } from './call-center-text-contrast.mjs';
 
@@ -136,6 +137,12 @@ export async function verifyEndingAttemptHistory(parent, info, target) {
       `Actual native history state contrast: ${JSON.stringify(stateContrast)}`
     ).toBe(true);
     await expect(panel.locator('[data-ending-attempt-target]')).toHaveCount(1);
+    const nativeTaskState = await verifyNativeTaskCurrentState(page, panel, {
+      accountId: account,
+      projectId: target.automation_project_id,
+      taskId: target.history_task_id,
+    });
+    await capture('native-current-state');
     await capture('independent-outcomes');
     panel = await showHistory();
     await panel.getByRole('button', { name: 'Próxima', exact: true }).click();
@@ -190,6 +197,7 @@ export async function verifyEndingAttemptHistory(parent, info, target) {
           persisted_after_reload: true,
           ordinary_other_agent_status: denied.status(),
           native_task_view: nativeTaskView,
+          native_task_current_state: nativeTaskState,
           native_task_route_opened: true,
           prohibited_mutations_or_external_calls: prohibited,
           page_errors: errors,

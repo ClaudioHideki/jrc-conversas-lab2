@@ -13,7 +13,8 @@ RSpec.describe 'Owned committed recording fixture and native read', :pabx, type:
     conditions = [Rails.env.test?, ENV['GITHUB_ACTIONS'] == 'true', ENV['RUNNER_ENVIRONMENT'] == 'github-hosted',
                   ENV['GITHUB_REF_NAME'] == 'codex/call-center-control-desk-20261116',
                   config.configuration_hash[:host] == '127.0.0.1', ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15',
-                  ApplicationRecord.connection.current_database == 'jrc_sd_bc_portal_concurrency_20261025_test']
+                  ENV['JRC_CC_COMMITTED_RECORDING_FIXTURE'] == 'true',
+                  ApplicationRecord.connection.current_database == 'jrc_cc_recording_fixture_committed_test']
     raise 'Owned committed recording fixture database required' unless conditions.all?
     raise 'An outer fixture transaction would hide the native lifecycle' if ApplicationRecord.connection.transaction_open?
 

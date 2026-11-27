@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'jrc_call_center_recording_task_seed'
+
 # Exclusive synthetic records for the existing native browser runner. Never imports a real CDR or issues a provider request.
 class JrcContactCenter::SyntheticRecordingsSeed
   MARKER = 'jrc_cc_owned_recordings_fixture'
@@ -7,6 +9,22 @@ class JrcContactCenter::SyntheticRecordingsSeed
 
   def self.call(account:, operator:, viewer:, queues:)
     new(account, operator, viewer, queues).call
+  end
+
+  # One additional, explicitly opted-in disposable preflight database. Never
+  # infer ownership from the name alone or broaden the default fixture scope.
+  def self.owned_database?(config)
+    expected = if ENV['JRC_CC_COMMITTED_RECORDING_FIXTURE'] == 'true'
+                 'jrc_cc_recording_fixture_committed_test'
+               else
+                 'jrc_sd_bc_portal_concurrency_20261025_test'
+               end
+    config.database == expected && ApplicationRecord.connection.current_database == expected
+  end
+
+  def self.allowed_scenarios?(values, allowed)
+    valid = values.is_a?(Array) && !values.empty? && (values - allowed).empty?
+    valid && (ENV['JRC_CC_COMMITTED_RECORDING_FIXTURE'] != 'true' || values == ['recordings'])
   end
 
   def initialize(account, operator, viewer, queues)
@@ -27,7 +45,8 @@ class JrcContactCenter::SyntheticRecordingsSeed
     install_marker!(rows.values + extras)
     { recordings: rows.transform_values { |record| recording_identity(record) },
       authorized_recording_count: 21, recording_provider_boundary: 'synthetic_in_memory_wav_not_external_homologation',
-      quality_history_record: recording_identity(extras.first), ending_context: owned_ending_context(extras.first) }
+      quality_history_record: recording_identity(extras.first), ending_context: owned_ending_context(extras.first),
+      manual_task_destination: JrcContactCenter::SyntheticRecordingTaskSeed.call(account: @account, operator: @operator) }
   end
 
   private
@@ -62,7 +81,7 @@ class JrcContactCenter::SyntheticRecordingsSeed
     config = ApplicationRecord.connection_db_config
     runtime = [Rails.env.test?, ENV['GITHUB_ACTIONS'] == 'true', ENV['RUNNER_ENVIRONMENT'] == 'github-hosted',
                ENV['GITHUB_REF_NAME'] == 'codex/call-center-control-desk-20261116',
-               config.database == 'jrc_sd_bc_portal_concurrency_20261025_test', config.configuration_hash[:host] == '127.0.0.1',
+               self.class.owned_database?(config), config.configuration_hash[:host] == '127.0.0.1',
                ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15', ENV.fetch('GITHUB_SHA', '').match?(/\A[0-9a-f]{40}\z/)].all?
     raise 'Owned synthetic recording scope required' unless runtime && owned_account?
   end

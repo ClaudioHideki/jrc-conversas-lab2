@@ -6,6 +6,7 @@ import { usePendingEndingRun } from './usePendingEndingRun';
 import PendingEndingReview from './PendingEndingReview.vue';
 import { destinationHistoryRoute } from './endingDestinationHistoryContract';
 import { useEndingDestinationRequests } from './useEndingDestinationRequests';
+import EndingTaskState from './EndingTaskState.vue';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -300,6 +301,13 @@ const operationLabel = row =>
           >
             {{ t('JRC_CONTACT_CENTER.ENDING_DESTINATION_REQUESTS.RETRY') }}
           </button>
+          <EndingTaskState
+            v-if="row.target?.kind === 'project_task'"
+            :account-id="accountId"
+            :project-id="row.target.project_id"
+            :task-id="row.target.id"
+            :authority-key="authorityKey"
+          />
           <router-link
             v-if="targetRoute(row)"
             :to="targetRoute(row)"

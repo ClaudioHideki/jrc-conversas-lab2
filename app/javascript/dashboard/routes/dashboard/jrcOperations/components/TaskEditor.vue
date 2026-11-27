@@ -24,6 +24,7 @@ const props = defineProps({
   task: Object,
   initialColumnId: { type: [Number, String], default: null },
   tasks: { type: Array, default: () => [] },
+  createRequest: { type: Function, default: null },
 });
 const emit = defineEmits(['close', 'changed', 'open']);
 const { accountId, userId, projectText } = useProjects();
@@ -211,11 +212,13 @@ async function submit() {
         lock_version: formVersion.value,
       },
     };
-    await request(
-      accountId.value,
-      props.task ? `${base}/${props.task.id}` : base,
-      { method: props.task ? 'patch' : 'post', data }
-    );
+    if (!props.task && props.createRequest) await props.createRequest(data);
+    else
+      await request(
+        accountId.value,
+        props.task ? `${base}/${props.task.id}` : base,
+        { method: props.task ? 'patch' : 'post', data }
+      );
     emit('changed');
     emit('close');
   } catch (err) {

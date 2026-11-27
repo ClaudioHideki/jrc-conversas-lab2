@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
-import { enableAutoUnmount, mount } from '@vue/test-utils';
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import RecordingDetailsDialog from './RecordingDetailsDialog.vue';
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
@@ -42,6 +42,8 @@ const create = overrides =>
         RecordingCallContext: true,
         QualityReviewHistory: true,
         RecordingEndingActions: true,
+        RecordingManualTasks: true,
+        RecordingTaskCreate: true,
       },
     },
   });
@@ -341,5 +343,72 @@ describe('authorized native recording details popup', () => {
       wrapper.get('[data-recording-audio-open]').attributes('aria-selected')
     ).toBe('true');
     expect(wrapper.findAll('[role="tab"]')).toHaveLength(1);
+  });
+  it('suspends the original dialog for the native Task editor and returns to the same recording on explicit Cancel', async () => {
+    const wrapper = create({
+      capabilities: { recordings_listen: true, operate: true },
+    });
+    const nativeDialog = wrapper.getComponent(Dialog);
+    expect(nativeDialog.vm.open).toHaveBeenCalledTimes(1);
+    await wrapper.get('[data-recording-actions-open]').trigger('click');
+    wrapper.getComponent({ name: 'RecordingManualTasks' }).vm.$emit('create');
+    await flushPromises();
+    expect(wrapper.emitted('close')).toBeUndefined();
+    const creator = wrapper.getComponent({ name: 'RecordingTaskCreate' });
+    expect(creator.props()).toMatchObject({
+      accountId: 1,
+      recordingId: item.id,
+    });
+    creator.vm.$emit('close');
+    await flushPromises();
+    expect(nativeDialog.vm.open).toHaveBeenCalledTimes(2);
+    expect(
+      wrapper
+        .getComponent({ name: 'RecordingManualTasks' })
+        .props('recordingId')
+    ).toBe(item.id);
+    expect(wrapper.emitted('close')).toBeUndefined();
+    expect(wrapper.emitted('playback')).toBeUndefined();
+  });
+
+  it('removes the native Task creator immediately when source listening authority is withdrawn', async () => {
+    const wrapper = create({
+      capabilities: { recordings_listen: true, operate: true },
+    });
+    await wrapper.get('[data-recording-actions-open]').trigger('click');
+    wrapper.getComponent({ name: 'RecordingManualTasks' }).vm.$emit('create');
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: 'RecordingTaskCreate' }).exists()
+    ).toBe(true);
+    await wrapper.setProps({
+      capabilities: { recordings_listen: false, operate: false },
+    });
+    expect(
+      wrapper.findComponent({ name: 'RecordingTaskCreate' }).exists()
+    ).toBe(false);
+    expect(
+      wrapper.findComponent({ name: 'RecordingManualTasks' }).exists()
+    ).toBe(false);
+    expect(wrapper.getComponent(Dialog).vm.open).toHaveBeenCalledTimes(1);
+    expect(wrapper.emitted('playback')).toBeUndefined();
+  });
+
+  it('discards the prior-source Task creator on a recording identity change without emitting a write or reopening its old source', async () => {
+    const wrapper = create({
+      capabilities: { recordings_listen: true, operate: true },
+    });
+    await wrapper.get('[data-recording-actions-open]').trigger('click');
+    wrapper.getComponent({ name: 'RecordingManualTasks' }).vm.$emit('create');
+    await flushPromises();
+    await wrapper.setProps({ item: { ...item, id: '16' } });
+    expect(
+      wrapper.findComponent({ name: 'RecordingTaskCreate' }).exists()
+    ).toBe(false);
+    expect(
+      wrapper.findComponent({ name: 'RecordingManualTasks' }).exists()
+    ).toBe(false);
+    expect(wrapper.emitted('close')).toBeUndefined();
+    expect(wrapper.getComponent(Dialog).vm.open).toHaveBeenCalledTimes(1);
   });
 });

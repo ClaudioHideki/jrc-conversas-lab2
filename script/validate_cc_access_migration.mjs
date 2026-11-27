@@ -1,3 +1,4 @@
+import { sourcePins as recordingTaskPins, validateRecordingTaskSources } from './validate_cc_recording_task_migration.mjs';
 import { sourcePins as qualityReviewPins, validateQualityReviewSources } from './validate_cc_quality_review_migration.mjs';
 import { sourcePins as endingAttemptPins, validateEndingAttemptSources } from './validate_cc_ending_attempt_migration.mjs';
 import { sourcePins as endingExecutionPins, validateEndingExecutionSources } from './validate_cc_ending_execution_migration.mjs';
@@ -327,12 +328,27 @@ export function verifyQualityReviewMigrations(changes, readCurrent, schema) {
   return validateNewMigrationTimestamps(schema, rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
 }
 
+// Admit only the exact M24 sources, then execute every unchanged M1-M23
+// verifier. Unknown changes, old hashes and the forward timestamp gate still fail.
+export function verifyRecordingTaskMigrations(changes, readCurrent, schema) {
+  const additions = [recordingTaskPins.migration.path, recordingTaskPins.sql.path];
+  const rows = changes.trim().split('\n').filter(Boolean);
+  for (const path of additions) {
+    if (rows.filter(row => row === `A\t${path}`).length !== 1)
+      throw new Error(`Missing or duplicate reviewed recording task source: ${path}`);
+  }
+  const prior = rows.filter(row => !additions.some(path => row === `A\t${path}`));
+  verifyQualityReviewMigrations(prior.join('\n'), readCurrent, schema);
+  validateRecordingTaskSources(Object.fromEntries(Object.entries(recordingTaskPins).map(([key, pin]) => [key, readCurrent(pin.path)])));
+  return validateNewMigrationTimestamps(schema, rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyQualityReviewMigrations(changes, readFileSync, schema);
+  const result = verifyRecordingTaskMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
     [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash, [endingActionVersionMigrationPath]: endingActionVersionMigrationHash },
     pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, endingOriginPins,
-    nicoDispatchIntentMigration: { path: nicoDispatchIntentMigrationPath, sha256: nicoDispatchIntentMigrationHash }, ...result }));
+    recordingTaskPins, nicoDispatchIntentMigration: { path: nicoDispatchIntentMigrationPath, sha256: nicoDispatchIntentMigrationHash }, ...result }));
 }

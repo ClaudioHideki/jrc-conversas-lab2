@@ -1,3 +1,4 @@
+import { verifyNativeManualRecordingTask } from './call-center-recording-manual-task-native.mjs';
 import { expect } from '@playwright/test';
 import { verifyNativeRecordingActions } from './call-center-recording-actions-native.mjs';
 import fs from 'node:fs';
@@ -311,6 +312,7 @@ export async function verifyNativeQualityReview(parent, info, target) {
     await verifyNativeRecordingContext(page, viewer, info, target, capture);
     await verifyNativeQualityHistory(parent, page, info, target, capture);
     await verifyNativeRecordingActions(parent, page, info, target, capture);
+    await verifyNativeManualRecordingTask(parent, info, target);
     const raw = execFileSync(
       'bundle',
       [
