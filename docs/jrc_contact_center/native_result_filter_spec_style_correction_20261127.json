@@ -1,0 +1,67 @@
+{
+  "source_parent": "08f80ebf3e24d4da0e2729daf378063fbf5fbbdb",
+  "run": 46044966779,
+  "artifact": 15221524351,
+  "artifact_sha256": "32bcf4a40588bf0b2b22f7120d1f49aede9093ac8d9b3f7452a7741f6b749b5f",
+  "confirmed_findings": [
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb",
+      "offenses": [
+        {
+          "severity": "convention",
+          "message": "Example has too many expectations [8/7].",
+          "cop_name": "RSpec/MultipleExpectations",
+          "corrected": false,
+          "correctable": false,
+          "location": {
+            "start_line": 68,
+            "start_column": 3,
+            "last_line": 68,
+            "last_column": 95,
+            "length": 93,
+            "line": 68,
+            "column": 3
+          }
+        },
+        {
+          "severity": "convention",
+          "message": "Use `%w` or `%W` for an array of words.",
+          "cop_name": "Style/WordArray",
+          "corrected": false,
+          "correctable": true,
+          "location": {
+            "start_line": 92,
+            "start_column": 15,
+            "last_line": 92,
+            "last_column": 40,
+            "length": 26,
+            "line": 92,
+            "column": 15
+          }
+        },
+        {
+          "severity": "convention",
+          "message": "Use `%w` or `%W` for an array of words.",
+          "cop_name": "Style/WordArray",
+          "corrected": false,
+          "correctable": true,
+          "location": {
+            "start_line": 92,
+            "start_column": 58,
+            "last_line": 92,
+            "last_column": 80,
+            "length": 23,
+            "line": 92,
+            "column": 58
+          }
+        }
+      ]
+    }
+  ],
+  "passed_directed_Vue": 325,
+  "correction": "Use canonical word arrays and assert the exact same two positive total values together; preserve all status, zero-result, item and denial criteria.",
+  "recording_API_cases_preserved": 42,
+  "all_expected_values_and_security_criteria_preserved": true,
+  "product_code_permissions_workflow_or_migrations_changed": false,
+  "native_or_Chrome_acceptance": false
+}

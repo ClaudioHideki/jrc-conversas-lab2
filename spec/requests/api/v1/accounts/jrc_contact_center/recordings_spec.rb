@@ -69,8 +69,7 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
     get path, headers: headers, params: { status: 'answered', direction: 'inbound' }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').pluck('id')).to eq([record.id.to_s])
-    expect(response.parsed_body.dig('meta', 'total')).to eq(1)
-    expect(response.parsed_body.dig('summary', 'total')).to eq(1)
+    expect(response.parsed_body.values_at('meta', 'summary').map { |value| value.fetch('total') }).to eq([1, 1])
     get path, headers: headers, params: { status: 'answered', direction: 'outbound' }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items')).to be_empty
@@ -89,7 +88,7 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
   end
 
   [
-    { status: ['answered', 'unanswered'] }, { direction: ['inbound', 'outbound'] },
+    { status: %w[answered unanswered] }, { direction: %w[inbound outbound] },
     { status: { value: 'answered' } }, { direction: { value: 'inbound' } },
     { status: 'not_a_native_status' }, { direction: 'not_a_native_direction' }
   ].each do |criteria|
