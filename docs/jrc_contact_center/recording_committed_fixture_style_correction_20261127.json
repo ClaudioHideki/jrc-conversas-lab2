@@ -1,0 +1,19 @@
+{
+  "parent": "8a2c3832f311b1760dd4f66e1fda54e4e8a81047",
+  "failed_run": 45939142840,
+  "failed_job": 140309166751,
+  "artifact": 15171693860,
+  "artifact_sha256": "4a11d76649c2ecb19345ee5498988f9bc59047f763595fb65410bcec74a9cc72",
+  "lint_report_sha256": "d7be5e1c656fa58b33b0cfd608f64c4da1d709ab6f725b133a764d4d9aa3aa22",
+  "source_sha256": {
+    "script/jrc_call_center_pause_seed.rb": "571a3b3124a37ea99ce7bfe64e04dae4b9dc34e1ce20feabe0eda6babb0bb958",
+    "spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb": "6897541660da1887521ea74ac9d36a0b0fcd5e2fce64faa3345ee4f53db7c5dd"
+  },
+  "parent_sources": {
+    "script/jrc_call_center_pause_seed.rb": "efc932ff0496ee7feca9509222eeb600039cb87b3f05d7cd64060fbc7694980a",
+    "spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb": "88339d0374e103f21e5d41f41afe22d3db799a3e435e03b0c7a702a91fd48ab8"
+  },
+  "offenses_addressed": 4,
+  "no_rule_or_assertion_removed": true,
+  "native_or_Chrome_acceptance": false
+}

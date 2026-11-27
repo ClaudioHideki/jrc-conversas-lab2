@@ -5,7 +5,7 @@ require Rails.root.join('script/jrc_call_center_pause_seed')
 
 # Real committed lifecycle + authenticated native read. A transactional factory
 # cannot reproduce the after-commit qualification that caused the bootstrap failure.
-RSpec.describe 'Owned committed recording fixture and native read', type: :request, pabx: true do
+RSpec.describe 'Owned committed recording fixture and native read', :pabx, type: :request do
   self.use_transactional_tests = false
 
   around do |example|
@@ -20,17 +20,18 @@ RSpec.describe 'Owned committed recording fixture and native read', type: :reque
     example.run
   end
 
+  let(:creation_state) { { started: false } }
   let(:project_key) { "committed-recording-#{SecureRandom.hex(10)}" }
   let(:fixture_name) { "SYNTHETIC pause #{project_key}-recordings" }
   let(:payload) do
     raise 'Preserve a pre-existing fixture' if Account.exists?(name: fixture_name)
 
-    @owned_creation_started = true
+    creation_state[:started] = true
     JrcContactCenter::SyntheticPauseSeed.call(projects: [project_key], scenarios: ['recordings']).fetch(project_key).fetch('recordings')
   end
 
   after do
-    next unless @owned_creation_started
+    next unless creation_state.fetch(:started)
 
     account = Account.find_by(name: fixture_name)
     next unless account
