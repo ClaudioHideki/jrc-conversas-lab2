@@ -1,0 +1,15 @@
+{
+  "source_parent": "aa094b2e1cd2564a483d59c34079eddf331b671d",
+  "failed_run": 46020826135,
+  "failed_job": 140579738426,
+  "observed_Vue": {
+    "passed": 287,
+    "failed": 3,
+    "total": 290
+  },
+  "root_cause": "shallowMount default Panel stub omitted its default slot; native ScopeBar, RequesterSelect and title controls were not mounted.",
+  "correction": "Render the default slot of this layout-only stub; keep real native form logic and all six test assertions.",
+  "product_changed": false,
+  "test_cases_or_assertions_removed": false,
+  "new_native_or_Chrome_acceptance": false
+}

@@ -96,6 +96,7 @@ const render = async (query = { recording_id: '8' }) => {
   await router.push({ name: 'new', params: { accountId: '1' }, query });
   wrapper = shallowMount(TicketFormView, {
     global: {
+      stubs: { Panel: { template: '<section><slot /></section>' } },
       plugins: [
         router,
         createI18n({
