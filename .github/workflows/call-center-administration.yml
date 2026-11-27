@@ -425,7 +425,7 @@ jobs:
           report = json.loads(Path('/tmp/call-center-recordings-preflight.json').read_text())
           assert report['summary']['example_count'] == len(report['examples']) == 48
           assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
-          assert len({row['id'] for row in report['examples']}) == 40
+          assert len({row['id'] for row in report['examples']}) == 48
           from collections import Counter
           assert all(row['status'] == 'passed' for row in report['examples'])
           assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb': 42, 'spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb': 3, 'spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb': 3}

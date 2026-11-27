@@ -1,0 +1,35 @@
+{
+  "source_parent": "d0f57ab285979697643e5ff246be8246b6575757",
+  "failed_run": 46048511034,
+  "artifact": 15224200614,
+  "artifact_sha256": "deb1c2c1235e8e75ac195e028981fadf3b71379766530e2bc4e60f445bbc71e9",
+  "native_report_sha256": "42b26a95baf5362febae5c4f553d4c5b8af110e213c6ded2ae10bc3810cb1745",
+  "confirmed_native_summary": {
+    "duration": 19.035506215,
+    "example_count": 48,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "exact_unique_positive_native_cases": 48,
+  "minimum_change": {
+    "before": "assert len({row['id'] for row in report['examples']}) == 40",
+    "after": "assert len({row['id'] for row in report['examples']}) == 48"
+  },
+  "configuration_checks": {
+    "original_failure_reproduced": true,
+    "actual_native_48_pass": true,
+    "mutated_evidence_still_rejected": [
+      "duplicate_native_identity",
+      "missing_native_example",
+      "pending_native_example",
+      "wrong_native_source",
+      "native_failure",
+      "outside_example_error"
+    ],
+    "count": 8
+  },
+  "all_98_steps_native_tests_identity_and_zero_error_checks_preserved": true,
+  "no_product_permission_or_migration_change": true,
+  "full_candidate_native_and_Chrome_acceptance": false
+}
