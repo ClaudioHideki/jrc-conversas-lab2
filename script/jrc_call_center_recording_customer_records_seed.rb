@@ -10,11 +10,15 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
     operator.custom_role.update!(permissions: (operator.custom_role.permissions + rights).uniq)
     call = JrcContactCenter::CallSession.find_by!(account: account, external_session_id: record.external_unique_id)
     contact = account.contacts.find(call.contact_id)
+    commercial!(account, operator, viewer, contact).merge(projects!(account, operator, contact))
+  end
+
+  def self.commercial!(account, operator, viewer, contact)
     stage = stage!(account)
-    records = 26.times.map { |index| deal!(account, operator.user, contact, stage, "SYNTHETIC context opportunity #{index + 1}") }
+    records = Array.new(26) { |index| deal!(account, operator.user, contact, stage, "SYNTHETIC context opportunity #{index + 1}") }
     private_record = deal!(account, viewer.user, contact, stage, 'SYNTHETIC PRIVATE other-owner opportunity')
     { contact_id: contact.id.to_s, deal_ids: records.map { |row| row.id.to_s },
-      private_deal_id: private_record.id.to_s, private_title: private_record.title }.merge(projects!(account, operator, contact))
+      private_deal_id: private_record.id.to_s, private_title: private_record.title }
   end
 
   def self.projects!(account, operator, contact)
@@ -32,12 +36,12 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
   def self.stage!(account)
     pipeline = JrcCrm::Pipeline.create!(account: account, name: 'SYNTHETIC recording context', key: 'synthetic-recording-context', active: true)
     JrcCrm::Stage.create!(account: account, pipeline: pipeline, name: 'SYNTHETIC context stage', key: 'synthetic-context',
-                         position: 0, active: true, probability: 0, is_terminal: false, is_won: false, is_lost: false)
+                          position: 0, active: true, probability: 0, is_terminal: false, is_won: false, is_lost: false)
   end
 
   def self.deal!(account, owner, contact, stage, title)
     JrcCrm::Deal.create!(account: account, owner: owner, contact: contact, company_id: contact.company_id,
-                        pipeline: stage.pipeline, stage: stage, title: title, status: 'open', value_cents: 0, currency: 'BRL')
+                         pipeline: stage.pipeline, stage: stage, title: title, status: 'open', value_cents: 0, currency: 'BRL')
   end
 
   def self.owned_runtime?(config)
@@ -61,5 +65,5 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
                   record.account_id == account_id, ids.include?(record.id), operator.agent?]
     raise 'Exact owned recording customer context identities required' unless identities.all?
   end
-  private_class_method :owned!, :owned_runtime?, :stage!, :deal!, :projects!
+  private_class_method :commercial!, :owned!, :owned_runtime?, :stage!, :deal!, :projects!
 end

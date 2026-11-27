@@ -1,0 +1,115 @@
+{
+  "source_parent": "20b83c5a30d368bc7c73f22095c306c30d060c7d",
+  "run": 46042353628,
+  "artifact": 15221176717,
+  "artifact_sha256": "73fc3dcb941e84b7f9e1c61862c3e1b0f0d6453d59ecf782906f235e83bb2dac",
+  "passed_directed_Vue": 320,
+  "new_fixture_findings": [
+    {
+      "path": "script/jrc_call_center_recording_customer_records_seed.rb",
+      "offenses": [
+        {
+          "severity": "convention",
+          "message": "Assignment Branch Condition size for call is too high. [<8, 31, 2> 32.08/26]",
+          "cop_name": "Metrics/AbcSize",
+          "corrected": false,
+          "correctable": false,
+          "location": {
+            "start_line": 6,
+            "start_column": 3,
+            "last_line": 18,
+            "last_column": 5,
+            "length": 943,
+            "line": 6,
+            "column": 3
+          }
+        },
+        {
+          "severity": "convention",
+          "message": "Use `Array.new(26)` with a block instead of `.times.map`.",
+          "cop_name": "Performance/TimesMap",
+          "corrected": false,
+          "correctable": true,
+          "location": {
+            "start_line": 14,
+            "start_column": 15,
+            "last_line": 14,
+            "last_column": 130,
+            "length": 116,
+            "line": 14,
+            "column": 15
+          }
+        },
+        {
+          "severity": "convention",
+          "message": "Align the arguments of a method call if they span more than one line.",
+          "cop_name": "Layout/ArgumentAlignment",
+          "corrected": false,
+          "correctable": true,
+          "location": {
+            "start_line": 35,
+            "start_column": 26,
+            "last_line": 35,
+            "last_column": 36,
+            "length": 11,
+            "line": 35,
+            "column": 26
+          }
+        },
+        {
+          "severity": "convention",
+          "message": "Align the keys of a hash literal if they span more than one line.",
+          "cop_name": "Layout/HashAlignment",
+          "corrected": false,
+          "correctable": true,
+          "location": {
+            "start_line": 35,
+            "start_column": 26,
+            "last_line": 35,
+            "last_column": 36,
+            "length": 11,
+            "line": 35,
+            "column": 26
+          }
+        },
+        {
+          "severity": "convention",
+          "message": "Align the arguments of a method call if they span more than one line.",
+          "cop_name": "Layout/ArgumentAlignment",
+          "corrected": false,
+          "correctable": true,
+          "location": {
+            "start_line": 40,
+            "start_column": 25,
+            "last_line": 40,
+            "last_column": 48,
+            "length": 24,
+            "line": 40,
+            "column": 25
+          }
+        },
+        {
+          "severity": "convention",
+          "message": "Align the keys of a hash literal if they span more than one line.",
+          "cop_name": "Layout/HashAlignment",
+          "corrected": false,
+          "correctable": true,
+          "location": {
+            "start_line": 40,
+            "start_column": 25,
+            "last_line": 40,
+            "last_column": 48,
+            "length": 24,
+            "line": 40,
+            "column": 25
+          }
+        }
+      ]
+    }
+  ],
+  "correction": "Separate synthetic commercial rows from the fixture entry point, use Array.new and align native call arguments.",
+  "exact_runtime_and_account_ownership_guards_preserved": true,
+  "same_26_owned_CRM_rows_private_row_and_native_Projects": true,
+  "product_permissions_workflow_native_cases_or_assertions_changed": false,
+  "native_or_visual_acceptance": false
+}
