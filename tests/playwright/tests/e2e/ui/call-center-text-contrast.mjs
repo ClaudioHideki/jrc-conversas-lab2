@@ -52,3 +52,16 @@ export function measureTextContrast(root, selectors = []) {
     };
   });
 }
+
+// Locator calls originate in Node. Keep the existing browser function unchanged
+// and execute it through Playwright, never against a Node-side DOM substitute.
+export async function measureLocatorTextContrast(locator) {
+  const measurements = await locator.evaluate(measureTextContrast);
+  if (
+    !Array.isArray(measurements) ||
+    measurements.length !== 1 ||
+    !Number.isFinite(measurements[0]?.ratio)
+  )
+    throw new Error('Expected one actual browser text-contrast measurement');
+  return measurements[0];
+}

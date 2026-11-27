@@ -37,6 +37,9 @@ const create = overrides =>
         Dialog,
         CallRecordingPlayer: true,
         RecordingAccessHistory: true,
+        RecordingTranscript: true,
+        RecordingCallContext: true,
+        QualityReviewHistory: true,
       },
     },
   });
@@ -114,5 +117,102 @@ describe('authorized native recording details popup', () => {
     expect(
       wrapper.findComponent({ name: 'RecordingAccessHistory' }).exists()
     ).toBe(false);
+  });
+
+  it('opens original transcript only explicitly and removes it on permission or recording changes without coupling audio failures', async () => {
+    const wrapper = create({ error: 'MEDIA_ERROR' });
+    expect(
+      wrapper.findComponent({ name: 'RecordingTranscript' }).exists()
+    ).toBe(false);
+    await wrapper.get('[data-recording-transcript-open]').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'RecordingTranscript' }).props()
+    ).toMatchObject({
+      accountId: 1,
+      recordingId: item.id,
+      callId: item.unique_id,
+    });
+    expect(wrapper.get('[role="alert"]').text()).toContain('MEDIA_ERROR');
+    await wrapper.setProps({ capabilities: { recordings_listen: false } });
+    expect(
+      wrapper.findComponent({ name: 'RecordingTranscript' }).exists()
+    ).toBe(false);
+    await wrapper.setProps({ capabilities: { recordings_listen: true } });
+    expect(
+      wrapper.findComponent({ name: 'RecordingTranscript' }).exists()
+    ).toBe(false);
+    await wrapper.get('[data-recording-transcript-open]').trigger('click');
+    await wrapper.setProps({
+      item: { ...item, id: '16', unique_id: 'SYNTHETIC-other' },
+    });
+    expect(
+      wrapper.findComponent({ name: 'RecordingTranscript' }).exists()
+    ).toBe(false);
+    expect(wrapper.emitted('playback')).toBeUndefined();
+  });
+
+  it('opens native call context only explicitly and clears it on recording or listening-authority change', async () => {
+    const wrapper = create({
+      capabilities: { recordings_listen: true, operate: true },
+    });
+    expect(
+      wrapper.findComponent({ name: 'RecordingCallContext' }).exists()
+    ).toBe(false);
+    await wrapper.get('[data-recording-context-open]').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'RecordingCallContext' }).props()
+    ).toMatchObject({
+      accountId: 1,
+      callSessionId: item.call_session_id,
+      callId: item.unique_id,
+      operationalContextAllowed: true,
+    });
+    await wrapper.setProps({
+      capabilities: { recordings_listen: true, operate: false },
+    });
+    expect(
+      wrapper
+        .getComponent({ name: 'RecordingCallContext' })
+        .props('operationalContextAllowed')
+    ).toBe(false);
+    await wrapper.setProps({ item: { ...item, id: '16' } });
+    expect(
+      wrapper.findComponent({ name: 'RecordingCallContext' }).exists()
+    ).toBe(false);
+    await wrapper.get('[data-recording-context-open]').trigger('click');
+    await wrapper.setProps({ capabilities: { recordings_listen: false } });
+    expect(
+      wrapper.findComponent({ name: 'RecordingCallContext' }).exists()
+    ).toBe(false);
+    expect(wrapper.emitted('playback')).toBeUndefined();
+  });
+
+  it('opens revision history independently of provider analysis, review writes or audit administration and clears it on withdrawal', async () => {
+    const wrapper = create({
+      error: 'MEDIA_ERROR',
+      capabilities: {
+        recordings_listen: true,
+        quality_review: false,
+        audit: false,
+      },
+    });
+    expect(
+      wrapper.findComponent({ name: 'QualityReviewHistory' }).exists()
+    ).toBe(false);
+    await wrapper.get('[data-recording-quality-history-open]').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'QualityReviewHistory' }).props()
+    ).toMatchObject({ accountId: 1, recordingId: item.id });
+    expect(wrapper.get('[role="alert"]').text()).toContain('MEDIA_ERROR');
+    await wrapper.setProps({ item: { ...item, id: '16' } });
+    expect(
+      wrapper.findComponent({ name: 'QualityReviewHistory' }).exists()
+    ).toBe(false);
+    await wrapper.get('[data-recording-quality-history-open]').trigger('click');
+    await wrapper.setProps({ capabilities: { recordings_listen: false } });
+    expect(
+      wrapper.findComponent({ name: 'QualityReviewHistory' }).exists()
+    ).toBe(false);
+    expect(wrapper.emitted('playback')).toBeUndefined();
   });
 });

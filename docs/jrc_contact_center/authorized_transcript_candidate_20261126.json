@@ -1,0 +1,63 @@
+{
+  "parent": "9fdae9e50e9945c844b1d3accd6672afcc81407f",
+  "stage": {
+    "name": "exact_authorized_original_transcript_and_optional_native_player_volume",
+    "source_sha256": {
+      ".github/workflows/call-center-administration.yml": "1843eca4c0b38381406b502fd1ae92d340c6f3fb50371a321193b958b29139bd",
+      "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb": "c3103d14e301782a72155db69ac07a144de7ba8064144e2fdaf52bb0a2850a69",
+      "app/javascript/dashboard/api/jrcContactCenter.js": "1eec81ca74a69ea134dd6602cec5114e10c9bed0198a26342cfb98cc54c0cccc",
+      "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue": "f02bdc6db4b35fb9ac9e51eb94e5f0bb6d694028926f1f70d9c9059f00617cf2",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "e6e5eaedfdba6cfa7b028d9c12439e9313fe5d7ebab031ed6efab3261e209f9f",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.vue": "ea59c3a2a7bf4b41a46554dc26187638394c95e4b7dd6cf95b85cc13ce2c3372",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "4d4bcc0810cca99ddd594f9f39aba750eeba96231b375b89b921a42db631f6e3",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "85252e5fb75e558d3f4eee5d543095000ac43e39af18f08b45411d16a627db6c",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js": "9de7d6e0424c12cfc2dd5bfd2644cf76f9520972a832133e2858fa92c4c12a2d",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.vue": "ff33db9aea971bbf2e92a601ee87a24c6e5c6204be3a9f7d35f5e814326727eb",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js": "3209e3ec4437e3dc14481e754901423599e5b214d73a287975de0a9424bd8448",
+      "app/services/jrc_contact_center/recording_audit.rb": "0b85e9b6bff92faba7e99270129dc20a169facc191c6181931ce5fcd2a69b365",
+      "config/routes/jrc_contact_center.rb": "4a15bea971f33a2d231509c7d335177e963fef797d2c3bb7f63088d21c5e46b0",
+      "spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb": "6897e874a3fdd094a2fa918b623a73683da8490bfc98629b15bd69db00e399d6",
+      "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "c9fecef99b356f0a8798b0f342a4addc54699454ed4a3a639b33e8aca76137ef",
+      "tests/playwright/tests/e2e/ui/call-center-recordings-native.mjs": "226a89cf9f9bb6de9c80a9e66d685a0f83d9c070ea4ed18c35a19fb586821c75",
+      "tests/playwright/tests/e2e/ui/call-center-transcript-native.mjs": "64a57d39348d7772fca0496fdabbee226e2448c2dccf80b93148724fa72bf24f"
+    },
+    "parent_sources": {
+      ".github/workflows/call-center-administration.yml": "4d65507548c13ee31ab4c00e1242d301f47f696f8febf239b647563760c777f0",
+      "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb": "ced76990761c1a17cb49ca25308308ae5ca3e64ccec726748da3de753de89ced",
+      "app/javascript/dashboard/api/jrcContactCenter.js": "6e69c31e8c4f6d6b0492a7cf2ba2ce20a1ff8d65c703bd209e2978ae3ceb4c2c",
+      "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue": "05d905a51e4202f2c65ffeed098d697dea3a62d40216ac0ca60ce708f0a182e7",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "518a5d905d490bf48366d83dd1e2186c873a6c0af2d4aef60a5df629304bce5e",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.vue": "b03ecf673dd54189be7ac380abe6839d3041242bc81cc1c0abdd9a6b49c83b76",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "e817db78b91580ca6fb72f346cedaea65977d66f84199b761bec2bb8c13e5e18",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "250b9e6be3a71c2f4481a9a5ad373d239c884d83e498e655008e0b88f972517b",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js": null,
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.vue": null,
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js": "bc912ba31898bb6112d2b9c626277816ef1f0e06be309f11b0a7f9dd79524e19",
+      "app/services/jrc_contact_center/recording_audit.rb": "592cfe2053940014951af49bef6b48dc254d84dc9262db7d0428414cb2ab5a48",
+      "config/routes/jrc_contact_center.rb": "af0139ed512d0e72a72483c947f6a866ec6a50fd654568cc45d527785ac91530",
+      "spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb": null,
+      "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "bbe2c3e2d828f3fd371b3274e3ffab9ceb4602e3863a0bace6b7b4b0eb640f54",
+      "tests/playwright/tests/e2e/ui/call-center-recordings-native.mjs": "fa196f9768d474c176ea744d735dc6d57e5beac5dcca200a7a07e4cfa0e2ce3e",
+      "tests/playwright/tests/e2e/ui/call-center-transcript-native.mjs": null
+    }
+  },
+  "parent_native_Chrome_and_original_images_reviewed": false,
+  "parent_failure_evidence_sha256": "31a43a48ede17c01dee7ce0e6a7e27c4b66ce073d9811d77dd3102f8460ff88d",
+  "failed_parent_reconciliation_sha256": "326cb6d5940d6742326ff463689826496cebacf7452f1ce8b905e83b24487cb0",
+  "native_or_Chrome_acceptance": false,
+  "functional_scope": [
+    "Authorized read-only original transcript and local plain-text search",
+    "No guessed speaker timestamps, sentiment curve or automatic audio seek",
+    "Media failure does not erase the authorized transcript",
+    "Optional actual volume control on the existing player, retaining its original default consumers and playback audit hook"
+  ],
+  "whole_Part1_accepted": false,
+  "expected_transcript_only_not_results": {
+    "distinct_Rails": 3876,
+    "main_Vue": 2031,
+    "recordings_targeted_Vue": 84,
+    "Chrome": 288,
+    "PNG": 764
+  },
+  "combined_successor": "docs/jrc_contact_center/native_recording_context_candidate_20261126.json"
+}

@@ -103,6 +103,7 @@ namespace :api, defaults: { format: 'json' } do
           post :reproduce, on: :member
           resource :quality_review, only: %i[show create], controller: 'quality_reviews' do
             get :history
+            get :transcript
           end
           get :access_history, on: :member
         end

@@ -2,7 +2,10 @@ import { expect } from '@playwright/test';
 import fs from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { measureTextContrast } from './call-center-text-contrast.mjs';
+import { measureLocatorTextContrast as measureTextContrast } from './call-center-text-contrast.mjs';
+import { verifyNativeTranscript } from './call-center-transcript-native.mjs';
+import { verifyNativeRecordingContext } from './call-center-recording-context-native.mjs';
+import { verifyNativeQualityHistory } from './call-center-quality-history-native.mjs';
 
 // Production Vue + real authenticated native APIs, immutable SQL revisions and audits.
 // The alternate owned server substitutes only the declared remote analysis read, never an API or authorization response.
@@ -228,6 +231,9 @@ export async function verifyNativeQualityReview(parent, info, target) {
       viewer.locator('[data-quality-current-human-review]')
     ).toContainText('SYNTHETIC first human summary');
     await capture(viewer, 'readonly-listener');
+    await verifyNativeTranscript(parent, viewer, info, target, capture);
+    await verifyNativeRecordingContext(page, viewer, info, target, capture);
+    await verifyNativeQualityHistory(parent, page, info, target, capture);
     const raw = execFileSync(
       'bundle',
       [

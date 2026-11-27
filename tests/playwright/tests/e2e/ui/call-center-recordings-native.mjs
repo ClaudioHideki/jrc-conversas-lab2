@@ -313,7 +313,7 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
     await expect
       .poll(() => audio.evaluate(element => element.paused))
       .toBe(true);
-    await selected.locator('input[type="range"]').evaluate(element => {
+    await selected.locator('[data-native-recording-seek]').evaluate(element => {
       element.value = '1';
       element.dispatchEvent(new Event('input', { bubbles: true }));
     });

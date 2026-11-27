@@ -115,6 +115,7 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
     get "#{path}/history", headers: headers, params: { page: 1, per_page: 1 }, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('meta')).to include('page' => 1, 'per_page' => 1, 'total' => 1)
+    expect(response.parsed_body).to include('recording_id' => record.id.to_s, 'timezone' => Time.zone.tzinfo.name)
     expect(response.parsed_body.fetch('items').sole.fetch('origin')).to eq('human')
     role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_recordings_view])
     get "#{path}/history", headers: headers, as: :json

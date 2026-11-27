@@ -19,15 +19,22 @@ class JrcContactCenter::SyntheticRecordingsSeed
 
   def call
     owned_environment!
+    @account.enable_features!('jrc_customer_master')
     configure_roles
     configure_native_history
     rows = create_rows
-    install_marker!(rows.values + (1..20).map { |index| create_record("extra-#{index.to_s.rjust(2, '0')}", @queues.first) })
-    { recordings: rows.transform_values { |record| { id: record.id.to_s, call_id: record.external_unique_id } },
-      authorized_recording_count: 21, recording_provider_boundary: 'synthetic_in_memory_wav_not_external_homologation' }
+    extras = (1..20).map { |index| create_record("extra-#{index.to_s.rjust(2, '0')}", @queues.first) }
+    install_marker!(rows.values + extras)
+    { recordings: rows.transform_values { |record| recording_identity(record) },
+      authorized_recording_count: 21, recording_provider_boundary: 'synthetic_in_memory_wav_not_external_homologation',
+      quality_history_record: recording_identity(extras.first) }
   end
 
   private
+
+  def recording_identity(record)
+    { id: record.id.to_s, call_id: record.external_unique_id }
+  end
 
   def create_rows
     {
@@ -57,7 +64,7 @@ class JrcContactCenter::SyntheticRecordingsSeed
 
   def configure_roles
     extra = %w[jrc_contact_center_operate jrc_contact_center_recordings_download jrc_contact_center_audit
-               jrc_contact_center_quality_review]
+               jrc_contact_center_quality_review contact_manage]
     @operator.custom_role.update!(permissions: RIGHTS + extra)
     @viewer.custom_role.update!(permissions: RIGHTS)
     @viewer.update!(role: :agent)
@@ -84,10 +91,18 @@ class JrcContactCenter::SyntheticRecordingsSeed
                                                  current_unit: queue.unit, current_queue: queue, direction: 'inbound', status: 'ended',
                                                  started_at: first, answered_at: first + 1.second, ended_at: first + 61.seconds)
     create_participant_legs(call, queue)
+    link_native_customer!(call, queue) if kind == 'allowed'
     TelephonyCallRecord.create!(account: @account, provider: Pabx::Settings::PROVIDER, external_tenant: tenant, extension: '1410',
                                 external_unique_id: key, started_at: first, synced_at: Time.current, direction: 'inbound', status: 'answered',
                                 caller: '551100000001', callee: '1410', duration_seconds: 61, answered_seconds: 60,
                                 has_recording: true, recording_reference: "/var/spool/asterisk/monitor/#{tenant}/synthetic-#{@nonce}.wav")
+  end
+
+  # Only this fixture's owned Account and explicitly scoped ordinary operator receive test data and the existing directory right.
+  def link_native_customer!(call, queue)
+    company = @account.master_companies.find(queue.unit.settings.fetch('issuer_company_id'))
+    contact = Contact.create!(account: @account, company_id: company.id, name: 'SYNTHETIC linked recording customer')
+    call.update!(contact_id: contact.id, company_id: company.id)
   end
 
   def create_participant_legs(call, queue)

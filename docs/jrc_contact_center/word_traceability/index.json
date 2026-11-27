@@ -4369,5 +4369,32 @@
       "sha256": "834ed7659e02fb0cab37329c238bde6442cb8355b26590518b2b23695ef458ba"
     },
     "native_or_browser_accepted": false
+  },
+  "next_grouped_recording_user_delivery": {
+    "parent_proven_source_sha": "9fdae9e50e9945c844b1d3accd6672afcc81407f",
+    "documents": [
+      "docs/jrc_contact_center/authorized_transcript_candidate_20261126.json",
+      "docs/jrc_contact_center/native_recording_context_candidate_20261126.json",
+      "docs/jrc_contact_center/quality_history_read_candidate_20261126.json",
+      "docs/jrc_contact_center/browser_contrast_dispatch_correction_20261126.json",
+      "docs/jrc_contact_center/grouped_recording_failed_parent_reconciliation_20261126.json"
+    ],
+    "figure_documents": [
+      {
+        "path": "docs/jrc_contact_center/word_traceability/figure-20.json",
+        "sha256": "9f0b545d8a28522a492d36d5a2b2944906101f239c255a64f7e7f5a52dfdb1bc"
+      },
+      {
+        "path": "docs/jrc_contact_center/word_traceability/figure-21.json",
+        "sha256": "9a4a3a6a46651641d6ac2f1cd0f4ff5615bf6cdb060631987ed074f65e5a8d92"
+      },
+      {
+        "path": "docs/jrc_contact_center/word_traceability/figure-23.json",
+        "sha256": "810792e5c392296431cfc7380e3949b5ae33b56ecd8c407a9dea020c52249c33"
+      }
+    ],
+    "native_or_Chrome_accepted": false,
+    "complete_five_tab_composition_accepted": false,
+    "no_external_provider_homologation": true
   }
 }

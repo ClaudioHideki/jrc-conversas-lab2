@@ -35,6 +35,7 @@ const operations = computed(() => ({
   listen: t('JRC_CONTACT_CENTER.RECORDINGS.ACCESS_HISTORY.LISTEN'),
   download: t('JRC_CONTACT_CENTER.RECORDINGS.ACCESS_HISTORY.DOWNLOAD'),
   reproduce: t('JRC_CONTACT_CENTER.RECORDINGS.ACCESS_HISTORY.REPRODUCE'),
+  transcript: t('JRC_CONTACT_CENTER.RECORDINGS.ACCESS_HISTORY.TRANSCRIPT'),
 }));
 const rows = ref([]);
 const loading = ref(false);

@@ -1,0 +1,52 @@
+{
+  "parent": "9fdae9e50e9945c844b1d3accd6672afcc81407f",
+  "stage": {
+    "name": "exact_native_immutable_quality_history_read_and_twenty_plus_one_pagination",
+    "source_sha256": {
+      "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb": "8a57fa5619b56059a681f3dbecce253e6a8083208a8d7fb31f69fc518834203c",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "6eef68e9b7918e434771de28e308679b5b5266972b85125f271aaa855ceccdc0",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js": "2710d8c33bb48dc0c9afed0e3e494bb4c280e00991addd657f542a33114a4e93",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.vue": "f3fa67cfe85338f7af3a3b61c7a68cbc78d64f87fad4bbe94e7b0c7b84928515",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "4b3ae88564b7236397613e7489c6f146b75e2f8ed797a0b247d312c6cc0af60b",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "ca3f44ee3535355520db876792f7d666a2d1252b17bcb70edb7154ee5d2b8d6f",
+      "script/jrc_call_center_recordings_seed.rb": "56ff9328572ecbf4a83207baa8cc6517953489a1b64d72f7457ef25f86fbe18b",
+      "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb": "d523d48265542338afc2704a509e61b7ead376df76c678850fdb93de8d430f3d",
+      "tests/playwright/tests/e2e/ui/call-center-quality-history-native.mjs": "ba2d6feea3ea9ad503476a59fd0ed6cdd9beb34afb4cb5927f65a1287e56e4b2",
+      "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "dcc124032bd5e493f05979748fb0209f5e9b500167e4845c6e4ff2cdde4ef002",
+      ".github/workflows/call-center-administration.yml": "265828e5bf01a52a4fb4e96f1e1bcd5ac42871f0892e1b08b5e173bf264135ac"
+    },
+    "parent_sources": {
+      "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb": "c3103d14e301782a72155db69ac07a144de7ba8064144e2fdaf52bb0a2850a69",
+      "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb": "b508a9f6094aa9bd8fa86d00bd7fc66282d2656823b58e8fa9d7d08c9f0631f8",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "cf1cb173204edff28f2a44d8439543a1c520b4457160a3992f4deb8fe081b40f",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "3feb67ad4190155f6419bc1e55cc1455718fd6ec349353f736b2c5bccc9cd0a6",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "e3cc16ed1756bc013453ed004f4f3ea41f3d0a75f0ba86d78b07276ccacb822d",
+      "script/jrc_call_center_recordings_seed.rb": "ae33ced0bdf1b98bfed6c2d90d6112821797daee9a814a74a91d4b89ebd2e970",
+      "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "3d57c2940a7d921ed425c9293f675ba42d76a1aa38a5eeb5f65b34b546c0a660",
+      ".github/workflows/call-center-administration.yml": "1a5268a3be02ecf09ec4b94935730ff0651c6b52c035cde45a95dba29e73bd59",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js": null,
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.vue": null,
+      "tests/playwright/tests/e2e/ui/call-center-quality-history-native.mjs": null
+    }
+  },
+  "preceding": "docs/jrc_contact_center/native_recording_context_candidate_20261126.json",
+  "parent_native_Chrome_and_original_images_reviewed": false,
+  "failed_parent_reconciliation_sha256": "326cb6d5940d6742326ff463689826496cebacf7452f1ce8b905e83b24487cb0",
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false,
+  "expected_combined_not_results": {
+    "distinct_Rails": 3882,
+    "main_Vue": 2053,
+    "recordings_targeted_Vue": 106,
+    "Chrome": 288,
+    "PNG": 792
+  },
+  "existing_native_history_outage_example_strengthened": true,
+  "actual_twenty_plus_one_history_reads_and_SQL_comparison_prepared": true,
+  "new_model_migration_permission_or_provider_operation": false,
+  "remaining": [
+    "Native runtime and original four-mode Chrome evidence verification",
+    "Full five-tab analysis/context/actions layout remains separate",
+    "Provider model provenance and timed segment data remain explicitly unavailable"
+  ]
+}

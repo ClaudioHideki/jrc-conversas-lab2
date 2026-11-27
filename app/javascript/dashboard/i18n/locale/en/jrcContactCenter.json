@@ -3260,9 +3260,40 @@
         "VIEW": "Consulta dos detalhes",
         "LISTEN": "Carregamento para escuta",
         "DOWNLOAD": "Download",
-        "REPRODUCE": "Solicitação autorizada de reprodução"
+        "REPRODUCE": "Solicitação autorizada de reprodução",
+        "TRANSCRIPT": "Consultar transcrição"
       },
-      "QUALITY": "Análise e revisão do Nico"
+      "QUALITY": "Análise e revisão do Nico",
+      "TRANSCRIPT": {
+        "TITLE": "Transcrição original",
+        "SEARCH": "Pesquisar na transcrição",
+        "ORIGINAL": "Texto original recebido da fonte, sem alterações.",
+        "NO_TIMESTAMPS": "A fonte atual não fornece marcações de tempo por fala. A pesquisa apenas localiza texto e não desloca o áudio nem estima emoções por trecho.",
+        "EMPTY": "A fonte não informou uma transcrição para esta chamada.",
+        "NO_MATCHES": "Nenhum bloco de texto corresponde à pesquisa.",
+        "SOURCE": "Versão da fonte",
+        "LOADING": "Carregando transcrição autorizada…",
+        "ERROR": "Não foi possível carregar a transcrição. O áudio e seus controles permanecem independentes.",
+        "UNAVAILABLE": "A transcrição não está disponível na fonte atual.",
+        "DENIED": "Você não tem acesso à transcrição desta chamada.",
+        "RETRY": "Tentar novamente",
+        "VOLUME": "Volume"
+      },
+      "CONTEXT": {
+        "TITLE": "Contexto do atendimento",
+        "SOURCE": "Fonte: chamada e cadastro nativos do JRC. A transcrição não comprova a identidade do cliente.",
+        "LOADING": "Consultando o contexto autorizado…",
+        "RESTRICTED": "O contexto operacional do cliente não está autorizado no seu perfil atual.",
+        "ERROR": "Não foi possível consultar o contexto. Os demais dados da gravação permanecem disponíveis.",
+        "RETRY": "Consultar novamente",
+        "QUEUE": "Fila na chamada",
+        "CONTACT": "Contato vinculado",
+        "COMPANY": "Empresa vinculada",
+        "UNKNOWN": "Não informado pela origem",
+        "AMBIGUOUS": "A identificação está ambígua. Nenhum candidato foi escolhido automaticamente.",
+        "UNLINKED": "Não há contato explicitamente vinculado e autorizado nesta chamada.",
+        "NATIVE_MASTER_LIMIT": "Contratos, atendimentos e histórico continuam no Cliente 360º de origem, conforme suas permissões. Acesso a esta gravação não concede acesso ao cadastro."
+      }
     },
     "QUALITY_REVIEW": {
       "TITLE": "Corrigir Análise do Nico",
@@ -3318,6 +3349,33 @@
       "CLASS_REQUIRED": "Selecione uma classificação válida.",
       "ERROR": "Não foi possível concluir. O rascunho foi preservado; confira o resultado antes de tentar novamente.",
       "SEPARATOR": "·"
+    },
+    "QUALITY_HISTORY": {
+      "TITLE": "Histórico das revisões",
+      "LOADING": "Consultando as revisões autorizadas…",
+      "ERROR": "Não foi possível consultar o histórico. Nenhuma revisão foi alterada.",
+      "DENIED": "O histórico não está autorizado no seu escopo atual.",
+      "EMPTY": "Nenhuma revisão visível no seu escopo.",
+      "REVISION": "Revisão",
+      "AUTHOR": "Usuário",
+      "ORIGINAL": "Inferência original preservada",
+      "HUMAN": "Revisão humana",
+      "QUALITY": "Nota de qualidade",
+      "SENTIMENT": "Sentimento original",
+      "REASON": "Justificativa",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "RETRY": "Consultar novamente",
+      "UNKNOWN": "Não informado pela fonte",
+      "POSITIVE": "Positivo",
+      "NEUTRAL": "Neutro",
+      "NEGATIVE": "Negativo",
+      "SOURCE": "Fonte: histórico nativo. Fuso:",
+      "SOURCE_VERSION": "Identificação da inferência original:",
+      "MODEL": "Modelo",
+      "COLON": ":",
+      "SEPARATOR": "·",
+      "PAGE": "Total {total} · Página {page}"
     }
   }
 }

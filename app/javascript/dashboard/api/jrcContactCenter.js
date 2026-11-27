@@ -514,6 +514,11 @@ export default {
       `${base(accountId)}/recordings/${recordIdentity(id)}/quality_review`,
       { timeout: 30000 }
     ),
+  recordingTranscript: (accountId, id) =>
+    axios.get(
+      `${base(accountId)}/recordings/${recordIdentity(id)}/quality_review/transcript`,
+      { timeout: 30000 }
+    ),
   saveQualityReview: (accountId, id, values) =>
     axios.post(
       `${base(accountId)}/recordings/${recordIdentity(id)}/quality_review`,

@@ -1,3 +1,4 @@
+import { measureLocatorTextContrast as contrast } from './call-center-text-contrast.mjs';
 import { verifyAudioRowPreview } from './call-center-audio-row-native.mjs';
 import { isBrowserApiResponse } from './call-center-browser-api.mjs';
 import { verifyNativeQueueMembership } from './call-center-queue-membership-native.mjs';
@@ -4964,7 +4965,7 @@ test('team roster last eligible withdrawal uses real native review, persistence 
     exact: true,
   });
   await expect(rosterLegend).toBeVisible();
-  const rosterLegendContrast = await measureTextContrast(rosterLegend);
+  const rosterLegendContrast = await contrast(rosterLegend);
   expect(rosterLegendContrast.ratio).toBeGreaterThanOrEqual(4.5);
   const selection = dialog.locator(
     `[data-team-member="${target.operator_user_id}"]`

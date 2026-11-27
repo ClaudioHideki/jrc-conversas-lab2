@@ -5,6 +5,9 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import CallRecordingPlayer from 'dashboard/components-next/Calls/CallRecordingPlayer.vue';
 import RecordingAccessHistory from './RecordingAccessHistory.vue';
 import QualityReviewDialog from './QualityReviewDialog.vue';
+import RecordingTranscript from './RecordingTranscript.vue';
+import RecordingCallContext from './RecordingCallContext.vue';
+import QualityReviewHistory from './QualityReviewHistory.vue';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -21,15 +24,31 @@ const { t } = useI18n();
 const dialog = ref(null);
 const showHistory = ref(false);
 const showQuality = ref(false);
+const showTranscript = ref(false);
+const showContext = ref(false);
+const showQualityHistory = ref(false);
 watch(
   () => props.capabilities.audit,
   allowed => {
     if (!allowed) showHistory.value = false;
   }
 );
+watch(
+  () => [props.accountId, props.item.id, props.capabilities.recordings_listen],
+  () => {
+    showTranscript.value = false;
+    showContext.value = false;
+    showQualityHistory.value = false;
+  },
+  { flush: 'sync' }
+);
 const labels = computed(() => ({
   AUDIT_HISTORY: t('JRC_CONTACT_CENTER.RECORDINGS.ACCESS_HISTORY.TITLE'),
   QUALITY: t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY'),
+  TRANSCRIPT: t('JRC_CONTACT_CENTER.RECORDINGS.TRANSCRIPT.TITLE'),
+  VOLUME: t('JRC_CONTACT_CENTER.RECORDINGS.TRANSCRIPT.VOLUME'),
+  CONTEXT: t('JRC_CONTACT_CENTER.RECORDINGS.CONTEXT.TITLE'),
+  QUALITY_HISTORY: t('JRC_CONTACT_CENTER.QUALITY_HISTORY.TITLE'),
   DETAILS: t('JRC_CONTACT_CENTER.RECORDINGS.DETAILS'),
   CALL: t('JRC_CONTACT_CENTER.RECORDINGS.CALL'),
   CALL_ID: t('JRC_CONTACT_CENTER.RECORDINGS.CALL_ID'),
@@ -134,14 +153,66 @@ onMounted(() => dialog.value.open());
       >
         {{ text('QUALITY') }}
       </button>
+      <button
+        v-if="capabilities.recordings_listen"
+        type="button"
+        class="rounded-lg border border-n-violet-6 px-3 py-2 text-n-violet-11"
+        data-recording-transcript-open
+        :aria-expanded="showTranscript"
+        @click="showTranscript = !showTranscript"
+      >
+        {{ text('TRANSCRIPT') }}
+      </button>
+      <RecordingTranscript
+        v-if="showTranscript && capabilities.recordings_listen"
+        :key="`${accountId}-${item.id}`"
+        :account-id="accountId"
+        :recording-id="item.id"
+        :call-id="item.unique_id"
+      />
       <CallRecordingPlayer
         v-if="url && capabilities.recordings_listen"
         :key="url"
         :src="url"
         :fallback-duration="item.talk_duration_seconds || 0"
         :can-download="false"
+        :volume-label="text('VOLUME')"
         :before-playback="authorizePlayback"
         @error="emit('playback-error')"
+      />
+      <button
+        v-if="capabilities.recordings_listen"
+        type="button"
+        class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
+        data-recording-context-open
+        :aria-expanded="showContext"
+        @click="showContext = !showContext"
+      >
+        {{ text('CONTEXT') }}
+      </button>
+      <RecordingCallContext
+        v-if="showContext && capabilities.recordings_listen"
+        :key="`${accountId}-${item.id}`"
+        :account-id="accountId"
+        :call-session-id="item.call_session_id"
+        :call-id="item.unique_id"
+        :operational-context-allowed="capabilities.operate === true"
+      />
+      <button
+        v-if="capabilities.recordings_listen"
+        type="button"
+        class="rounded-lg border border-n-violet-6 px-3 py-2 text-n-violet-11"
+        data-recording-quality-history-open
+        :aria-expanded="showQualityHistory"
+        @click="showQualityHistory = !showQualityHistory"
+      >
+        {{ text('QUALITY_HISTORY') }}
+      </button>
+      <QualityReviewHistory
+        v-if="showQualityHistory && capabilities.recordings_listen"
+        :key="`${accountId}-${item.id}`"
+        :account-id="accountId"
+        :recording-id="item.id"
       />
       <button
         v-if="capabilities.audit"

@@ -140,17 +140,20 @@
   },
   "next_grouped_increment": {
     "documents": [
-      "docs/jrc_contact_center/recording_access_history_candidate_20261126.json",
-      "docs/jrc_contact_center/quality_review_operation_candidate_20261126.json"
+      "docs/jrc_contact_center/authorized_transcript_candidate_20261126.json",
+      "docs/jrc_contact_center/native_recording_context_candidate_20261126.json",
+      "docs/jrc_contact_center/quality_history_read_candidate_20261126.json",
+      "docs/jrc_contact_center/browser_contrast_dispatch_correction_20261126.json",
+      "docs/jrc_contact_center/grouped_recording_failed_parent_reconciliation_20261126.json"
     ],
     "figures": [
-      1,
-      12,
-      17,
+      20,
+      21,
       23
     ],
     "native_or_browser_accepted": false,
-    "single_sequential_CI": true
+    "single_sequential_CI": true,
+    "no_repeated_matrix_of_36_A_G_jobs": true
   },
   "effective_hours_not_measured_not_fabricated": true,
   "grouped_delivery_status_is_bounded_not_whole_figure_acceptance": true

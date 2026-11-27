@@ -117,4 +117,51 @@ describe('reuse of the native recording player without implicit download authori
     await flushPromises();
     expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
   });
+
+  it('keeps volume controls opt-in and changes only its existing audio element after an explicit input', async () => {
+    const legacy = fixture();
+    expect(legacy.find('[data-native-recording-volume]').exists()).toBe(false);
+    const wrapper = fixture({
+      canDownload: false,
+      volumeLabel: 'SYNTHETIC volume',
+    });
+    await wrapper.get('[data-native-recording-volume]').setValue('0.35');
+    expect(wrapper.get('audio').element.volume).toBeCloseTo(0.35);
+    expect(legacy.get('audio').element.volume).toBe(1);
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    expect(downloadFile).not.toHaveBeenCalled();
+  });
+
+  it('supports silence and full volume without authorizing playback or downloads', async () => {
+    const authorize = vi.fn().mockResolvedValue(false);
+    const wrapper = fixture({
+      canDownload: false,
+      beforePlayback: authorize,
+      volumeLabel: 'SYNTHETIC volume',
+    });
+    await wrapper.get('[data-native-recording-volume]').setValue('0');
+    expect(wrapper.get('audio').element.volume).toBe(0);
+    await wrapper.get('[data-native-recording-volume]').setValue('1');
+    expect(wrapper.get('audio').element.volume).toBe(1);
+    await wrapper.get('[data-native-recording-play]').trigger('click');
+    await flushPromises();
+    expect(authorize).toHaveBeenCalledOnce();
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    expect(downloadFile).not.toHaveBeenCalled();
+  });
+
+  it('does not carry a previous recording volume or media reference into a newly selected player', async () => {
+    const first = fixture({ volumeLabel: 'SYNTHETIC volume' });
+    await first.get('[data-native-recording-volume]').setValue('0.2');
+    first.unmount();
+    const second = fixture({
+      src: 'blob:synthetic-other-recording',
+      volumeLabel: 'SYNTHETIC volume',
+    });
+    expect(second.get('audio').element.volume).toBe(1);
+    expect(second.get('[data-native-recording-volume]').element.value).toBe(
+      '1'
+    );
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
 });

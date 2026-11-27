@@ -4,7 +4,7 @@
 # recording scope is also required: audit rights never grant another call.
 class JrcContactCenter::RecordingAudit < JrcContactCenter::ConfigurationAuditScope
   COMMENTS = %w[jrc_contact_center_recording_access_v1 jrc_contact_center_recording_reproduction_v1].freeze
-  OPERATIONS = %w[view listen download reproduce].freeze
+  OPERATIONS = %w[view listen download reproduce transcript].freeze
 
   def call
     return @relation.none unless history_available?

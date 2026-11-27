@@ -575,7 +575,35 @@
       "divergences": [
         "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "grouped_functional_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/authorized_transcript_candidate_20261126.json",
+        "implementation_prepared": true,
+        "native_and_Chrome_accepted": false,
+        "code": [
+          "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb",
+          "app/javascript/dashboard/api/jrcContactCenter.js",
+          "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue",
+          "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js",
+          "app/services/jrc_contact_center/recording_audit.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.vue"
+        ],
+        "prepared_native_tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb"
+        ],
+        "prepared_real_Chrome": "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs",
+        "native_permissions_reused_without_automatic_grants": true
+      }
     },
     {
       "id": "D2-P0394-C04",
@@ -785,7 +813,35 @@
       "divergences": [
         "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "grouped_functional_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/authorized_transcript_candidate_20261126.json",
+        "implementation_prepared": true,
+        "native_and_Chrome_accepted": false,
+        "code": [
+          "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb",
+          "app/javascript/dashboard/api/jrcContactCenter.js",
+          "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue",
+          "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js",
+          "app/services/jrc_contact_center/recording_audit.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.vue"
+        ],
+        "prepared_native_tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb"
+        ],
+        "prepared_real_Chrome": "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs",
+        "native_permissions_reused_without_automatic_grants": true
+      }
     },
     {
       "id": "D2-P0396-C03",
@@ -845,7 +901,35 @@
       "divergences": [
         "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "grouped_functional_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/authorized_transcript_candidate_20261126.json",
+        "implementation_prepared": true,
+        "native_and_Chrome_accepted": false,
+        "code": [
+          "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb",
+          "app/javascript/dashboard/api/jrcContactCenter.js",
+          "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue",
+          "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js",
+          "app/services/jrc_contact_center/recording_audit.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.vue"
+        ],
+        "prepared_native_tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb"
+        ],
+        "prepared_real_Chrome": "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs",
+        "native_permissions_reused_without_automatic_grants": true
+      }
     },
     {
       "id": "D2-P0397-C02",
@@ -875,7 +959,35 @@
       "divergences": [
         "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "grouped_functional_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/authorized_transcript_candidate_20261126.json",
+        "implementation_prepared": true,
+        "native_and_Chrome_accepted": false,
+        "code": [
+          "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb",
+          "app/javascript/dashboard/api/jrcContactCenter.js",
+          "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue",
+          "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js",
+          "app/services/jrc_contact_center/recording_audit.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.vue"
+        ],
+        "prepared_native_tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb"
+        ],
+        "prepared_real_Chrome": "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs",
+        "native_permissions_reused_without_automatic_grants": true
+      }
     },
     {
       "id": "D2-P0399-C01",
@@ -943,5 +1055,39 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "grouped_transcript_and_native_context_candidate": {
+    "documents": [
+      "docs/jrc_contact_center/authorized_transcript_candidate_20261126.json",
+      "docs/jrc_contact_center/native_recording_context_candidate_20261126.json",
+      "docs/jrc_contact_center/quality_history_read_candidate_20261126.json",
+      "docs/jrc_contact_center/browser_contrast_dispatch_correction_20261126.json",
+      "docs/jrc_contact_center/grouped_recording_failed_parent_reconciliation_20261126.json"
+    ],
+    "native_and_Chrome_acceptance": false,
+    "whole_figure_accepted": false,
+    "source_sha256": {
+      "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb": "8a57fa5619b56059a681f3dbecce253e6a8083208a8d7fb31f69fc518834203c",
+      "app/javascript/dashboard/api/jrcContactCenter.js": "1eec81ca74a69ea134dd6602cec5114e10c9bed0198a26342cfb98cc54c0cccc",
+      "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue": "f02bdc6db4b35fb9ac9e51eb94e5f0bb6d694028926f1f70d9c9059f00617cf2",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "6eef68e9b7918e434771de28e308679b5b5266972b85125f271aaa855ceccdc0",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.vue": "ea59c3a2a7bf4b41a46554dc26187638394c95e4b7dd6cf95b85cc13ce2c3372",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "4b3ae88564b7236397613e7489c6f146b75e2f8ed797a0b247d312c6cc0af60b",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "ca3f44ee3535355520db876792f7d666a2d1252b17bcb70edb7154ee5d2b8d6f",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js": "9de7d6e0424c12cfc2dd5bfd2644cf76f9520972a832133e2858fa92c4c12a2d",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.vue": "ff33db9aea971bbf2e92a601ee87a24c6e5c6204be3a9f7d35f5e814326727eb",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js": "3209e3ec4437e3dc14481e754901423599e5b214d73a287975de0a9424bd8448",
+      "app/services/jrc_contact_center/recording_audit.rb": "0b85e9b6bff92faba7e99270129dc20a169facc191c6181931ce5fcd2a69b365",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js": "8109da1bc333d668810ac1c76a51bf46d087f9d1138ad52979a1eceb87e70465",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.vue": "a67f2f9e39e9d0285d155f7391c079961d3e5114d04854dd15bc7e78a46461c3",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js": "2710d8c33bb48dc0c9afed0e3e494bb4c280e00991addd657f542a33114a4e93",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.vue": "f3fa67cfe85338f7af3a3b61c7a68cbc78d64f87fad4bbe94e7b0c7b84928515"
+    },
+    "remaining": [
+      "Real native tests and four-mode Chrome acceptance",
+      "Complete five-tab layout and inline cross-module context remain distinct clauses",
+      "Contracts, relationship, CRM and Service Desk retain their native source, layout and permissions",
+      "Source-timed segment alignment and external PABX/Nico homologation remain separate dependencies"
+    ]
+  }
 }

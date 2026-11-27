@@ -1,0 +1,197 @@
+{
+  "sha": "9fdae9e50e9945c844b1d3accd6672afcc81407f",
+  "run": 45905585781,
+  "artifact": 15160994191,
+  "artifact_sha256": "a0e638abec5a86d36bf73113267239c71f5a6e6a50312a7782360b786708161b",
+  "failure_report_sha256": "31a43a48ede17c01dee7ce0e6a7e27c4b66ce073d9811d77dd3102f8460ff88d",
+  "Chrome_report_sha256": "71f12db55546246fb00b382901c633a8ab603472b5cc843d0f563c4258c70179",
+  "native_distinct_examples_passed": 3867,
+  "main_Vue_passed": 2017,
+  "recording_Vue_passed": 70,
+  "SD_Vue_passed": 110,
+  "Chrome_passed": 280,
+  "Chrome_failed": 8,
+  "failed_cases": [
+    {
+      "title": "team roster last eligible withdrawal uses real native review, persistence and scoped audit",
+      "project": "desktop-light",
+      "status": "failed",
+      "errors": [
+        "ReferenceError: measureTextContrast is not defined\n\n  4965 |   });\n  4966 |   await expect(rosterLegend).toBeVisible();\n> 4967 |   const rosterLegendContrast = await measureTextContrast(rosterLegend);\n       |                                ^\n  4968 |   expect(rosterLegendContrast.ratio).toBeGreaterThanOrEqual(4.5);\n  4969 |   const selection = dialog.locator(\n  4970 |     `[data-team-member=\"${target.operator_user_id}\"]`\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-native.spec.ts:4967:32"
+      ]
+    },
+    {
+      "title": "team roster last eligible withdrawal uses real native review, persistence and scoped audit",
+      "project": "desktop-dark",
+      "status": "failed",
+      "errors": [
+        "ReferenceError: measureTextContrast is not defined\n\n  4965 |   });\n  4966 |   await expect(rosterLegend).toBeVisible();\n> 4967 |   const rosterLegendContrast = await measureTextContrast(rosterLegend);\n       |                                ^\n  4968 |   expect(rosterLegendContrast.ratio).toBeGreaterThanOrEqual(4.5);\n  4969 |   const selection = dialog.locator(\n  4970 |     `[data-team-member=\"${target.operator_user_id}\"]`\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-native.spec.ts:4967:32"
+      ]
+    },
+    {
+      "title": "team roster last eligible withdrawal uses real native review, persistence and scoped audit",
+      "project": "mobile-light",
+      "status": "failed",
+      "errors": [
+        "ReferenceError: measureTextContrast is not defined\n\n  4965 |   });\n  4966 |   await expect(rosterLegend).toBeVisible();\n> 4967 |   const rosterLegendContrast = await measureTextContrast(rosterLegend);\n       |                                ^\n  4968 |   expect(rosterLegendContrast.ratio).toBeGreaterThanOrEqual(4.5);\n  4969 |   const selection = dialog.locator(\n  4970 |     `[data-team-member=\"${target.operator_user_id}\"]`\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-native.spec.ts:4967:32"
+      ]
+    },
+    {
+      "title": "team roster last eligible withdrawal uses real native review, persistence and scoped audit",
+      "project": "mobile-dark",
+      "status": "failed",
+      "errors": [
+        "ReferenceError: measureTextContrast is not defined\n\n  4965 |   });\n  4966 |   await expect(rosterLegend).toBeVisible();\n> 4967 |   const rosterLegendContrast = await measureTextContrast(rosterLegend);\n       |                                ^\n  4968 |   expect(rosterLegendContrast.ratio).toBeGreaterThanOrEqual(4.5);\n  4969 |   const selection = dialog.locator(\n  4970 |     `[data-team-member=\"${target.operator_user_id}\"]`\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-native.spec.ts:4967:32"
+      ]
+    },
+    {
+      "title": "native human Nico correction preserves immutable source, reviewed conflicts and independent authority",
+      "project": "desktop-light",
+      "status": "failed",
+      "errors": [
+        "ReferenceError: document is not defined\n\n   at call-center-text-contrast.mjs:3\n\n  1 | // Runs inside the actual browser; computed CSS, alpha composition and WCAG luminance.\n  2 | export function measureTextContrast(root, selectors = []) {\n> 3 |   const context = document.createElement('canvas').getContext('2d');\n    |                   ^\n  4 |   const pixel = color => {\n  5 |     context.clearRect(0, 0, 1, 1);\n  6 |     context.fillStyle = color;\n    at measureTextContrast (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-text-contrast.mjs:3:19)\n    at verifyNativeQualityReview (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs:127:47)\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts:25:3"
+      ]
+    },
+    {
+      "title": "native human Nico correction preserves immutable source, reviewed conflicts and independent authority",
+      "project": "desktop-dark",
+      "status": "failed",
+      "errors": [
+        "ReferenceError: document is not defined\n\n   at call-center-text-contrast.mjs:3\n\n  1 | // Runs inside the actual browser; computed CSS, alpha composition and WCAG luminance.\n  2 | export function measureTextContrast(root, selectors = []) {\n> 3 |   const context = document.createElement('canvas').getContext('2d');\n    |                   ^\n  4 |   const pixel = color => {\n  5 |     context.clearRect(0, 0, 1, 1);\n  6 |     context.fillStyle = color;\n    at measureTextContrast (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-text-contrast.mjs:3:19)\n    at verifyNativeQualityReview (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs:127:47)\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts:25:3"
+      ]
+    },
+    {
+      "title": "native human Nico correction preserves immutable source, reviewed conflicts and independent authority",
+      "project": "mobile-light",
+      "status": "failed",
+      "errors": [
+        "ReferenceError: document is not defined\n\n   at call-center-text-contrast.mjs:3\n\n  1 | // Runs inside the actual browser; computed CSS, alpha composition and WCAG luminance.\n  2 | export function measureTextContrast(root, selectors = []) {\n> 3 |   const context = document.createElement('canvas').getContext('2d');\n    |                   ^\n  4 |   const pixel = color => {\n  5 |     context.clearRect(0, 0, 1, 1);\n  6 |     context.fillStyle = color;\n    at measureTextContrast (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-text-contrast.mjs:3:19)\n    at verifyNativeQualityReview (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs:127:47)\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts:25:3"
+      ]
+    },
+    {
+      "title": "native human Nico correction preserves immutable source, reviewed conflicts and independent authority",
+      "project": "mobile-dark",
+      "status": "failed",
+      "errors": [
+        "ReferenceError: document is not defined\n\n   at call-center-text-contrast.mjs:3\n\n  1 | // Runs inside the actual browser; computed CSS, alpha composition and WCAG luminance.\n  2 | export function measureTextContrast(root, selectors = []) {\n> 3 |   const context = document.createElement('canvas').getContext('2d');\n    |                   ^\n  4 |   const pixel = color => {\n  5 |     context.clearRect(0, 0, 1, 1);\n  6 |     context.fillStyle = color;\n    at measureTextContrast (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-text-contrast.mjs:3:19)\n    at verifyNativeQualityReview (/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs:127:47)\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/tests/playwright/tests/e2e/ui/call-center-recordings-native.spec.ts:25:3"
+      ]
+    }
+  ],
+  "native_reports": [
+    {
+      "name": "call-center-corporate-rspec.json",
+      "sha256": "63f44ba2ec2d7a5596dde834be422081db166049af20ccd5e6dc3b121e9f84ac",
+      "examples": 85
+    },
+    {
+      "name": "call-center-ending-actual-broker-rspec.json",
+      "sha256": "871d15bf7f75b7942624f8bd40b039af5a325826b3f5145fdb8a610cf2a10b3b",
+      "examples": 3
+    },
+    {
+      "name": "call-center-ending-completion-projection-rspec.json",
+      "sha256": "1279057457ca38495a355119417cde214b8c8f46428c09f15f3e03d31bdd5d2f",
+      "examples": 4
+    },
+    {
+      "name": "call-center-ending-nico-queue-rspec.json",
+      "sha256": "9a6cba83c5461e699934e104c5adf68c43e1d0c6adc474c70f3bb9cfaf7709d6",
+      "examples": 14
+    },
+    {
+      "name": "call-center-ending-pending-rspec.json",
+      "sha256": "a61004705dddc0fb7237d27d3f9ac22996292b60c632463c97c8130a0418eebf",
+      "examples": 15
+    },
+    {
+      "name": "call-center-ending-public-committed-rspec.json",
+      "sha256": "053ef5ded271fcff17159d296cc776fe287a12ecabc6f40bd42b2e6b1e3ea47c",
+      "examples": 56
+    },
+    {
+      "name": "call-center-ending-sd-public-pipeline-rspec.json",
+      "sha256": "bf450608e07417d885bd3b46dd3cfe891dfcd45e059c2d2d3a400cca69932f6d",
+      "examples": 3
+    },
+    {
+      "name": "call-center-ending-typed-actual-broker-rspec.json",
+      "sha256": "bd3bc652ec3ed2a18ff129715c5f0ba2ad1c26ef8478d313adcdaa39a9d501b2",
+      "examples": 3
+    },
+    {
+      "name": "call-center-ivr-schema-reload-rspec.json",
+      "sha256": "c6c5bf841e0ce9b84a52f720d8aa739c836b4fc8e433463a425c5631e7a7a705",
+      "examples": 252
+    },
+    {
+      "name": "call-center-nico-intent-fresh-rspec.json",
+      "sha256": "606e5126419a60865dc5153bfe7baab37dcbd20443100483ff76ecc03e6681ca",
+      "examples": 6
+    },
+    {
+      "name": "call-center-nico-intent-reload-rspec.json",
+      "sha256": "6f9cadd3e146fcb0c6dbb9af3ae21e6559b35990d0e6794a99c388f165e24b94",
+      "examples": 6
+    },
+    {
+      "name": "call-center-nico-intent-upgrade-rspec.json",
+      "sha256": "73cf628ab1aec00657433c835dcc3430eaffd1a6117ca08b5f2bfd6565ec609c",
+      "examples": 1
+    },
+    {
+      "name": "call-center-nico-native-regressions-rspec.json",
+      "sha256": "4e8e7aeec859897ada67ba9f0edc8c4884717cd92198bd4f6f0ec3061fd31593",
+      "examples": 87
+    },
+    {
+      "name": "call-center-nico-preserved-contention-rspec.json",
+      "sha256": "4a76f291c84c95e997c1ca03c413a9204434ee40083c8cfd5c059dcddac7876a",
+      "examples": 2
+    },
+    {
+      "name": "call-center-pabx-rspec.json",
+      "sha256": "b5bcdd3e728d0b4019089d06b8e3f292fc65b37bd6d614ec8f350d2842561e01",
+      "examples": 253
+    },
+    {
+      "name": "call-center-quality-review-concurrency-rspec.json",
+      "sha256": "5d26600c842b174e99939ad338316929682cd08f1e159b13649bfcfda40ad64e",
+      "examples": 3
+    },
+    {
+      "name": "call-center-rspec.json",
+      "sha256": "ea021191bd18dc86af272e09cbe4251548b9d739973d7e0b901ed1914ab290a7",
+      "examples": 3274
+    },
+    {
+      "name": "call-center-typed-delivery-transaction-rspec.json",
+      "sha256": "198e10ff6f5db9927000a4dd9a732aadfd62673c3bdb5faf8fa91199771e7d19",
+      "examples": 20
+    },
+    {
+      "name": "call-center-typed-destination-concurrency-rspec.json",
+      "sha256": "985c03e2293e63707e3068dbc64bb50178d290246dced0bf2419358c6446c25b",
+      "examples": 25
+    },
+    {
+      "name": "call-center-typed-destination-reload-rspec.json",
+      "sha256": "047f5c1a6a0ddb9801f81ab05c57d898edadaa464f04c8d0720d54b6cfafc77a",
+      "examples": 11
+    },
+    {
+      "name": "call-center-typed-destination-upgrade-rspec.json",
+      "sha256": "6ed8781ad7bfc72dd56e3d982ff246c43870dceead046321c830af5d1b8fb107",
+      "examples": 3
+    },
+    {
+      "name": "call-center-typed-original-event-rspec.json",
+      "sha256": "e9e0804035d256eabeb1e253a09578958bfff84404b7f9865750305e6517f540",
+      "examples": 10
+    }
+  ],
+  "only_two_proven_QA_ReferenceErrors_in_four_modes": true,
+  "whole_parent_accepted": false,
+  "visual_acceptance_for_failed_cases": false,
+  "all_native_gates_and_288_Chrome_must_pass_on_successor_SHA": true,
+  "purpose": "Group the exact QA correction with prepared related functionality, without representing failed evidence as approved."
+}

@@ -1,0 +1,73 @@
+{
+  "parent": "9fdae9e50e9945c844b1d3accd6672afcc81407f",
+  "stage": {
+    "name": "exact_reused_native_call_and_customer_context_with_separate_directory_authority",
+    "source_sha256": {
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "e3cc16ed1756bc013453ed004f4f3ea41f3d0a75f0ba86d78b07276ccacb822d",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js": "8109da1bc333d668810ac1c76a51bf46d087f9d1138ad52979a1eceb87e70465",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.vue": "a67f2f9e39e9d0285d155f7391c079961d3e5114d04854dd15bc7e78a46461c3",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "3feb67ad4190155f6419bc1e55cc1455718fd6ec349353f736b2c5bccc9cd0a6",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "cf1cb173204edff28f2a44d8439543a1c520b4457160a3992f4deb8fe081b40f",
+      "script/jrc_call_center_recordings_seed.rb": "ae33ced0bdf1b98bfed6c2d90d6112821797daee9a814a74a91d4b89ebd2e970",
+      "spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb": "24aee3bfd1fab8856af5f60f2febf2494031d37d5aa81b6b0ef6a259a066b65e",
+      "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "3d57c2940a7d921ed425c9293f675ba42d76a1aa38a5eeb5f65b34b546c0a660",
+      "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs": "b90fc8b03a1809d9b7fe1e00f81aa0123313f3023ea6c76e3b37fa2ccf9335b2",
+      ".github/workflows/call-center-administration.yml": "1a5268a3be02ecf09ec4b94935730ff0651c6b52c035cde45a95dba29e73bd59"
+    },
+    "parent_sources": {
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "e6e5eaedfdba6cfa7b028d9c12439e9313fe5d7ebab031ed6efab3261e209f9f",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js": null,
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.vue": null,
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "4d4bcc0810cca99ddd594f9f39aba750eeba96231b375b89b921a42db631f6e3",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "85252e5fb75e558d3f4eee5d543095000ac43e39af18f08b45411d16a627db6c",
+      "script/jrc_call_center_recordings_seed.rb": "d63b11acfebdae6cd84422b68a4b6282d3d3f7cd2254317ae6b838d8223c1de6",
+      "spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb": null,
+      "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "c9fecef99b356f0a8798b0f342a4addc54699454ed4a3a639b33e8aca76137ef",
+      "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs": null,
+      ".github/workflows/call-center-administration.yml": "1843eca4c0b38381406b502fd1ae92d340c6f3fb50371a321193b958b29139bd"
+    }
+  },
+  "preceding": "docs/jrc_contact_center/authorized_transcript_candidate_20261126.json",
+  "parent_native_Chrome_and_original_images_reviewed": false,
+  "failed_parent_reconciliation_sha256": "326cb6d5940d6742326ff463689826496cebacf7452f1ce8b905e83b24487cb0",
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false,
+  "native_contracts": [
+    {
+      "path": "app/policies/jrc_customers/directory_policy.rb",
+      "sha256": "319486052b37e5e93c769db724522a0f5031f1c586321d8d7267d98301a2babe",
+      "source_sha": "9fdae9e50e9945c844b1d3accd6672afcc81407f"
+    },
+    {
+      "path": "app/services/jrc_customers/contact_directory.rb",
+      "sha256": "68f99616e9208b0a735ba3ed339810640404536b8e617b55c37f5434f039a6d8",
+      "source_sha": "9fdae9e50e9945c844b1d3accd6672afcc81407f"
+    },
+    {
+      "path": "spec/support/contact_center_quality_review.rb",
+      "sha256": "615675cb92c94d1884eaac04502f7466a3b0263b7601d50a59045123f440a97d",
+      "source_sha": "9fdae9e50e9945c844b1d3accd6672afcc81407f"
+    }
+  ],
+  "functional_scope": [
+    "Existing authenticated call_sessions#show and native corporate scope",
+    "Existing CustomerContext#for_call with explicit call/contact link",
+    "Existing DirectoryPolicy and ContactDirectory, with no permission inferred from recording access",
+    "Existing LinkedContactMaster and real Contact360Panel dialog",
+    "The same four recording-quality Chrome cases and owned PostgreSQL fixtures"
+  ],
+  "explicit_owned_fixture_only_grant": true,
+  "expected_combined_not_results": {
+    "distinct_Rails": 3882,
+    "main_Vue": 2042,
+    "recordings_targeted_Vue": 95,
+    "Chrome": 288,
+    "PNG": 780
+  },
+  "remaining": [
+    "Real native tests and four-mode Chrome acceptance",
+    "Complete five-tab layout and inline cross-module context remain distinct clauses",
+    "Contracts, relationship, CRM and Service Desk retain their native source, layout and permissions",
+    "Source-timed segment alignment and external PABX/Nico homologation remain separate dependencies"
+  ]
+}

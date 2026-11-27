@@ -1,0 +1,188 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import API from 'dashboard/api/jrcContactCenter';
+import RecordingCallContext from './RecordingCallContext.vue';
+
+vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
+vi.mock('dashboard/api/jrcContactCenter', () => ({
+  default: { call: vi.fn() },
+}));
+const result = () => ({
+  account_id: '1',
+  item: {
+    id: '7',
+    external_session_id: 'SYNTHETIC-recorded-call',
+    contact_id: '2',
+    queue: { name: 'SYNTHETIC native queue' },
+    customer: {
+      status: 'identified',
+      ambiguous: false,
+      contacts: [
+        {
+          id: '2',
+          name: 'SYNTHETIC authorized contact',
+          company: { id: '9', name: 'SYNTHETIC covered company' },
+        },
+      ],
+      directory: { contact_id: '2' },
+    },
+  },
+});
+const render = (props = {}) =>
+  mount(RecordingCallContext, {
+    props: {
+      accountId: '1',
+      callSessionId: '7',
+      callId: 'SYNTHETIC-recorded-call',
+      operationalContextAllowed: true,
+      ...props,
+    },
+    global: { stubs: { LinkedContactMaster: true } },
+  });
+enableAutoUnmount(afterEach);
+afterEach(() => vi.resetAllMocks());
+
+describe('current native call context inside recording details', () => {
+  it('reuses the authenticated existing call API and the native linked-master component', async () => {
+    API.call.mockResolvedValue({ data: result() });
+    const wrapper = render();
+    await flushPromises();
+    expect(API.call).toHaveBeenCalledTimes(1);
+    expect(API.call).toHaveBeenCalledWith('1', '7');
+    expect(wrapper.get('[data-recording-context-contact]').text()).toBe(
+      'SYNTHETIC authorized contact'
+    );
+    expect(wrapper.get('[data-recording-context-company]').text()).toBe(
+      'SYNTHETIC covered company'
+    );
+    expect(
+      wrapper.getComponent({ name: 'LinkedContactMaster' }).props()
+    ).toMatchObject({
+      accountId: '1',
+      call: result().item,
+      customer: result().item.customer,
+      enabled: true,
+    });
+  });
+
+  it('does not infer a customer from a unique phone candidate or transcript text', async () => {
+    const data = result();
+    data.item.contact_id = null;
+    data.item.metadata = { transcript: 'SYNTHETIC untrusted identity' };
+    API.call.mockResolvedValue({ data });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('SYNTHETIC authorized contact');
+    expect(wrapper.text()).not.toContain('SYNTHETIC untrusted identity');
+    expect(wrapper.get('[data-recording-context-identity]').text()).toContain(
+      'UNLINKED'
+    );
+    expect(
+      wrapper.findComponent({ name: 'LinkedContactMaster' }).exists()
+    ).toBe(false);
+  });
+
+  it('does not choose the first ambiguous candidate or another explicit contact', async () => {
+    const data = result();
+    data.item.customer.ambiguous = true;
+    API.call.mockResolvedValue({ data });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('SYNTHETIC authorized contact');
+    expect(wrapper.get('[data-recording-context-identity]').text()).toContain(
+      'AMBIGUOUS'
+    );
+    data.item.customer.ambiguous = false;
+    data.item.contact_id = '99';
+    await wrapper.setProps({ operationalContextAllowed: false });
+    await wrapper.setProps({ operationalContextAllowed: true });
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: 'LinkedContactMaster' }).exists()
+    ).toBe(false);
+    expect(wrapper.get('[data-recording-context-identity]').text()).toContain(
+      'UNLINKED'
+    );
+  });
+
+  it('clears the customer immediately on authority withdrawal without another API read', async () => {
+    API.call.mockResolvedValue({ data: result() });
+    const wrapper = render();
+    await flushPromises();
+    await wrapper.setProps({ operationalContextAllowed: false });
+    expect(wrapper.text()).not.toContain('SYNTHETIC authorized contact');
+    expect(wrapper.get('[role="alert"]').text()).toContain('RESTRICTED');
+    expect(API.call).toHaveBeenCalledTimes(1);
+    expect(
+      wrapper.findComponent({ name: 'LinkedContactMaster' }).exists()
+    ).toBe(false);
+  });
+
+  it.each(['account', 'call-session', 'external-call'])(
+    'never renders a mismatched %s identity',
+    async kind => {
+      const data = result();
+      if (kind === 'account') data.account_id = '8';
+      if (kind === 'call-session') data.item.id = '8';
+      if (kind === 'external-call')
+        data.item.external_session_id = 'SYNTHETIC-other';
+      API.call.mockResolvedValue({ data });
+      const wrapper = render();
+      await flushPromises();
+      expect(wrapper.text()).not.toContain('SYNTHETIC authorized contact');
+      expect(wrapper.get('[role="alert"]').text()).toContain('ERROR');
+    }
+  );
+
+  it('ignores a late response after switching accounts and recordings', async () => {
+    let resolveFirst;
+    API.call.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveFirst = resolve;
+        })
+    );
+    API.call.mockRejectedValueOnce({ response: { status: 404 } });
+    const wrapper = render();
+    await wrapper.setProps({
+      accountId: '2',
+      callSessionId: '8',
+      callId: 'SYNTHETIC-other',
+    });
+    await flushPromises();
+    resolveFirst({ data: result() });
+    await flushPromises();
+    expect(API.call).toHaveBeenLastCalledWith('2', '8');
+    expect(wrapper.text()).not.toContain('SYNTHETIC authorized contact');
+    expect(wrapper.get('[role="alert"]').text()).toContain('RESTRICTED');
+  });
+
+  it('keeps a source failure local and supports an explicit fresh authorized retry', async () => {
+    API.call.mockRejectedValueOnce({ response: { status: 503 } });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain('ERROR');
+    API.call.mockResolvedValueOnce({ data: result() });
+    await wrapper.get('[data-recording-context-retry]').trigger('click');
+    await flushPromises();
+    expect(API.call).toHaveBeenCalledTimes(2);
+    expect(wrapper.get('[data-recording-context-contact]').text()).toBe(
+      'SYNTHETIC authorized contact'
+    );
+  });
+
+  it('honors an explicit restricted source and never opens the native directory for it', async () => {
+    const data = result();
+    data.item.customer.status = 'restricted';
+    API.call.mockResolvedValue({ data });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('SYNTHETIC authorized contact');
+    expect(wrapper.get('[data-recording-context-identity]').text()).toContain(
+      'RESTRICTED'
+    );
+    expect(
+      wrapper.findComponent({ name: 'LinkedContactMaster' }).exists()
+    ).toBe(false);
+  });
+});

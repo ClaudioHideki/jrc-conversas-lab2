@@ -22,6 +22,7 @@ const props = defineProps({
     default: true,
   },
   beforePlayback: { type: Function, default: null },
+  volumeLabel: { type: String, default: '' },
   fallbackDuration: {
     type: Number,
     default: 0,
@@ -39,6 +40,7 @@ const playbackPending = ref(false);
 const currentTime = ref(0);
 const duration = ref(props.fallbackDuration);
 const playbackSpeed = ref(1);
+const volume = ref(1);
 
 const onLoadedMetadata = () => {
   const loadedDuration = audioPlayer.value?.duration;
@@ -109,6 +111,14 @@ const seek = event => {
   currentTime.value = time;
 };
 
+const changeVolume = event => {
+  const value = Number(event.target.value);
+  if (!Number.isFinite(value) || value < 0 || value > 1 || !audioPlayer.value)
+    return;
+  audioPlayer.value.volume = value;
+  volume.value = value;
+};
+
 const onEnd = () => {
   isPlaying.value = false;
   currentTime.value = 0;
@@ -129,7 +139,10 @@ const downloadRecording = () => {
 
 <template>
   <div
-    class="flex items-center justify-center h-9 gap-2 px-2 rounded-full bg-n-alpha-1 dark:bg-n-alpha-2 overflow-hidden"
+    class="flex items-center justify-center gap-2 px-2 bg-n-alpha-1 dark:bg-n-alpha-2 overflow-hidden"
+    :class="
+      volumeLabel ? 'h-auto flex-wrap rounded-xl py-2' : 'h-9 rounded-full'
+    "
     @click.stop
   >
     <audio
@@ -164,6 +177,7 @@ const downloadRecording = () => {
       min="0"
       :max="duration || 0"
       :value="currentTime"
+      data-native-recording-seek
       class="flex-1 min-w-0 lg:grow-0 lg:basis-24 h-1 rounded-lg appearance-none cursor-pointer bg-n-slate-12/30 accent-n-slate-11"
       @input="seek"
     />
@@ -193,5 +207,20 @@ const downloadRecording = () => {
         <Icon icon="i-lucide-download" class="size-4 flex-shrink-0" />
       </template>
     </Button>
+    <label v-if="volumeLabel" class="flex basis-full items-center gap-2 px-2">
+      <span class="text-xs text-n-slate-11">{{ volumeLabel }}</span>
+      <input
+        type="range"
+        min="0"
+        max="1"
+        step="0.05"
+        :value="volume"
+        :aria-label="volumeLabel"
+        :aria-valuetext="`${Math.round(volume * 100)}%`"
+        class="min-w-0 flex-1 accent-n-slate-11"
+        data-native-recording-volume
+        @input="changeVolume"
+      />
+    </label>
   </div>
 </template>

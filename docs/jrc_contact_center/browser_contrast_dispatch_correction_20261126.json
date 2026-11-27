@@ -1,0 +1,34 @@
+{
+  "parent": "9fdae9e50e9945c844b1d3accd6672afcc81407f",
+  "stage": {
+    "name": "exact_browser_DOM_contrast_dispatch_without_changing_measurement_or_assertions",
+    "source_sha256": {
+      "tests/playwright/tests/e2e/ui/call-center-text-contrast.mjs": "2cceb09f7515df1af9af2ca69edc24745826ebfd347b1eb45ae14d316aacfbf9",
+      "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "813b5f6a60b77e6ce7ef17f79b32e78bf48a409c418d942d7e2453504cae3337",
+      "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "2177657cacacb49f3fd7ad9ce39d45509e1a3e62a2dac7fdd073a6dc1c903621",
+      "tests/playwright/tests/e2e/ui/call-center-transcript-native.mjs": "e55fcaecb53146d7dadc0ad689784e9fafe27d9c422ec5abe7288e324292ed34",
+      "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs": "eb170cf0c8ae037e72f1557061a674503d26559b39a82dd0e75120b2499ea5ce",
+      "tests/playwright/tests/e2e/ui/call-center-quality-history-native.mjs": "f8dfe717c4dca9de65fb9fccb9a624aeef14a16f55b53972b3e0549aa0cc47bb",
+      ".github/workflows/call-center-administration.yml": "65762a79830206d087575d5f941649f9538a66b66b3784d6a15ad50f06ad42ba",
+      "tests/playwright/tests/e2e/ui/call-center-text-contrast-dispatch.test.mjs": "9cc94c9f1dcb47fd9a16da4f4727b1a0f2466ef1ab9be9d04ede2864506cb5c9"
+    },
+    "parent_sources": {
+      "tests/playwright/tests/e2e/ui/call-center-text-contrast.mjs": "96743e2c8d8fd56fbfbb05d59621ba2790ab4a29aa1f65f39f1f668343e31a1c",
+      "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "c469da30a804d1328c172746b63c3cf4c899496c54ccb5e8a32b81e5e59df6fc",
+      "tests/playwright/tests/e2e/ui/call-center-quality-review-native.mjs": "dcc124032bd5e493f05979748fb0209f5e9b500167e4845c6e4ff2cdde4ef002",
+      "tests/playwright/tests/e2e/ui/call-center-transcript-native.mjs": "64a57d39348d7772fca0496fdabbee226e2448c2dccf80b93148724fa72bf24f",
+      "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs": "b90fc8b03a1809d9b7fe1e00f81aa0123313f3023ea6c76e3b37fa2ccf9335b2",
+      "tests/playwright/tests/e2e/ui/call-center-quality-history-native.mjs": "ba2d6feea3ea9ad503476a59fd0ed6cdd9beb34afb4cb5927f65a1287e56e4b2",
+      ".github/workflows/call-center-administration.yml": "265828e5bf01a52a4fb4e96f1e1bcd5ac42871f0892e1b08b5e173bf264135ac",
+      "tests/playwright/tests/e2e/ui/call-center-text-contrast-dispatch.test.mjs": null
+    }
+  },
+  "parent_native_Chrome_and_original_images_reviewed": false,
+  "failed_parent_reconciliation_sha256": "326cb6d5940d6742326ff463689826496cebacf7452f1ce8b905e83b24487cb0",
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false,
+  "original_browser_calculation_and_all_288_cases_preserved": true,
+  "current_native_tests_and_real_Chrome_on_new_SHA_required": true,
+  "prepared_QA_regression_tests": 4,
+  "no_application_test_count_inflation": true
+}

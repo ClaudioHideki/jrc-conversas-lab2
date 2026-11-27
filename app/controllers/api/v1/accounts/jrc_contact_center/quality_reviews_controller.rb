@@ -26,10 +26,25 @@ class Api::V1::Accounts::JrcContactCenter::QualityReviewsController < Api::V1::A
     render json: base_payload.merge(recording_id: row.recording_id.to_s, item: present(row))
   end
 
+  def transcript
+    reader.call(params[:recording_id]) do |record, call, snapshot|
+      text = snapshot.data['texto_transcrito']
+      unless text.nil? || text.is_a?(String)
+        raise JrcContactCenter::OperationError, 'quality_analysis_source_unavailable'
+      end
+
+      audit_transcript!(record, call)
+      render json: base_payload.merge(recording_id: record.id.to_s, call_session_id: call.id.to_s,
+                                      call_id: record.external_unique_id, source_sha256: snapshot.sha256,
+                                      text: text, segments: [], temporal_alignment: 'not_supplied_by_native_source')
+    end
+  end
+
   def history
     reader.with_record(params[:recording_id]) do |record, _call|
       params[:page] = 1 if params[:page].blank?
-      render json: list_payload(revisions(record).order(revision: :desc)) { |row| present(row) }
+      payload = list_payload(revisions(record).order(revision: :desc)) { |row| present(row) }
+      render json: payload.merge(recording_id: record.id.to_s, timezone: Time.zone.tzinfo.name)
     end
   end
 
@@ -53,6 +68,15 @@ class Api::V1::Accounts::JrcContactCenter::QualityReviewsController < Api::V1::A
 
   def current_review_authority?
     JrcContactCenter::ModulePolicy.new(pundit_user, :contact_center).quality_review?
+  end
+
+  def audit_transcript!(record, call)
+    Audited.audit_class.create!(
+      auditable: record, associated: Current.account, user: Current.user, action: 'read',
+      comment: JrcContactCenter::RecordingAudit::COMMENTS.first,
+      audited_changes: { 'schema_version' => 1, 'operation' => 'transcript', 'call_session_id' => call.id.to_s }
+        .merge(JrcContactCenter::RecordingAudit.scope_fields(call))
+    )
   end
 
   def private_response

@@ -140,18 +140,32 @@ jobs:
           PY
       - name: Focused native recordings selection, shared player and retained ACW target controls
         run: |
+          node --test --test-reporter=tap tests/playwright/tests/e2e/ui/call-center-text-contrast-dispatch.test.mjs > /tmp/call-center-contrast-dispatch.txt
+          cat /tmp/call-center-contrast-dispatch.txt
+          python3 -B - <<'PY'
+          import hashlib, json, os, re
+          from pathlib import Path
+          raw = Path('/tmp/call-center-contrast-dispatch.txt').read_bytes()
+          values = {key: int(value) for key, value in re.findall(r'^# (tests|pass|fail|cancelled|skipped|todo) (\d+)$', raw.decode(), re.M)}
+          assert values == {'tests': 4, 'pass': 4, 'fail': 0, 'cancelled': 0, 'skipped': 0, 'todo': 0}
+          files = ['tests/playwright/tests/e2e/ui/call-center-text-contrast.mjs', 'tests/playwright/tests/e2e/ui/call-center-text-contrast-dispatch.test.mjs']
+          proof = {'sha': os.environ['GITHUB_SHA'], 'tests': values, 'TAP_sha256': hashlib.sha256(raw).hexdigest(),
+                   'source_sha256': {path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in files},
+                   'no_browser_CSS_or_application_acceptance_claimed': True}
+          Path('/tmp/call-center-contrast-dispatch.json').write_text(json.dumps(proof, indent=2) + '\n')
+          PY
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.spec.js \
-            app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js \
+            app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/call-center-recordings-preflight-vitest.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 70
+          assert report['numTotalTests'] == report['numPassedTests'] == 106
           assert report['numFailedTests'] == report['numPendingTests'] == 0
-          assert len(report['testResults']) == 6 and all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useScopedRecordings.spec.js': 22, 'ScopedNativeRecordingPlayer.spec.js': 8, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 4, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13}
+          assert len(report['testResults']) == 9 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'useScopedRecordings.spec.js': 22, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 7, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 10, 'QualityReviewHistory.spec.js': 10}
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           PY
@@ -196,7 +210,7 @@ jobs:
       - name: Human quality review native source lint
         id: quality_review_lint
         run: |
-          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb app/models/jrc_contact_center/quality_review_revision.rb app/services/jrc_contact_center/quality_review_presentation.rb app/services/jrc_contact_center/quality_review_scope.rb app/services/jrc_contact_center/quality_review_source.rb app/services/jrc_contact_center/quality_review_write.rb config/initializers/contact_center_quality_review_privacy.rb db/migrate/20261126193000_create_contact_center_quality_reviews.rb lib/jrc_contact_center/quality_review_schema_receipt.rb script/jrc_call_center_quality_review_evidence.rb script/jrc_call_center_quality_review_upgrade.rb script/jrc_call_center_quality_schema_probe.rb script/jrc_call_center_recordings_seed.rb spec/integration/jrc_contact_center/owned_public_ending_server.ru spec/integration/jrc_contact_center/owned_quality_evidence.rb spec/integration/jrc_contact_center/owned_quality_source.rb spec/models/jrc_contact_center/quality_review_revision_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb spec/services/jrc_contact_center/quality_review_source_spec.rb spec/services/jrc_contact_center/quality_review_write_spec.rb spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb spec/support/contact_center_quality_review.rb --format json --out /tmp/call-center-quality-review-lint.json
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb app/models/jrc_contact_center/quality_review_revision.rb app/services/jrc_contact_center/quality_review_presentation.rb app/services/jrc_contact_center/quality_review_scope.rb app/services/jrc_contact_center/quality_review_source.rb app/services/jrc_contact_center/quality_review_write.rb config/initializers/contact_center_quality_review_privacy.rb db/migrate/20261126193000_create_contact_center_quality_reviews.rb lib/jrc_contact_center/quality_review_schema_receipt.rb script/jrc_call_center_quality_review_evidence.rb script/jrc_call_center_quality_review_upgrade.rb script/jrc_call_center_quality_schema_probe.rb script/jrc_call_center_recordings_seed.rb spec/integration/jrc_contact_center/owned_public_ending_server.ru spec/integration/jrc_contact_center/owned_quality_evidence.rb spec/integration/jrc_contact_center/owned_quality_source.rb spec/models/jrc_contact_center/quality_review_revision_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb spec/services/jrc_contact_center/quality_review_source_spec.rb spec/services/jrc_contact_center/quality_review_write_spec.rb spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb spec/support/contact_center_quality_review.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb --format json --out /tmp/call-center-quality-review-lint.json
       - name: Disposable application schema and pending migrations
         id: native_schema
         run: |
@@ -291,12 +305,12 @@ jobs:
       - name: Human quality review native permissions, persistence and immutable source
         id: quality_review_preflight
         run: |
-          bundle exec rspec spec/models/jrc_contact_center/quality_review_revision_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb spec/services/jrc_contact_center/quality_review_source_spec.rb spec/services/jrc_contact_center/quality_review_write_spec.rb spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb --format progress --format json --out /tmp/call-center-quality-review-preflight.json
+          bundle exec rspec spec/models/jrc_contact_center/quality_review_revision_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb spec/services/jrc_contact_center/quality_review_source_spec.rb spec/services/jrc_contact_center/quality_review_write_spec.rb spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb --format progress --format json --out /tmp/call-center-quality-review-preflight.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-quality-review-preflight.json').read_text())
-          expected = {'spec/models/jrc_contact_center/quality_review_revision_spec.rb': 5, 'spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb': 12, 'spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb': 5, 'spec/services/jrc_contact_center/quality_review_source_spec.rb': 10, 'spec/services/jrc_contact_center/quality_review_write_spec.rb': 8, 'spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb': 4, 'spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb': 4}
+          expected = {'spec/models/jrc_contact_center/quality_review_revision_spec.rb': 5, 'spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb': 12, 'spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb': 5, 'spec/services/jrc_contact_center/quality_review_source_spec.rb': 10, 'spec/services/jrc_contact_center/quality_review_write_spec.rb': 8, 'spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb': 4, 'spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb': 4, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb': 9}
           assert report['summary']['example_count'] == len(report['examples']) == sum(expected.values())
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           actual, identities = {}, set()
@@ -1226,7 +1240,7 @@ jobs:
           python3 -B - <<'PY'
           import hashlib, json, os
           from pathlib import Path
-          for name, count in [('preflight', 48), ('reload', 10), ('concurrency-rspec', 3)]:
+          for name, count in [('preflight', 63), ('reload', 10), ('concurrency-rspec', 3)]:
               report = json.loads(Path('/tmp', f'call-center-quality-review-{name}.json').read_text())
               assert report['summary']['example_count'] == len(report['examples']) == count
               assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
@@ -1316,9 +1330,52 @@ jobs:
               assert row['real_native_persistence_and_reload'] and row['original_operator_nonadministrator']
               assert row['explicit_conflict_review_preserved_draft'] and row['listener_without_own_review_permission_denied']
               assert row['no_recommendation_or_PABX_operation'] and row['whole_figure23_accepted'] is False and row['external_Nico_homologated'] is False
-              assert len(row['screenshots']) == 4 and all(Path(path).is_file() for path in row['screenshots'])
+              assert len(row['screenshots']) == 15 and all(Path(path).is_file() for path in row['screenshots'])
               assert [revision['revision'] for revision in row['native']['actual_native_revisions']] == [1, 2, 3]
               assert len(row['native']['native_audits']) == 3 and row['native']['PABX_commands'] == row['native']['ending_destination_actions'] == 0
+          transcripts = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-transcript-native.json')]
+          assert len(transcripts) == 4 and {row['project'] for row in transcripts} == {'desktop-light', 'desktop-dark', 'mobile-light', 'mobile-dark'}
+          assert len({row['account_id'] for row in transcripts}) == 4
+          for row in transcripts:
+              assert row['sha'] == os.environ['GITHUB_SHA'] and row['synthetic'] is True
+              assert row['actual_dark_theme'] == row['project'].endswith('dark') and row['contrast']['ratio'] >= 4.5
+              assert row['first']['account_id'] == row['account_id'] and row['first']['recording_id'] == row['recording_id']
+              assert row['first']['text'] == 'SYNTHETIC original transcript never changed' and row['first']['segments'] == []
+              assert row['first']['temporal_alignment'] == 'not_supplied_by_native_source'
+              assert row['native']['source_sha'] == os.environ['GITHUB_SHA']
+              assert len(row['transcript_read_receipts']) == 2
+              assert all(event['action'] == 'read' and event['user_id'] == row['current_actor_id'] for event in row['transcript_read_receipts'])
+              assert all(event['changes']['operation'] == 'transcript' for event in row['transcript_read_receipts'])
+              assert len(row['denied']) == 3 and all(event['status'] == 404 for event in row['denied'])
+              assert row['original_preserved_after_human_review'] and row['local_text_search_without_extra_fetch_or_media_seek']
+              assert row['explicit_missing_timing_without_manufactured_segments'] and row['existing_four_mode_quality_case_extended']
+              assert row['external_Nico_homologation'] is row['synchronized_segment_acceptance'] is False
+              assert row['native_volume_value'] == 0.05 and row['volume_change_did_not_start_audio'] is True
+              assert len(row['screenshots']) == 4 and all(Path(path).is_file() for path in row['screenshots'])
+          contexts = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-recording-context-native.json')]
+          assert len(contexts) == 4 and {row['project'] for row in contexts} == {'desktop-light', 'desktop-dark', 'mobile-light', 'mobile-dark'}
+          for row in contexts:
+              assert row['sha'] == os.environ['GITHUB_SHA'] and row['synthetic'] is True
+              assert row['actual_dark_theme'] == row['project'].endswith('dark') and row['contrast']['ratio'] >= 4.5
+              assert all(row[key] is True for key in ['reused_existing_call_API', 'explicit_native_call_contact_link_verified', 'native_directory_permission_separate_from_recording_listen', 'real_existing_master_dialog_loaded', 'listener_without_operate_received_no_customer_context', 'no_new_customer_module_or_provider_operation', 'authorized_transcript_remained_visible_after_actual_blob_failure'])
+              assert row['complete_five_tab_composition_accepted'] is row['whole_figure21_accepted'] is False
+              assert row['context']['item']['customer']['identity_source'] == 'call_contact_link'
+              assert str(row['context']['item']['contact_id']) == row['context']['item']['customer']['directory']['contact_id']
+              assert row['media_failure']['source'] == 'revoked_owned_browser_blob' and isinstance(row['media_failure']['code'], int) and row['media_failure']['code'] > 0
+              assert len(row['screenshots']) == 4 and all(Path(path).is_file() for path in row['screenshots'])
+          histories = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-quality-history-native.json')]
+          assert len(histories) == 4 and {row['project'] for row in histories} == {'desktop-light', 'desktop-dark', 'mobile-light', 'mobile-dark'}
+          for row in histories:
+              assert row['sha'] == os.environ['GITHUB_SHA'] and row['synthetic'] is True
+              assert row['actual_dark_theme'] == row['project'].endswith('dark') and row['contrast']['ratio'] >= 4.5
+              assert all(row[key] is True for key in ['original_three_UI_corrections_not_modified', 'real_scoped_API_pagination_and_return', 'immutable_original_compared_with_human_revisions', 'listening_did_not_grant_review_writes', 'no_provider_homologation'])
+              assert row['whole_figure23_accepted'] is False
+              assert row['native']['source_sha'] == os.environ['GITHUB_SHA']
+              assert [item['revision'] for item in row['native']['actual_native_revisions']] == list(range(1, 22))
+              assert len(row['native']['native_audits']) == 21 and row['native']['ending_destination_actions'] == row['native']['PABX_commands'] == 0
+              assert row['first']['meta']['total'] == 21 and len(row['first']['items']) == 20
+              assert row['second']['meta']['page'] == 2 and [item['revision'] for item in row['second']['items']] == [1]
+              assert len(row['screenshots']) == 3 and all(Path(path).is_file() for path in row['screenshots'])
           ending_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-confirmation-native.json')]
           expected_projects = {'desktop-light', 'desktop-dark', 'mobile-light', 'mobile-dark'}
           assert len(ending_flows) == 4 and {flow['project'] for flow in ending_flows} == expected_projects
