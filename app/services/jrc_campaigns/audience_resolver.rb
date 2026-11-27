@@ -37,7 +37,9 @@ class JrcCampaigns::AudienceResolver
     resolved = resolved_entries
     counters = Hash.new(0)
     rejections = []
-    sender_selected = campaign.inbox_id.present? || campaign.campaign_inboxes.any?
+    sender_selected = campaign.inbox_id.present? || campaign.campaign_inboxes.any? do |link|
+      link.enabled? && !link.marked_for_destruction?
+    end
     sender_unavailable = sender_selected && campaign.sending_inbox_links.empty?
     eligible = resolved.filter_map do |entry|
       normalized = normalized_entry(entry)

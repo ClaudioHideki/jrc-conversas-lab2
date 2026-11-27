@@ -65,7 +65,13 @@ jobs:
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcCampaigns/specs --maxWorkers=1 --minWorkers=1
           pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcCampaigns/components/CampaignAudienceInput.vue app/javascript/dashboard/routes/dashboard/jrcCampaigns/components/CampaignWizard.vue app/javascript/dashboard/routes/dashboard/jrcCampaigns/specs/campaignAudienceInput.spec.js --quiet
       - name: Dependencias nativas
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+        run: |
+          if [ -f .github/scripts/jrc_ci_apt_setup.sh ]; then
+            bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev
+          else
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+          fi
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.12'
