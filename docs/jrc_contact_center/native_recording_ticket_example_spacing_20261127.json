@@ -1,0 +1,11 @@
+{
+  "source_parent": "01fdb457d9a9fc22bc7243c57c3c3cc4bf6348d0",
+  "failed_run": 46029189670,
+  "native_lint_report_sha256": "f4799f350036602c0859e6c65d9478b9629a1831c3c0d205d32b4f3cf959271a",
+  "finding": "RSpec/EmptyLineAfterExample",
+  "change": "Add exactly one empty line before the new reachable GET-body regression.",
+  "non_whitespace_test_bytes_changed": false,
+  "production_or_workflow_changed": false,
+  "actual_directed_Vue_passed": 305,
+  "native_or_Chrome_accepted": false
+}

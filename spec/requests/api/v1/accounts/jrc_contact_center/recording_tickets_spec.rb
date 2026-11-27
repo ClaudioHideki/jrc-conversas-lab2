@@ -112,6 +112,7 @@ RSpec.describe 'Native recording-linked Ticket list and destination authority', 
     read_tickets({ page: '0' })
     expect(response).to have_http_status(:unprocessable_entity)
   end
+
   it 'rejects a nonempty JSON GET body instead of silently accepting hidden selectors' do
     native_ticket
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/recordings/#{record.id}/tickets",
