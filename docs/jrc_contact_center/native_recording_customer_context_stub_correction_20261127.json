@@ -1,0 +1,17 @@
+{
+  "source_parent": "627fcd4cdd2313ab794dcb3ded2947f4d285b116",
+  "run": 46041432353,
+  "artifact": 15220162606,
+  "artifact_sha256": "2a2772a3b08c725dcecf5d6bd6cbf647d341edbe3abe18876bef69b0049a46cc",
+  "actual_result": {
+    "directed_Vue": 320,
+    "passed": 319,
+    "failed": 1,
+    "new_module_cases_passed": 13
+  },
+  "cause": "Vue Test Utils auto-stubbed an unresolved async child without its prop declaration; props() returned an empty object despite forwarded attributes.",
+  "correction": "Declare the same five native child props on the test double; retain the exact source identity and no-unauthorized-mount assertions.",
+  "all_cases_and_behavioral_assertions_preserved": true,
+  "product_workflow_or_permissions_changed": false,
+  "native_or_visual_acceptance": false
+}

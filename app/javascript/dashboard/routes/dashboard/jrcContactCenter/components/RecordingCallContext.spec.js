@@ -38,7 +38,20 @@ const render = (props = {}) =>
       ...props,
     },
     global: {
-      stubs: { LinkedContactMaster: true, RecordingCustomerRecords: true },
+      stubs: {
+        LinkedContactMaster: true,
+        RecordingCustomerRecords: {
+          name: 'RecordingCustomerRecords',
+          props: [
+            'accountId',
+            'contactId',
+            'callSessionId',
+            'callId',
+            'enabled',
+          ],
+          template: '<div data-native-customer-records-host-stub />',
+        },
+      },
     },
   });
 enableAutoUnmount(afterEach);
