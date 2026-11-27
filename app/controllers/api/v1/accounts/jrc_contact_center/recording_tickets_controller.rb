@@ -4,7 +4,7 @@ class Api::V1::Accounts::JrcContactCenter::RecordingTicketsController < Api::V1:
   before_action :private_response
 
   def index
-    raise ArgumentError unless (request.query_parameters.keys - ['page']).empty?
+    raise ArgumentError unless request.request_parameters.empty? && (request.query_parameters.keys - ['page']).empty?
 
     reader = JrcContactCenter::RecordingTicketList.new(account: Current.account, member: Current.account_user,
                                                        page: params.fetch(:page, 1))

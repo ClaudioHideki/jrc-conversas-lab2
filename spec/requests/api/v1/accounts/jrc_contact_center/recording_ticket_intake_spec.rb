@@ -98,7 +98,7 @@ RSpec.describe 'Native manual Service Desk intake from an authorized recording',
     expect(response).to have_http_status(:created)
     sd_membership.update!(active: false)
     post_ticket
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:forbidden)
     expect(tickets.count).to eq(1)
   end
 
@@ -174,6 +174,7 @@ RSpec.describe 'Native manual Service Desk intake from an authorized recording',
   end
 
   it 'keeps the source correlation private through the existing native event projection after listening is revoked' do
+    role.update!(permissions: (role.permissions + ['jrc_service_desk_history_view']).uniq)
     post_ticket
     expect(response).to have_http_status(:created)
     ticket = tickets.sole

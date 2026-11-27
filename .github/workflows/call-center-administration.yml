@@ -391,7 +391,7 @@ jobs:
           assert lint['summary']['inspected_file_count'] == lint['summary']['target_file_count'] == 12
           report = json.loads(Path('/tmp/call-center-recording-ticket-preflight.json').read_text())
           summary = report['summary']
-          assert summary['example_count'] == len(report['examples']) and summary['example_count'] > 33
+          assert summary['example_count'] == len(report['examples']) and summary['example_count'] > 34
           assert all(summary[key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           files = {}
           for row in report['examples']:
@@ -401,7 +401,7 @@ jobs:
           assert files['spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_spec.rb'] == 21
           assert files['spec/services/jrc_contact_center/synthetic_recording_ticket_seed_spec.rb'] == 1
           assert files['spec/services/jrc_service_desk/cp4_workflow_spec.rb'] > 0 and len(files) == 4
-          assert files['spec/requests/api/v1/accounts/jrc_contact_center/recording_tickets_spec.rb'] == 11
+          assert files['spec/requests/api/v1/accounts/jrc_contact_center/recording_tickets_spec.rb'] == 12
           vue = json.loads(Path('/tmp/call-center-recording-ticket-native-form-compatibility.json').read_text())
           assert vue['numTotalTests'] == vue['numPassedTests'] and vue['numTotalTests'] > 0
           assert vue['numFailedTests'] == vue['numPendingTests'] == 0
@@ -1965,7 +1965,7 @@ jobs:
               assert linked['account_id'] == flow['account_id'] and linked['user_id'] == source['user_id']
               assert linked['recording_id'] == flow['recording_id'] and len(linked['items']) == 1
               assert linked['items'][0]['id'] == ticket['id']
-              assert flow['actual_link_navigation_after_create_and_reload'] is True and flow['denied_linked_list_status'] == 403
+              assert flow['actual_link_navigation_after_create_and_reload'] is True and flow['denied_linked_list_status'] == 401
               assert all(Path(image).is_file() for image in flow['screenshots'])
               assert flow['whole_figure21_or_Part1_accepted'] is flow['external_provider_homologation'] is False
           ending_preflight = json.loads(Path('/tmp/call-center-ending-confirmation-preflight.json').read_text())['summary']

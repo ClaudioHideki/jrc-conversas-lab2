@@ -13,7 +13,7 @@ RSpec.describe 'Native recording-linked Ticket list and destination authority', 
 
   def read_tickets(query = {}, recording_id = record.id)
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/recordings/#{recording_id}/tickets",
-        headers: actor.create_new_auth_token, params: query, as: :json
+        headers: actor.create_new_auth_token, params: query
   end
 
   it 'returns only the native authorized title, status and route identity without exposing private origin or credentials' do
@@ -64,7 +64,7 @@ RSpec.describe 'Native recording-linked Ticket list and destination authority', 
       ticket = native_ticket
       role.update!(permissions: role.permissions - [right])
       read_tickets
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:unauthorized)
       expect(response.body).not_to include(ticket.title)
       expect(JrcServiceDesk::Ticket.where(account: account).count).to eq(1)
     end
@@ -74,7 +74,7 @@ RSpec.describe 'Native recording-linked Ticket list and destination authority', 
     ticket = native_ticket
     sd_membership.update!(active: false)
     read_tickets
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:unauthorized)
     expect(response.body).not_to include(ticket.title)
   end
 
@@ -111,5 +111,12 @@ RSpec.describe 'Native recording-linked Ticket list and destination authority', 
     native_ticket
     read_tickets({ page: '0' })
     expect(response).to have_http_status(:unprocessable_entity)
+  end
+  it 'rejects a nonempty JSON GET body instead of silently accepting hidden selectors' do
+    native_ticket
+    get "/api/v1/accounts/#{account.id}/jrc_contact_center/recordings/#{record.id}/tickets",
+        headers: actor.create_new_auth_token, params: { unit_id: sd_unit.id }, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body).to eq('error' => 'invalid_recording_ticket_page')
   end
 end

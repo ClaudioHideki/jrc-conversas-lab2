@@ -1,0 +1,30 @@
+{
+  "source_parent": "65726c84b58d25506a7df65f07a720a734eb73b5",
+  "failed_run": 46027104962,
+  "failed_artifact": 15213391104,
+  "failed_artifact_sha256": "dce20e65d6b1dddc2fef57a09ecd929af222cf07f1eb921980ff447be46f2ed0",
+  "actual_native_preflight": {
+    "examples": 41,
+    "passed": 35,
+    "failed": 6
+  },
+  "actual_directed_Vue_passed": 305,
+  "actual_focused_native_lint_findings": 0,
+  "confirmed_native_contracts": [
+    "Service Desk denies a withdrawn operational identity with HTTP 403 before ticket lookup.",
+    "Call Center BaseController preserves native Pundit denial HTTP 401; the standalone Service Desk write denial remains HTTP 403.",
+    "Reading native Ticket history requires its own existing history_view capability.",
+    "Rails integration GET with as:json placed selectors in the request body; actual browser filters use the query string."
+  ],
+  "correction": [
+    "Use the actual query-string transport in the read requests.",
+    "Reject nonempty GET bodies explicitly and add a separate regression for this reachable malformed request.",
+    "Assert exact native denial codes without accepting multiple statuses.",
+    "Grant existing history_view only inside the synthetic privacy case so that the real native event projection is exercised."
+  ],
+  "real_user_grants_permissions_or_native_denial_handlers_changed": false,
+  "cases_removed_or_security_assertions_weakened": false,
+  "new_native_case": 1,
+  "expected_list_request_cases": 12,
+  "native_or_Chrome_accepted": false
+}

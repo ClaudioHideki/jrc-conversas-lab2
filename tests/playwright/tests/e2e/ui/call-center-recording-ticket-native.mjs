@@ -253,7 +253,7 @@ export async function verifyNativeRecordingTicket(parent, info, target) {
     const deniedList = await parent.request.get(origin + listPath, {
       headers: target.scoped,
     });
-    expect(deniedList.status()).toBe(403);
+    expect(deniedList.status()).toBe(401);
     const final = witness();
     expect(final.ticket_count).toBe(1);
     expect(final.tickets).toEqual(after.tickets);
