@@ -25,14 +25,15 @@ RSpec.describe 'Native recording task idempotence and current authority contenti
 
   def task_worker(values)
     ids = [account.id, member.id, record.id]
+    ready, results = state.values_at(:ready, :results)
     Thread.new do
       ApplicationRecord.connection_pool.with_connection do |connection|
-        state[:ready] << connection.raw_connection.backend_pid
+        ready << connection.raw_connection.backend_pid
         writer = JrcContactCenter::RecordingTaskWrite.new(account: Account.find(ids[0]), member: AccountUser.find(ids[1]))
-        state[:results] << writer.call(ids[2], values)
+        results << writer.call(ids[2], values)
       end
     rescue StandardError => e
-      state[:results] << e
+      results << e
     end
   end
 

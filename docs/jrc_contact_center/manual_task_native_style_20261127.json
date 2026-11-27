@@ -1,0 +1,39 @@
+{
+  "parent": "d4e0793afb4516073b3127e7697578c42ab9d6dd",
+  "failed_run": 45947787103,
+  "failed_job": 140336359721,
+  "artifact": 15175188999,
+  "artifact_sha256": "89e2799867ea0975933427bbeea91854fcd1bb0f89f656dde8f038cdfeab59b5",
+  "lint_report_sha256": "7c75850e5b9f2f20f90079fc3bf1e7e655a07706fbc2d30506bdf779267f1bc8",
+  "offenses_addressed": 23,
+  "source_sha256": {
+    "app/services/jrc_contact_center/recording_task_input.rb": "8f3ccf4cdbb66ce584fb51a8452cf2b42d656aa77a5cb6986b414dcc247cd347",
+    "app/services/jrc_contact_center/recording_task_write.rb": "780bad50891912f42cb6ac4e27074af80ef85df7d396c8476f2a02526d43d592",
+    "db/migrate/20261127003000_create_contact_center_recording_task_links.rb": "42b80a6a5a18069df20350e8ff605f96146c6621b9f6c50f276746e41ae5ae4e",
+    "script/validate_cc_recording_task_migration.mjs": "7ca170cd34e3bc5692e704a4619b6fd96fc459700cd225c1b9ac90f120fadd02",
+    "script/jrc_call_center_recording_task_seed.rb": "c058a6836617c9eeb71a64ba01d554a6fce1f75a069870107f13a95e9843938e",
+    "spec/models/jrc_contact_center/recording_task_link_spec.rb": "fcb605ffff47b5af4cd78d47dc55cb77e2f956577b1da33365e86f8c4dc7f24a",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_task_concurrency_spec.rb": "7862fd0f136da568eab1683c01a96309f44eb9e622b5d9f4ee12487f349d0f04",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_tasks_spec.rb": "3798673f265e77da599150e35bf758575442855bcb4267721075c6ad4993b1bd",
+    "spec/services/jrc_contact_center/recording_task_write_spec.rb": "f8b053dbbc7c4c56a026a1b2b00e15c75dd503e5670b51dbfcf3fee084c606b6",
+    "spec/support/contact_center_recording_tasks.rb": "2f93b30d5a2e23896304c79d4922a87efa20900973e41873033db139cf88a757"
+  },
+  "parent_sources": {
+    "app/services/jrc_contact_center/recording_task_input.rb": "7395ac3198497a93587accd668e45ec57487f9df47798c2ad6039ce25b4acec9",
+    "app/services/jrc_contact_center/recording_task_write.rb": "535dd494b08edd44bc3ebeb5ab29ab7daeea421142458b4694320212c988ec1e",
+    "db/migrate/20261127003000_create_contact_center_recording_task_links.rb": "21594036dd147d4f903c74de0c37e2951eee6fe1473fc2ea433ca3037c1bc519",
+    "script/validate_cc_recording_task_migration.mjs": "a0b22bb5fde93a2939a1a82154a871877221577a95f9da3baa5f03ff6e8ee70b",
+    "script/jrc_call_center_recording_task_seed.rb": "63ee7a9beb0775f7a5e6e49823b41cf096e52225cdfc8fc9b132dc68bf885a24",
+    "spec/models/jrc_contact_center/recording_task_link_spec.rb": "59c015b765a4845d0e96ac3adf5005825a62b7470aa6a035d8c18f7c2f3bab14",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_task_concurrency_spec.rb": "11d31d02c73528f590039926003a415f423ec9bfb29f0f3e7a8831c7f40db798",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_tasks_spec.rb": "3656d26c6e63483091d4b51a3cf337daee6d6d1598f95f7e8e99fa2f4bb6605a",
+    "spec/services/jrc_contact_center/recording_task_write_spec.rb": "004de8f9f91474d8dbdcc22adcf5e1776e2aa0479cc70057718101992e3f73bf",
+    "spec/support/contact_center_recording_tasks.rb": "03836ebd1cd442ce0e880f237629700b49d1c3844f44edee875583a1e069c059"
+  },
+  "all_35_native_cases_and_2_real_concurrency_cases_preserved": true,
+  "all_API_fields_and_status_assertions_preserved": true,
+  "SQL_receipt_and_original_task_rules_unchanged": true,
+  "migration_change_only_equivalent_source_guard_layout": true,
+  "no_rule_or_gate_suppressed": true,
+  "native_or_Chrome_acceptance": false
+}

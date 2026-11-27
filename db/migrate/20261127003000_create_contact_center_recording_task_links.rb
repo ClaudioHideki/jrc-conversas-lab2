@@ -28,14 +28,14 @@ class CreateContactCenterRecordingTaskLinks < ActiveRecord::Migration[7.1]
   private
 
   def verify_sources!
-    unless Digest::SHA256.file(Rails.root.join(SQL)).hexdigest == SQL_SHA256
-      raise ActiveRecord::MigrationError, 'Unreviewed recording task source'
-    end
+    valid_sql = Digest::SHA256.file(Rails.root.join(SQL)).hexdigest == SQL_SHA256
+    raise ActiveRecord::MigrationError, 'Unreviewed recording task source' unless valid_sql
 
     receipt_path = 'lib/jrc_contact_center/recording_task_schema_receipt.rb'
-    unless Digest::SHA256.file(Rails.root.join(receipt_path)).hexdigest == 'e33b56fa7770ec904672061f1bf27e4f47b89b906a84cc8f73d9320a08e60537'
-      raise ActiveRecord::MigrationError, 'Unreviewed recording task schema verifier'
-    end
+    expected = 'e33b56fa7770ec904672061f1bf27e4f47b89b906a84cc8f73d9320a08e60537'
+    return if Digest::SHA256.file(Rails.root.join(receipt_path)).hexdigest == expected
+
+    raise ActiveRecord::MigrationError, 'Unreviewed recording task schema verifier'
   end
 
   def create_receipt_table

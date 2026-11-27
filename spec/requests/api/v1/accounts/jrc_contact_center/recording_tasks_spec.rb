@@ -27,13 +27,13 @@ RSpec.describe 'Explicit native task creation from an authorized recording', :pa
     get path, headers: headers, as: :json
     expect(response).to have_http_status(:ok)
     body = response.parsed_body
-    expect(body).to include('recording_id' => record.id.to_s, 'call_session_id' => source_call.id.to_s,
-                            'call_id' => source_call.external_session_id, 'project_module_available' => true,
-                            'meta' => { 'page' => 1, 'per_page' => 20, 'total' => 1, 'pages' => 1 })
-    expect(body.fetch('items').sole).to include('id' => row.id.to_s, 'request_id' => request_id,
-                                               'account_user_id' => member.id.to_s)
-    expect(body.fetch('items').sole.fetch('target')).to include('kind' => 'project_task', 'id' => row.task_id.to_s,
-                                                              'project_id' => project.id.to_s)
+    target = a_hash_including('kind' => 'project_task', 'id' => row.task_id.to_s, 'project_id' => project.id.to_s)
+    item = a_hash_including('id' => row.id.to_s, 'request_id' => request_id, 'account_user_id' => member.id.to_s, 'target' => target)
+    expect(body).to include(
+      'recording_id' => record.id.to_s, 'call_session_id' => source_call.id.to_s,
+      'call_id' => source_call.external_session_id, 'project_module_available' => true,
+      'meta' => { 'page' => 1, 'per_page' => 20, 'total' => 1, 'pages' => 1 }, 'items' => [item]
+    )
     expect(response.body).not_to include(input.fetch('task').fetch('title'), 'recording_reference', 'synthetic-password')
     expect(counts).to eq([1, 1, 1])
   end
@@ -61,7 +61,7 @@ RSpec.describe 'Explicit native task creation from an authorized recording', :pa
     expect(response).to have_http_status(:unauthorized)
     foreign = create(:account)
     post path.sub("accounts/#{account.id}", "accounts/#{foreign.id}"), headers: headers,
-         params: { recording_task: input }, as: :json
+          params: { recording_task: input }, as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(counts).to eq([0, 0, 0])
   end
@@ -88,7 +88,7 @@ RSpec.describe 'Explicit native task creation from an authorized recording', :pa
     get path, headers: headers, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').sole).to include('id' => row.id.to_s, 'target' => nil)
-    expect(response.body).not_to include(project.name, input.fetch('task').fetch('title'), "\"project_id\"")
+    expect(response.body).not_to include(project.name, input.fetch('task').fetch('title'), '"project_id"')
     expect(counts).to eq([1, 1, 1])
   end
 
@@ -111,6 +111,7 @@ RSpec.describe 'Explicit native task creation from an authorized recording', :pa
     expect(response.parsed_body).to eq(first)
     expect(counts).to eq([21, 21, 21])
   end
+
   it 'rejects caller-supplied account/unit/actor authority and malformed command shapes without creating any destination' do
     invalid = [
       input.merge('account_id' => account.id.to_s, 'unit_id' => unit.id.to_s),
@@ -124,5 +125,4 @@ RSpec.describe 'Explicit native task creation from an authorized recording', :pa
       expect(counts).to eq([0, 0, 0])
     end
   end
-
 end

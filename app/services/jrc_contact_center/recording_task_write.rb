@@ -38,7 +38,7 @@ class JrcContactCenter::RecordingTaskWrite
   end
 
   def raise_if_conflicting_request!(input)
-    return unless JrcContactCenter::RecordingTaskLink.where(account: @account, idempotency_key: input.request_id).exists?
+    return unless JrcContactCenter::RecordingTaskLink.exists?(account: @account, idempotency_key: input.request_id)
 
     raise JrcContactCenter::OperationError.new('recording_task_request_conflict', status: :conflict)
   end

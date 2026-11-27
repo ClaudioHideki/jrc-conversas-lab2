@@ -14,15 +14,19 @@ class JrcContactCenter::SyntheticRecordingTaskSeed
       allowed = create_project(account, owner, 'SYNTHETIC recording actions permitted project')
       hidden = create_project(account, owner, 'SYNTHETIC recording actions PRIVATE excluded project')
       JrcProjects::ProjectMember.create!(account: account, project: allowed, user: operator.user, role: 'member')
-      { project_id: allowed.id.to_s, project_name: allowed.name, hidden_project_id: hidden.id.to_s, hidden_project_name: hidden.name,
-        assignee_id: operator.user_id.to_s, assignee_name: operator.user.name,
-        column_id: allowed.board_columns.find_by!(status_key: 'backlog').id.to_s }
+      present(allowed, hidden, operator)
     end
+  end
+
+  def self.present(allowed, hidden, operator)
+    { project_id: allowed.id.to_s, project_name: allowed.name, hidden_project_id: hidden.id.to_s, hidden_project_name: hidden.name,
+      assignee_id: operator.user_id.to_s, assignee_name: operator.user.name,
+      column_id: allowed.board_columns.find_by!(status_key: 'backlog').id.to_s }
   end
 
   def self.authorize_synthetic_destinations(owner, operator)
     owner.update!(jrc_projects_enabled: true,
-                    jrc_projects_permissions: { 'projects.project.create' => true, 'projects.task.move' => true })
+                  jrc_projects_permissions: { 'projects.project.create' => true, 'projects.task.move' => true })
     owner_rights = RIGHTS + %w[jrc_projects_project_create jrc_projects_task_move]
     owner.custom_role.update!(permissions: (owner.custom_role.permissions + owner_rights).uniq)
     operator.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.task.create' => true, 'projects.task.assign' => true })
@@ -33,5 +37,5 @@ class JrcContactCenter::SyntheticRecordingTaskSeed
     JrcProjects::Projects::Create.call(account: account, actor: owner.user,
                                        attributes: { name: name, visibility: 'private' }, idempotency_key: SecureRandom.uuid)
   end
-  private_class_method :create_project, :authorize_synthetic_destinations
+  private_class_method :create_project, :authorize_synthetic_destinations, :present
 end

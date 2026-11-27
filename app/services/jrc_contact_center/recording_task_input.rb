@@ -33,6 +33,6 @@ class JrcContactCenter::RecordingTaskInput
   def valid_labels?
     return true unless @attributes.key?('labels')
 
-    @attributes['labels'].is_a?(Array) && @attributes['labels'].all? { |value| value.is_a?(String) }
+    @attributes['labels'].is_a?(Array) && @attributes['labels'].all?(String)
   end
 end

@@ -28,5 +28,4 @@ RSpec.shared_context 'with native manual recording task destination' do
     member.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.task.create' => true, 'projects.task.assign' => true })
     JrcProjects::ProjectMember.create!(account: account, project: project, user: actor, role: 'member')
   end
-
 end

@@ -18,7 +18,7 @@ RSpec.describe JrcContactCenter::RecordingTaskLink, :pabx do
   end
 
   it 'has real active append and immutability triggers in the loaded schema' do
-    triggers = ApplicationRecord.connection.select_values(<<~SQL)
+    triggers = ApplicationRecord.connection.select_values(<<~SQL.squish)
       SELECT tgname FROM pg_trigger
       WHERE tgrelid = 'jrc_contact_center_recording_task_links'::regclass AND NOT tgisinternal AND tgenabled = 'O'
     SQL
@@ -47,10 +47,11 @@ RSpec.describe JrcContactCenter::RecordingTaskLink, :pabx do
   it 'rejects forged company or business-unit scope snapshots under the actual PostgreSQL append trigger' do
     row = link
     %w[issuer_company_id business_unit_id].each do |field|
-      attributes = row.attributes.except('id').merge('idempotency_key' => SecureRandom.uuid,
-                                                    'scope_snapshot' => row.scope_snapshot.merge(field => '999999999'))
+      attributes = row.attributes.except('id').merge(
+        'idempotency_key' => SecureRandom.uuid, 'scope_snapshot' => row.scope_snapshot.merge(field => '999999999')
+      )
       expect do
-        ApplicationRecord.transaction(requires_new: true) { described_class.insert_all!([attributes]) }
+        ApplicationRecord.transaction(requires_new: true) { described_class.create!(attributes) }
       end.to raise_error(ActiveRecord::StatementInvalid)
     end
     expect(described_class.where(account: account).count).to eq(1)

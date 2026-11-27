@@ -113,9 +113,10 @@ RSpec.describe JrcContactCenter::RecordingTaskWrite, :pabx do
     row = create_call_task
     original = row.attributes
     expect do
-      ApplicationRecord.transaction(requires_new: true) do
-        JrcContactCenter::RecordingTaskLink.where(id: row.id).update_all(task_id: row.task_id + 1)
-      end
+      statement = <<~SQL.squish
+        UPDATE jrc_contact_center_recording_task_links SET task_id = #{row.task_id + 1} WHERE id = #{row.id}
+      SQL
+      ApplicationRecord.transaction(requires_new: true) { ApplicationRecord.connection.execute(statement) }
     end.to raise_error(ActiveRecord::StatementInvalid)
     expect(row.reload.attributes).to eq(original)
     expect(native_effect_counts).to eq([1, 1, 1])
