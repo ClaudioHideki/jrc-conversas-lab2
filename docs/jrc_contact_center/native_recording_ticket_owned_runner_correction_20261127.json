@@ -1,0 +1,16 @@
+{
+  "source_parent": "63c1a52abdc572590cb12255162ddc7f3bd93eaa",
+  "failed_run": 46030112268,
+  "job": 140611459395,
+  "artifact": 15215596213,
+  "artifact_sha256": "f92fe21808e8b7560d6d97eba6ca66a2ccab0abd23296a2fcfe14821e77a20f4",
+  "raw_log_sha256": "e8b3b046f89842ff1fc1825baa770fbb72a107a2774fd7b999c0c79f429e0853",
+  "actual_failure": "All three committed Ticket tests refused the inherited default DB before touching their test records.",
+  "cause": "The new recording_ticket_concurrency step omitted the step-level POSTGRES_DATABASE used by the already prepared corporate_gratuity_disposable database.",
+  "correction": "Select that existing exclusive synthetic database for this step; preserve every actual Ruby ownership and transaction guard.",
+  "native_lint_and_directed_Vue_305_passed": true,
+  "new_lightweight_workflow_regressions_prepared": 4,
+  "product_services_permissions_migrations_or_native_assertions_changed": false,
+  "full_native_or_browser_acceptance": false,
+  "grouped_audit_delivery": "docs/jrc_contact_center/native_audit_table_candidate_20261127.json"
+}

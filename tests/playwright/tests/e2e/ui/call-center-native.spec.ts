@@ -1,3 +1,4 @@
+import { verifyNativeAuditQueryFailure, preserveNativeAuditQueryRecovery } from './call-center-audit-error-reference-native.mjs';
 import { measureLocatorTextContrast as contrast } from './call-center-text-contrast.mjs';
 import { verifyAudioRowPreview } from './call-center-audio-row-native.mjs';
 import { verifyNativePauseCatalogEditor } from './call-center-pause-catalog-native.mjs';
@@ -2368,19 +2369,12 @@ test('configuration audit filters pagination details history and verified export
   expect(csv.toString('utf8')).toContain('SYNTHETIC audit ' + suffix);
   expect(csv.toString('utf8')).toContain('Escopo posterior');
   expect(csv.toString('utf8')).not.toMatch(/access-token|password|api_key/);
-  await panel.getByLabel('Data inicial', { exact: true }).fill('2026-11-18');
-  await panel.getByLabel('Data final', { exact: true }).fill('2026-11-17');
-  await panel
-    .getByRole('button', { name: 'Aplicar filtros', exact: true })
-    .click();
-  await expect(panel.locator('[data-audit-list-error]')).toHaveText(
-    'Confira as datas inicial e final.'
-  );
-  await expect(panel.locator('[data-audit-row]')).toHaveCount(0);
+  const auditReference = await verifyNativeAuditQueryFailure(page, panel, info);
   await panel
     .getByRole('button', { name: 'Limpar filtros', exact: true })
     .click();
   await expect(panel.locator('[data-audit-row]').first()).toBeVisible();
+  await preserveNativeAuditQueryRecovery(page, panel, info, session.account_id, auditReference);
   await expect(page).toHaveURL(/unrelated_filter=keep/);
   expect(new URL(page.url()).searchParams.has('audit_config_resource_id')).toBe(
     false

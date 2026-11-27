@@ -1,5 +1,6 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { webcrypto } from 'node:crypto';
+import { Blob as NativeBlob } from 'node:buffer';
 import { defineComponent, reactive, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
@@ -11,7 +12,17 @@ vi.mock('vue-router', () => ({
   useRoute: () => mocks.route,
   useRouter: () => ({ replace: mocks.replace }),
 }));
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, params) => {
+      if (key.endsWith('.ENTRY_LABEL'))
+        return `${params.resource} #${params.id} · ${params.operation}`;
+      if (key.endsWith('.PAGE_LABEL'))
+        return `JRC_CONTACT_CENTER.ADMIN.PAGE ${params.page} / ${params.pages}`;
+      return params?.id ? `${key}: ${params.id}` : key;
+    },
+  }),
+}));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: {
     configurationAudits: vi.fn(),
@@ -47,6 +58,7 @@ const event = {
   actor_id: 4,
   actor_name: 'Authorized actor',
   correlation_id: 'SYNTHETIC correlation',
+  result: 'recorded_locally',
   revision: 2,
   before: { name: 'Previous' },
   after: { name: 'Current' },
@@ -312,5 +324,144 @@ describe('scoped administrative audit interface', () => {
     expect(wrapper.get('[role=status]').text()).toContain('NOT_ENABLED');
     expect(API.configurationAudits).not.toHaveBeenCalled();
     expect(wrapper.find('[data-configuration-audit]').exists()).toBe(false);
+  });
+});
+
+describe('native audit request references without exposing error payloads', () => {
+  const id = '11111111-1111-4111-8111-111111111111';
+  it('shows the native opaque query request ID with the translated error and no private database payload', async () => {
+    API.configurationAudits.mockRejectedValueOnce({
+      response: {
+        status: 503,
+        headers: { 'x-request-id': id },
+        data: { error: 'SYNTHETIC private SQL diagnostic' },
+      },
+    });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[data-audit-list-error]').text()).toContain(id);
+    expect(wrapper.text()).not.toContain('SYNTHETIC private SQL diagnostic');
+    expect(wrapper.findAll('[data-audit-row]')).toHaveLength(0);
+    expect(wrapper.find('[data-audit-preview]').exists()).toBe(false);
+  });
+  it('does not display an arbitrary non-UUID request header', async () => {
+    API.configurationAudits.mockRejectedValueOnce({
+      response: {
+        status: 503,
+        headers: { 'x-request-id': 'SYNTHETIC invalid <img src=x>' },
+      },
+    });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[data-audit-list-error]').text()).not.toContain(
+      'SYNTHETIC invalid'
+    );
+    expect(wrapper.find('img').exists()).toBe(false);
+  });
+  it('keeps an offline query visibly failed without fabricating a server reference', async () => {
+    API.configurationAudits.mockRejectedValueOnce(
+      new Error('SYNTHETIC network unavailable')
+    );
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[data-audit-list-error]').text()).toContain(
+      'COMMON.ERROR'
+    );
+    expect(wrapper.text()).not.toContain('REQUEST_REFERENCE');
+    expect(wrapper.find('[data-audit-preview]').exists()).toBe(false);
+  });
+  it('preserves denied details as denied and shows only their own native request identifier', async () => {
+    API.configurationAudit.mockRejectedValueOnce({
+      response: { status: 403, headers: { 'x-request-id': id } },
+    });
+    const wrapper = render();
+    await flushPromises();
+    await wrapper.get('[data-audit-detail]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-dialog] [role=alert]').text()).toContain(
+      'DENIED'
+    );
+    expect(wrapper.get('[data-dialog] [role=alert]').text()).toContain(id);
+    expect(wrapper.get('[data-dialog]').text()).not.toContain('Previous');
+  });
+  it('preserves a Blob export failure and its native identifier instead of producing a download', async () => {
+    vi.stubGlobal('Blob', NativeBlob);
+    API.exportConfigurationAudits.mockRejectedValueOnce({
+      response: {
+        status: 422,
+        headers: { 'x-request-id': id },
+        data: new Blob([
+          JSON.stringify({ error: 'audit_export_limit_exceeded' }),
+        ]),
+      },
+    });
+    const wrapper = render();
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(
+        button =>
+          button.text() === 'JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.EXPORT'
+      )
+      .trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-audit-export-error]').text()).toContain(id);
+    expect(wrapper.get('[data-audit-export-error]').text()).toContain(
+      'EXPORT_LIMIT'
+    );
+  });
+  it('clears the old request identifier after an explicit successful query', async () => {
+    API.configurationAudits.mockRejectedValueOnce({
+      response: { status: 503, headers: { 'x-request-id': id } },
+    });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[data-audit-list-error]').text()).toContain(id);
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(wrapper.find('[data-audit-list-error]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain(id);
+    expect(wrapper.findAll('[data-audit-row]')).toHaveLength(1);
+  });
+});
+
+describe('native administrative audit table from the Word reference', () => {
+  it('presents semantic columns, the authenticated actor, native date and local result while preserving row preview and popup', async () => {
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[data-audit-table]').element.tagName).toBe('TABLE');
+    expect(wrapper.findAll('thead th')).toHaveLength(6);
+    const row = wrapper.get('[data-audit-row]');
+    expect(row.element.tagName).toBe('TR');
+    expect(row.findAll('td')).toHaveLength(6);
+    expect(row.get('time').attributes('datetime')).toBe(event.created_at);
+    expect(row.text()).toContain('Authorized actor');
+    expect(row.get('[data-audit-local-result]').text()).toContain(
+      'RECORDED_LOCALLY'
+    );
+    await row.get('button').trigger('click');
+    await flushPromises();
+    expect(API.configurationAudit).toHaveBeenLastCalledWith('1', event.id);
+    expect(
+      wrapper.find('[data-audit-preview] [data-audit-details]').exists()
+    ).toBe(true);
+    await row.get('[data-audit-detail]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-dialog]').text()).toContain('Previous');
+  });
+
+  it('does not turn an unknown result into a local or PABX confirmation', async () => {
+    API.configurationAudits.mockResolvedValue(
+      response([{ ...event, result: 'SYNTHETIC unknown' }])
+    );
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[data-audit-local-result]').text()).toContain(
+      'NO_CONFIRMATION'
+    );
+    expect(wrapper.get('[data-audit-local-result]').text()).not.toContain(
+      'RECORDED_LOCALLY'
+    );
+    expect(wrapper.text()).not.toContain('SYNTHETIC unknown');
   });
 });

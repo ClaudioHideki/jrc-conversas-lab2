@@ -1,0 +1,26 @@
+{
+  "source_reference": "63c1a52abdc572590cb12255162ddc7f3bd93eaa",
+  "figure": 14,
+  "clauses": [
+    "D2-P0293-C01",
+    "D2-P0293-C02"
+  ],
+  "delivery": "Show native Rails request UUID on query/detail/export errors, without exposing private payloads or returning empty success; clear it on explicit successful recovery.",
+  "reused": [
+    "Native audit panel, filters, popup, CSV export and Rails X-Request-ID middleware"
+  ],
+  "prepared_not_results": {
+    "new_native_API": 1,
+    "new_Vue": 8,
+    "focused_native_examples_with_existing_cases": 22,
+    "focused_Vue_examples_with_existing_cases": 32,
+    "existing_Chrome_cases_extended": 4
+  },
+  "all_existing_95_steps_retained": true,
+  "one_focused_preflight_added": true,
+  "no_models_migrations_permissions_or_provider_operations": true,
+  "static_frontend_lint_errors": 0,
+  "native_or_Chrome_accepted": false,
+  "remaining_literal_limit": "The combined clause also refers to denied-access audit retention under existing policies; this change does not invent that policy or claim all provider event chains.",
+  "grouped_with": "docs/jrc_contact_center/native_audit_table_candidate_20261127.json"
+}

@@ -14,7 +14,8 @@
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditPanel.vue",
       "git_blob_at_validated_base": "88e3df87218689b84f257c7247a5bac6859b808c",
       "state": "presente_na_base_validada",
-      "current_sha256": "fab417f98f3dee69c40a82e206c9af171bfb2374df26a747f7dbf7d2b114c439"
+      "current_sha256": "fab417f98f3dee69c40a82e206c9af171bfb2374df26a747f7dbf7d2b114c439",
+      "candidate_sha256_not_acceptance": "6f4f0495ec22a82286704c763aaec228d8b32dbf1a282baf68c23bea85ecfb33"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditDetails.vue",
@@ -1024,7 +1025,17 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": [],
+  "tests_candidate_not_validated": [
+    {
+      "candidate": "docs/jrc_contact_center/native_audit_error_reference_candidate_20261127.json",
+      "native_API_prepared": 1,
+      "Vue_prepared": 8,
+      "existing_Chrome_cases_extended": 4,
+      "native_and_Chrome_accepted": false,
+      "bounded_scope": "Native request reference, real failure instead of empty success, explicit successful recovery.",
+      "grouped_table_candidate": "docs/jrc_contact_center/native_audit_table_candidate_20261127.json"
+    }
+  ],
   "bounded_literal_acceptance": {
     "clauses": [
       "D2-P0290-C02",

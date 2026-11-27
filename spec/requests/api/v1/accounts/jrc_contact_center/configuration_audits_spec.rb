@@ -261,4 +261,13 @@ RSpec.describe 'Call Center configuration audit API', type: :request do
       expect(response.parsed_body.fetch('item').dig('scopes', 'after', 'business_unit_id')).to eq(business_b.id.to_s)
     end
   end
+
+  it 'preserves the native request identifier on an invalid query without returning an empty successful audit page' do
+    correlation = SecureRandom.uuid
+    get url, headers: headers.merge('X-Request-ID' => correlation), params: { from: '2026-11-18', to: '2026-11-17' }
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.headers['x-request-id']).to eq(correlation)
+    expect(response.parsed_body.fetch('error')).to eq('invalid_audit_dates')
+    expect(response.parsed_body).not_to have_key('items')
+  end
 end

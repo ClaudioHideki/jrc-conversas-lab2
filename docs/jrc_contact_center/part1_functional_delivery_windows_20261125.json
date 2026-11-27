@@ -271,8 +271,8 @@
     "effective_work_hours_not_inferred_from_CI_wait_or_example_count": true
   },
   "current_24_effective_hour_delivery": {
-    "parent": "62363de150ee452c2e7d93a509e3c4f4cb108206",
-    "status": "implemented_pending_native_and_visual_validation",
+    "parent": "63c1a52abdc572590cb12255162ddc7f3bd93eaa",
+    "status": "native_targeted_gates_passed_committed_ticket_job_refused_inherited_default_database_full_browser_not_run",
     "figures": [
       21,
       22,
@@ -298,6 +298,40 @@
       "Native and four-mode browser validation of current and preceding grouped flows"
     ],
     "effort_recording": "No verified active-work time ledger exists; calendar elapsed time is not represented as engineering hours.",
-    "scope_and_acceptance_not_reduced": true
+    "scope_and_acceptance_not_reduced": true,
+    "native_prepared_since_d236": 37,
+    "single_CI_run": 46030112268,
+    "exact_SHA_for_the_running_delivery": "63c1a52abdc572590cb12255162ddc7f3bd93eaa",
+    "do_not_treat_plan_or_in_progress_CI_as_acceptance": true,
+    "current_correction": "docs/jrc_contact_center/native_recording_ticket_owned_runner_correction_20261127.json",
+    "existing_ownership_guard_retained": true,
+    "both_independent_usable_deliveries_grouped_into_one_following_CI": true
+  },
+  "following_independent_functional_delivery": {
+    "figures": [
+      14
+    ],
+    "document": "docs/jrc_contact_center/native_audit_error_reference_candidate_20261127.json",
+    "user_outcome": "Consult authorized audit events in the desktop table/mobile rows, open the existing details, identify an actual failed request without exposing its private payload, and recover explicitly.",
+    "reuse": "Existing audit page, native Rails request ID, native scoped API, filters, popup and export.",
+    "native_API_prepared": 1,
+    "Vue_prepared": 8,
+    "four_existing_browser_cases_extended_not_a_second_matrix": true,
+    "only_one_own_CI_at_a_time": true,
+    "native_or_visual_accepted": false,
+    "grouped_with": "docs/jrc_contact_center/native_audit_table_candidate_20261127.json"
+  },
+  "24_effective_hour_acceptance_reporting": {
+    "delivery_unit": "A usable end-to-end user flow, with evidence linked to literal Word clauses.",
+    "report_fields": [
+      "Completed user functions",
+      "Word clauses accepted and remaining divergence",
+      "Native and actual browser evidence",
+      "Effort used and remaining estimate",
+      "External dependencies and operational parameters"
+    ],
+    "no_scope_extension_architecture_framework_or_wait_for_report_boundary": true,
+    "time_accounting": "No historical active-work ledger was captured; CI waiting, calendar elapsed time and case counts are not invented as engineering hours.",
+    "reusable_verified_sources_not_repeated_without_technical_cause": true
   }
 }

@@ -35,7 +35,22 @@ def validate_source(text, filename):
     return checked
 
 
+def validate_owned_ticket_step(text):
+    """The committed spec refuses any DB except its already prepared own database."""
+    blocks = [block for block in text.split('      - name: ')
+              if '\n        id: recording_ticket_concurrency\n' in block]
+    if len(blocks) != 1:
+        raise ValueError('Exactly one native recording Ticket contention gate is required')
+    config, command = blocks[0].split('        run: |\n', 1)
+    if '\n        env:\n          POSTGRES_DATABASE: corporate_gratuity_disposable\n' not in config:
+        raise ValueError('Native recording Ticket contention requires its own disposable PostgreSQL database')
+    spec = 'spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_concurrency_spec.rb'
+    if 'bundle exec rspec ' + spec not in command:
+        raise ValueError('The actual native recording Ticket contention spec must execute')
+
+
 if __name__ == '__main__':
     path = Path(sys.argv[1])
     blocks = validate_source(path.read_text(encoding='utf-8'), str(path))
+    validate_owned_ticket_step(path.read_text(encoding='utf-8'))
     print(f'Compiled {len(blocks)} embedded Python blocks; no commands executed')

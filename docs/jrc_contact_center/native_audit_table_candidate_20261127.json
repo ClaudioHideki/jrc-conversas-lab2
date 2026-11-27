@@ -1,0 +1,23 @@
+{
+  "source_reference": "63c1a52abdc572590cb12255162ddc7f3bd93eaa",
+  "figure": 14,
+  "Word_image_sha256": "b5a0d87dcc7757227cac2cf2aa8a04241d3a6aa11784b96765018b947bcba6b6",
+  "delivery": "Existing authorized audit events use semantic compact desktop columns and labelled mobile rows, preserving inline preview, popup, pagination and export.",
+  "actual_fields": [
+    "Native time in account timezone",
+    "Actual actor",
+    "Operation",
+    "Object",
+    "Confirmed local result only",
+    "Details"
+  ],
+  "no_PABX_publication_confirmation_inferred": true,
+  "same_native_API_and_scopes": true,
+  "new_Vue_cases_prepared": 2,
+  "existing_four_browser_cases_extended": true,
+  "native_or_visual_accepted": false,
+  "remaining_divergences": [
+    "Full company/tenant filters",
+    "Provider execution, ACK and rollback event sequence"
+  ]
+}

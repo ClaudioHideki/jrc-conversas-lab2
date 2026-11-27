@@ -260,6 +260,32 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_quality_schema_probe"); JrcContactCenter::SyntheticQualitySchemaProbe.record("fresh")'
           } > /tmp/call-center-initial-schema.log 2>&1
           cat /tmp/call-center-initial-schema.log
+      - name: Native audit error request references before broad regressions
+        id: audit_reference_preflight
+        run: |
+          bundle exec rubocop spec/requests/api/v1/accounts/jrc_contact_center/configuration_audits_spec.rb --format progress --format json --out /tmp/call-center-audit-reference-lint.json
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/configuration_audits_spec.rb --format progress --format json --out /tmp/call-center-audit-reference-preflight.json
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditPanel.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditDetails.spec.js --maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile=/tmp/call-center-audit-reference-vitest.json
+          python3 -B - <<'PY'
+          from collections import Counter
+          import json
+          from pathlib import Path
+          lint = json.loads(Path('/tmp/call-center-audit-reference-lint.json').read_text())
+          assert lint['summary']['offense_count'] == 0
+          assert lint['summary']['inspected_file_count'] == lint['summary']['target_file_count'] == len(lint['files']) == 1
+          assert lint['files'][0]['path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/configuration_audits_spec.rb'
+          assert lint['files'][0]['offenses'] == []
+          native = json.loads(Path('/tmp/call-center-audit-reference-preflight.json').read_text())
+          assert native['summary']['example_count'] == len(native['examples']) == 22
+          assert all(native['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' and row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/configuration_audits_spec.rb' for row in native['examples'])
+          assert len({row['id'] for row in native['examples']}) == 22
+          vue = json.loads(Path('/tmp/call-center-audit-reference-vitest.json').read_text())
+          assert vue['numTotalTests'] == vue['numPassedTests'] == 32
+          assert vue['numFailedTests'] == vue['numPendingTests'] == 0
+          assert {Path(row['name']).name: len(row['assertionResults']) for row in vue['testResults']} == {'ConfigurationAuditPanel.spec.js': 23, 'ConfigurationAuditDetails.spec.js': 9}
+          assert all(row['status'] == 'passed' and all(case['status'] == 'passed' for case in row['assertionResults']) for row in vue['testResults'])
+          PY
       - name: Focused real Service Desk template API and current authorization
         run: |
           bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_service_desk_configuration_spec.rb --format progress --format json --out /tmp/call-center-ending-sd-public-preflight.json
@@ -1103,6 +1129,8 @@ jobs:
           PY
       - name: Native recording Ticket real PostgreSQL contention and atomic rollback
         id: recording_ticket_concurrency
+        env:
+          POSTGRES_DATABASE: corporate_gratuity_disposable
         run: |
           bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_concurrency_spec.rb --format progress --format json --out /tmp/call-center-recording-ticket-concurrency.json
           python3 -B - <<'PY'
@@ -1968,6 +1996,22 @@ jobs:
               assert flow['actual_link_navigation_after_create_and_reload'] is True and flow['denied_linked_list_status'] == 401
               assert all(Path(image).is_file() for image in flow['screenshots'])
               assert flow['whole_figure21_or_Part1_accepted'] is flow['external_provider_homologation'] is False
+          import re
+          audit_references = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-audit-native-error-reference.json')]
+          assert len(audit_references) == 4 and {row['project'] for row in audit_references} == expected_projects
+          assert len({row['actual_native_request_id'] for row in audit_references}) == 4
+          assert len({row['account_id'] for row in audit_references}) == 4
+          for flow in audit_references:
+              assert flow['sha'] == os.environ['GITHUB_SHA'] and flow['synthetic'] is True
+              assert flow['actual_dark_theme'] == flow['project'].endswith('dark')
+              assert flow['actual_native_query_status'] == 422
+              layout = flow['native_table_layout']
+              assert layout['tag'] == 'TR' and layout['display'] == ('block' if flow['project'].startswith('mobile') else 'table-row')
+              assert 0 <= layout['left'] < layout['right'] <= layout['viewport']
+              assert re.fullmatch(r'[a-fA-F0-9]{8}-(?:[a-fA-F0-9]{4}-){3}[a-fA-F0-9]{12}', flow['actual_native_request_id'])
+              assert flow['real_error_not_empty_success'] is flow['explicit_successful_recovery_cleared_error'] is True
+              assert flow['contrast']['ratio'] >= 4.5 and Path(flow['screenshot']).is_file()
+              assert flow['no_new_provider_operation'] is True and flow['whole_figure14_or_Part1_accepted'] is False
           ending_preflight = json.loads(Path('/tmp/call-center-ending-confirmation-preflight.json').read_text())['summary']
           scope_preflight = json.loads(Path('/tmp/call-center-ending-scope-preflight.json').read_text())['summary']
           version_preflight = json.loads(Path('/tmp/call-center-ending-version-preflight.json').read_text())['summary']

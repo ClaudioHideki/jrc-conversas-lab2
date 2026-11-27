@@ -42,6 +42,8 @@ const text = {
   next: t('JRC_CONTACT_CENTER.ADMIN.NEXT'),
   pagination: t('JRC_CONTACT_CENTER.ADMIN.PAGINATION'),
   system: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.SYSTEM'),
+  date: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.DATE'),
+  result: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.RESULT'),
   error: t('JRC_CONTACT_CENTER.COMMON.ERROR'),
   denied: t('JRC_CONTACT_CENTER.ADMIN.DENIED'),
   datesError: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.DATES_ERROR'),
@@ -119,6 +121,16 @@ const formattedDate = value =>
     timeZone: timezone.value,
   }).format(new Date(value));
 
+// Only the native opaque UUID is displayed; never an arbitrary header or error payload.
+const withRequestReference = (message, error) => {
+  const id = error?.response?.headers?.['x-request-id'];
+  if (
+    typeof id !== 'string' ||
+    !/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(id)
+  )
+    return message;
+  return `${message} ${t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REQUEST_REFERENCE', { id })}`;
+};
 const errorLabel = async error => {
   let body = error?.response?.data;
   if (body instanceof Blob) {
@@ -128,7 +140,8 @@ const errorLabel = async error => {
       body = null;
     }
   }
-  if ([401, 403, 404].includes(error?.response?.status)) return text.denied;
+  if ([401, 403, 404].includes(error?.response?.status))
+    return withRequestReference(text.denied, error);
   const labels = {
     invalid_audit_dates: text.datesError,
     invalid_audit_filter: text.filterError,
@@ -136,7 +149,10 @@ const errorLabel = async error => {
     audit_integrity_failed: text.exportIntegrity,
     native_audit_unavailable: text.notEnabled,
   };
-  return labels[body?.error || error?.message] || text.error;
+  return withRequestReference(
+    labels[body?.error || error?.message] || text.error,
+    error
+  );
 };
 const restoreFilters = () => {
   filterKeys.forEach(key => {
@@ -366,8 +382,8 @@ onBeforeUnmount(() => {
           >
             {{ label }}
           </option>
-        </select></label
-      >
+        </select>
+      </label>
       <label class="text-sm">
         <span>{{ text.resourceId }}</span>
         <input
@@ -393,8 +409,8 @@ onBeforeUnmount(() => {
           >
             {{ label }}
           </option>
-        </select></label
-      >
+        </select>
+      </label>
       <label class="text-sm">
         <span>{{ text.unit }}</span>
         <select
@@ -410,8 +426,8 @@ onBeforeUnmount(() => {
           >
             {{ unit.name }}
           </option>
-        </select></label
-      >
+        </select>
+      </label>
       <label class="text-sm">
         <span>{{ text.actor }}</span>
         <select
@@ -427,8 +443,8 @@ onBeforeUnmount(() => {
           >
             {{ actor.name || '#' + actor.id }}
           </option>
-        </select></label
-      >
+        </select>
+      </label>
       <label class="text-sm">
         <span>{{ text.correlation }}</span>
         <input
@@ -464,7 +480,7 @@ onBeforeUnmount(() => {
     <p
       v-if="exportError"
       role="alert"
-      class="text-sm text-n-ruby-11"
+      class="break-words text-sm text-n-ruby-11"
       data-audit-export-error
     >
       {{ exportError }}
@@ -473,7 +489,7 @@ onBeforeUnmount(() => {
     <p
       v-else-if="listError"
       role="alert"
-      class="rounded-lg border border-n-ruby-6 p-4 text-n-ruby-11"
+      class="break-words rounded-lg border border-n-ruby-6 p-4 text-n-ruby-11"
       data-audit-list-error
     >
       {{ listError }}
@@ -485,39 +501,126 @@ onBeforeUnmount(() => {
             {{ text.total }} {{ meta.total }}
           </p>
           <p v-if="!items.length" role="status">{{ text.empty }}</p>
-          <article
-            v-for="row in items"
-            :key="row.id"
-            class="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-4"
-            data-audit-row
+          <table
+            v-if="items.length"
+            class="block w-full table-fixed border-separate border-spacing-y-2 text-start md:table md:border-spacing-y-0"
+            data-audit-table
           >
-            <button
-              type="button"
-              class="min-w-0 flex-1 text-start"
-              @click="loadDetail(row)"
+            <caption class="sr-only">
+              {{
+                text.title
+              }}
+            </caption>
+            <thead
+              class="hidden bg-n-solid-3 text-xs text-n-slate-11 md:table-header-group"
             >
-              <strong class="block break-words"
-                >{{ resourceLabels[row.resource_type] }} #{{
-                  row.resource_id
-                }}
-                · {{ operationLabels[row.operation] }}</strong
+              <tr>
+                <th
+                  v-for="label in [
+                    text.date,
+                    text.actor,
+                    text.operation,
+                    text.resource,
+                    text.result,
+                    text.details,
+                  ]"
+                  :key="label"
+                  scope="col"
+                  class="break-words p-2"
+                >
+                  {{ label }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="block space-y-3 md:table-row-group md:space-y-0">
+              <tr
+                v-for="row in items"
+                :key="row.id"
+                class="block min-w-0 rounded-lg border border-n-weak bg-n-solid-2 p-3 md:table-row md:rounded-none md:p-0"
+                data-audit-row
               >
-              <time class="mt-1 block text-sm text-n-slate-11">{{
-                formattedDate(row.created_at)
-              }}</time>
-              <span class="mt-1 block break-words text-sm">{{
-                row.actor_name ||
-                (row.actor_id ? '#' + row.actor_id : text.system)
-              }}</span>
-            </button>
-            <Button
-              data-audit-detail
-              faded
-              blue
-              :label="text.details"
-              @click="loadDetail(row, true)"
-            />
-          </article>
+                <td
+                  class="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] gap-2 py-2 text-sm md:table-cell md:p-2"
+                >
+                  <span class="text-n-slate-11 md:hidden">{{ text.date }}</span>
+                  <time :datetime="row.created_at" class="break-words">{{
+                    formattedDate(row.created_at)
+                  }}</time>
+                </td>
+                <td
+                  class="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] gap-2 py-2 text-sm md:table-cell md:p-2"
+                >
+                  <span class="text-n-slate-11 md:hidden">{{
+                    text.actor
+                  }}</span>
+                  <span class="break-words">{{
+                    row.actor_name ||
+                    (row.actor_id ? '#' + row.actor_id : text.system)
+                  }}</span>
+                </td>
+                <td
+                  class="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] gap-2 py-2 text-sm md:table-cell md:p-2"
+                >
+                  <span class="text-n-slate-11 md:hidden">{{
+                    text.operation
+                  }}</span>
+                  <span class="break-words">{{
+                    operationLabels[row.operation] || '—'
+                  }}</span>
+                </td>
+                <td
+                  class="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] gap-2 py-2 text-sm md:table-cell md:p-2"
+                >
+                  <span class="text-n-slate-11 md:hidden">{{
+                    text.resource
+                  }}</span>
+                  <button
+                    type="button"
+                    class="min-w-0 break-words text-start font-medium text-n-blue-11"
+                    @click="loadDetail(row)"
+                  >
+                    {{
+                      t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.ENTRY_LABEL', {
+                        resource: resourceLabels[row.resource_type] || '',
+                        id: row.resource_id,
+                        operation: operationLabels[row.operation] || '',
+                      })
+                    }}
+                  </button>
+                </td>
+                <td
+                  class="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] gap-2 py-2 text-sm md:table-cell md:p-2"
+                >
+                  <span class="text-n-slate-11 md:hidden">{{
+                    text.result
+                  }}</span>
+                  <span
+                    class="break-words text-n-slate-12"
+                    data-audit-local-result
+                  >
+                    {{
+                      row.result === 'recorded_locally'
+                        ? t(
+                            'JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.RECORDED_LOCALLY'
+                          )
+                        : t(
+                            'JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.NO_CONFIRMATION'
+                          )
+                    }}
+                  </span>
+                </td>
+                <td class="py-2 md:p-2">
+                  <Button
+                    data-audit-detail
+                    faded
+                    blue
+                    :label="text.details"
+                    @click="loadDetail(row, true)"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
           <nav
             v-if="meta.pages > 1"
             class="flex flex-wrap items-center gap-3 text-sm"
@@ -530,7 +633,12 @@ onBeforeUnmount(() => {
               :disabled="meta.page <= 1 || loading"
               @click="changePage(meta.page - 1)"
             />
-            <span>{{ text.page }} {{ meta.page }} / {{ meta.pages }}</span>
+            <span>{{
+              t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PAGE_LABEL', {
+                page: meta.page,
+                pages: meta.pages,
+              })
+            }}</span>
             <Button
               :label="text.next"
               faded
@@ -548,7 +656,11 @@ onBeforeUnmount(() => {
           <p v-if="loadingDetail" role="status" class="text-n-slate-12">
             {{ text.loading }}
           </p>
-          <p v-else-if="detailError" role="alert" class="text-n-ruby-11">
+          <p
+            v-else-if="detailError"
+            role="alert"
+            class="break-words text-n-ruby-11"
+          >
             {{ detailError }}
           </p>
           <template v-else-if="selected">
@@ -579,7 +691,11 @@ onBeforeUnmount(() => {
       @close="stopDetails"
     >
       <p v-if="loadingDetail" role="status">{{ text.loading }}</p>
-      <p v-else-if="detailError" role="alert" class="text-n-ruby-11">
+      <p
+        v-else-if="detailError"
+        role="alert"
+        class="break-words text-n-ruby-11"
+      >
         {{ detailError }}
       </p>
       <ConfigurationAuditDetails
