@@ -34,7 +34,8 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
   end
 
   def self.stage!(account)
-    pipeline = JrcCrm::Pipeline.create!(account: account, name: 'SYNTHETIC recording context', key: 'synthetic-recording-context', active: true)
+    pipeline = JrcCrm::Pipeline.create!(account: account, name: 'SYNTHETIC recording context',
+                                      key: 'synthetic-recording-context', position: 1, active: true)
     JrcCrm::Stage.create!(account: account, pipeline: pipeline, name: 'SYNTHETIC context stage', key: 'synthetic-context',
                           position: 0, active: true, probability: 0, is_terminal: false, is_won: false, is_lost: false)
   end

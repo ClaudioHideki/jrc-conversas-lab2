@@ -1700,7 +1700,7 @@
       "NATIVE_INTEGRATION": "Esta seção reutiliza o módulo nativo. Políticas, escopos e versões continuam sendo validados na origem.",
       "NATIVE_PERMISSIONS": "Abrir papéis e permissões",
       "NATIVE_ROLE": "Perfil nativo",
-      "ROLE_SCOPE": "As capacidades vêm do perfil atribuído ao usuário. Participar de uma equipe ou fila não concede permissões adicionais. Os escopos da conta, empresa e unidade continuam obrigatórios.",
+      "ROLE_SCOPE": "Além do perfil, o acesso considera concessões explícitas individuais e de equipes ativas no Call Center. Bloqueios individuais prevalecem. Participar de uma fila, por si só, não concede permissão. Elegibilidade e escopos de conta, empresa e unidade continuam obrigatórios.",
       "EDIT_NATIVE_ROLE": "Configurar perfil",
       "ROLE_REVIEW_TITLE": "Revise as alterações antes de salvar",
       "ROLE_REVIEW_ADDED": "Capacidades a conceder",

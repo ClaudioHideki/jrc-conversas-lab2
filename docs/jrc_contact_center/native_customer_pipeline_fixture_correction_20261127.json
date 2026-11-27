@@ -1,0 +1,45 @@
+{
+  "source_parent": "2034a88defa693abc658e0941baf09d57121ea57",
+  "failed_run": 46045686594,
+  "artifact": 15221813963,
+  "artifact_sha256": "6d5d818a105aefd03769e7ba5a4c300b34f1bc720f92a9ce9d5d601218b32073",
+  "confirmed_cause": "The native Pipeline validates a positive position before its before_create fallback. The synthetic fixture omitted that field.",
+  "minimum_correction": "Use explicit synthetic position 1, matching the unchanged native CRM factory. Preserve all native validations and owned runtime/data guards.",
+  "existing_regression_examples": [
+    "Owned committed recording fixture and native read reuses the actual committed qualification and preserves its full state and native counts through a real API read",
+    "Owned committed recording fixture and native read fails loudly instead of creating ACW when the requested native actor has no qualification for that source"
+  ],
+  "native_models_and_services_reviewed": {
+    "sha": "2034a88defa693abc658e0941baf09d57121ea57",
+    "remote_read_only": true,
+    "sources": {
+      "app/models/jrc_crm/pipeline.rb": "63d0f43bffb6424d85758d6772ef04366fda06bdd444054ea57a29f86b280ba5",
+      "app/models/jrc_crm/stage.rb": "539444b46f5676eb3d9df3446f81238f0998e98d0f43f001c34f6a336d1c2b62",
+      "app/models/jrc_crm/deal.rb": "8d96f3a4f47ea08a9d5b3f070afbdb79a385be72414ed9f58e4431fc816c4241",
+      "spec/factories/jrc_crm_factories.rb": "8ca5838b7bf9def917906fee4d526bb3692fc8b33565c0c87793921ddfdc4284",
+      "app/models/jrc_projects/project.rb": "4583717570f8745b04d9cbd7008337ca8c2884f371c884a12082a2aa2d5ed6b8",
+      "app/services/jrc_projects/projects/create.rb": "fff3219db77b933c3360487d1bb7a37aa923d5d4160c109778207b77d7653c88",
+      "spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb": "a6ace083c63172f252a728aa61560fb1f5fb822aeb8135ebb0ae753cb223dfb9"
+    }
+  },
+  "reviewed_permission_warning_only": {
+    "path": "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+    "before": "As capacidades vêm do perfil atribuído ao usuário. Participar de uma equipe ou fila não concede permissões adicionais. Os escopos da conta, empresa e unidade continuam obrigatórios.",
+    "after": "Além do perfil, o acesso considera concessões explícitas individuais e de equipes ativas no Call Center. Bloqueios individuais prevalecem. Participar de uma fila, por si só, não concede permissão. Elegibilidade e escopos de conta, empresa e unidade continuam obrigatórios.",
+    "authority": [
+      "app/services/jrc_contact_center/permission_sources.rb",
+      "app/policies/jrc_contact_center/module_policy.rb"
+    ],
+    "permissions_or_real_users_changed": false
+  },
+  "all_tests_assertions_and_98_CI_steps_preserved": true,
+  "native_or_browser_acceptance": false,
+  "planned_not_results": {
+    "distinct_Rails": 4012,
+    "main_Vue": 2252,
+    "directed_Vue": 325,
+    "customer_focused_Vue": 41,
+    "Chrome": 288,
+    "PNG": 916
+  }
+}
