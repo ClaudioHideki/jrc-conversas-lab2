@@ -21,6 +21,9 @@ const props = defineProps({
 const RecordingCustomerRecords = defineAsyncComponent(
   () => import('./RecordingCustomerRecords.vue')
 );
+const RecordingCustomerLink = defineAsyncComponent(
+  () => import('./RecordingCustomerLink.vue')
+);
 const { t } = useI18n();
 const labels = computed(() => ({
   TITLE: t('JRC_CONTACT_CENTER.RECORDINGS.CONTEXT.TITLE'),
@@ -154,6 +157,16 @@ onBeforeUnmount(() => {
       <p v-if="!linked" role="status" data-recording-context-identity>
         {{ text(state) }}
       </p>
+      <RecordingCustomerLink
+        v-if="!call.contact_id && recordingId && operationalContextAllowed"
+        :key="`customer-link-${accountId}-${recordingId}-${callSessionId}`"
+        :account-id="accountId"
+        :recording-id="recordingId"
+        :call-session-id="callSessionId"
+        :call-id="callId"
+        :enabled="operationalContextAllowed"
+        @updated="load"
+      />
       <LinkedContactMaster
         v-if="linked"
         :key="`${accountId}-${callSessionId}`"

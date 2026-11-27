@@ -1,0 +1,45 @@
+{
+  "source_parent": "6921f12c53deb401f05e1d2708cb10767b026688",
+  "failed_run": 46049934795,
+  "artifact": 15228642590,
+  "artifact_sha256": "16aaa295f0bc4295adb5a17884a5dc596344995070983d9850fab9c93ba52bcf",
+  "independent_failed_evidence_sha256": "f0f4b42eef0fd819d75d5c23542486c52160c3b1610283fbca4dc23ed129be92",
+  "actual_Chrome_report_sha256": "462ed2effcb6af5627e1a6c29175256e77825c932fa4295a1441a858d66fa29e",
+  "actual_native_distinct_passed": 4012,
+  "actual_main_Vue_passed": 2252,
+  "actual_directed_recordings_Vue_passed": 325,
+  "actual_Chrome": {
+    "startTime": "2026-11-27T19:27:08.334Z",
+    "duration": 2499523.149,
+    "expected": 276,
+    "skipped": 0,
+    "unexpected": 12,
+    "flaky": 0
+  },
+  "root_causes_and_minimum_fixes": [
+    "The approved truthful profile/individual/active-team warning replaced old misleading text; require its exact full current text, keeping every selected-right and persistence assertion.",
+    "Next matched three independent paginators; require exactly one enabled Next inside the actual named recordings navigation, preserving HTTP, distinct IDs, page/reload and cleared-filter assertions.",
+    "Unchanged ScopeBar/LookupSelect native labels include their options; bind the unique actual combobox label prefix and additionally assert exact server-selected unit/contact values and disabled state. No shared Select or Service Desk component rewrite.",
+    "The unpublished pending link targeted configuration instead of pending records. Reuse the real supervisor route only when the native API reports ModulePolicy.supervise?; preserve read-only scoped pending count for callers without that authority."
+  ],
+  "native_permission_capability": "Add only supervise Boolean from the existing policy to Administration.capabilities. No new right, grant or bypass.",
+  "existing_native_security_cases_extended_not_new": 2,
+  "all_original_Rails_Vue_and_Chrome_cases_preserved": true,
+  "no_test_assertion_removed_and_no_first_or_nth_selector_used_to_hide_ambiguity": true,
+  "two_shared_native_components_read_at_exact_SHA_not_modified": {
+    "ScopeBar.vue": "bd6f27fe1ee98bb8e5e4298291ae310bb1200994c0fbf2daa818c7291cb89c02",
+    "Select.vue": "eb876719d2530c4326e077fea4af982e32a38b3250a40d73d32bdc463c101951"
+  },
+  "prepared_not_results": {
+    "distinct_native": 4052,
+    "main_Vue": 2289,
+    "directed_recordings_Vue": 346,
+    "customer_focused_Vue": 47,
+    "Chrome": 292,
+    "PNG": 928
+  },
+  "native_or_visual_acceptance": false,
+  "whole_figure_or_Part1_accepted": false,
+  "failures_not_reclassified_as_passes": true,
+  "external_provider_homologation": false
+}

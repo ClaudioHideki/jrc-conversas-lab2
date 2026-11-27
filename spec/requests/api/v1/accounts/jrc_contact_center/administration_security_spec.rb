@@ -17,6 +17,8 @@ RSpec.describe 'Call Center administration isolation', type: :request do
     end
     get "#{base}/administration/audit", headers: headers
     expect(response).to have_http_status(:unauthorized)
+    get "#{base}/administration", headers: headers
+    expect(response.parsed_body.fetch('capabilities').fetch('supervise')).to eq(policy.supervise?)
   end
 
   it 'preserves legacy agent access without granting new administrative authorities' do
@@ -25,6 +27,7 @@ RSpec.describe 'Call Center administration isolation', type: :request do
     expect(response).to have_http_status(:ok)
     get "#{base}/administration", headers: agent.create_new_auth_token
     expect(response.parsed_body.fetch('cards')).to be_empty
+    expect(response.parsed_body.fetch('capabilities').fetch('supervise')).to be(false)
   end
 
   it 'keeps publication blocked without permission or a provider contract' do

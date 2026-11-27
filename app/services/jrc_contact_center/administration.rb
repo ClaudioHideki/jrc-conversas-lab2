@@ -61,7 +61,7 @@ class JrcContactCenter::Administration
   end
 
   def capabilities
-    actions = %w[configure administer audit publish approve reports recordings_view recordings_listen recordings_download monitor]
+    actions = %w[configure administer audit publish approve reports supervise recordings_view recordings_listen recordings_download monitor]
     actions.index_with { |key| @policy.public_send("#{key}?") }
            .merge('control' => @policy.control?, 'configuration_global' => global_configuration?,
                   'configuration_audit' => @policy.audit? && @account.feature_enabled?('audit_logs'))

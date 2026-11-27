@@ -1880,7 +1880,15 @@
       "OPEN_RECORDINGS": "Consultar gravações autorizadas",
       "QUEUE_COUNT": "Filas no seu escopo",
       "UNIT_COUNT": "Unidades no seu escopo",
-      "PENDING_ACW_COUNT": "Pós-atendimentos pendentes no seu escopo"
+      "PENDING_ACW_COUNT": "Pós-atendimentos pendentes no seu escopo",
+      "PENDING_ALERTS": {
+        "TITLE": "Alertas e pendências",
+        "SYNC_FAILED": "A última sincronização com o PABX registrou uma falha. Confira a origem; nenhuma sincronização bem-sucedida está sendo anunciada.",
+        "NOT_CONFIGURED": "A conexão PABX ainda não está configurada nesta conta. Os recursos locais continuam disponíveis conforme suas permissões.",
+        "PROVIDER_SOURCE": "Consultar integração autorizada",
+        "PENDING_ACW": "{count} tabulações pendentes nas chamadas do seu escopo de acesso.",
+        "ACW_SOURCE": "Conferir pendências na supervisão"
+      }
     },
     "CONFIGURATION_AUDIT": {
       "TITLE": "Auditoria administrativa",
@@ -3504,6 +3512,19 @@
       "TICKETS": "Chamados",
       "PROJECTS": "Projetos",
       "HISTORY": "Histórico unificado"
+    },
+    "CUSTOMER_LINK": {
+      "OPEN": "Vincular cliente existente",
+      "REFRESH": "Verificar vínculo e atualizar",
+      "EXPLICIT_ONLY": "Selecione uma pessoa do Cadastro Mestre. Telefone e transcrição não confirmam a identidade.",
+      "CONFIRM": "Conferi a pessoa selecionada e confirmo seu vínculo com esta chamada.",
+      "HISTORY": "O vínculo será auditado. Registros e aprovações anteriores serão preservados; ações antigas não serão reativadas.",
+      "SAVE": "Confirmar vínculo",
+      "CANCEL": "Cancelar",
+      "DENIED": "O acesso atual não permite vincular este cliente. Nenhuma permissão foi concedida.",
+      "ERROR": "Não foi possível verificar a chamada. Atualize antes de selecionar uma pessoa.",
+      "STALE": "A chamada mudou ou já recebeu um vínculo. Verifique o estado atual antes de continuar.",
+      "SAVE_ERROR": "Não foi possível confirmar o resultado. A seleção foi preservada; verifique o vínculo antes de tentar novamente."
     }
   }
 }

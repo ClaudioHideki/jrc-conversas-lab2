@@ -781,5 +781,11 @@
     "document": "docs/jrc_contact_center/native_legacy_settings_context_candidate_20261127.json",
     "sha256": "64f9e7d66f9ad6567f72800d3eaacb37cec083db4c0a8c008ed4bd35bcf8d80c",
     "native_or_browser_accepted": false
+  },
+  "bounded_native_alerts_candidate_not_accepted": {
+    "document": "docs/jrc_contact_center/administration_native_alerts_candidate_20261127.json",
+    "status": "implemented_pending_native_and_Chrome_acceptance",
+    "reused_native_source": true,
+    "whole_figure_accepted": false
   }
 }

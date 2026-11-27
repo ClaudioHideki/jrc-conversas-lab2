@@ -9,6 +9,7 @@ import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAcces
 import AdministrationSection from '../components/AdministrationSection.vue';
 import ConfigurationAuditPage from '../components/ConfigurationAuditPage.vue';
 import RecentConfigurationActivity from '../components/RecentConfigurationActivity.vue';
+import AdministrationPendingAlerts from '../components/AdministrationPendingAlerts.vue';
 import RoutingDraftWorkspace from '../components/RoutingDraftWorkspace.vue';
 
 const route = useRoute();
@@ -177,6 +178,12 @@ onBeforeUnmount(() => {
       >
         {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.TITLE') }}
       </RouterLink>
+      <AdministrationPendingAlerts
+        v-if="!section"
+        :account-id="accountId"
+        :context="data"
+        :query="route.query"
+      />
       <div
         v-if="!section"
         class="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"

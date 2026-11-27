@@ -1,0 +1,272 @@
+{
+  "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "run": 45984659600,
+  "artifact": 15198996699,
+  "artifact_sha256": "949211f5d1f3b7f4b1cf40649ddbfb15262889427d3f97096cca34d6aa160ae3",
+  "independently_verified_source_reuse": {
+    "approved_source": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "current_source": "6921f12c53deb401f05e1d2708cb10767b026688",
+    "read_only_GitHub_source_verification": true,
+    "sources": {
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue": {
+        "git_blob_at_approved_62": "1a428ffbb0fe94e8442edc3b5dabfc8d6807937a",
+        "unchanged_current_sha256": "56fa36af3fb6336ae449d3502f0fcf4af2ef293fb33c7f20535b56695029df73"
+      },
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/pauseCatalogPresentation.js": {
+        "git_blob_at_approved_62": "2b6dd5e44c79dc3241b5f52617ea3fb9743206eb",
+        "unchanged_current_sha256": "d10ae26612dbcb348511f00963c67a97ae154f0beb57f1e09e48a8ca31e21822"
+      },
+      "app/controllers/api/v1/accounts/jrc_contact_center/pause_catalogs_controller.rb": {
+        "git_blob_at_approved_62": "641d9cfae4838043d5911e02754b1a856b827f9c",
+        "unchanged_current_sha256": "f2bd401a5b19ce17d06105ada97715ccffcd7cad15dbb142256c57031dda7fcc"
+      },
+      "app/services/jrc_contact_center/pause_catalog.rb": {
+        "git_blob_at_approved_62": "aa7d83b3785f82ebebe2d28f986053f313942dea",
+        "unchanged_current_sha256": "16f018b6b95abfd9406e10f932c2e3baac2ebdf95544d2905dce652ad13cc21a"
+      },
+      "app/services/jrc_contact_center/pause_reason_definition.rb": {
+        "git_blob_at_approved_62": "d9d560b5ccc7cbfa66ce27a3f3b2744e7efcd12e",
+        "unchanged_current_sha256": "555641460e01bf46b8a4a567add54f8d115abb595f65f8ecf6ec0d56973fd512"
+      },
+      "app/services/jrc_contact_center/pause_catalog_audit.rb": {
+        "git_blob_at_approved_62": "97b1f3d764b26eb58cd65d7ee5fa95e4e1cef4ab",
+        "unchanged_current_sha256": "0c33763265aadbd2ea6e9c6144c5e01846c52f36a255d098bee679630d6e39b8"
+      },
+      "app/policies/jrc_contact_center/module_policy.rb": {
+        "git_blob_at_approved_62": "877203b7de8eb1e36a2e4895cb1eb6fbc0dc5ee0",
+        "unchanged_current_sha256": "7600c7111a23f02e6dda05a312b09d5661f3d0a285bf724dafaea99a27d0c965"
+      },
+      "tests/playwright/tests/e2e/ui/call-center-pause-catalog-native.mjs": {
+        "git_blob_at_approved_62": "24e0dfc5b3dfc441abe5e55388be2bcdcce5d474",
+        "unchanged_current_sha256": "1169d0f5518c4ab127604c59115badc131fc2de5190a7d0dd21aa8c2f264afb8"
+      }
+    },
+    "only_bounded_identity_save_cancel_clauses_considered": true,
+    "whole_figure_accepted": false
+  },
+  "native_report": {
+    "path": "tmp/call-center-rspec.json",
+    "sha256": "22ebf847a37ce0180f695178b0c0859377d675ad914501e2c503944a153409da",
+    "examples_reused_not_new": 42,
+    "paths": {
+      "./spec/services/jrc_contact_center/pause_catalog_spec.rb": 24,
+      "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb": 13,
+      "./spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_visibility_spec.rb": 5
+    }
+  },
+  "original_images_actually_viewed": [
+    {
+      "project": "desktop-dark",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\native-pause-save-cancel-literal-reuse-20261127\\desktop-dark-pause-catalog-restored-after-cancel.png",
+      "sha256": "f3b997934a1bcaf22e9df79a4a1328a15c1c1f2f19d021e964431352b31a2c47",
+      "receipt": {
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "project": "desktop-dark",
+        "account_id": "3628",
+        "synthetic": true,
+        "same_existing_case_and_all_original_assertions_retained": true,
+        "creation": {
+          "code": "synthetic_created",
+          "name": "SYNTHETIC created by real UI",
+          "active": true,
+          "category": "SYNTHETIC",
+          "unit_ids": [],
+          "description": "SYNTHETIC persisted pause purpose",
+          "custom_role_ids": [],
+          "default_minutes": 30,
+          "maximum_minutes": 60,
+          "minimum_minutes": 15,
+          "approval_required": false,
+          "justification_required": true
+        },
+        "afterCancel": {
+          "code": "synthetic_created",
+          "name": "SYNTHETIC created by real UI",
+          "active": true,
+          "category": "SYNTHETIC",
+          "unit_ids": [],
+          "description": "SYNTHETIC persisted pause purpose",
+          "custom_role_ids": [],
+          "default_minutes": 30,
+          "maximum_minutes": 60,
+          "minimum_minutes": 15,
+          "approval_required": false,
+          "justification_required": true
+        },
+        "initial_revision": "90633675982afbc4bea937884680d77efb161ac3e6dc913167349026320e7cd7",
+        "after_cancel_revision": "90633675982afbc4bea937884680d77efb161ac3e6dc913167349026320e7cd7",
+        "canceledWrites": [],
+        "real_native_persistence_and_reopen": true,
+        "actual_dark_theme": true,
+        "screenshot": ".codex/call-center-native-e2e/desktop-dark-pause-catalog-restored-after-cancel.png",
+        "external_PABX_or_legal_policy_homologation": false
+      },
+      "receipt_sha256": "fc62eca780aa26c55407fa43c329cda4fd1bb97a2f6be7116dab3253f5a5b90c",
+      "actual_image_observation": "Original image actually opened: persisted name/category/description, 00:15/00:30/01:00 values and visible native Cancelar/Salvar. Desktop has two columns; mobile is stacked with accessible fixed footer. Lower help text and all scroll positions are not wholly accepted by this image."
+    },
+    {
+      "project": "mobile-light",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\native-pause-save-cancel-literal-reuse-20261127\\mobile-light-pause-catalog-restored-after-cancel.png",
+      "sha256": "5003b7551bbc2f06361a71f55273378ed3d90c8c87342a1355b387dab0ab6a76",
+      "receipt": {
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "project": "mobile-light",
+        "account_id": "3659",
+        "synthetic": true,
+        "same_existing_case_and_all_original_assertions_retained": true,
+        "creation": {
+          "code": "synthetic_created",
+          "name": "SYNTHETIC created by real UI",
+          "active": true,
+          "category": "SYNTHETIC",
+          "unit_ids": [],
+          "description": "SYNTHETIC persisted pause purpose",
+          "custom_role_ids": [],
+          "default_minutes": 30,
+          "maximum_minutes": 60,
+          "minimum_minutes": 15,
+          "approval_required": false,
+          "justification_required": true
+        },
+        "afterCancel": {
+          "code": "synthetic_created",
+          "name": "SYNTHETIC created by real UI",
+          "active": true,
+          "category": "SYNTHETIC",
+          "unit_ids": [],
+          "description": "SYNTHETIC persisted pause purpose",
+          "custom_role_ids": [],
+          "default_minutes": 30,
+          "maximum_minutes": 60,
+          "minimum_minutes": 15,
+          "approval_required": false,
+          "justification_required": true
+        },
+        "initial_revision": "5e998148b0ab02239f273746944fbe1c9877a5305055ffe5090155f620c78862",
+        "after_cancel_revision": "5e998148b0ab02239f273746944fbe1c9877a5305055ffe5090155f620c78862",
+        "canceledWrites": [],
+        "real_native_persistence_and_reopen": true,
+        "actual_dark_theme": false,
+        "screenshot": ".codex/call-center-native-e2e/mobile-light-pause-catalog-restored-after-cancel.png",
+        "external_PABX_or_legal_policy_homologation": false
+      },
+      "receipt_sha256": "7e955b010c40e48766a7534aba795be4fb34d8230e9e7c6d74f0a0ea6553e010",
+      "actual_image_observation": "Original image actually opened: persisted name/category/description, 00:15/00:30/01:00 values and visible native Cancelar/Salvar. Desktop has two columns; mobile is stacked with accessible fixed footer. Lower help text and all scroll positions are not wholly accepted by this image."
+    },
+    {
+      "project": "mobile-dark",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\native-pause-save-cancel-literal-reuse-20261127\\mobile-dark-pause-catalog-restored-after-cancel.png",
+      "sha256": "66384ec7edd1b76ff6a4a97a209084b526360214d3e965ab61f2f3f053f3865c",
+      "receipt": {
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "project": "mobile-dark",
+        "account_id": "3690",
+        "synthetic": true,
+        "same_existing_case_and_all_original_assertions_retained": true,
+        "creation": {
+          "code": "synthetic_created",
+          "name": "SYNTHETIC created by real UI",
+          "active": true,
+          "category": "SYNTHETIC",
+          "unit_ids": [],
+          "description": "SYNTHETIC persisted pause purpose",
+          "custom_role_ids": [],
+          "default_minutes": 30,
+          "maximum_minutes": 60,
+          "minimum_minutes": 15,
+          "approval_required": false,
+          "justification_required": true
+        },
+        "afterCancel": {
+          "code": "synthetic_created",
+          "name": "SYNTHETIC created by real UI",
+          "active": true,
+          "category": "SYNTHETIC",
+          "unit_ids": [],
+          "description": "SYNTHETIC persisted pause purpose",
+          "custom_role_ids": [],
+          "default_minutes": 30,
+          "maximum_minutes": 60,
+          "minimum_minutes": 15,
+          "approval_required": false,
+          "justification_required": true
+        },
+        "initial_revision": "46f42bf2115bf0892522e0c9ec6a247b97e6f5f252c17625293b3ff17435dd3e",
+        "after_cancel_revision": "46f42bf2115bf0892522e0c9ec6a247b97e6f5f252c17625293b3ff17435dd3e",
+        "canceledWrites": [],
+        "real_native_persistence_and_reopen": true,
+        "actual_dark_theme": true,
+        "screenshot": ".codex/call-center-native-e2e/mobile-dark-pause-catalog-restored-after-cancel.png",
+        "external_PABX_or_legal_policy_homologation": false
+      },
+      "receipt_sha256": "3fbf55969d981a86374957ed403fc2253e66cf82675e6d2825c94ea0aadff391",
+      "actual_image_observation": "Original image actually opened: persisted name/category/description, 00:15/00:30/01:00 values and visible native Cancelar/Salvar. Desktop has two columns; mobile is stacked with accessible fixed footer. Lower help text and all scroll positions are not wholly accepted by this image."
+    },
+    {
+      "project": "desktop-light",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\native-pause-save-cancel-literal-reuse-20261127\\desktop-light-pause-catalog-restored-after-cancel.png",
+      "sha256": "44f5b451bb3aa91e9ce2f4ada96a59e5ff1a32d5d33f2733175e8ddc120f80e0",
+      "receipt": {
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "project": "desktop-light",
+        "account_id": "3597",
+        "synthetic": true,
+        "same_existing_case_and_all_original_assertions_retained": true,
+        "creation": {
+          "code": "synthetic_created",
+          "name": "SYNTHETIC created by real UI",
+          "active": true,
+          "category": "SYNTHETIC",
+          "unit_ids": [],
+          "description": "SYNTHETIC persisted pause purpose",
+          "custom_role_ids": [],
+          "default_minutes": 30,
+          "maximum_minutes": 60,
+          "minimum_minutes": 15,
+          "approval_required": false,
+          "justification_required": true
+        },
+        "afterCancel": {
+          "code": "synthetic_created",
+          "name": "SYNTHETIC created by real UI",
+          "active": true,
+          "category": "SYNTHETIC",
+          "unit_ids": [],
+          "description": "SYNTHETIC persisted pause purpose",
+          "custom_role_ids": [],
+          "default_minutes": 30,
+          "maximum_minutes": 60,
+          "minimum_minutes": 15,
+          "approval_required": false,
+          "justification_required": true
+        },
+        "initial_revision": "a5fcb41f56054c1219f3a6a92451478cdbdb8550d6947d311290b51e934425c3",
+        "after_cancel_revision": "a5fcb41f56054c1219f3a6a92451478cdbdb8550d6947d311290b51e934425c3",
+        "canceledWrites": [],
+        "real_native_persistence_and_reopen": true,
+        "actual_dark_theme": false,
+        "screenshot": ".codex/call-center-native-e2e/desktop-light-pause-catalog-restored-after-cancel.png",
+        "external_PABX_or_legal_policy_homologation": false
+      },
+      "receipt_sha256": "3fe96f167b56888fd56240b3a1d385ac5d49ba04d7b4bbdc98a96f81807a57e7",
+      "actual_image_observation": "Original image actually opened: persisted name/category/description, 00:15/00:30/01:00 values and visible native Cancelar/Salvar. Desktop has two columns; mobile is stacked with accessible fixed footer. Lower help text and all scroll positions are not wholly accepted by this image."
+    }
+  ],
+  "clauses": [
+    "D2-P0188-C01",
+    "D2-P0188-C05"
+  ],
+  "proved_behaviour": [
+    "Actual authorized native catalog creation and reopen retain identity, category and description.",
+    "Invalid save is rejected by the existing native validation; successful save persists.",
+    "Canceled edits produce no mutation and preserve both persisted values and exact version on reopen."
+  ],
+  "native_tests_reused_not_new": 42,
+  "four_Chrome_modes_reused_not_new": true,
+  "whole_figure_or_Part1_accepted": false,
+  "remaining_limits": [
+    "No external PABX application or legal/pay policy homologation inferred.",
+    "Full pause/distribution/team availability surface and every visual state remain separate.",
+    "Lower dark helper-text contrast and every mobile scroll position remain outside this bounded save/cancel acceptance."
+  ]
+}

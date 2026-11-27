@@ -255,20 +255,25 @@
     "parent_full_CI_success_not_whole_visual_acceptance": true
   },
   "latest_verified_literal_delivery": {
-    "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
-    "sha256": "f4aa21310e2f01dd2e0eb37d40a5daeb2ec7f09039a9317e269ca7e6bef83105",
+    "document": "docs/jrc_contact_center/literal_pause_catalog_save_cancel_acceptance_20261127.json",
+    "sha256": "c20025846ef44c3a04cf5f4924253d2aa9eff95a2ac1edc9c3b035115b90a019",
     "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
     "whole_figure_or_Part1_accepted": false,
-    "unique_clauses": 28,
-    "current_counts": {
-      "parcial": 416,
+    "unique_closed": 83,
+    "formally_closed": 83,
+    "total_unique": 554,
+    "prior_81_acceptances_preserved": true,
+    "whole_Part1_accepted": false,
+    "bounded_user_delivery": "Existing native pause identity creation, validation, persistence and cancel-without-write.",
+    "application_tests_reused_not_new": 42,
+    "four_existing_Chrome_modes_reused": true,
+    "current_unique_requirement_counts": {
+      "parcial": 413,
       "bloqueado": 24,
-      "implementado": 80,
+      "implementado": 83,
       "pendente": 33,
       "implementado_sem_aceite": 1
-    },
-    "next_functional_payload_still_requires_its_own_CI_and_Chrome": true,
-    "effective_work_hours_not_inferred_from_CI_wait_or_example_count": true
+    }
   },
   "current_24_effective_hour_delivery": {
     "candidate_source_parent": "488c471c24695de7f201bc0f3d6960407785a137",
@@ -379,5 +384,69 @@
       "Full visual acceptance of the current and new grouped flows"
     ],
     "whole_Part1_accepted": false
+  },
+  "next_manual_customer_link_functional_delivery": {
+    "document": "docs/jrc_contact_center/manual_recording_customer_link_candidate_20261127.json",
+    "sha256": "8b925743931893f0bc80a2a4083d5192ff9a531bf32590290c351d9b16b6c8b0",
+    "figures": [
+      21
+    ],
+    "candidate_not_accepted": true,
+    "continue_independent_work_during_only_current_CI": true,
+    "preserve_all_current_native_and_Chrome_acceptance_criteria": true,
+    "effective_hours_not_measured_not_fabricated": true
+  },
+  "next_grouped_administration_alerts_delivery": {
+    "document": "docs/jrc_contact_center/administration_native_alerts_candidate_20261127.json",
+    "figures": [
+      1,
+      2
+    ],
+    "combined_with_existing_master_manual_link": true,
+    "native_or_visual_acceptance": false,
+    "cadence": "Report functional delivery every 24 effective work hours; do not stop between checkpoints or claim unmeasured effort.",
+    "new_main_Vue_prepared_not_run": 12,
+    "new_Chrome_cases": 0,
+    "existing_four_mode_case_extended": true
+  },
+  "pause_catalog_literal_reused_acceptance": {
+    "document": "docs/jrc_contact_center/literal_pause_catalog_save_cancel_acceptance_20261127.json",
+    "clauses": [
+      "D2-P0188-C01",
+      "D2-P0188-C05"
+    ],
+    "current_unique_counts": {
+      "implementado": 83,
+      "implementado_sem_aceite": 1,
+      "parcial": 413,
+      "pendente": 33,
+      "bloqueado": 24
+    },
+    "new_application_tests": 0,
+    "whole_figure_or_Part1_accepted": false
+  },
+  "latest_verified_literal_delivery_before_pause_identity_save_cancel": {
+    "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+    "sha256": "f4aa21310e2f01dd2e0eb37d40a5daeb2ec7f09039a9317e269ca7e6bef83105",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "whole_figure_or_Part1_accepted": false,
+    "unique_clauses": 28,
+    "current_counts": {
+      "parcial": 416,
+      "bloqueado": 24,
+      "implementado": 80,
+      "pendente": 33,
+      "implementado_sem_aceite": 1
+    },
+    "next_functional_payload_still_requires_its_own_CI_and_Chrome": true,
+    "effective_work_hours_not_inferred_from_CI_wait_or_example_count": true
+  },
+  "current_exact_native_browser_source_correction_pending": {
+    "document": "docs/jrc_contact_center/native_browser_source_contract_correction_20261127.json",
+    "prior_Chrome_passed": 276,
+    "prior_Chrome_failed": 12,
+    "same_288_cases_retained_plus_four_new_manual_link_cases": true,
+    "native_or_visual_acceptance": false,
+    "real_pending_source_not_configuration_catalog": true
   }
 }

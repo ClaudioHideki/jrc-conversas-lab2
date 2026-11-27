@@ -533,5 +533,11 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "bounded_native_alerts_candidate_not_accepted": {
+    "document": "docs/jrc_contact_center/administration_native_alerts_candidate_20261127.json",
+    "status": "implemented_pending_native_and_Chrome_acceptance",
+    "reused_native_source": true,
+    "whole_figure_accepted": false
+  }
 }

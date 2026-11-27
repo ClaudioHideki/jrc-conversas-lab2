@@ -40,6 +40,18 @@ const render = (props = {}) =>
     global: {
       stubs: {
         LinkedContactMaster: true,
+        RecordingCustomerLink: {
+          name: 'RecordingCustomerLink',
+          props: [
+            'accountId',
+            'recordingId',
+            'callSessionId',
+            'callId',
+            'enabled',
+          ],
+          emits: ['updated'],
+          template: '<div data-native-manual-customer-link-stub />',
+        },
         RecordingCustomerRecords: {
           name: 'RecordingCustomerRecords',
           props: [
@@ -231,4 +243,37 @@ describe('native customer records follow the exact authorized recording contact'
       wrapper.findComponent({ name: 'RecordingCustomerRecords' }).exists()
     ).toBe(false);
   });
+});
+
+it('offers the manual native-master flow for an unlinked call without treating a phone candidate as an established identity', async () => {
+  const data = result();
+  data.item.contact_id = null;
+  data.item.customer.identity_source = 'phone_candidates';
+  API.call.mockResolvedValue({ data });
+  const wrapper = render({ recordingId: '8' });
+  await flushPromises();
+  expect(
+    wrapper.getComponent({ name: 'RecordingCustomerLink' }).props()
+  ).toMatchObject({
+    accountId: '1',
+    recordingId: '8',
+    callSessionId: '7',
+    callId: data.item.external_session_id,
+    enabled: true,
+  });
+  expect(wrapper.findComponent({ name: 'LinkedContactMaster' }).exists()).toBe(
+    false
+  );
+  expect(wrapper.text()).not.toContain('SYNTHETIC authorized contact');
+  wrapper.getComponent({ name: 'RecordingCustomerLink' }).vm.$emit('updated');
+  await flushPromises();
+  expect(API.call).toHaveBeenCalledTimes(2);
+});
+it('never offers the manual flow as a replacement for an existing explicit call contact', async () => {
+  API.call.mockResolvedValue({ data: result() });
+  const wrapper = render({ recordingId: '8' });
+  await flushPromises();
+  expect(
+    wrapper.findComponent({ name: 'RecordingCustomerLink' }).exists()
+  ).toBe(false);
 });

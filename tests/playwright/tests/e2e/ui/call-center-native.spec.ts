@@ -1269,6 +1269,21 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
     'display',
     'grid'
   );
+  const localAlerts = page.locator('[data-administration-pending-alerts]');
+  await expect(localAlerts).toBeVisible();
+  await expect(localAlerts.getByRole('heading', { name: 'Alertas e pendências' })).toBeVisible();
+  await expect(localAlerts.locator('[data-native-provider-alert]')).toContainText(
+    'A conexão PABX ainda não está configurada nesta conta.'
+  );
+  const providerSource = localAlerts.locator('[data-native-provider-alert-source]');
+  await expect(providerSource).toHaveAttribute('href', /control-desk\/integrations(?:\?|$)/);
+  const providerAlertHref = await providerSource.getAttribute('href');
+  const alertContrast = await contrast(localAlerts.locator('[data-native-provider-alert] p'));
+  expect(alertContrast.ratio).toBeGreaterThanOrEqual(4.5);
+  await providerSource.click();
+  await expect(page.locator('[data-administration-section] h2')).toHaveText('Integrações');
+  await page.getByText('Voltar às configurações do Call Center', { exact: true }).click();
+  await expect(page.locator('[data-administration-pending-alerts]')).toBeVisible();
   await expect(page.locator('[data-control-desk] > header')).toHaveCount(1);
   await expect(page.locator('[data-control-desk] > header')).not.toHaveCSS(
     'background-color',
@@ -1425,6 +1440,16 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
         sha: process.env.GITHUB_SHA,
         project: info.project.name,
         synthetic: true,
+        native_pending_alerts: {
+          configured: nativeAdministration.provider.configured,
+          source_href: providerAlertHref,
+          source_section: 'integrations',
+          authorized_source_card: nativeAdministration.cards.some(card => card.key === 'integrations'),
+          native_source_navigation_completed: true,
+          contrast: alertContrast,
+          actual_dark_theme: await page.evaluate(() => document.documentElement.classList.contains('dark')),
+          no_operational_PABX_success_inferred: true,
+        },
         local_availability_verified_against_native_HTTP: true,
         real_existing_recording_route_opened_from_administration: true,
         provider_application_not_enabled: true,
@@ -1986,7 +2011,10 @@ test('native role creation validates the form and persists exactly the selected 
   await expect(submit).toBeEnabled();
   await expect(dialog.locator('#jrc_contact_center_publish')).not.toBeChecked();
   await expect(
-    dialog.getByText('Participar de uma equipe ou fila', { exact: false })
+    dialog.getByText(
+      'Além do perfil, o acesso considera concessões explícitas individuais e de equipes ativas no Call Center. Bloqueios individuais prevalecem. Participar de uma fila, por si só, não concede permissão. Elegibilidade e escopos de conta, empresa e unidade continuam obrigatórios.',
+      { exact: true }
+    )
   ).toBeVisible();
   expect(
     await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)

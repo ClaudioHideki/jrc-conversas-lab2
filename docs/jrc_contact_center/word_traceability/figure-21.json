@@ -1241,5 +1241,12 @@
     },
     "current_literal_status_preserved_until_native_and_visual_acceptance": true,
     "existing_status_translation_and_full_CRM_destination_navigation_not_accepted": true
+  },
+  "next_native_manual_customer_link_not_accepted": {
+    "document": "docs/jrc_contact_center/manual_recording_customer_link_candidate_20261127.json",
+    "sha256": "8b925743931893f0bc80a2a4083d5192ff9a531bf32590290c351d9b16b6c8b0",
+    "literal_requirement": "D2-P0408-C01",
+    "native_and_Chrome_accepted": false,
+    "new_permanent_model_or_permission": false
   }
 }

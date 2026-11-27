@@ -1,0 +1,36 @@
+{
+  "source_parent": "6921f12c53deb401f05e1d2708cb10767b026688",
+  "follows_exact_manual_link_plan_sha256": "c197b6924336b4914f5a0fac408b9a89a6f2024151a12ad31647cafaaeec0c33",
+  "figures": [
+    1,
+    2
+  ],
+  "clauses": [
+    "D1-P0048-C01",
+    "D2-P0064-C03",
+    "D2-P0065-C02"
+  ],
+  "reused_source": "Unchanged Administration provider_state and native scoped closures card count; no health polling, new API or new indicators.",
+  "bounded_delivery": "Central -> truthful local pending notice -> existing authorized integrations or closures source -> native back navigation.",
+  "permissions": "Only routes represented by native authorized cards. Pending ACW count is taken exclusively from the existing closures card, already scoped to accessible calls.",
+  "privacy": "Raw sync errors, credentials and arbitrary provider payloads are never rendered. No new PABX operation or connected/synchronized claim.",
+  "preexisting_warnings": "ControlDeskPage has the same four preexisting ESLint warnings; no new errors, warnings or rule/config changes. New component and test have zero findings.",
+  "prepared_not_executed": {
+    "new_Vue_cases": 12,
+    "retained_four_Chrome_modes_extended": 4,
+    "new_Chrome_cases": 0,
+    "new_screenshots": 0,
+    "combined_main_Vue": 2289,
+    "combined_directed_recordings_Vue": 346,
+    "combined_native_distinct": 4052,
+    "combined_Chrome": 292,
+    "combined_PNG": 928
+  },
+  "native_and_Chrome_accepted": false,
+  "whole_figure_or_Part1_accepted": false,
+  "remaining_gaps": [
+    "Full operational notifications remain subject to their real native source and explicit recipient permission.",
+    "External PABX health, applied configuration and ACKs remain unhomologated."
+  ],
+  "no_new_backend_models_migrations_permissions_or_provider_commands": true
+}

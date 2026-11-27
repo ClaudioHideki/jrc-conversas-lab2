@@ -1,0 +1,140 @@
+{
+  "source_parent": "6921f12c53deb401f05e1d2708cb10767b026688",
+  "figures": [
+    21
+  ],
+  "clauses": [
+    "D2-P0408-C01",
+    "D2-P0410-C01"
+  ],
+  "two_primary_Word_sources": [
+    {
+      "sha256": "5db370d9b7598a720d32f7f60eba4e22b4b61878327bd4459176ff729fe7a2c8",
+      "name": "JRC_Conversas_Call_Center_Parte_1_Especificacao_DEV_Com_Imagens.docx"
+    },
+    {
+      "sha256": "8f9300cf1940012f71be1a97903a192f7b5a18667e6da6664b9f972866e7e88b",
+      "name": "JRC_Conversas_Call_Center_Parte_1_Detalhamento_Funcional_23_Imagens.docx"
+    }
+  ],
+  "literal_primary_requirement": "Estados de erro e excecoes:  Sem cliente identificado, mostrar vinculacao pendente e permitir fluxo manual autorizado, sem atribuir automaticamente a pessoa errada. Falhas em CRM ou SD nao devem ocultar demais dados validos; indicar origem indisponivel.",
+  "Word_figure21_image_actually_reviewed_sha256": "a69bf30378d2183c5686b1855fe2c9d7ebec0cf7fdee18e613201d0633f19ffe",
+  "bounded_user_delivery": "Unidentified recording context -> choose an existing authorized master contact -> explicit identity confirmation -> atomic initial call link and native audit -> current linked context and existing master -> native reload.",
+  "reused_native_sources": [
+    "Existing ContactPicker and native master search/show APIs",
+    "QualityReviewSource.with_record without a provider analysis read",
+    "Current recording/SIP, account, eligibility, corporate unit and queue scopes",
+    "ContactDirectory.with_locked_contact and its native master/corporate policy",
+    "Existing call lock_version, account authority mutex, Audited and audit snapshot filters",
+    "Existing linked-master/details context and native history, without changing old snapshots"
+  ],
+  "no_new_models_migrations_permissions_or_provider_commands": true,
+  "authorization": "Current recording listen plus operate, active account/user and native master coverage. Request account/user/unit/company values never grant authority.",
+  "concurrency": "One account transaction and locked call; expected version and absent initial link are required. A repeated or competing write returns conflict and never overwrites an existing link.",
+  "failure_integrity": "A native audit persistence failure rolls back the call link; uncertain frontend results require an explicit current-state check and renewed confirmation.",
+  "audit_privacy": "The new family is excluded from ordinary account audits and requires current audit/listen/operate/master access, native recording/SIP scope and both historical corporate snapshots.",
+  "new_internal_endpoints": [
+    "GET /api/v1/accounts/:account_id/jrc_contact_center/recordings/:recording_id/customer_link",
+    "POST /api/v1/accounts/:account_id/jrc_contact_center/recordings/:recording_id/customer_link"
+  ],
+  "prepared_not_executed_native_or_browser": {
+    "new_native_HTTP_cases": 28,
+    "new_native_audit_scope_cases": 9,
+    "real_PostgreSQL_contention_and_rollback": 3,
+    "new_component_Vue": 19,
+    "new_parent_integration_Vue": 2,
+    "new_native_API_Vue": 4,
+    "directed_Vue_total": 346,
+    "customer_focused_Vue_total": 47,
+    "main_Vue_total": 2277,
+    "distinct_native_total": 4052,
+    "new_Chrome_cases": 4,
+    "retained_Chrome_cases": 288,
+    "total_Chrome_cases": 292,
+    "new_original_PNG": 12,
+    "expected_original_PNG_total": 928,
+    "customer_native_preflight_total": 49
+  },
+  "light_static_checks_only": {
+    "frontend_files_zero_lint_errors": 6,
+    "existing_CI_steps_preserved": 98,
+    "reviewed_CI_steps_extended": 6,
+    "embedded_Python_blocks_compiled": 7,
+    "native_Chrome_counter_configuration_tests_passed": 19,
+    "all_embedded_Python_blocks_compiled": 57
+  },
+  "native_and_Chrome_accepted": false,
+  "whole_figure_or_Part1_accepted": false,
+  "remaining_figure21_gaps": [
+    "Complete compact contextual arrangement and all visual cards from the Word reference",
+    "Native Relationship registration shortcut with exact call origin",
+    "Contextual indicators with an explicit supported time window and source definition",
+    "External Nico sentiment factors only when supported and externally authorized"
+  ],
+  "no_operational_or_financial_values_invented": true,
+  "native_reuse_source_identity_receipt": {
+    "sha": "6921f12c53deb401f05e1d2708cb10767b026688",
+    "main_preserved": "517f278523f7d885f1a9cb25d1eb6361a8c27831",
+    "remote_read_only": true,
+    "sources": {
+      "app/services/jrc_customers/contact_directory.rb": {
+        "git_blob": "6471074ba4676cbc6f4377bf9be7211c1937f6c6",
+        "sha256": "68f99616e9208b0a735ba3ed339810640404536b8e617b55c37f5434f039a6d8"
+      },
+      "app/policies/jrc_customers/directory_policy.rb": {
+        "git_blob": "63c63634f7d1091276c0a9e01eeea42294def1cd",
+        "sha256": "319486052b37e5e93c769db724522a0f5031f1c586321d8d7267d98301a2babe"
+      },
+      "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContactPicker.vue": {
+        "git_blob": "ba5c09ad5a01cb01e498210a82d26dfe1065d429",
+        "sha256": "928f10d6e1bb97cef12938585962adc6431a2655ef1856dae884b11598b3cf53"
+      },
+      "app/services/pabx/access.rb": {
+        "git_blob": "34d5b3974a6efb302a64af65b9e5c4616da62376",
+        "sha256": "23fe0b011fd3cece71236447d1d94d112d69a611a720278ba5f2f739a433b9d9"
+      },
+      "app/models/sip_credential.rb": {
+        "git_blob": "250a2385ee452ec92ddb165e159ea99a77aa3c5a",
+        "sha256": "f21697629bc1b48449c9e5c6ad631861d6dfeb4bc61d31173521af247dd04d05"
+      },
+      "enterprise/app/controllers/api/v1/accounts/audit_logs_controller.rb": {
+        "git_blob": "a09ec138eb4c6ff2c7fcf900a9cb0dd056e8a7ae",
+        "sha256": "c861e20dce464ec3fdf4a993a543502c4ed139f7a3173e0f25a55a087b96d919"
+      },
+      "app/models/jrc_contact_center/call_session.rb": {
+        "git_blob": "e5d6f7f6d35dec1497bddccb7ca6a260c69c5713",
+        "sha256": "f06e04a6c67f46f04f36d50c9b19aeb29a93e1e332004ea716545451eaddb86e"
+      },
+      "app/services/jrc_contact_center/quality_review_source.rb": {
+        "git_blob": "2b23e6852b16b3b04d0633c320119331bb614e7d",
+        "sha256": "66c873e613a4ac993313ad14bab4480f6445b61efccd98a8c7117b08e2c1e1e5"
+      },
+      "app/services/jrc_contact_center/recorded_calls.rb": {
+        "git_blob": "ea3be031772442b26fc543d98d3ebf0f9681fb72",
+        "sha256": "9e37ad61da293a558f9b77f55917397728b07d2d540e3d7b3bb3178ca5b4ff7c"
+      },
+      "app/services/jrc_contact_center/authority_transaction.rb": {
+        "git_blob": "612e5c38a3f69aa20120a7e8875fe87f4ae36a0f",
+        "sha256": "afc9bba5b7c4811f88741410e96ec9732f651cebb8dcd962fa115f10daf32dc5"
+      },
+      "app/services/jrc_contact_center/event_reconciler.rb": {
+        "git_blob": "a22e8cde8a7b43bab49e9aabb3543bb470c85fe3",
+        "sha256": "034ea2a82ab7dc39250d56883de85e770d49a5ac7ad19d7658d845847cb5c845"
+      },
+      "app/policies/jrc_contact_center/module_policy.rb": {
+        "git_blob": "877203b7de8eb1e36a2e4895cb1eb6fbc0dc5ee0",
+        "sha256": "7600c7111a23f02e6dda05a312b09d5661f3d0a285bf724dafaea99a27d0c965"
+      }
+    },
+    "no_existing_unreviewed_payload_path_overwritten": true
+  },
+  "old_ending_origins_preserved": {
+    "unchanged_native_files": {
+      "app/services/jrc_contact_center/ending_actions/original_customer_reference.rb": "3c62a65b673c2f3564ae25cc2433d84ecce858782f929dcbc90c0251da6931dd",
+      "app/services/jrc_contact_center/ending_actions/source_authority.rb": "ccac40fee03a43fa5df8606d8998645acc89c66e7802958e16a5ad481b914ac4",
+      "app/services/jrc_contact_center/event_reconciler.rb": "034ea2a82ab7dc39250d56883de85e770d49a5ac7ad19d7658d845847cb5c845"
+    },
+    "consequence": "No backfill of an absent original contact. Existing immutable origins and pending actions are not rewritten or released by this new initial manual link.",
+    "actual_browser_witness_must_preserve_origin_and_qualification_digests": true
+  }
+}

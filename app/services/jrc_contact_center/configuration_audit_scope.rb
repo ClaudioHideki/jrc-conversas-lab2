@@ -5,9 +5,11 @@ class JrcContactCenter::ConfigurationAuditScope
     # Operator requests are not global configuration records. Retain their native audit,
     # but do not expose another unit's employee metadata through the ordinary account list.
     comments = JrcContactCenter::ConfigurationAudit::COMMENTS + JrcContactCenter::RecordingAudit::COMMENTS
-    comments += [JrcContactCenter::DeferredPauseAudit::COMMENT]
+    comments += [JrcContactCenter::DeferredPauseAudit::COMMENT, JrcContactCenter::RecordingCustomerLinkAudit::COMMENT]
     ordinary = relation.where.not(comment: comments).or(relation.where(comment: nil))
-    ordinary.or(new(context: context, relation: relation).call).or(JrcContactCenter::RecordingAudit.new(context: context, relation: relation).call)
+    permitted = new(context: context, relation: relation).call.or(JrcContactCenter::RecordingAudit.new(context: context, relation: relation).call)
+    permitted = permitted.or(JrcContactCenter::RecordingCustomerLinkAudit.new(context: context, relation: relation).call)
+    ordinary.or(permitted)
   end
 
   def initialize(context:, relation: Audited.audit_class.all)

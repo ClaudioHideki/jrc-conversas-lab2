@@ -131,15 +131,21 @@ export async function verifyNativeRecordingTicket(parent, info, target) {
     await expect(form.locator('[data-recording-ticket-origin]')).toContainText(
       String(record.id)
     );
-    await expect(form.getByLabel('Unidade', { exact: true })).toBeDisabled();
+    // The unchanged native ScopeBar label includes its select option text.
+    // Match the unique actual combobox name prefix and additionally prove its exact scoped value.
+    const lockedUnit = form.getByRole('combobox', { name: /^Unidade(?:\s|$)/ });
+    await expect(lockedUnit).toHaveCount(1);
+    await expect(lockedUnit).toBeDisabled();
+    await expect(lockedUnit).toHaveValue(target.manual_ticket_destination.unit_id);
     expect(posts).toHaveLength(0);
     await capture('existing-native-form');
     const next = () =>
       form.getByRole('button', { name: 'Próxima etapa', exact: true }).click();
     await next();
-    await expect(
-      form.getByLabel('Solicitante', { exact: true })
-    ).toBeDisabled();
+    const lockedRequester = form.getByRole('combobox', { name: /^Solicitante(?:\s|$)/ });
+    await expect(lockedRequester).toHaveCount(1);
+    await expect(lockedRequester).toBeDisabled();
+    await expect(lockedRequester).toHaveValue(source.contact_id);
     const title = `SYNTHETIC recording native Ticket ${info.project.name}`;
     await form.getByLabel('Título', { exact: true }).fill(title);
     await form
@@ -149,7 +155,7 @@ export async function verifyNativeRecordingTicket(parent, info, target) {
       );
     await next();
     await form
-      .getByLabel('Prioridade', { exact: true })
+      .getByRole('combobox', { name: /^Prioridade(?:\s|$)/ })
       .selectOption(target.manual_ticket_destination.priority_id);
     await next();
     await next();

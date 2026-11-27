@@ -63,12 +63,17 @@ export async function verifyNativeRecordingResultFilters(page, info, target) {
   const contrast = await measureLocatorTextContrast(result.locator('..'));
   expect(contrast.ratio).toBeGreaterThanOrEqual(4.5);
   await capture('native-filtered-list');
+  const nextButton = page
+    .getByRole('navigation', { name: 'Gestão de gravações', exact: true })
+    .getByRole('button', { name: 'Próxima', exact: true });
+  await expect(nextButton).toHaveCount(1);
+  await expect(nextButton).toBeEnabled();
   const nextResponse = responseFor({
     status: 'answered',
     direction: 'inbound',
     page: 2,
   });
-  await page.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await nextButton.click();
   const next = await nextResponse;
   expect(next.status()).toBe(200);
   const page2 = await next.json();

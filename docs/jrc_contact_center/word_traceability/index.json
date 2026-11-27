@@ -2,7 +2,7 @@
   "format_version": 1,
   "review_at": "2026-11-23T20:15:50.371122+00:00",
   "validated_base_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
-  "candidate_source_parent_sha": "38e297bf2fa6292193267ea6a62ede65fd883a26",
+  "candidate_source_parent_sha": "6921f12c53deb401f05e1d2708cb10767b026688",
   "candidate_not_yet_validated": true,
   "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
@@ -4289,15 +4289,15 @@
     "whole_Part1_complete": false
   },
   "latest_literal_functional_progress": {
-    "document": "docs/jrc_contact_center/literal_last_team_agent_acceptance_20261127.json",
-    "sha256": "3c6cabb18c28c9a4dd107b297752a079793287584c76e888058c29b8315a4e69",
+    "document": "docs/jrc_contact_center/literal_pause_catalog_save_cancel_acceptance_20261127.json",
+    "sha256": "c20025846ef44c3a04cf5f4924253d2aa9eff95a2ac1edc9c3b035115b90a019",
     "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
     "whole_figure_or_Part1_accepted": false,
-    "unique_closed": 81,
-    "formally_closed": 81,
+    "unique_closed": 83,
+    "formally_closed": 83,
     "total_unique": 554,
-    "whole_Part1_accepted": false,
-    "prior_80_acceptances_preserved": true
+    "prior_81_acceptances_preserved": true,
+    "whole_Part1_accepted": false
   },
   "current_public_operational_increment": {
     "candidate": "docs/jrc_contact_center/ending_public_operational_candidate_20261125.json",
@@ -4459,9 +4459,9 @@
     "whole_figure_or_Part1_accepted": false
   },
   "current_unique_requirement_counts": {
-    "parcial": 415,
+    "parcial": 413,
     "bloqueado": 24,
-    "implementado": 81,
+    "implementado": 83,
     "pendente": 33,
     "implementado_sem_aceite": 1
   },
@@ -4506,5 +4506,60 @@
     "document": "docs/jrc_contact_center/native_recording_customer_records_candidate_20261127.json",
     "failed_parent_lint_correction": "docs/jrc_contact_center/native_ticket_workflow_lint_correction_20261127.json",
     "native_or_Chrome_accepted": false
+  },
+  "next_manual_customer_link_group": {
+    "document": "docs/jrc_contact_center/manual_recording_customer_link_candidate_20261127.json",
+    "sha256": "8b925743931893f0bc80a2a4083d5192ff9a531bf32590290c351d9b16b6c8b0",
+    "source_parent": "6921f12c53deb401f05e1d2708cb10767b026688",
+    "candidate_requires_current_native_and_four_mode_Chrome": true,
+    "formal_554_statuses_not_promoted_by_preparation_or_CI_counts": true
+  },
+  "next_grouped_administration_alerts_delivery": {
+    "document": "docs/jrc_contact_center/administration_native_alerts_candidate_20261127.json",
+    "figures": [
+      1,
+      2
+    ],
+    "combined_with_existing_master_manual_link": true,
+    "native_or_visual_acceptance": false,
+    "cadence": "Report functional delivery every 24 effective work hours; do not stop between checkpoints or claim unmeasured effort.",
+    "new_main_Vue_prepared_not_run": 12,
+    "new_Chrome_cases": 0,
+    "existing_four_mode_case_extended": true
+  },
+  "pause_catalog_literal_reused_acceptance": {
+    "document": "docs/jrc_contact_center/literal_pause_catalog_save_cancel_acceptance_20261127.json",
+    "clauses": [
+      "D2-P0188-C01",
+      "D2-P0188-C05"
+    ],
+    "current_unique_counts": {
+      "implementado": 83,
+      "implementado_sem_aceite": 1,
+      "parcial": 413,
+      "pendente": 33,
+      "bloqueado": 24
+    },
+    "new_application_tests": 0,
+    "whole_figure_or_Part1_accepted": false
+  },
+  "historical_literal_progress_before_pause_identity_save_cancel": {
+    "document": "docs/jrc_contact_center/literal_last_team_agent_acceptance_20261127.json",
+    "sha256": "3c6cabb18c28c9a4dd107b297752a079793287584c76e888058c29b8315a4e69",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "whole_figure_or_Part1_accepted": false,
+    "unique_closed": 81,
+    "formally_closed": 81,
+    "total_unique": 554,
+    "whole_Part1_accepted": false,
+    "prior_80_acceptances_preserved": true
+  },
+  "current_exact_native_browser_source_correction_pending": {
+    "document": "docs/jrc_contact_center/native_browser_source_contract_correction_20261127.json",
+    "prior_Chrome_passed": 276,
+    "prior_Chrome_failed": 12,
+    "same_288_cases_retained_plus_four_new_manual_link_cases": true,
+    "native_or_visual_acceptance": false,
+    "real_pending_source_not_configuration_catalog": true
   }
 }

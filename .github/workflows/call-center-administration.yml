@@ -170,17 +170,17 @@ jobs:
           Path('/tmp/call-center-owned-media-failure.json').write_text(json.dumps(proof, indent=2) + '\n')
           PY
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.spec.js \
-            app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCustomerRecords.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingEndingActions.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAnalysis.spec.js \
+            app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCustomerLink.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCustomerRecords.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingEndingActions.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAnalysis.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default app/javascript/dashboard/routes/dashboard/inbox/EndingTaskState.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingManualTasks.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTaskCreate.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/SupervisorPage.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/LinkedContactMaster.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContactDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTicketAction.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingLinkedTickets.spec.js app/javascript/dashboard/routes/dashboard/serviceDesk/composables/useRecordingTicketContext.spec.js app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/recordingTicketSource.spec.js app/javascript/dashboard/routes/dashboard/serviceDesk/views/spec/RecordingTicketForm.spec.js app/javascript/dashboard/api/specs/serviceDeskOperationsRecording.spec.js --reporter=json --outputFile=/tmp/call-center-recordings-preflight-vitest.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 325
+          assert report['numTotalTests'] == report['numPassedTests'] == 346
           assert report['numFailedTests'] == report['numPendingTests'] == 0
-          assert len(report['testResults']) == 25 and all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useScopedRecordings.spec.js': 33, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 18, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 14, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 12, 'RecordingCustomerRecords.spec.js': 13, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 12}
+          assert len(report['testResults']) == 26 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'useScopedRecordings.spec.js': 33, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 18, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 14, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 14, 'RecordingCustomerLink.spec.js': 19, 'RecordingCustomerRecords.spec.js': 13, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 12}
           expected.update({'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9, 'SupervisorPage.spec.js': 26, 'LinkedContactMaster.spec.js': 10, 'ContactDetailsDialog.spec.js': 3, 'Contact360Panel.spec.js': 7})
           expected.update({'RecordingLinkedTickets.spec.js': 14, 'RecordingTicketAction.spec.js': 12, 'useRecordingTicketContext.spec.js': 13, 'recordingTicketSource.spec.js': 13, 'RecordingTicketForm.spec.js': 6, 'serviceDeskOperationsRecording.spec.js': 12})
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
@@ -197,7 +197,7 @@ jobs:
       - name: Native recording customer context fixture lint before broad regressions
         id: customer_records_lint
         run: |
-          bundle exec rubocop script/jrc_call_center_recording_customer_records_seed.rb script/jrc_call_center_recordings_seed.rb spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb --format progress --format json --out /tmp/call-center-customer-records-lint.json
+          bundle exec rubocop script/jrc_call_center_recording_customer_records_seed.rb script/jrc_call_center_recordings_seed.rb spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb app/controllers/api/v1/accounts/jrc_contact_center/recording_customer_links_controller.rb app/services/jrc_contact_center/recording_customer_link.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_links_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_link_concurrency_spec.rb spec/integration/jrc_contact_center/owned_recording_customer_link_evidence.rb script/jrc_call_center_recording_customer_link_evidence.rb app/services/jrc_contact_center/recording_customer_link_audit.rb spec/services/jrc_contact_center/recording_customer_link_audit_spec.rb app/services/jrc_contact_center/configuration_audit_scope.rb --format progress --format json --out /tmp/call-center-customer-records-lint.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
@@ -292,28 +292,28 @@ jobs:
       - name: Native customer lists timeline and fixture ownership before broad regressions
         id: customer_records_preflight
         run: |
-          bundle exec rspec spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb spec/requests/api/v1/accounts/customers/contact_records_spec.rb spec/services/jrc_customers/timeline_spec.rb --format progress --format json --out /tmp/call-center-customer-records-preflight.json
+          bundle exec rspec spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb spec/requests/api/v1/accounts/customers/contact_records_spec.rb spec/services/jrc_customers/timeline_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_links_spec.rb spec/services/jrc_contact_center/recording_customer_link_audit_spec.rb --format progress --format json --out /tmp/call-center-customer-records-preflight.json
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCustomerRecords.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js app/javascript/dashboard/api/specs/nativeCallSourceIdentity.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContextRecordPanels.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.spec.js --maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile=/tmp/call-center-customer-records-vitest.json
           python3 -B - <<'PY'
           from collections import Counter
           import json
           from pathlib import Path
           lint = json.loads(Path('/tmp/call-center-customer-records-lint.json').read_text())
-          expected = {'script/jrc_call_center_recording_customer_records_seed.rb', 'script/jrc_call_center_recordings_seed.rb', 'spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb'}
+          expected = {'script/jrc_call_center_recording_customer_records_seed.rb', 'script/jrc_call_center_recordings_seed.rb', 'spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb', 'app/controllers/api/v1/accounts/jrc_contact_center/recording_customer_links_controller.rb', 'app/services/jrc_contact_center/recording_customer_link.rb', 'spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_links_spec.rb', 'spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_link_concurrency_spec.rb', 'spec/integration/jrc_contact_center/owned_recording_customer_link_evidence.rb', 'script/jrc_call_center_recording_customer_link_evidence.rb', 'app/services/jrc_contact_center/recording_customer_link_audit.rb', 'spec/services/jrc_contact_center/recording_customer_link_audit_spec.rb', 'app/services/jrc_contact_center/configuration_audit_scope.rb'}
           assert lint['summary']['offense_count'] == 0
-          assert lint['summary']['inspected_file_count'] == lint['summary']['target_file_count'] == len(lint['files']) == 3
+          assert lint['summary']['inspected_file_count'] == lint['summary']['target_file_count'] == len(lint['files']) == 12
           assert {row['path'].removeprefix('./') for row in lint['files']} == expected
           assert all(row['offenses'] == [] for row in lint['files'])
           native = json.loads(Path('/tmp/call-center-customer-records-preflight.json').read_text())
-          assert native['summary']['example_count'] == len(native['examples']) == 12
+          assert native['summary']['example_count'] == len(native['examples']) == 49
           assert all(native['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
-          assert Counter(row['file_path'].removeprefix('./') for row in native['examples']) == {'spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb': 2, 'spec/requests/api/v1/accounts/customers/contact_records_spec.rb': 5, 'spec/services/jrc_customers/timeline_spec.rb': 5}
+          assert Counter(row['file_path'].removeprefix('./') for row in native['examples']) == {'spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb': 2, 'spec/requests/api/v1/accounts/customers/contact_records_spec.rb': 5, 'spec/services/jrc_customers/timeline_spec.rb': 5, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_links_spec.rb': 28, 'spec/services/jrc_contact_center/recording_customer_link_audit_spec.rb': 9}
           assert all(row['status'] == 'passed' for row in native['examples'])
-          assert len({row['id'] for row in native['examples']}) == 12
+          assert len({row['id'] for row in native['examples']}) == 49
           vue = json.loads(Path('/tmp/call-center-customer-records-vitest.json').read_text())
-          assert vue['numTotalTests'] == vue['numPassedTests'] == 41
+          assert vue['numTotalTests'] == vue['numPassedTests'] == 47
           assert vue['numFailedTests'] == vue['numPendingTests'] == 0
-          assert {Path(row['name']).name: len(row['assertionResults']) for row in vue['testResults']} == {'RecordingCustomerRecords.spec.js': 13, 'RecordingCallContext.spec.js': 12, 'nativeCallSourceIdentity.spec.js': 3, 'ContextRecordPanels.spec.js': 7, 'useCustomerMaster.spec.js': 6}
+          assert {Path(row['name']).name: len(row['assertionResults']) for row in vue['testResults']} == {'RecordingCustomerRecords.spec.js': 13, 'RecordingCallContext.spec.js': 14, 'nativeCallSourceIdentity.spec.js': 7, 'ContextRecordPanels.spec.js': 7, 'useCustomerMaster.spec.js': 6}
           assert all(row['status'] == 'passed' and all(case['status'] == 'passed' for case in row['assertionResults']) for row in vue['testResults'])
           PY
       - name: Native audit error request references before broad regressions
@@ -1188,14 +1188,17 @@ jobs:
         env:
           POSTGRES_DATABASE: corporate_gratuity_disposable
         run: |
-          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_concurrency_spec.rb --format progress --format json --out /tmp/call-center-recording-ticket-concurrency.json
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_link_concurrency_spec.rb --format progress --format json --out /tmp/call-center-recording-ticket-concurrency.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recording-ticket-concurrency.json').read_text())
-          assert report['summary']['example_count'] == len(report['examples']) == 3
+          assert report['summary']['example_count'] == len(report['examples']) == 6
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
-          assert all(row['status'] == 'passed' and row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_concurrency_spec.rb' for row in report['examples'])
+          from collections import Counter
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          assert len({row['id'] for row in report['examples']}) == 6
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_concurrency_spec.rb': 3, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_link_concurrency_spec.rb': 3}
           PY
       - name: Rails authorization, persistence and affected regressions
         id: native_core
@@ -1215,7 +1218,7 @@ jobs:
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb spec/services/jrc_customers/timeline_spec.rb \
             spec/serializers/jrc_approvals/request_serializer_pause_spec.rb \
-            --exclude-pattern '**/recording_ticket_intake_concurrency_spec.rb,**/quality_review_persistence_failure_spec.rb,**/recording_task_concurrency_spec.rb,**/quality_review_concurrency_spec.rb,**/ending_service_desk_public_pipeline_spec.rb,**/ending_completion_projection_commit_spec.rb,**/ending_destination_commands_spec.rb,**/ending_manual_destination_intent_spec.rb,**/ending_selected_destination_retry_spec.rb,**/ending_typed_history_spec.rb,**/initial_destination_attempts_spec.rb,**/queue_destination_attempt_spec.rb,**/ending_typed_delivery_transaction_spec.rb,**/ending_typed_actual_broker_concurrency_spec.rb,**/ending_typed_mixed_destinations_spec.rb,**/ending_typed_execution_concurrency_spec.rb,**/synthetic_typed_destination_upgrade_spec.rb,**/ending_native_sd_update_concurrency_spec.rb,**/ending_native_crm_activity_concurrency_spec.rb,**/ending_native_service_desk_concurrency_spec.rb,**/ending_native_nico_queue_transaction_spec.rb,**/synthetic_nico_dispatch_upgrade_spec.rb,**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
+            --exclude-pattern '**/recording_customer_link_concurrency_spec.rb,**/recording_ticket_intake_concurrency_spec.rb,**/quality_review_persistence_failure_spec.rb,**/recording_task_concurrency_spec.rb,**/quality_review_concurrency_spec.rb,**/ending_service_desk_public_pipeline_spec.rb,**/ending_completion_projection_commit_spec.rb,**/ending_destination_commands_spec.rb,**/ending_manual_destination_intent_spec.rb,**/ending_selected_destination_retry_spec.rb,**/ending_typed_history_spec.rb,**/initial_destination_attempts_spec.rb,**/queue_destination_attempt_spec.rb,**/ending_typed_delivery_transaction_spec.rb,**/ending_typed_actual_broker_concurrency_spec.rb,**/ending_typed_mixed_destinations_spec.rb,**/ending_typed_execution_concurrency_spec.rb,**/synthetic_typed_destination_upgrade_spec.rb,**/ending_native_sd_update_concurrency_spec.rb,**/ending_native_crm_activity_concurrency_spec.rb,**/ending_native_service_desk_concurrency_spec.rb,**/ending_native_nico_queue_transaction_spec.rb,**/synthetic_nico_dispatch_upgrade_spec.rb,**/ending_native_crm_concurrency_spec.rb,**/ending_pending_project_run_spec.rb,**/ending_pending_run_concurrency_spec.rb,**/ending_actual_broker_concurrency_spec.rb,**/ending_attempt_history_spec.rb,**/ending_attempt_history_concurrency_spec.rb,**/ending_dispatch_native_spec.rb,**/synthetic_ending_attempt_upgrade_spec.rb,**/ending_attempt_execution_concurrency_spec.rb,**/synthetic_ending_execution_upgrade_spec.rb,**/ending_project_executor_concurrency_spec.rb,**/synthetic_ending_readiness_upgrade_spec.rb,**/ending_readiness_concurrency_spec.rb,**/ending_original_actor_concurrency_spec.rb,**/ending_execution_transaction_concurrency_spec.rb,**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
         if: failure() && (steps.native_schema.outcome == 'failure' || steps.native_concurrency.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_fixture_core_preflight.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure' || steps.ending_origin_preflight.outcome == 'failure' || steps.ending_origin_upgrade.outcome == 'failure' || steps.ending_actor_preflight.outcome == 'failure' || steps.ending_project_preflight.outcome == 'failure' || steps.ending_readiness_upgrade.outcome == 'failure' || steps.ending_readiness_preflight.outcome == 'failure' || steps.ending_success_upgrade.outcome == 'failure' || steps.ending_success_preflight.outcome == 'failure' || steps.ending_assignee_preflight.outcome == 'failure' || steps.ending_attempt_upgrade.outcome == 'failure' || steps.ending_attempt_preflight.outcome == 'failure' || steps.ending_activation_preflight.outcome == 'failure' || steps.ending_history_lint.outcome == 'failure' || steps.ending_actual_broker_lint.outcome == 'failure' || steps.ending_pending_preflight.outcome == 'failure' || steps.nico_intent_queue.outcome == 'failure' || steps.nico_intent_upgrade.outcome == 'failure' || steps.nico_native_regressions.outcome == 'failure' || steps.ending_crm_activity_lint.outcome == 'failure' || steps.ending_crm_activity_coverage.outcome == 'failure' || steps.ending_sd_update_lint.outcome == 'failure' || steps.ending_sd_update_coverage.outcome == 'failure' || steps.ending_destination_schema_lint.outcome == 'failure' || steps.ending_destination_schema_coverage.outcome == 'failure' || steps.typed_destination_upgrade.outcome == 'failure' || steps.typed_destination_lint.outcome == 'failure' || steps.typed_destination_coverage.outcome == 'failure' || steps.typed_destination_concurrency.outcome == 'failure' || steps.typed_delivery_lint.outcome == 'failure' || steps.typed_delivery_commit.outcome == 'failure' || steps.typed_delivery_broker.outcome == 'failure')
@@ -1594,7 +1597,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 288
+          assert stats['expected'] == 292
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')
@@ -2103,6 +2106,28 @@ jobs:
               assert len(flow['screenshots']) == len(set(flow['screenshots'])) == 2
               assert all(Path(image).is_file() for image in flow['screenshots'])
               assert flow['new_provider_operation'] is flow['whole_figure_accepted'] is False
+          manual_links = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-recording-customer-link.json')]
+          assert len(manual_links) == 4 and {row['project'] for row in manual_links} == expected_projects
+          assert len({row['account_id'] for row in manual_links}) == 4
+          for row in manual_links:
+              assert row['sha'] == os.environ['GITHUB_SHA'] and row['synthetic'] is True
+              assert row['actual_dark_theme'] == row['project'].endswith('dark')
+              assert row['explicit_selection_and_confirmation'] is row['persisted_after_native_reload'] is True
+              assert row['existing_master_picker_reused'] is row['history_not_rewritten'] is row['no_provider_operation'] is True
+              before, after = row['native_before'], row['native_after']
+              assert before['source_sha'] == after['source_sha'] == os.environ['GITHUB_SHA']
+              assert before['contact_id'] is None and before['audit_count'] == 0
+              assert after['audit_count'] == len(after['audits']) == 1
+              assert after['contact_id'] == row['exact_native_receipt']['contact_id']
+              assert after['lock_version'] == before['lock_version'] + 1
+              assert before['native_history'] == after['native_history']
+              for key in ['unmodified_call_fields_sha256', 'original_recording_sha256']:
+                  assert before[key] == after[key]
+              assert row['replay_status'] == 409 and row['denied_status'] in [401, 403, 404]
+              assert row['errors'] == row['prohibited'] == [] and row['contrast']['ratio'] >= 4.5
+              assert len(row['screenshots']) == len(set(row['screenshots'])) == 3
+              assert all(Path(image).is_file() for image in row['screenshots'])
+              assert row['whole_figure_or_Part1_accepted'] is False
           ending_preflight = json.loads(Path('/tmp/call-center-ending-confirmation-preflight.json').read_text())['summary']
           scope_preflight = json.loads(Path('/tmp/call-center-ending-scope-preflight.json').read_text())['summary']
           version_preflight = json.loads(Path('/tmp/call-center-ending-version-preflight.json').read_text())['summary']
