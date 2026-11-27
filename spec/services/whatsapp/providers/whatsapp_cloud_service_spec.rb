@@ -25,7 +25,7 @@ describe Whatsapp::Providers::WhatsappCloudService do
   describe '#send_message' do
     it 'preserves the existing campaign proxy response after a successful text POST' do
       proxy = JrcCampaigns::ProviderMessageProxy.new(kind: 'text', body: 'Synthetic')
-      request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
+      request = stub_request(:post, 'https://graph.facebook.com/v24.0/123456789/messages')
                 .with(body: hash_including(text: { body: 'Synthetic' }))
                 .to_return(status: 200, body: whatsapp_response.to_json, headers: response_headers)
 
@@ -236,7 +236,7 @@ describe Whatsapp::Providers::WhatsappCloudService do
 
       it 'preserves the existing campaign proxy contract without retry metadata' do
         proxy = JrcCampaigns::ProviderMessageProxy.new(kind: 'text', body: 'Synthetic')
-        request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
+        request = stub_request(:post, 'https://graph.facebook.com/v24.0/123456789/messages')
                   .with(body: template_body.to_json)
                   .to_return(status: 200, body: whatsapp_response.to_json, headers: response_headers)
 
