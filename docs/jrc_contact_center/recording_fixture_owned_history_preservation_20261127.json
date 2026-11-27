@@ -1,0 +1,20 @@
+{
+  "parent": "1ae72c6fecbc38101945e42d37029f56510ec989",
+  "failed_run": 45940384979,
+  "failed_job": 140313091623,
+  "artifact": 15172926384,
+  "artifact_sha256": "8602512c8198b97d361469c333c325885734921d1e55e9ced2d7e3a55e8fedc9",
+  "sanitized_job_log_sha256": "225f81787d44f31760cdc631942a0290498427855f348e66f554d7404480c77f",
+  "cause": "Both real committed fixture tests reached their assertions; teardown then attempted account DELETE and native agent-state history FK correctly refused it.",
+  "source_sha256": {
+    "spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb": "8c2bb1e825719d1658b734d0dac912b1908644f18bfa6b417d63010cfc60c963"
+  },
+  "parent_sources": {
+    "spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb": "6897541660da1887521ea74ac9d36a0b0fcd5e2fce64faa3345ee4f53db7c5dd"
+  },
+  "all_three_example_bodies_and_every_assertion_preserved": true,
+  "only_destructive_teardown_and_its_tracking_removed": true,
+  "unique_owned_accounts_preserved_until_disposable_runner_teardown": true,
+  "no_FK_or_lifecycle_rule_changed": true,
+  "no_native_or_Chrome_acceptance_claimed": true
+}

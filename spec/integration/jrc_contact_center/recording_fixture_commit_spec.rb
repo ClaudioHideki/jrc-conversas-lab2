@@ -20,26 +20,16 @@ RSpec.describe 'Owned committed recording fixture and native read', :pabx, type:
     example.run
   end
 
-  let(:creation_state) { { started: false } }
   let(:project_key) { "committed-recording-#{SecureRandom.hex(10)}" }
   let(:fixture_name) { "SYNTHETIC pause #{project_key}-recordings" }
   let(:payload) do
     raise 'Preserve a pre-existing fixture' if Account.exists?(name: fixture_name)
 
-    creation_state[:started] = true
     JrcContactCenter::SyntheticPauseSeed.call(projects: [project_key], scenarios: ['recordings']).fetch(project_key).fetch('recordings')
   end
 
-  after do
-    next unless creation_state.fetch(:started)
-
-    account = Account.find_by(name: fixture_name)
-    next unless account
-
-    users = account.account_users.pluck(:user_id)
-    Account.where(id: account.id, name: fixture_name).delete_all
-    User.where(id: users).where.missing(:account_users).delete_all
-  end
+  # Preserve the unique owned fixture as native evidence. The runner disposes
+  # this whole isolated database; never bypass existing account/history FKs.
 
   it 'reuses the actual committed qualification and preserves its full state and native counts through a real API read' do
     source = payload.fetch(:ending_context)
