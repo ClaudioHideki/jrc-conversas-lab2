@@ -1,0 +1,19 @@
+{
+  "parent": "08128153cce9e2e1122a77c83fdcbacab6b80706",
+  "failed_run": 45917116495,
+  "artifact": 15162892394,
+  "artifact_sha256": "c56fce2c3e05e9cedf20ee6f2d6228405593783bc9055588f648c73a830fd39a",
+  "report_sha256": "4c81677c86572b772dcb9513e32b5f0649cab147b93e9074467a5725f518edb2",
+  "offenses": 1,
+  "rule": "Style/IfUnlessModifier",
+  "native_files_inspected": 27,
+  "parent_sources": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb": "8a57fa5619b56059a681f3dbecce253e6a8083208a8d7fb31f69fc518834203c"
+  },
+  "source_sha256": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb": "43755ca45780f253256e3caf27541c6c40f31511feb7548f163106d1b68a5589"
+  },
+  "functional_behavior_unchanged": true,
+  "focused_Vue_106_passed_in_this_parent": true,
+  "native_or_Chrome_acceptance": false
+}

@@ -29,9 +29,7 @@ class Api::V1::Accounts::JrcContactCenter::QualityReviewsController < Api::V1::A
   def transcript
     reader.call(params[:recording_id]) do |record, call, snapshot|
       text = snapshot.data['texto_transcrito']
-      unless text.nil? || text.is_a?(String)
-        raise JrcContactCenter::OperationError, 'quality_analysis_source_unavailable'
-      end
+      raise JrcContactCenter::OperationError, 'quality_analysis_source_unavailable' unless text.nil? || text.is_a?(String)
 
       audit_transcript!(record, call)
       render json: base_payload.merge(recording_id: record.id.to_s, call_session_id: call.id.to_s,
