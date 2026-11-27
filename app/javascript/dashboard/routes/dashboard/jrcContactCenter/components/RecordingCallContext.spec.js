@@ -92,11 +92,13 @@ describe('current native call context inside recording details', () => {
     expect(wrapper.get('[data-recording-context-identity]').text()).toContain(
       'AMBIGUOUS'
     );
-    data.item.customer.ambiguous = false;
-    data.item.contact_id = '99';
+    const nextResponse = result();
+    nextResponse.item.contact_id = '99';
+    API.call.mockResolvedValueOnce({ data: nextResponse });
     await wrapper.setProps({ operationalContextAllowed: false });
     await wrapper.setProps({ operationalContextAllowed: true });
     await flushPromises();
+    expect(API.call).toHaveBeenCalledTimes(2);
     expect(
       wrapper.findComponent({ name: 'LinkedContactMaster' }).exists()
     ).toBe(false);

@@ -1,0 +1,20 @@
+{
+  "stage": {
+    "name": "exact_independent_listen_identity_watch_and_fresh_context_test_response",
+    "source_sha256": {
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "c0e2e93d1db010117d48cfaa1efd957a07cf6cb2e3423d7e3413af1b1dfb36a6",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js": "b023a0b74cfc1b7a6081b159ebc9da19928a622dc47d274d8c44d5993926677e"
+    },
+    "parent_sources": {
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue": "ca3f44ee3535355520db876792f7d666a2d1252b17bcb70edb7154ee5d2b8d6f",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js": "8109da1bc333d668810ac1c76a51bf46d087f9d1138ad52979a1eceb87e70465"
+    }
+  },
+  "parent": "bdba0f64a1f9a53aa063bdb695c2987b5cf518b2",
+  "failed_run": 45916484889,
+  "sanitized_log_sha256": "769713ee803a324df5aa8593d2b5ff5c0e470265214a907ebf2fdc7ed7f9902c",
+  "two_demonstrated_failures_corrected_pending_native_validation": true,
+  "no_gate_workflow_test_count_or_assertion_reduction": true,
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false
+}

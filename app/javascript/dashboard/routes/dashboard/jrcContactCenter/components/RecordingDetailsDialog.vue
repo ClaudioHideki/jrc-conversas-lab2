@@ -34,7 +34,11 @@ watch(
   }
 );
 watch(
-  () => [props.accountId, props.item.id, props.capabilities.recordings_listen],
+  [
+    () => props.accountId,
+    () => props.item.id,
+    () => props.capabilities.recordings_listen,
+  ],
   () => {
     showTranscript.value = false;
     showContext.value = false;
