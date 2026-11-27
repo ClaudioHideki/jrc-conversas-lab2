@@ -1,0 +1,34 @@
+{
+  "parent": "8c0b99bb9855a74306a0d8a35d545c42d4f75d7c",
+  "failed_run": 45949145061,
+  "failed_job": 140340676899,
+  "artifact": 15175699442,
+  "artifact_sha256": "2c1649680efb81cee129e4029c618855a11a840ed9b590128c8a3968212cbad7",
+  "report_sha256": "795046cc2e8802f0bdcd85bb34d091434227784d1e38c2859a3ccbd6550ce1a4",
+  "observed_native_examples": 35,
+  "observed_native_failures": 19,
+  "source_sha256": {
+    "spec/support/contact_center_recording_tasks.rb": "a7a626d985c6f35b482f89455bf578bdd09612c733df2fbdb66ce41e99827f98",
+    "script/jrc_call_center_recording_task_seed.rb": "169d12c0165f398678a438ab453384495ee6eb1b02c23d3dba57140c57de2bc2",
+    "spec/services/jrc_contact_center/create_contact_center_recording_task_links_spec.rb": "0dd598d12435f38d5a2483767d98ebbb3d56544bc4e86101bf5e74573895e7c4",
+    "app/controllers/api/v1/accounts/jrc_contact_center/recording_tasks_controller.rb": "db5d7b33d8cc934f10ebc71ad2ee7f7af5f518ab393d5e72adb7500417318ab3",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_tasks_spec.rb": "7f19e8586c71c5a5ffdea45b14d61bfbb577cd95d61b0f24b26fc4b182baba66"
+  },
+  "parent_sources": {
+    "spec/support/contact_center_recording_tasks.rb": "2f93b30d5a2e23896304c79d4922a87efa20900973e41873033db139cf88a757",
+    "script/jrc_call_center_recording_task_seed.rb": "c058a6836617c9eeb71a64ba01d554a6fce1f75a069870107f13a95e9843938e",
+    "spec/services/jrc_contact_center/create_contact_center_recording_task_links_spec.rb": "3cdf511c40cff3dc3c703a4a5e7f21351982e41d1e364221da448973e425c4b4",
+    "app/controllers/api/v1/accounts/jrc_contact_center/recording_tasks_controller.rb": "66e9690db5854c65becafe719b11b6ad56e0fcfd6e4ffc30ab423b0f4be7ef5d",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_tasks_spec.rb": "89ef55fe2554d914d279dde48a0e5adbf0159d18225293aa0b86c510037a9012"
+  },
+  "causes": [
+    "Native projects.task.assign uses the existing CustomRole alias projects.task.update; only owned synthetic fixtures lacked that required native permission.",
+    "Malformed manual task commands raised ArgumentError/ParameterMissing through a generic 500 boundary; use a bounded 422 response and preserve current permissions.",
+    "The migration no-data-change test must capture the real PostgreSQL reloaded timestamp before comparing all attributes."
+  ],
+  "no_product_permission_or_native_Project_rule_changed": true,
+  "all_35_core_cases_and_assertions_preserved": true,
+  "additional_malformed_root_shapes_in_existing_case": 3,
+  "no_native_or_Chrome_acceptance_claimed": true,
+  "synthetic_original_quality_review_permissions_preserved": true
+}

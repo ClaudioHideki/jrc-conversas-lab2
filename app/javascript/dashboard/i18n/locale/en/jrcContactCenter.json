@@ -3317,6 +3317,13 @@
         "ACTIONS": "Ações e Histórico",
         "TRANSCRIPT": "Transcrição",
         "CONTEXT": "Contexto"
+      },
+      "SUMMARY": {
+        "COUNT": "Gravações no período filtrado",
+        "DURATION": "Duração conhecida (hh:mm:ss)",
+        "MEASURED": "Duração informada em {count} gravações.",
+        "MISSING": "Gravações sem duração informada",
+        "NO_DURATION": "Sem duração informada"
       }
     },
     "QUALITY_REVIEW": {

@@ -10,7 +10,7 @@ RSpec.describe CreateContactCenterRecordingTaskLinks do
 
   it 'verifies the current installation without changing an account or automatically granting destination capabilities' do
     account = create(:account)
-    original = account.attributes
+    original = account.reload.attributes
     members = account.account_users.order(:id).map(&:attributes)
     expect { migration.up }.not_to raise_error
     expect(account.reload.attributes).to eq(original)

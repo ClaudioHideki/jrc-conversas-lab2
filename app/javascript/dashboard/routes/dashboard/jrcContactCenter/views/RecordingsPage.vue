@@ -35,6 +35,7 @@ const {
   items,
   meta,
   period,
+  summary,
   filters,
   page,
   capabilities,
@@ -79,6 +80,18 @@ const labels = computed(() => ({
   NO_MEASUREMENT: t('JRC_CONTACT_CENTER.RECORDINGS.NO_MEASUREMENT'),
 }));
 const copy = key => labels.value[key];
+const periodDuration = computed(() => {
+  const seconds = summary.value?.duration_seconds;
+  if (seconds === null || seconds === undefined)
+    return t('JRC_CONTACT_CENTER.RECORDINGS.SUMMARY.NO_DURATION');
+  return [
+    Math.floor(seconds / 3600),
+    Math.floor((seconds % 3600) / 60),
+    seconds % 60,
+  ]
+    .map(value => String(value).padStart(2, '0'))
+    .join(':');
+});
 const duration = value =>
   Number.isFinite(value) && value >= 0
     ? `${Math.floor(value / 60)}:${String(value % 60).padStart(2, '0')}`
@@ -182,6 +195,54 @@ const duration = value =>
         </button>
       </div>
     </form>
+    <dl
+      v-if="summary && period && !loading && !error"
+      class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3"
+      data-recordings-period-summary
+    >
+      <div
+        class="min-w-0 rounded-xl border border-n-violet-6 bg-n-violet-2 p-4"
+      >
+        <dt class="text-sm text-n-violet-11">
+          {{ t('JRC_CONTACT_CENTER.RECORDINGS.SUMMARY.COUNT') }}
+        </dt>
+        <dd
+          class="mt-1 text-2xl font-semibold text-n-slate-12"
+          data-recordings-total
+        >
+          {{ summary.total }}
+        </dd>
+      </div>
+      <div class="min-w-0 rounded-xl border border-n-blue-6 bg-n-blue-2 p-4">
+        <dt class="text-sm text-n-blue-11">
+          {{ t('JRC_CONTACT_CENTER.RECORDINGS.SUMMARY.DURATION') }}
+        </dt>
+        <dd
+          class="mt-1 break-words text-2xl font-semibold text-n-slate-12"
+          data-recordings-duration
+        >
+          {{ periodDuration }}
+        </dd>
+        <p class="mt-1 text-sm text-n-slate-11">
+          {{
+            t('JRC_CONTACT_CENTER.RECORDINGS.SUMMARY.MEASURED', {
+              count: summary.duration_measured_count,
+            })
+          }}
+        </p>
+      </div>
+      <div class="min-w-0 rounded-xl border border-n-weak bg-n-solid-1 p-4">
+        <dt class="text-sm text-n-slate-11">
+          {{ t('JRC_CONTACT_CENTER.RECORDINGS.SUMMARY.MISSING') }}
+        </dt>
+        <dd
+          class="mt-1 text-2xl font-semibold text-n-slate-12"
+          data-recordings-duration-missing
+        >
+          {{ summary.duration_missing_count }}
+        </dd>
+      </div>
+    </dl>
     <p v-if="loading" role="status">{{ copy('LOADING') }}</p>
     <p v-else-if="error" role="alert" class="text-n-ruby-11">
       {{ copy(error) }}

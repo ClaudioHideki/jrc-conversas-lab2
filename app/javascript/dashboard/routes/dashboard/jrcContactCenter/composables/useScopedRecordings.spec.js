@@ -572,3 +572,84 @@ describe('current-scope recording browser state', () => {
     expect(API.recordingBytes).not.toHaveBeenCalled();
   });
 });
+
+describe('native authorized period summary', () => {
+  const totals = {
+    total: 41,
+    duration_measured_count: 40,
+    duration_missing_count: 1,
+    duration_seconds: 0,
+    duration_unit: 'seconds',
+  };
+  const response = () => ({ data: { ...page().data, summary: { ...totals } } });
+  it('retains real zero duration and the whole filtered denominator on a page change', async () => {
+    API.recordings.mockResolvedValue(response());
+    const { state } = fixture();
+    await flushPromises();
+    expect(state.summary.value).toEqual(totals);
+    state.changePage(2);
+    await flushPromises();
+    expect(API.recordings).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ page: 2 })
+    );
+    expect(state.summary.value).toEqual(totals);
+    expect(state.items.value).toHaveLength(1);
+  });
+  it('keeps all-unknown duration null and removes totals immediately on reload or access refusal', async () => {
+    API.recordings.mockResolvedValue({
+      data: {
+        ...page().data,
+        summary: {
+          ...totals,
+          duration_measured_count: 0,
+          duration_missing_count: 41,
+          duration_seconds: null,
+        },
+      },
+    });
+    const { state } = fixture();
+    await flushPromises();
+    expect(state.summary.value.duration_seconds).toBeNull();
+    API.recordings.mockRejectedValueOnce({ response: { status: 403 } });
+    const pending = state.load();
+    expect(state.summary.value).toBeNull();
+    await pending;
+    expect(state.summary.value).toBeNull();
+    expect(state.items.value).toEqual([]);
+    expect(state.error.value).toBe('DENIED');
+  });
+  it('discards old-profile totals when a delayed authorized response arrives after a profile change', async () => {
+    let finish;
+    API.recordings.mockReturnValueOnce(
+      new Promise(resolve => {
+        finish = resolve;
+      })
+    );
+    const { state, actorScope } = fixture();
+    await flushPromises();
+    actorScope.value = 'SYNTHETIC-other-profile';
+    await flushPromises();
+    finish(response());
+    await flushPromises();
+    expect(state.summary.value).toBeNull();
+    expect(state.items.value).toEqual([row]);
+  });
+  it.each([
+    { total: 42 },
+    { duration_missing_count: -1 },
+    { duration_seconds: null },
+  ])(
+    'rejects inconsistent totals without displaying an invented measurement: %j',
+    async invalid => {
+      API.recordings.mockResolvedValue({
+        data: { ...page().data, summary: { ...totals, ...invalid } },
+      });
+      const { state } = fixture();
+      await flushPromises();
+      expect(state.summary.value).toBeNull();
+      expect(state.items.value).toEqual([]);
+      expect(state.error.value).toBe('ERROR');
+    }
+  );
+});

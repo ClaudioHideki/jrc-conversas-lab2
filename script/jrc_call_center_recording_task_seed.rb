@@ -4,7 +4,7 @@
 # guard. Explicit synthetic Projects grants never activate a real user or provider.
 class JrcContactCenter::SyntheticRecordingTaskSeed
   RIGHTS = %w[jrc_projects_project_view jrc_projects_task_view jrc_projects_task_create
-              jrc_projects_task_assign jrc_projects_member_view].freeze
+              jrc_projects_task_update jrc_projects_task_assign jrc_projects_member_view].freeze
 
   def self.call(account:, operator:)
     owner = account.account_users.where(role: :administrator).where.not(id: operator.id).sole

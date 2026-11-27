@@ -33,6 +33,15 @@ class JrcContactCenter::RecordedCalls
     search(with_operating_filters(relation, params), params[:q]).order(started_at: :desc, id: :desc)
   end
 
+  # Aggregate the same authorized, filtered relation before pagination. Missing
+  # or invalid durations remain unknown; a recorded zero is a real measurement.
+  def period_summary(relation, total:)
+    measured = relation.reorder(nil).where('duration_seconds >= 0')
+    count, seconds = measured.pick(Arel.sql('COUNT(*)'), Arel.sql('SUM(duration_seconds)'))
+    { total: total, duration_measured_count: count, duration_missing_count: total - count,
+      duration_seconds: count.positive? ? seconds : nil, duration_unit: 'seconds' }
+  end
+
   def with_operating_filters(relation, params)
     %w[unit queue].each do |kind|
       next if params["#{kind}_id"].blank?

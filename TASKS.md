@@ -3,6 +3,8 @@
 
 ## Em progresso (WIP)
 
+- [ ] **CALL-CENTER-RECORDING-TOTALS-20261127:** Quantidade e duração conhecidas do período filtrado, antes da paginação, com ausências distintas de zero e os escopos nativos preservados. Quatro novos casos Rails e seis Vue preparados; os quatro cenários Chrome de gravações serão ampliados. Candidata sem aceite: docs/jrc_contact_center/recording_period_totals_candidate_20261127.json.
+
 - [ ] **CALL-CENTER-NATIVE-TASK-FLOW-20261127:** Nova ação pela gravação com tarefa/editor nativos, persistência, autorização atual, recibo e estado de origem. Correção do isolamento das fixtures commitadas agrupada na mesma CI. Código preparado; requer testes nativos e Chrome, sem alegar aceite integral da figura 22 ou Parte 1. [Candidata](docs/jrc_contact_center/manual_recording_task_candidate_20261127.json).
 
 - [ ] **CALL-CENTER-NATIVE-PANELS-20261126:** Cinco abas nativas, consulta dos recibos do atendimento e cancelamento de pausas/revisão em validação agrupada. A falha de observação de mídia de `a815499d` permanece registrada; requer todos os gates e 288 cenários Chrome no novo SHA. Sem publicação ou homologação externa. Evidência/candidata: `docs/jrc_contact_center/recording_actions_and_pause_candidate_20261126.json`.

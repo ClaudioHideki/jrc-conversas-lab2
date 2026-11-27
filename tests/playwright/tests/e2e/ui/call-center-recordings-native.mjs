@@ -172,6 +172,14 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
       pages: 2,
     });
     expect(listed.items).toHaveLength(20);
+    const summary = listed.summary;
+    expect(summary).toEqual({
+      total: 21,
+      duration_measured_count: 21,
+      duration_missing_count: 0,
+      duration_seconds: 21 * 61,
+      duration_unit: 'seconds',
+    });
     for (const kind of ['denied_unit', 'denied_tenant', 'unmapped_provider']) {
       expect(
         (await read(`${root}/${target.recordings[kind].id}`)).status()
@@ -186,12 +194,29 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
       ).status()
     ).toBe(404);
     await open();
+    const verifySummary = async (count, duration) => {
+      await expect(
+        page.locator('[data-recordings-period-summary]')
+      ).toBeVisible();
+      await expect(page.locator('[data-recordings-total]')).toHaveText(
+        String(count)
+      );
+      await expect(page.locator('[data-recordings-duration]')).toHaveText(
+        duration
+      );
+      await expect(
+        page.locator('[data-recordings-duration-missing]')
+      ).toHaveText('0');
+    };
+    await verifySummary(21, '00:21:21');
+    await capture('period-authorized-summary');
     await page
       .getByRole('button', { name: 'Próxima', exact: true })
       .last()
       .click();
     await expect(page.locator('[data-recording-row]')).toHaveCount(1);
     await expect(page).toHaveURL(/recordings_page=2/);
+    await verifySummary(21, '00:21:21');
     await page.reload();
     await expect(page.locator('[data-recording-row]')).toHaveCount(1);
     await page
@@ -216,6 +241,7 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
       .click();
     await expect(page.locator('[data-recording-row]')).toHaveCount(1);
     await expect(page).toHaveURL(/recordings_q=/);
+    await verifySummary(1, '00:01:01');
     await page.reload();
     await expect(page.locator('[data-recording-row]')).toHaveCount(1);
     await expect(page.locator('[data-recordings-search]')).toHaveValue(
@@ -552,6 +578,12 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
           provider_boundary: target.recording_provider_boundary,
           actual_dark_theme: dark,
           authorized_rows: listed.meta.total,
+          native_period_summary: {
+            full: summary,
+            page_2_same_filtered_denominator: true,
+            filtered: { total: 1, duration_seconds: 61 },
+            no_unmeasured_or_capacity_invention: true,
+          },
           denied_unit_tenant_and_unmapped_provider: true,
           real_pagination_filter_URL_and_reload: true,
           original_operator_nonadministrator: true,

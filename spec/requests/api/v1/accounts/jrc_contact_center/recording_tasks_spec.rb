@@ -113,6 +113,7 @@ RSpec.describe 'Explicit native task creation from an authorized recording', :pa
 
   it 'rejects caller-supplied account/unit/actor authority and malformed command shapes without creating any destination' do
     invalid = [
+      nil, [], 'SYNTHETIC invalid command',
       input.merge('account_id' => account.id.to_s, 'unit_id' => unit.id.to_s),
       input.merge('user_id' => actor.id.to_s),
       input.merge('request_id' => [request_id]),

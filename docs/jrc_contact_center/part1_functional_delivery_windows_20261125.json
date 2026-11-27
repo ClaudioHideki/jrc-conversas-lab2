@@ -173,5 +173,12 @@
     "Chrome_failed": 4,
     "whole_parent_accepted": false
   },
-  "external_dependencies_separately_preserved": true
+  "external_dependencies_separately_preserved": true,
+  "recording_period_totals_candidate_not_accepted": {
+    "document": "docs/jrc_contact_center/recording_period_totals_candidate_20261127.json",
+    "sha256": "e1b56d2e2c65b491bdb9f5b9665da8c404da8184ec1ac92f15a9ddfc6eb8f432",
+    "native_or_Chrome_acceptance": false,
+    "literal_requirement": "D2-P0349-C02",
+    "no_capacity_retention_or_provider_claim": true
+  }
 }

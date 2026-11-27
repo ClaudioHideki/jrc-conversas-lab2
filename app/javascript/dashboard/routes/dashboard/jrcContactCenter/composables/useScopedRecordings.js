@@ -11,6 +11,7 @@ export const useScopedRecordings = ({
   const items = ref([]);
   const meta = ref({ page: 1, per_page: 20, total: 0, pages: 0 });
   const period = ref(null);
+  const summary = ref(null);
   const filters = ref({ from: '', to: '', q: '', unit_id: '', queue_id: '' });
   const page = ref(1);
   const capabilities = ref({});
@@ -44,6 +45,7 @@ export const useScopedRecordings = ({
     close();
     items.value = [];
     period.value = null;
+    summary.value = null;
     capabilities.value = {};
   };
   const denied = failure => [401, 403, 404].includes(failure?.response?.status);
@@ -53,6 +55,7 @@ export const useScopedRecordings = ({
     close();
     items.value = [];
     period.value = null;
+    summary.value = null;
     error.value = '';
     loading.value = true;
     const account = String(accountId.value);
@@ -82,6 +85,26 @@ export const useScopedRecordings = ({
         !data.period
       )
         throw new Error('Invalid native recording list identity');
+      const totals = data.summary;
+      if (totals !== undefined) {
+        const valid =
+          totals?.duration_unit === 'seconds' &&
+          Number.isSafeInteger(totals.total) &&
+          totals.total === data.meta.total &&
+          Number.isSafeInteger(totals.duration_measured_count) &&
+          totals.duration_measured_count >= 0 &&
+          Number.isSafeInteger(totals.duration_missing_count) &&
+          totals.duration_missing_count >= 0 &&
+          totals.duration_measured_count + totals.duration_missing_count ===
+            totals.total &&
+          (totals.duration_measured_count === 0
+            ? totals.duration_seconds === null
+            : Number.isSafeInteger(totals.duration_seconds) &&
+              totals.duration_seconds >= 0);
+        if (!valid)
+          throw new TypeError('Invalid native recording period totals');
+      }
+      summary.value = totals ?? null;
       items.value = data.items;
       meta.value = data.meta;
       period.value = data.period;
@@ -293,6 +316,7 @@ export const useScopedRecordings = ({
     items,
     meta,
     period,
+    summary,
     filters,
     page,
     capabilities,

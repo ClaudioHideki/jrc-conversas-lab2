@@ -177,10 +177,10 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 166
+          assert report['numTotalTests'] == report['numPassedTests'] == 172
           assert report['numFailedTests'] == report['numPendingTests'] == 0
           assert len(report['testResults']) == 14 and all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useScopedRecordings.spec.js': 22, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 13, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 10, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 8}
+          expected = {'useScopedRecordings.spec.js': 28, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 13, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 10, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 8}
           expected.update({'EndingTaskState.spec.js': 12, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9})
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
@@ -311,12 +311,12 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight.json').read_text())
-          assert report['summary']['example_count'] == len(report['examples']) == 36
+          assert report['summary']['example_count'] == len(report['examples']) == 40
           assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
-          assert len({row['id'] for row in report['examples']}) == 36
+          assert len({row['id'] for row in report['examples']}) == 40
           from collections import Counter
           assert all(row['status'] == 'passed' for row in report['examples'])
-          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb': 30, 'spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb': 3, 'spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb': 3}
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == {'spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb': 34, 'spec/services/jrc_contact_center/synthetic_recordings_seed_scope_spec.rb': 3, 'spec/integration/jrc_contact_center/recording_fixture_commit_spec.rb': 3}
           PY
           POSTGRES_DATABASE=jrc_sd_bc_portal_concurrency_20261025_test JRC_CC_COMMITTED_RECORDING_FIXTURE=false bundle exec rails runner 'config = ApplicationRecord.connection_db_config; actual = ApplicationRecord.connection.current_database; owned = Rails.env.test? && ENV["GITHUB_ACTIONS"] == "true" && ENV["RUNNER_ENVIRONMENT"] == "github-hosted" && config.configuration_hash[:host] == "127.0.0.1" && actual == "jrc_sd_bc_portal_concurrency_20261025_test"; raise "Owned shared database required" unless owned; raise "Committed fixtures polluted native role regressions" unless CustomRole.count.zero?; File.write("/tmp/call-center-recording-fixture-isolation.json", JSON.generate({sha: ENV.fetch("GITHUB_SHA"), synthetic: true, native_main_database: actual, preserved_custom_role_count: 0, no_cleanup_or_permission_change: true}))'
       - name: Focused public source and CRM authorization before full regressions
@@ -1745,8 +1745,12 @@ jobs:
               assert flow['contrast_ratio'] >= 4.5
               assert len(flow['state_contrast_ratios']) == 4 and all(ratio >= 4.5 for ratio in flow['state_contrast_ratios'])
               assert not flow['page_errors'] and not flow['prohibited_mutations_or_external_calls']
-              images = {f".codex/call-center-native-e2e/{flow['project']}-ending-history-{stage}.png" for stage in ['pending-page', 'independent-outcomes', 'native-task']}
-              assert len(flow['screenshots']) == 3 and set(flow['screenshots']) == images
+              images = {f".codex/call-center-native-e2e/{flow['project']}-ending-history-{stage}.png" for stage in ['pending-page', 'native-current-state', 'independent-outcomes', 'native-task']}
+              assert len(flow['screenshots']) == 4 and set(flow['screenshots']) == images
+              state = flow['native_task_current_state']
+              assert state['actual_native_GET'] is state['explicit_read_and_refresh'] is state['no_task_write_or_receipt_rewrite'] is True
+              assert state['task_id'] == flow['native_task_view']['task_id'] and state['project_id'] == flow['native_task_view']['project_id']
+              assert state['state_contrast_ratio'] >= 4.5
               assert all(Path(image).is_file() for image in images)
               assert flow['whole_figure10_or_Part1_accepted'] is False
           pending_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-pending-native.json')]

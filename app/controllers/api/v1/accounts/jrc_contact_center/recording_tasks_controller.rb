@@ -2,6 +2,7 @@
 
 class Api::V1::Accounts::JrcContactCenter::RecordingTasksController < Api::V1::Accounts::JrcContactCenter::BaseController
   before_action :private_response
+  rescue_from ArgumentError, ActionController::ParameterMissing, with: :invalid_task_request
 
   def index
     reader = JrcContactCenter::RecordingTaskList.new(account: Current.account, member: Current.account_user, page: params.fetch(:page, 1))
@@ -23,11 +24,18 @@ class Api::V1::Accounts::JrcContactCenter::RecordingTasksController < Api::V1::A
     response.headers['X-Content-Type-Options'] = 'nosniff'
   end
 
+  def invalid_task_request
+    render json: base_payload.merge(error: 'invalid_recording_task_request'), status: :unprocessable_entity
+  end
+
   def task_input
     unless request.media_type == 'application/json' && request.raw_post.bytesize.between?(1, 65_536)
       raise ArgumentError, 'Solicitação de tarefa inválida.'
     end
 
-    params.require(:recording_task).to_unsafe_h
+    input = params.require(:recording_task)
+    raise ArgumentError, 'Solicitação de tarefa inválida.' unless input.is_a?(ActionController::Parameters)
+
+    input.to_unsafe_h
   end
 end

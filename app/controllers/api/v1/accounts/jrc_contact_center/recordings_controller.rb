@@ -18,10 +18,12 @@ class Api::V1::Accounts::JrcContactCenter::RecordingsController < Api::V1::Accou
     with_recording_authority do
       reader = current_reader
       params[:page] = 1 if params[:page].blank?
-      payload = list_payload(reader.filtered(params)) { |record| reader.present(record) }
+      relation = reader.filtered(params)
+      payload = list_payload(relation) { |record| reader.present(record) }
       range = { from: reader.period.begin.to_date, to: reader.period.end.to_date, timezone: Time.zone.name }
       audit_list!(payload)
-      render json: payload.merge(period: range)
+      summary = reader.period_summary(relation, total: payload.fetch(:meta).fetch(:total))
+      render json: payload.merge(period: range, summary: summary)
     end
   rescue ArgumentError
     render_invalid_range

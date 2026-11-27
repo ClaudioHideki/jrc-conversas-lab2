@@ -394,4 +394,50 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
       expect(rows.find { |row| row['id'] == audit.id }.fetch('audited_changes')).to eq(audit.audited_changes)
     end
   end
+
+  it 'aggregates measured duration across all authorized rows before pagination' do
+    record.update!(duration_seconds: 125)
+    second_call = source_call.dup
+    second_call.external_session_id = 'SYNTHETIC-second-recording-total'
+    second_call.correlation_id = 'SYNTHETIC-second-recording-total'
+    second_call.save!
+    second_leg = source_call.legs.first.dup
+    second_leg.call_session = second_call
+    second_leg.save!
+    second = record.dup
+    second.external_unique_id = second_call.external_session_id
+    second.duration_seconds = 0
+    second.save!
+    get path, headers: headers, params: { page: 2, per_page: 1 }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items').length).to eq(1)
+    expect(response.parsed_body.fetch('summary')).to eq('total' => 2, 'duration_measured_count' => 2,
+                                                      'duration_missing_count' => 0, 'duration_seconds' => 125, 'duration_unit' => 'seconds')
+  end
+
+  it 'keeps a missing duration unknown while preserving the real authorized recording count' do
+    record.update!(duration_seconds: nil)
+    get path, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('summary')).to eq('total' => 1, 'duration_measured_count' => 0,
+                                                      'duration_missing_count' => 1, 'duration_seconds' => nil, 'duration_unit' => 'seconds')
+  end
+
+  it 'treats invalid negative provider durations as missing rather than subtracting from the total' do
+    record.update!(duration_seconds: -1)
+    get path, headers: headers
+    expect(response.parsed_body.fetch('summary')).to include('duration_measured_count' => 0, 'duration_missing_count' => 1,
+                                                           'duration_seconds' => nil)
+  end
+
+  it 'uses the same filtered universe for duration and rows and never adds a personally unauthorized call' do
+    record.update!(duration_seconds: 125)
+    get path, headers: headers, params: { q: 'SYNTHETIC-no-match' }
+    expect(response.parsed_body.fetch('summary')).to include('total' => 0, 'duration_seconds' => nil)
+    expect(response.parsed_body.fetch('items')).to be_empty
+    source_call.legs.first.update!(account_user_id: nil)
+    get path, headers: headers
+    expect(response.parsed_body.fetch('summary')).to include('total' => 0, 'duration_seconds' => nil)
+    expect(response.parsed_body.fetch('items')).to be_empty
+  end
 end

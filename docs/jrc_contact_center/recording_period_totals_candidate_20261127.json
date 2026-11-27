@@ -1,0 +1,44 @@
+{
+  "parent": "8c0b99bb9855a74306a0d8a35d545c42d4f75d7c",
+  "prepared_plan_sha256": "16a47647fc086ec2668db8294ed79f2abf50083783755216fb48c54a93a78c12",
+  "functional_requirement": "D2-P0349-C02",
+  "stage": {
+    "name": "native_authorized_filtered_recording_period_totals",
+    "source_sha256": {
+      "app/services/jrc_contact_center/recorded_calls.rb": "2136a0448fe08622d246df8cebac3a8c4cb8227bcdbbb27eb77a45a9c215b606",
+      "app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb": "8a852ccda8505458531966a20578d961c0afd4cf2a5f83c651806eab85a3035e",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.js": "b47d8c3dfca692344407c089e509c071f61f458a797aa5b1de51a1e704d228ae",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/RecordingsPage.vue": "928860691fbdc3c3eb241a944b42a4023f20449b12391a4a0f6325cc796a1e41",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "75fcc026223c1fe892f8d2c159ef30cba779d6b2acd1770f93d40fe5176a55a9",
+      "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "c8ad819aca2ae4c10f1bc11c4417b6d62227ad02ba90a526c0f5a6736722e86b",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js": "01f70d4c8f4dcf845fa49df01dcce50c2b9d47743d10ace9ba422eb6183f55dd",
+      "tests/playwright/tests/e2e/ui/call-center-recordings-native.mjs": "bfba955e24b297e77d45494f881f3a62a1068a36235a6a5796884d2cedf05a3d",
+      ".github/workflows/call-center-administration.yml": "1aa347696095f8606b5b82272360c197d0b960a514864212bb64bc1f524b5d5a"
+    },
+    "parent_sources": {
+      "app/services/jrc_contact_center/recorded_calls.rb": "7fa5ae7a47bb3aa972da3bff7cbe146bb0724f05957835bf0cc7989352fc857d",
+      "app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb": "67f4771806d210bdbcc59226980a46a967b5922d676343e4888f3909684afde4",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.js": "80e56042a1ad1266accc51c1aad4762f1cf230a262cb9b7965c40ee6aae2960d",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/RecordingsPage.vue": "ac67c9f1c29ddc0beeb30a76d1e58ffdd339137cc2a64d560733c57079d24342",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "dc31c56a37f4bef5ddbeb374d2e760c85d6b754eb5641d18c58386b692687c9f",
+      "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "3ec0279d6149bbb8b4160097cd4066717fef02dc0f5514d64e1031e8c12abfe6",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js": "8d395e1dbc215b571aa88276cfaf2845988948fcf31052662df05a5b3235a0a5",
+      "tests/playwright/tests/e2e/ui/call-center-recordings-native.mjs": "226a89cf9f9bb6de9c80a9e66d685a0f83d9c070ea4ed18c35a19fb586821c75",
+      ".github/workflows/call-center-administration.yml": "df7289c58b1e69577c40a07ddd2efea095ae26a43f32e3e75ec53726c3d73704"
+    }
+  },
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false,
+  "no_new_tables_routes_models_or_permissions": true,
+  "expected_not_results": {
+    "additional_browser_cases": 0,
+    "same_existing_four_native_browser_cases_extended": true,
+    "same_existing_Rails_and_Vue_groups_extended": true,
+    "no_gate_assertion_removed": true,
+    "focused_Vue_expected_not_result": 172,
+    "focused_recordings_Rails_expected_not_result": 40,
+    "distinct_Rails_expected_not_result": 3935,
+    "main_Vue_expected_not_result": 2107,
+    "screenshots_expected_not_result": 840
+  }
+}

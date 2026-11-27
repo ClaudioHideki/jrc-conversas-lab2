@@ -12,7 +12,10 @@ RSpec.shared_context 'with native manual recording task destination' do
                                          idempotency_key: SecureRandom.uuid)
     end
   end
-  let(:project_rights) { %w[projects.project.view projects.task.view projects.task.create projects.task.assign projects.member.view] }
+  let(:project_rights) do
+    %w[projects.project.view projects.task.view projects.task.create projects.task.update
+       projects.task.assign projects.member.view]
+  end
   let(:request_id) { SecureRandom.uuid }
   let(:input) do
     { 'project_id' => project.id.to_s, 'request_id' => request_id, 'task' => {
@@ -24,7 +27,8 @@ RSpec.shared_context 'with native manual recording task destination' do
 
   before do
     account.enable_features!('jrc_projects')
-    role.update!(permissions: recording_rights + project_rights.map { |right| JrcProjects::Authorization.permission(right) })
+    required = project_rights.map { |right| JrcProjects::Authorization.permission(right) }
+    role.update!(permissions: (role.permissions + required).uniq)
     member.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.task.create' => true, 'projects.task.assign' => true })
     JrcProjects::ProjectMember.create!(account: account, project: project, user: actor, role: 'member')
   end
