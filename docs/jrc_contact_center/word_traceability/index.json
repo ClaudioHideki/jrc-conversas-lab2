@@ -4407,5 +4407,35 @@
     "figure_document": "docs/jrc_contact_center/word_traceability/figure-07.json",
     "figure_sha256": "9eec49d9d55b1cc7d59a90238aa856b9f796218990d539d77dc8091b2b483551",
     "native_or_browser_accepted": false
+  },
+  "next_native_audio_usage_filter": {
+    "document": "docs/jrc_contact_center/native_audio_purpose_filter_candidate_20261127.json",
+    "sha256": "16db24927860cf9cdc79e2ecf186e34a0487950e1696a58bd51ef94d0d3490f3",
+    "figure_document": "docs/jrc_contact_center/word_traceability/figure-16.json",
+    "figure_sha256": "603c14f28eece16068a9058a4c99420be5783d670a2bdc9495ebd16d0e8386f1",
+    "native_or_browser_accepted": false
+  },
+  "next_native_supervisor_close_contract_correction": {
+    "document": "docs/jrc_contact_center/native_supervisor_dialog_close_correction_20261127.json",
+    "sha256": "2644ed7a7cf8820736aa3566c87bdb9674c0418ba133a91905ac26f7ded9a17d",
+    "source_native_Dialog_sha256": "df1d5926d0ed44165adfd9bfa2c81975078063df612dec274f6cfdbbaa59d812",
+    "current_parent_popup_not_accepted_even_if_CI_green": true,
+    "native_or_browser_accepted": false
+  },
+  "next_audio_usage_row_completeness_not_acceptance": {
+    "figure": 6,
+    "clause": "D2-P0155-C01",
+    "document": "docs/jrc_contact_center/native_audio_purpose_filter_candidate_20261127.json",
+    "sha256": "cfa49091def321faa6d88f166cdaf086fbce75e4d341bc6b56bf01d862400d31",
+    "current_saved_native_purpose_not_search_term": true
+  },
+  "next_native_settings_access_context_candidate": {
+    "document": "docs/jrc_contact_center/native_legacy_settings_context_candidate_20261127.json",
+    "sha256": "64f9e7d66f9ad6567f72800d3eaacb37cec083db4c0a8c008ed4bd35bcf8d80c",
+    "figures": [
+      2,
+      11
+    ],
+    "native_or_browser_accepted": false
   }
 }

@@ -1,0 +1,46 @@
+{
+  "product_parent": "c6446040c0b161061540787b8e89696bf126130e",
+  "failed_run": 45968055817,
+  "actual_Chrome": {
+    "passed": 288,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "outside_errors": 0
+  },
+  "actual_distinct_native_examples": 3941,
+  "actual_main_Vue": 2123,
+  "actual_directed_Vue": {
+    "recordings": 207,
+    "SD_audio": 110
+  },
+  "artifact": 15190010387,
+  "artifact_sha256": "c880c0f25515e53bd942ee60e44518460a2cc2d810ae60dbcb46810763677c5d",
+  "cause": "Post-Chrome inventory still required 15 quality images although the preserved native action/history flow emits 19 in each mode.",
+  "exact_required_quality_capture_stages": [
+    "five-native-tabs-analysis",
+    "original",
+    "conflict",
+    "persisted",
+    "restored-after-explicit-cancel",
+    "readonly-listener",
+    "transcript-original",
+    "transcript-search",
+    "transcript-reloaded",
+    "transcript-audio-volume",
+    "native-call-context",
+    "existing-native-customer-master",
+    "transcript-after-real-media-resource-failure",
+    "native-call-context-restricted",
+    "immutable-revision-history-first-page",
+    "immutable-revision-history-second-page",
+    "immutable-revision-history-restored",
+    "existing-native-ending-controls",
+    "existing-native-ending-context-reloaded"
+  ],
+  "no_assertions_removed_or_loosened": true,
+  "exact_set_and_no_duplicate_or_cross_project_path_required": true,
+  "known_supervisor_native_close_defect_remains_unaccepted_until_corrected": true,
+  "new_group_native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false
+}

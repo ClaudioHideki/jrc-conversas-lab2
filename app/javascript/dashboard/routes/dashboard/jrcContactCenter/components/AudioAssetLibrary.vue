@@ -28,6 +28,7 @@ const { t } = useI18n();
 const { uid } = getCurrentInstance();
 const filterIds = {
   source: `audio-source-${uid}`,
+  purpose: `audio-purpose-${uid}`,
   format: `audio-format-${uid}`,
   size: `audio-size-${uid}`,
   inspection: `audio-inspection-${uid}`,
@@ -185,6 +186,7 @@ const loading = ref(false);
 const error = ref(false);
 const q = ref('');
 const sourceFilter = ref('');
+const purposeFilter = ref('');
 const formatFilter = ref('');
 const inspectionFilter = ref('');
 const inspectionStates = [
@@ -365,6 +367,9 @@ const load = async () => {
       unit_id: props.unitId,
       folder_id: props.folderId,
       q: route.query.audio_file_q || '',
+      ...(route.query.audio_file_purpose
+        ? { purpose: route.query.audio_file_purpose }
+        : {}),
       page: page.value,
       per_page: perPage.value,
       ...(route.query.audio_file_source
@@ -477,6 +482,9 @@ const openCopied = () => {
     audio_file_q: item.name,
     audio_file_page: 1,
     audio_file_source: undefined,
+    ...(route.query.audio_file_purpose !== undefined
+      ? { audio_file_purpose: undefined }
+      : {}),
     audio_file_format: undefined,
     ...(route.query.audio_file_inspection !== undefined
       ? { audio_file_inspection: undefined }
@@ -487,6 +495,7 @@ const applyFilters = () => {
   const values = { audio_file_q: q.value || undefined, audio_file_page: 1 };
   Object.entries({
     audio_file_source: sourceFilter.value,
+    audio_file_purpose: purposeFilter.value,
     audio_file_format: formatFilter.value,
     audio_file_inspection: inspectionFilter.value,
   }).forEach(([key, value]) => {
@@ -498,6 +507,7 @@ const applyFilters = () => {
 const clearFilters = () => {
   q.value = '';
   sourceFilter.value = '';
+  purposeFilter.value = '';
   formatFilter.value = '';
   inspectionFilter.value = '';
   applyFilters();
@@ -548,6 +558,7 @@ watch(
     perPage,
     () => route.query.audio_file_q,
     () => route.query.audio_file_source,
+    () => route.query.audio_file_purpose,
     () => route.query.audio_file_format,
     () => route.query.audio_file_inspection,
     actorScope,
@@ -557,6 +568,7 @@ watch(
     editor.clear();
     q.value = route.query.audio_file_q || '';
     sourceFilter.value = route.query.audio_file_source || '';
+    purposeFilter.value = route.query.audio_file_purpose || '';
     formatFilter.value = route.query.audio_file_format || '';
     inspectionFilter.value = route.query.audio_file_inspection || '';
     load();
@@ -606,6 +618,17 @@ onBeforeUnmount(() => {
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
         />
       </label>
+      <div class="w-full min-w-0 text-sm text-n-slate-12 sm:flex-1">
+        <label :for="filterIds.purpose">{{ label('PURPOSE') }}</label>
+        <input
+          :id="filterIds.purpose"
+          v-model="purposeFilter"
+          type="search"
+          maxlength="160"
+          data-audio-file-purpose-filter
+          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+        />
+      </div>
       <div class="block min-w-0 max-w-full text-sm text-n-slate-12">
         <label :for="filterIds.source">{{ label('SOURCE') }}</label>
         <select
@@ -822,6 +845,13 @@ onBeforeUnmount(() => {
                 </button>
                 <p class="mt-1 break-words text-n-slate-11">
                   {{ row.folder_name || label('ROOT') }}
+                </p>
+                <p
+                  v-if="row.purpose"
+                  class="mt-1 break-words text-n-slate-11"
+                  data-audio-asset-purpose-summary
+                >
+                  {{ [label('PURPOSE'), row.purpose].join(': ') }}
                 </p>
                 <p
                   v-if="row.description"

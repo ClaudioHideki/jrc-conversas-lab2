@@ -67,4 +67,44 @@ RSpec.describe 'Native scoped institutional audio filters use only the latest ve
     get base, headers: headers, params: { unit_id: unit.id, content_type: 'audio/wav' }
     expect(response).to have_http_status(:unauthorized)
   end
+
+  it 'combines actual institutional usage with name and latest version filters before totals and pagination' do
+    data = receipts
+    [data.fetch(:replaced), data.fetch(:captured)].each { |version| version.audio_asset.update!(purpose: 'SYNTHETIC URA welcome') }
+    data.fetch(:uploaded).audio_asset.update!(purpose: 'SYNTHETIC hold music')
+    values = { unit_id: unit.id, q: 'SYNTHETIC', source_kind: 'browser_capture', content_type: 'audio/wav', purpose: ' ura ', per_page: 1 }
+    get base, headers: headers, params: values.merge(page: 1)
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('meta')).to include('total' => 2, 'pages' => 2, 'page' => 1)
+    expect(response.parsed_body.fetch('items').pluck('id')).to eq([data.fetch(:replaced).audio_asset_id.to_s])
+    get base, headers: headers, params: values.merge(page: 2)
+    expect(response.parsed_body.fetch('items').pluck('id')).to eq([data.fetch(:captured).audio_asset_id.to_s])
+  end
+
+  it 'searches percent underscores and SQL-looking usage text literally without widening the authorized set' do
+    data = receipts
+    data.fetch(:uploaded).audio_asset.update!(purpose: "SYNTHETIC 10%_welcome' OR 1=1")
+    data.fetch(:captured).audio_asset.update!(purpose: 'SYNTHETIC 10AAwelcome')
+    get base, headers: headers, params: { unit_id: unit.id, purpose: "%_welcome' OR 1=1" }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items').pluck('id')).to eq([data.fetch(:uploaded).audio_asset_id.to_s])
+    expect(response.parsed_body.fetch('meta').fetch('total')).to eq(1)
+  end
+
+  it 'does not grant another unit or audio configuration through a usage filter' do
+    get base, headers: headers, params: { unit_id: units.last.id, purpose: 'URA' }
+    expect(response).to have_http_status(:not_found)
+    member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_recordings_listen])
+    get base, headers: headers, params: { unit_id: unit.id, purpose: 'URA' }
+    expect(response).to have_http_status(:unauthorized)
+  end
+
+  [{ purpose: ['ivr'] }, { purpose: { name: 'ivr' } }, { purpose: 'x' * 161 }].each do |filters|
+    it "rejects malformed institutional usage search #{filters.inspect} without unfiltered fallback" do
+      get base, headers: headers, params: { unit_id: unit.id }.merge(filters)
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body.fetch('error')).to eq('invalid_institutional_audio_filter')
+      expect(response.parsed_body).not_to have_key('items')
+    end
+  end
 end

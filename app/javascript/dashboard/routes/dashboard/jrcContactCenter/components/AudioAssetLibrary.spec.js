@@ -1379,4 +1379,121 @@ describe('unit scoped private audio metadata UI', () => {
     expect(wrapper.text()).not.toContain(row.name);
     expect(API.updateAudioAsset).not.toHaveBeenCalled();
   });
+
+  it('restores actual institutional usage from the route and sends it with current unit folder and version filters', async () => {
+    const actualUsage = 'SYNTHETIC saved usage <script>not markup</script>';
+    API.audioAssets.mockResolvedValueOnce({
+      data: {
+        items: [{ ...structuredClone(row), purpose: actualUsage }],
+        meta: { page: 1, pages: 1, total: 1 },
+        max_upload_bytes: 1000,
+      },
+    });
+    mocks.route.query = {
+      audio_unit: '10',
+      audio_file_purpose: 'SYNTHETIC URA',
+      audio_file_source: 'browser_capture',
+      audio_file_format: 'audio/ogg',
+    };
+    const wrapper = fixture();
+    await flushPromises();
+    expect(wrapper.get('[data-audio-file-purpose-filter]').element.value).toBe(
+      'SYNTHETIC URA'
+    );
+    expect(API.audioAssets).toHaveBeenCalledWith(
+      '1',
+      expect.objectContaining({
+        unit_id: '10',
+        folder_id: '',
+        purpose: 'SYNTHETIC URA',
+        source_kind: 'browser_capture',
+        content_type: 'audio/ogg',
+      })
+    );
+    expect(
+      wrapper.get('[data-audio-file-purpose-filter]').attributes('maxlength')
+    ).toBe('160');
+    const savedUsage = wrapper.get('[data-audio-asset-purpose-summary]');
+    expect(savedUsage.text()).toContain(actualUsage);
+    expect(savedUsage.find('script').exists()).toBe(false);
+  });
+
+  it('applies the user usage term through native URL filters and resets pagination without dropping other context', async () => {
+    mocks.route.query = {
+      audio_unit: '10',
+      audio_file_page: 2,
+      audio_file_q: 'SYNTHETIC',
+      audio_file_source: 'user_upload',
+      keep_context: 'owned',
+    };
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-file-purpose-filter]').setValue('URA');
+    await wrapper.get('form').trigger('submit');
+    expect(mocks.replace).toHaveBeenLastCalledWith({
+      query: {
+        ...mocks.route.query,
+        audio_file_q: 'SYNTHETIC',
+        audio_file_source: 'user_upload',
+        audio_file_purpose: 'URA',
+        audio_file_page: 1,
+      },
+    });
+  });
+
+  it('removes an applied institutional usage filter together with the native criteria while preserving unit context', async () => {
+    mocks.route.query = {
+      audio_unit: '10',
+      audio_file_purpose: 'URA',
+      audio_file_q: 'SYNTHETIC',
+      keep_context: 'owned',
+    };
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('form').findAll('button')[1].trigger('click');
+    expect(wrapper.get('[data-audio-file-purpose-filter]').element.value).toBe(
+      ''
+    );
+    expect(mocks.replace).toHaveBeenLastCalledWith({
+      query: {
+        ...mocks.route.query,
+        audio_file_q: undefined,
+        audio_file_purpose: undefined,
+        audio_file_page: 1,
+      },
+    });
+  });
+
+  it('does not restore a stale unfiltered audio selection after the usage query changes', async () => {
+    let finish;
+    API.audioAssets.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    const wrapper = fixture();
+    API.audioAssets.mockResolvedValueOnce({
+      data: {
+        items: [],
+        meta: { page: 1, pages: 0, total: 0 },
+        max_upload_bytes: 1000,
+      },
+    });
+    mocks.route.query.audio_file_purpose = 'URA';
+    await flushPromises();
+    finish({
+      data: {
+        items: [structuredClone(row)],
+        meta: { page: 1, pages: 1, total: 1 },
+        max_upload_bytes: 1000,
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-audio-asset="44"]').exists()).toBe(false);
+    expect(API.audioAssets).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ purpose: 'URA' })
+    );
+  });
 });

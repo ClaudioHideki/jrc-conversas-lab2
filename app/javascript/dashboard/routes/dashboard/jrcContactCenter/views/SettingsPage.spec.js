@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import SettingsPage from './SettingsPage.vue';
 
-const mocks = vi.hoisted(() => ({ route: null }));
+const mocks = vi.hoisted(() => ({ route: null, user: null }));
 vi.mock('vue-router', () => ({ useRoute: () => mocks.route }));
+vi.mock('dashboard/composables/store', () => ({
+  useMapGetter: () => mocks.user,
+}));
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: {
@@ -35,6 +38,12 @@ enableAutoUnmount(afterEach);
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.route = reactive({ params: { accountId: '1' } });
+  mocks.user = ref({
+    id: 7,
+    accounts: [
+      { id: 1, role: 'agent', permissions: ['jrc_contact_center_configure'] },
+    ],
+  });
   [API.units, API.queues, API.queueMemberships, API.routingRules].forEach(
     method => method.mockResolvedValue({ data: { items: [] } })
   );
@@ -123,5 +132,127 @@ describe('native legacy settings global ACW authority', () => {
       false
     );
     expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.COMMON.ERROR');
+  });
+
+  it('distinguishes an unobserved initial read from a real scoped zero count', async () => {
+    let finish;
+    API.administration.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    const wrapper = render();
+    expect(
+      wrapper
+        .findAllComponents({ name: 'VisualMetricCard' })
+        .map(card => card.props('value'))
+    ).toEqual(['—', '—', '—', '—']);
+    finish({
+      data: { capabilities: { configure: true, configuration_global: true } },
+    });
+    await flushPromises();
+    expect(
+      wrapper
+        .findAllComponents({ name: 'VisualMetricCard' })
+        .map(card => card.props('value'))
+    ).toEqual([0, 0, 0, 0]);
+  });
+
+  it('does not present a failed refresh as four observed zero metrics', async () => {
+    const wrapper = render();
+    await flushPromises();
+    API.administration.mockRejectedValueOnce({ response: { status: 403 } });
+    mocks.route.params.accountId = '2';
+    await flushPromises();
+    expect(
+      wrapper
+        .findAllComponents({ name: 'VisualMetricCard' })
+        .map(card => card.props('value'))
+    ).toEqual(['—', '—', '—', '—']);
+    expect(wrapper.findComponent({ name: 'StructureEditor' }).exists()).toBe(
+      false
+    );
+  });
+
+  it('clears existing structural and global authority immediately when the same account profile changes', async () => {
+    const wrapper = render();
+    await flushPromises();
+    let finish;
+    API.administration.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    mocks.user.value.accounts[0].permissions = [];
+    await flushPromises();
+    expect(wrapper.findComponent({ name: 'AcwPolicyEditor' }).exists()).toBe(
+      false
+    );
+    expect(wrapper.findComponent({ name: 'StructureEditor' }).exists()).toBe(
+      false
+    );
+    expect(API.administration).toHaveBeenLastCalledWith('1');
+    finish({
+      data: { capabilities: { configure: false, configuration_global: false } },
+    });
+    await flushPromises();
+    expect(wrapper.findComponent({ name: 'StructureEditor' }).exists()).toBe(
+      false
+    );
+  });
+
+  it('never restores a delayed old global grant after a same-account access change', async () => {
+    let finish;
+    API.administration.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    const wrapper = render();
+    API.administration.mockResolvedValueOnce({
+      data: { capabilities: { configure: false, configuration_global: false } },
+    });
+    mocks.user.value.accounts[0].custom_role_id = 91;
+    await flushPromises();
+    finish({
+      data: { capabilities: { configure: true, configuration_global: true } },
+    });
+    await flushPromises();
+    expect(wrapper.findComponent({ name: 'AcwPolicyEditor' }).exists()).toBe(
+      false
+    );
+    expect(wrapper.findComponent({ name: 'StructureEditor' }).exists()).toBe(
+      false
+    );
+  });
+
+  it('retains the current editor for native presence-only updates without refetching authority', async () => {
+    const wrapper = render();
+    await flushPromises();
+    const requests = API.administration.mock.calls.length;
+    const editor = wrapper.getComponent({ name: 'StructureEditor' }).vm;
+    mocks.user.value.accounts[0].availability_status = 'busy';
+    mocks.user.value.accounts[0].active_at = 12345;
+    await flushPromises();
+    expect(API.administration).toHaveBeenCalledTimes(requests);
+    expect(wrapper.getComponent({ name: 'StructureEditor' }).vm).toBe(editor);
+  });
+
+  it('loads current data when the authenticated actor changes within the same account', async () => {
+    const wrapper = render();
+    await flushPromises();
+    API.administration.mockResolvedValueOnce({
+      data: { capabilities: { configure: true, configuration_global: false } },
+    });
+    mocks.user.value.id = 8;
+    await flushPromises();
+    expect(API.administration).toHaveBeenCalledTimes(2);
+    expect(wrapper.findComponent({ name: 'AcwPolicyEditor' }).exists()).toBe(
+      false
+    );
+    expect(wrapper.get('[data-global-acw-denied]').exists()).toBe(true);
   });
 });

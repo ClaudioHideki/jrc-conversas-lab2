@@ -1445,7 +1445,13 @@
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "next_functional_candidate": {
+        "document": "docs/jrc_contact_center/native_audio_purpose_filter_candidate_20261127.json",
+        "sha256": "16db24927860cf9cdc79e2ecf186e34a0487950e1696a58bd51ef94d0d3490f3",
+        "bounded_implementation": "Native free-text usage filter, combined with existing name/folder/source/format/inspection filters; same authorized relation before pagination.",
+        "native_or_browser_accepted": false
+      }
     },
     {
       "id": "D2-P0337-C03",

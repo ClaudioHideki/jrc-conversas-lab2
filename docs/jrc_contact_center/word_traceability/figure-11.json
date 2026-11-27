@@ -1256,5 +1256,10 @@
       "Enquadrar filtros mobile de verdade; a captura atual não contém os controles.",
       "Adicionar capturas do topo do editor e dos parâmetros do destino antes de salvar."
     ]
+  },
+  "next_native_same_account_settings_context_candidate": {
+    "document": "docs/jrc_contact_center/native_legacy_settings_context_candidate_20261127.json",
+    "sha256": "64f9e7d66f9ad6567f72800d3eaacb37cec083db4c0a8c008ed4bd35bcf8d80c",
+    "native_or_browser_accepted": false
   }
 }

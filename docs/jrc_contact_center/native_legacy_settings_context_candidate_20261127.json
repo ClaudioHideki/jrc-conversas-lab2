@@ -1,0 +1,13 @@
+{
+  "source_parent": "c6446040c0b161061540787b8e89696bf126130e",
+  "figures": [
+    2,
+    11
+  ],
+  "flow": "Existing legacy settings screen clears old authority on same-account profile or actor changes, refetches the existing six APIs, and distinguishes unknown counts from real zero.",
+  "reused_native_contract": "dashboard/helper/accountMembershipAccess",
+  "new_backend_authority_permission_model_or_route": false,
+  "all_five_existing_cases_retained_and_six_cases_prepared": true,
+  "native_or_Chrome_acceptance": false,
+  "whole_figure_or_Part1_accepted": false
+}

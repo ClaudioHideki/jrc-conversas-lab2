@@ -2609,5 +2609,11 @@
     "unique_literal_IDs": [
       "D2-P0154-C04"
     ]
+  },
+  "next_native_audio_usage_filter_and_result_row_candidate": {
+    "document": "docs/jrc_contact_center/native_audio_purpose_filter_candidate_20261127.json",
+    "sha256": "cfa49091def321faa6d88f166cdaf086fbce75e4d341bc6b56bf01d862400d31",
+    "native_or_browser_accepted": false,
+    "no_new_fields_catalog_or_permission": true
   }
 }

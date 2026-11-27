@@ -1,0 +1,17 @@
+{
+  "product_parent": "c6446040c0b161061540787b8e89696bf126130e",
+  "native_dialog_git_blob": "6f521c68f5abc9b7af212b6aa82b1bdaf690d674",
+  "native_dialog_sha256": "df1d5926d0ed44165adfd9bfa2c81975078063df612dec274f6cfdbbaa59d812",
+  "source_contract_review_sha256": "901a68dc1e7dd0dae483a19843aed11f17ec502999437372e6611de2b43c56d7",
+  "cause": "Native Dialog.close synchronously emits close; the parent previously called close again from that same event.",
+  "correction": "Native close event clears selection only; programmatic close is idempotent and clears selection before invoking the native method.",
+  "test_stub_now_emits_the_actual_native_close_event": true,
+  "all_25_cases_and_current_authorization_assertions_preserved": true,
+  "new_Vue_regression_prepared_not_executed": 1,
+  "no_shared_Dialog_API_permission_or_backend_changed": true,
+  "active_CI_not_cancelled_or_duplicated": true,
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false,
+  "private_predecessor_audio_plan_sha256": "f8cef552d448001914edeb0c7ac8bae47193ba37b67d1bf9e067325f3722a8c3",
+  "no_prior_audio_source_preparation_discarded": true
+}

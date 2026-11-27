@@ -532,6 +532,7 @@ describe('native supervisor observed data', () => {
       stubs: {
         VisualSectionCard: { template: '<section><slot /></section>' },
         Dialog: {
+          emits: ['close'],
           template: '<section data-native-detail-dialog><slot /></section>',
           methods: {
             open() {
@@ -539,6 +540,7 @@ describe('native supervisor observed data', () => {
             },
             close() {
               mocks.dialogClose();
+              this.$emit('close');
             },
           },
         },
@@ -586,6 +588,7 @@ describe('native supervisor observed data', () => {
     expect(mocks.dialogOpen).toHaveBeenCalledTimes(1);
     await detail.get('[data-supervisor-agent-detail-close]').trigger('click');
     expect(wrapper.find('[data-supervisor-agent-detail]').exists()).toBe(false);
+    expect(mocks.dialogClose).toHaveBeenCalledTimes(1);
   });
 
   it('does not open stale agent details after a rejected current native read', async () => {
@@ -709,5 +712,23 @@ describe('native supervisor observed data', () => {
     expect(detail.text()).not.toContain('SYNTHETIC permitted queue');
     expect(detail.text()).not.toContain('SYNTHETIC PRIVATE');
     expect(detail.find('form, input, select, audio').exists()).toBe(false);
+  });
+
+  it('clears a native close event without calling the emitting close method recursively', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValue({
+      data: { agents: [observedAgent], queues: [] },
+    });
+    wrapper = shallowMount(SupervisorPage, detailOptions);
+    await flushPromises();
+    await wrapper.get('[data-supervisor-agent-details="42"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-supervisor-agent-detail]').text()).toContain(
+      observedAgent.name
+    );
+    wrapper.findComponent({ ref: 'agentDialog' }).vm.$emit('close');
+    await flushPromises();
+    expect(wrapper.find('[data-supervisor-agent-detail]').exists()).toBe(false);
+    expect(mocks.dialogClose).not.toHaveBeenCalled();
+    expect(mocks.dialogOpen).toHaveBeenCalledTimes(1);
   });
 });

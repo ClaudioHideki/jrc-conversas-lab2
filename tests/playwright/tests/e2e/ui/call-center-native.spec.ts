@@ -9646,6 +9646,9 @@ test('institutional audio folders native browser capture uses only the synthetic
   await expect(dialog.locator('[data-audio-asset-description]')).toHaveValue(
     'SYNTHETIC common fields retained across capture/import'
   );
+  await dialog
+    .locator('[data-audio-asset-purpose]')
+    .fill('SYNTHETIC URA reception');
   expect(writes).toBe(0);
   await capture.locator('[data-start-institutional-capture]').click();
   await expect
@@ -9764,6 +9767,83 @@ test('institutional audio folders native browser capture uses only the synthetic
   const filtered = await chooseFormat('audio/ogg');
   expect(filtered.meta.total).toBe(1);
   expect(filtered.items.map(item => item.id)).toEqual([asset.id]);
+  const applyPurpose = async (value: string) => {
+    await library.locator('[data-audio-file-purpose-filter]').fill(value);
+    const received = page.waitForResponse(response => {
+      const requested = new URL(response.url());
+      return (
+        requested.pathname === prefix &&
+        response.request().method() === 'GET' &&
+        requested.searchParams.get('purpose') === value
+      );
+    });
+    await library
+      .getByRole('button', { name: 'Filtrar áudios', exact: true })
+      .click();
+    const response = await received;
+    expect(response.status()).toBe(200);
+    return response.json();
+  };
+  const usage = await applyPurpose('ura');
+  expect(usage.meta.total).toBe(1);
+  expect(usage.items.map(item => item.id)).toEqual([asset.id]);
+  expect(usage.items[0].purpose).toBe('SYNTHETIC URA reception');
+  await page.reload();
+  await expect(library.locator('[data-audio-file-purpose-filter]')).toHaveValue(
+    'ura'
+  );
+  await expect(saved).toContainText(name);
+  const usageContrast = await contrast(
+    library.locator(
+      `label[for="${await library.locator('[data-audio-file-purpose-filter]').getAttribute('id')}"]`
+    )
+  );
+  expect(usageContrast.ratio).toBeGreaterThanOrEqual(4.5);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await expect(
+    saved.locator('[data-audio-asset-purpose-summary]')
+  ).toContainText('SYNTHETIC URA reception');
+  const usageScreenshot = `.codex/call-center-native-e2e/${info.project.name}-audio-purpose-filter.png`;
+  await library
+    .locator('[data-audio-file-purpose-filter]')
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({ path: usageScreenshot, fullPage: false });
+  const unmatchedUsage = await applyPurpose(
+    'SYNTHETIC no such institutional usage'
+  );
+  expect(unmatchedUsage.meta.total).toBe(0);
+  expect(unmatchedUsage.items).toEqual([]);
+  await expect(saved).toHaveCount(0);
+  await applyPurpose('ura');
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-purpose-filter.json`,
+    JSON.stringify(
+      {
+        sha: process.env.GITHUB_SHA,
+        project: info.project.name,
+        account_id: String(target.account_id),
+        synthetic: true,
+        actual_dark_theme: info.project.name.endsWith('dark'),
+        actual_native_GET: true,
+        asset_id: asset.id,
+        persisted_purpose: 'SYNTHETIC URA reception',
+        matching_total: usage.meta.total,
+        unmatched_total: unmatchedUsage.meta.total,
+        restored_URL_and_same_native_asset_after_reload: true,
+        contrast: usageContrast,
+        screenshot: usageScreenshot,
+        new_catalog_or_provider_operation: false,
+        whole_figure_or_Part1_accepted: false,
+      },
+      null,
+      2
+    ) + '\n'
+  );
+
   await page.reload();
   await expect(library.locator('[data-audio-file-source-filter]')).toHaveValue(
     'browser_capture'
@@ -9792,6 +9872,10 @@ test('institutional audio folders native browser capture uses only the synthetic
   const cleared = new URL(page.url()).searchParams;
   expect(cleared.get('audio_unit')).toBe(String(target.unit_id));
   expect(cleared.has('audio_file_source')).toBe(false);
+  expect(cleared.has('audio_file_purpose')).toBe(false);
+  await expect(library.locator('[data-audio-file-purpose-filter]')).toHaveValue(
+    ''
+  );
   expect(cleared.has('audio_file_format')).toBe(false);
   expect(cleared.has('audio_file_q')).toBe(false);
   await page.goto(

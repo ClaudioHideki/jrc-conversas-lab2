@@ -36,6 +36,7 @@ const selectedAgent = computed(() =>
   )
 );
 const closeAgentDetails = () => {
+  if (!selectedAgentId.value) return;
   selectedAgentId.value = '';
   agentDialog.value?.close();
 };
@@ -501,7 +502,7 @@ onBeforeUnmount(() => {
       :show-cancel-button="false"
       :use-form="false"
       contained
-      @close="closeAgentDetails"
+      @close="selectedAgentId = ''"
     >
       <div
         class="min-w-0 space-y-4 text-sm text-n-slate-12"

@@ -190,5 +190,21 @@
     "usable_delivery_requires_native_and_browser_acceptance": true,
     "no_other_own_CI_in_parallel": true,
     "effective_hours_not_measured_not_fabricated": true
+  },
+  "next_independent_grouped_increment": {
+    "document": "docs/jrc_contact_center/native_audio_purpose_filter_candidate_20261127.json",
+    "sha256": "16db24927860cf9cdc79e2ecf186e34a0487950e1696a58bd51ef94d0d3490f3",
+    "parent": "c6446040c0b161061540787b8e89696bf126130e",
+    "existing_suite_reused_not_duplicated": true,
+    "no_other_own_CI_in_parallel": true,
+    "staging_requires_current_full_native_and_original_browser_evidence": false,
+    "effective_hours_not_measured_not_fabricated": true,
+    "includes_native_Dialog_contract_correction": "docs/jrc_contact_center/native_supervisor_dialog_close_correction_20261127.json",
+    "current_parent_popup_known_defect_not_accepted": true,
+    "staging_requires_completed_current_run_preserved_actual_outcomes_and_verified_native_contract": true,
+    "settings_same_account_access_revalidation": "docs/jrc_contact_center/native_legacy_settings_context_candidate_20261127.json",
+    "prepared_new_Vue_cases_total": 11,
+    "one_own_CI_at_a_time": true,
+    "usable_delivery_not_test_count_is_acceptance_unit": true
   }
 }

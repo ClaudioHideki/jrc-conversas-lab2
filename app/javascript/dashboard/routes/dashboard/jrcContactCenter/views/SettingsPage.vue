@@ -1,9 +1,11 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
+import { useMapGetter } from 'dashboard/composables/store';
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import VisualMetricCard from '../components/visual/VisualMetricCard.vue';
 import VisualSectionCard from '../components/visual/VisualSectionCard.vue';
 import VisualStatusBadge from '../components/visual/VisualStatusBadge.vue';
@@ -22,32 +24,47 @@ const integration = ref(null);
 const agents = ref([]);
 const context = ref(null);
 const accountId = computed(() => route.params.accountId);
+const currentUser = useMapGetter('getCurrentUser');
+const contextKey = computed(() => {
+  const member = currentUser.value?.accounts?.find(
+    row => String(row.id) === String(accountId.value)
+  );
+  return JSON.stringify([
+    accountId.value,
+    currentUser.value?.id,
+    currentUser.value?.type,
+    accountMembershipAccess(member),
+  ]);
+});
+const observed = computed(
+  () => !loading.value && !failed.value && context.value
+);
 
 const metrics = computed(() => [
   {
     label: t('JRC_CONTACT_CENTER.CARDS.UNITS'),
-    value: units.value.length,
+    value: observed.value ? units.value.length : '—',
     detail: t('JRC_CONTACT_CENTER.VISUAL.LABEL_1154'),
     icon: 'i-lucide-building-2',
     tone: 'blue',
   },
   {
     label: t('JRC_CONTACT_CENTER.CARDS.QUEUES'),
-    value: queues.value.length,
+    value: observed.value ? queues.value.length : '—',
     detail: t('JRC_CONTACT_CENTER.VISUAL.LABEL_1155'),
     icon: 'i-lucide-layers-3',
     tone: 'teal',
   },
   {
     label: t('JRC_CONTACT_CENTER.CARDS.MEMBERSHIPS'),
-    value: memberships.value.length,
+    value: observed.value ? memberships.value.length : '—',
     detail: t('JRC_CONTACT_CENTER.VISUAL.LABEL_1156'),
     icon: 'i-lucide-users-round',
     tone: 'violet',
   },
   {
     label: t('JRC_CONTACT_CENTER.SETTINGS.ROUTING'),
-    value: rules.value.length,
+    value: observed.value ? rules.value.length : '—',
     detail: t('JRC_CONTACT_CENTER.VISUAL.LABEL_1157'),
     icon: 'i-lucide-route',
     tone: 'amber',
@@ -90,7 +107,17 @@ const load = async () => {
     if (version === generation) loading.value = false;
   }
 };
-watch(accountId, load, { immediate: true });
+watch(contextKey, load, { immediate: true, flush: 'sync' });
+onBeforeUnmount(() => {
+  generation += 1;
+  context.value = null;
+  units.value = [];
+  queues.value = [];
+  memberships.value = [];
+  agents.value = [];
+  rules.value = [];
+  integration.value = null;
+});
 </script>
 
 <template>
