@@ -21,9 +21,12 @@ RSpec.describe 'Native manual recording Ticket transaction contention', :pabx do
   end
 
   def create_ticket
-    input = ticket_input
-    described_writer.call(recording_id: input.fetch('recording_id'), unit_id: input.fetch('unit_id'),
-                           attributes: input.fetch('ticket'), idempotency_key: ticket_key)
+    write_ticket(described_writer, ticket_input, ticket_key)
+  end
+
+  def write_ticket(writer, input, key)
+    writer.call(recording_id: input.fetch('recording_id'), unit_id: input.fetch('unit_id'),
+                attributes: input.fetch('ticket'), idempotency_key: key)
   end
 
   def described_writer
@@ -39,8 +42,7 @@ RSpec.describe 'Native manual recording Ticket transaction contention', :pabx do
       ApplicationRecord.connection_pool.with_connection do |connection|
         ready << connection.raw_connection.backend_pid
         writer = JrcContactCenter::RecordingTicketIntake.new(account: Account.find(ids[0]), member: AccountUser.find(ids[1]))
-        results << writer.call(recording_id: values.fetch('recording_id'), unit_id: values.fetch('unit_id'),
-                                 attributes: values.fetch('ticket'), idempotency_key: key)
+        results << write_ticket(writer, values, key)
       end
     rescue StandardError => e
       results << e

@@ -14,7 +14,7 @@ class JrcContactCenter::RecordingTicketIntake
     with_source(recording_id) do |record, call, contact|
       raise ArgumentError unless JrcServiceDesk::Input.id(attributes.fetch('requester_id')) == contact.id
 
-      create_ticket(record, call, unit_id, attributes, idempotency_key, options)
+      create_ticket(record, call, { unit_id: unit_id, attributes: attributes, request_key: idempotency_key }, options)
     end
   end
 
@@ -60,21 +60,22 @@ class JrcContactCenter::RecordingTicketIntake
     raise Pundit::NotAuthorizedError unless identified
   end
 
-  def create_ticket(record, call, identifier, attributes, request_key, options)
+  def create_ticket(record, call, input, options)
     context = JrcServiceDesk::OperationalContext.new(user_context)
-    unit = authorized_unit!(context, call, identifier)
-    key = JrcServiceDesk::Input.request_key(request_key)
+    unit = authorized_unit!(context, call, input.fetch(:unit_id))
+    key = JrcServiceDesk::Input.request_key(input.fetch(:request_key))
     reject_cross_unit_replay!(unit, key)
     raise ArgumentError if options[:internal_request] == true
 
     JrcServiceDesk::CreateTicketWorkflowService.new(user_context: context.to_h).call(
-      unit_id: unit.id, attributes: attributes, idempotency_key: key,
+      unit_id: unit.id, attributes: input.fetch(:attributes), idempotency_key: key,
       **options, recording_origin: origin(record, call)
     )
   end
 
   def authorized_unit!(context, call, identifier = nil)
     raise Pundit::NotAuthorizedError unless context.native_operator? && context.capability?(:tickets_create) && context.capability?(:customers_view)
+
     mapped_id = mapped_unit_id(call)
     unit = context.unit_scope.find(identifier ? JrcServiceDesk::Input.id(identifier) : mapped_id)
     raise JrcServiceDesk::IdempotencyConflict unless mapped_id == unit.id
@@ -88,6 +89,7 @@ class JrcContactCenter::RecordingTicketIntake
     scope = call.current_unit.settings
     business = @account.jrc_crm_business_units.where(active: true).lock('FOR SHARE').find(JrcServiceDesk::Input.id(scope['business_unit_id']))
     raise Pundit::NotAuthorizedError unless business.company_id == JrcServiceDesk::Input.id(scope['issuer_company_id'])
+
     JrcServiceDesk::Input.id(business.settings['service_desk_unit_id'])
   end
 

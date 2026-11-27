@@ -165,9 +165,9 @@ RSpec.describe 'Native manual Service Desk intake from an authorized recording',
         headers: actor.create_new_auth_token, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body).to eq('contract_version' => 1, 'account_id' => account.id.to_s, 'user_id' => actor.id.to_s,
-                                      'recording_id' => record.id.to_s, 'call_session_id' => source_call.id.to_s,
-                                      'call_id' => source_call.external_session_id,
-                                      'contact_id' => sd_contact.id.to_s, 'service_desk_unit_id' => sd_unit.id.to_s)
+                                       'recording_id' => record.id.to_s, 'call_session_id' => source_call.id.to_s,
+                                       'call_id' => source_call.external_session_id,
+                                       'contact_id' => sd_contact.id.to_s, 'service_desk_unit_id' => sd_unit.id.to_s)
     expect(response.headers.fetch('Cache-Control')).to include('private', 'no-store')
     expect(provider).not_to have_received(:find_analysis)
     expect(tickets).to be_empty

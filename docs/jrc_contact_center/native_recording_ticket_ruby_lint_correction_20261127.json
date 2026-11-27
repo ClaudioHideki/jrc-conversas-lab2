@@ -1,0 +1,15 @@
+{
+  "source_parent": "edd1ad30c5004d9138b9a9417028706867b45d8c",
+  "failed_run": 46021927565,
+  "original_lint_report_sha256": "9a7ceaa8b209e6f30fc3fa5373b556051a249b5a3e001bdbf6cec6efde235f92",
+  "actual_findings": 28,
+  "changes": [
+    "Keyword input replaces a six-argument private forwarding method without changing server validation.",
+    "Alignment and guard spacing match native Ruby rules.",
+    "Synthetic seed and read-only witness split existing operations into bounded methods; all environment, identity and origin checks retained.",
+    "Committed contenders reuse the exact same writer helper; lock waits, separate backends, rollback and duplicate assertions retained."
+  ],
+  "all_native_and_browser_tests_still_required": true,
+  "permissions_migrations_test_counts_workflow_and_lint_configuration_changed": false,
+  "native_or_Chrome_accepted": false
+}
