@@ -4585,5 +4585,23 @@
     "native_401_inherited_handler_preserved": true,
     "no_permission_or_product_change": true,
     "native_or_Chrome_acceptance": false
+  },
+  "manual_link_E164_fixture_correction": {
+    "source_parent": "9decd0205870c4c7ddd681e0cc9c833ff59c9ebd",
+    "run": 46076604690,
+    "job": 140765675701,
+    "artifact": 15235306966,
+    "artifact_sha256": "f92f0b0b18569f78f043c546b9e5b80d92499415d008cf5911b84f7f21c4755f",
+    "actual_native_preflight": {
+      "examples": 49,
+      "passed": 48,
+      "failed": 1,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "confirmed_failure": "Only synthetic phone omits mandatory E164 leading plus. Product validation remains unchanged.",
+    "correction": "Use E164 synthetic phone in the existing no-auto-link preview scenario. Same 49 cases and all negative assertions.",
+    "product_and_permissions_changed": false,
+    "native_or_visual_acceptance": false
   }
 }

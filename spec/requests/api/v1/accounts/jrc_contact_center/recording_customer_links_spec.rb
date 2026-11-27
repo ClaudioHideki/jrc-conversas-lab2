@@ -26,7 +26,7 @@ RSpec.describe 'Explicit initial customer linkage from a native recording', :pab
   end
 
   it 'previews only current identity and version without selecting a telephone candidate or reading Nico' do
-    contact.update!(phone_number: record.caller)
+    contact.update!(phone_number: "+#{record.caller}")
     get path, headers: actor.create_new_auth_token
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body).to include('account_id' => account.id.to_s, 'user_id' => actor.id.to_s,
