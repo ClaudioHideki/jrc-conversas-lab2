@@ -1,0 +1,50 @@
+{
+  "source_parent": "6c8071434ab655f1f486d04d30a3e3bb9807d461",
+  "failed_run": 46047326846,
+  "artifact": 15223147481,
+  "artifact_sha256": "baea7eb90b75b5e114a3975040826361094b8c49f7598f5cbe877a7503e8a256",
+  "exact_findings": [
+    {
+      "path": "script/jrc_call_center_recording_customer_records_seed.rb",
+      "offenses": [
+        {
+          "severity": "convention",
+          "message": "Align the arguments of a method call if they span more than one line.",
+          "cop_name": "Layout/ArgumentAlignment",
+          "corrected": false,
+          "correctable": true,
+          "location": {
+            "start_line": 38,
+            "start_column": 39,
+            "last_line": 38,
+            "last_column": 72,
+            "length": 34,
+            "line": 38,
+            "column": 39
+          }
+        },
+        {
+          "severity": "convention",
+          "message": "Align the keys of a hash literal if they span more than one line.",
+          "cop_name": "Layout/HashAlignment",
+          "corrected": false,
+          "correctable": true,
+          "location": {
+            "start_line": 38,
+            "start_column": 39,
+            "last_line": 38,
+            "last_column": 72,
+            "length": 34,
+            "line": 38,
+            "column": 39
+          }
+        }
+      ]
+    }
+  ],
+  "correction": "Align the synthetic pipeline continuation to the exact native first argument column. All arguments, assertions, owned guards and code behavior remain unchanged.",
+  "argument_column_zero_based": 40,
+  "functional_or_permission_change": false,
+  "directed_Vue_passed": 325,
+  "native_or_browser_acceptance": false
+}
