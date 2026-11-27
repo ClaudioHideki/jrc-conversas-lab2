@@ -60,8 +60,7 @@ RSpec.describe 'Explicit native task creation from an authorized recording', :pa
     post path, params: { recording_task: input }, as: :json
     expect(response).to have_http_status(:unauthorized)
     foreign = create(:account)
-    post path.sub("accounts/#{account.id}", "accounts/#{foreign.id}"), headers: headers,
-          params: { recording_task: input }, as: :json
+    post path.sub("accounts/#{account.id}", "accounts/#{foreign.id}"), headers: headers, params: { recording_task: input }, as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(counts).to eq([0, 0, 0])
   end

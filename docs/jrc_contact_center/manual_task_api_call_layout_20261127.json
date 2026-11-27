@@ -1,0 +1,19 @@
+{
+  "parent": "ac3a0db8fac6e44ffa490ec2aaa489c45da545e3",
+  "failed_run": 45948578941,
+  "failed_job": 140338873742,
+  "artifact": 15176435523,
+  "artifact_sha256": "42aaccd188e361c9306e28995797f3c888a47abb80a9b00972194b200ed9c216",
+  "lint_report_sha256": "e99bac1528995fe630cd9685bd102afb5d7e13d637744062cd5c487e47472e1a",
+  "offenses_addressed": 1,
+  "previous_offenses_resolved": 22,
+  "only_same_post_call_layout_changed": true,
+  "source_sha256": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_tasks_spec.rb": "89ef55fe2554d914d279dde48a0e5adbf0159d18225293aa0b86c510037a9012"
+  },
+  "parent_sources": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_tasks_spec.rb": "3798673f265e77da599150e35bf758575442855bcb4267721075c6ad4993b1bd"
+  },
+  "no_assertion_or_gate_changed": true,
+  "native_or_Chrome_acceptance": false
+}
