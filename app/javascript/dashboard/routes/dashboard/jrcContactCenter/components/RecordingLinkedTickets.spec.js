@@ -49,7 +49,13 @@ const render = () =>
       authorityKey: 'scope-1',
     },
     global: {
-      stubs: { RouterLink: { props: ['to'], template: '<a><slot /></a>' } },
+      stubs: {
+        RouterLink: {
+          name: 'RouterLink',
+          props: ['to'],
+          template: '<a><slot /></a>',
+        },
+      },
     },
   });
 const button = (wrapper, suffix) =>

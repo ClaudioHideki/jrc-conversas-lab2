@@ -534,7 +534,7 @@ it('mounts only the native linked Ticket reader for a listener without granting 
   const wrapper = create({
     capabilities: { recordings_listen: true, operate: false, audit: false },
   });
-  await wrapper.get('[data-recording-actions-open]').trigger('click');
+  await wrapper.get('#recording-1-15-tab-actions').trigger('click');
   expect(
     wrapper.findComponent({ name: 'RecordingTicketAction' }).exists()
   ).toBe(false);

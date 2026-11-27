@@ -1,0 +1,19 @@
+{
+  "source_parent": "3d0c03442e40254fc9da7429ed57fd7927d6e075",
+  "failed_run": 46025265385,
+  "failed_artifact": 15211812824,
+  "failed_artifact_sha256": "ca198813b957d6b2caad2771c59422464b32619790cda634e63cea7eae4f68d8",
+  "actual_directed_Vue": {
+    "passed": 303,
+    "failed": 2,
+    "total": 305
+  },
+  "causes": [
+    "A read-only listener uses the existing Actions tab identity; the operational-action data attribute intentionally requires operate/audit.",
+    "The RouterLink test stub rendered its slot but had no component name for the exact route-prop assertion."
+  ],
+  "changes": "Use the existing tab ID for this read-only scenario and name the RouterLink stub; keep all assertions and production permissions.",
+  "product_or_workflow_changed": false,
+  "cases_or_assertions_removed": false,
+  "native_or_Chrome_accepted": false
+}
