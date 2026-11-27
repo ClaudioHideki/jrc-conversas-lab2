@@ -1,0 +1,17 @@
+{
+  "parent": "669faad33aa95e0f925dab3ba1787c5362d661e2",
+  "failed_run": 45947293544,
+  "failed_job": 140334803797,
+  "log_sha256": "b282b49223675af9c35080f000ff7555fa25dbc935c06736b75b6a695f316a3e",
+  "progress": "165 of 166 directed Vue cases now pass; all close/withdrawal spy assertions pass. One async component stub does not declare props, so props() returns an empty object.",
+  "cause": "Explicitly declare the async RecordingTaskCreate stub props and events, preserving the assertions and avoiding loading the native editor/API in the component test.",
+  "source_sha256": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "a605cec708f91c8c7557b8cabca94cf4fcae7f96a81f6462a18805ac66f7754c"
+  },
+  "parent_sources": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "cad10ca0e9cf694f5db43da85a8f94fa0a6d29b745a871538e3f0c97349f41f4"
+  },
+  "all_13_examples_and_every_behavioral_assertion_preserved": true,
+  "product_code_changed": false,
+  "native_or_Chrome_acceptance": false
+}

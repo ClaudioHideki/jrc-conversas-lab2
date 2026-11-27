@@ -45,7 +45,12 @@ const create = overrides =>
         QualityReviewHistory: true,
         RecordingEndingActions: true,
         RecordingManualTasks: true,
-        RecordingTaskCreate: true,
+        RecordingTaskCreate: {
+          name: 'RecordingTaskCreate',
+          props: ['accountId', 'recordingId', 'authorityKey'],
+          emits: ['close', 'changed'],
+          template: '<span />',
+        },
       },
     },
   });
