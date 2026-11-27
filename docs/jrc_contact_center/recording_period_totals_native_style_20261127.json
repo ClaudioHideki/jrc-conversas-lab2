@@ -1,0 +1,24 @@
+{
+  "parent": "3766b764ca47cd1714148f117834d4f7494739a6",
+  "failed_run": 45950474664,
+  "failed_job": 140344896312,
+  "artifact": 15176339566,
+  "artifact_sha256": "e344a574b0014001f0fee5e29813725a32f6c52446ea43b05ddb56368a5f5898",
+  "lint_report_sha256": "d26307a60839ff2d85c864407a2c90c91dd03e4b51ebd83a8f7f504db4524827",
+  "offenses_addressed": 7,
+  "source_sha256": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb": "40ea994ea7fb67564ebe22ae9fbd756577a1059f795c00d032ec00881586cc71",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "202ecf7c3f54dda385e3857da58d24a9054ea2a180f1b50a9d695091cb660110",
+    ".github/workflows/call-center-administration.yml": "9637075f7abd29baf8e5924fd510fc49df71c5d1a483c13dd54b9d0badebb64a"
+  },
+  "parent_sources": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/recordings_controller.rb": "8a852ccda8505458531966a20578d961c0afd4cf2a5f83c651806eab85a3035e",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recordings_spec.rb": "c8ad819aca2ae4c10f1bc11c4417b6d62227ad02ba90a526c0f5a6736722e86b",
+    ".github/workflows/call-center-administration.yml": "1aa347696095f8606b5b82272360c197d0b960a514864212bb64bc1f524b5d5a"
+  },
+  "controller_change": "Inline the same period summary and use native Hash#dig on the always-present pagination metadata; no extra query, helper or behavior.",
+  "all_original_and_four_new_API_cases_and_assertions_preserved": true,
+  "additional_gate_requirement": "Include the two already mandatory recording task concurrency and schema-reload JSONs in the final acceptance index, preserving all previous required reports.",
+  "no_security_or_quality_gate_removed": true,
+  "native_or_Chrome_acceptance": false
+}

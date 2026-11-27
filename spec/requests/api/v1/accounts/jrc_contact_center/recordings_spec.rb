@@ -411,23 +411,26 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
     get path, headers: headers, params: { page: 2, per_page: 1 }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').length).to eq(1)
-    expect(response.parsed_body.fetch('summary')).to eq('total' => 2, 'duration_measured_count' => 2,
-                                                      'duration_missing_count' => 0, 'duration_seconds' => 125, 'duration_unit' => 'seconds')
+    expect(response.parsed_body.fetch('summary')).to eq(
+      'total' => 2, 'duration_measured_count' => 2, 'duration_missing_count' => 0, 'duration_seconds' => 125, 'duration_unit' => 'seconds'
+    )
   end
 
   it 'keeps a missing duration unknown while preserving the real authorized recording count' do
     record.update!(duration_seconds: nil)
     get path, headers: headers
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body.fetch('summary')).to eq('total' => 1, 'duration_measured_count' => 0,
-                                                      'duration_missing_count' => 1, 'duration_seconds' => nil, 'duration_unit' => 'seconds')
+    expect(response.parsed_body.fetch('summary')).to eq(
+      'total' => 1, 'duration_measured_count' => 0, 'duration_missing_count' => 1, 'duration_seconds' => nil, 'duration_unit' => 'seconds'
+    )
   end
 
   it 'treats invalid negative provider durations as missing rather than subtracting from the total' do
     record.update!(duration_seconds: -1)
     get path, headers: headers
-    expect(response.parsed_body.fetch('summary')).to include('duration_measured_count' => 0, 'duration_missing_count' => 1,
-                                                           'duration_seconds' => nil)
+    expect(response.parsed_body.fetch('summary')).to include(
+      'duration_measured_count' => 0, 'duration_missing_count' => 1, 'duration_seconds' => nil
+    )
   end
 
   it 'uses the same filtered universe for duration and rows and never adds a personally unauthorized call' do
