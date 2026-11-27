@@ -82,6 +82,7 @@ export function createServiceDeskOperationsClient(http) {
         'files',
         'file_fingerprints',
         'internal_request',
+        'recording_id',
       ]);
       const ticket = fields(payload.ticket, [
         'title',
@@ -122,6 +123,8 @@ export function createServiceDeskOperationsClient(http) {
           ? { conversation_id: id(payload.conversation_id) }
           : {}),
       };
+      if (Object.hasOwn(payload, 'recording_id'))
+        body.recording_id = id(payload.recording_id);
       let transport = body;
       if (
         payload.files !== undefined &&

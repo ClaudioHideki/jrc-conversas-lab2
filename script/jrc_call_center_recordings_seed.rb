@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'jrc_call_center_recording_task_seed'
+require_relative 'jrc_call_center_recording_ticket_seed'
 
 # Exclusive synthetic records for the existing native browser runner. Never imports a real CDR or issues a provider request.
 class JrcContactCenter::SyntheticRecordingsSeed
@@ -46,7 +47,8 @@ class JrcContactCenter::SyntheticRecordingsSeed
     { recordings: rows.transform_values { |record| recording_identity(record) },
       authorized_recording_count: 21, recording_provider_boundary: 'synthetic_in_memory_wav_not_external_homologation',
       quality_history_record: recording_identity(extras.first), ending_context: owned_ending_context(extras.first),
-      manual_task_destination: JrcContactCenter::SyntheticRecordingTaskSeed.call(account: @account, operator: @operator) }
+      manual_task_destination: JrcContactCenter::SyntheticRecordingTaskSeed.call(account: @account, operator: @operator),
+      manual_ticket_destination: JrcContactCenter::SyntheticRecordingTicketSeed.call(account: @account, operator: @operator, queue: @queues.first) }
   end
 
   private

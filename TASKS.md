@@ -1135,3 +1135,6 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 
 
 - Aceite literal delimitado: 28 cláusulas adicionais comprovadas no SHA 62f8f4b1defc467c3f5a14fd4817e36385beaebf, CI 45984659600, com evidência nativa independente e capturas originais conferidas. Matriz: 80/554 aceitas; figura 10: 14/25. Isso não encerra figuras nem homologa fornecedores. A recuperação de falha SQL permanece sem aceite até o próximo fluxo real. Registro: docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json. O novo lote precisa da própria CI antes de ser aceito.
+
+
+- Lote funcional das figuras 21/22/23: formulário nativo de chamado a partir da gravação, solicitante e unidade derivados no servidor, permissões atuais, origem privada auditada e chave idempotente nativa. Reutilizados Cadastro Mestre e Service Desk, sem novo cadastro, migration ou grant. Preparados 25 testes Rails, 57 Vue e ampliação dos quatro fluxos Chrome existentes; ainda sem aceite. A correção do inventário final foi reproduzida contra o artefato d236 (83/10/4), com oito verificações leves do gate, sem dispensar casos ou regressões. A entrega continua no mesmo lote, preservando os 80 requisitos aceitos e as dependências externas separadas.

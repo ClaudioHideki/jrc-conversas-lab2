@@ -1,5 +1,7 @@
 <script setup>
 import QuickTicketForm from '../components/QuickTicketForm.vue';
+import { useRecordingTicketContext } from '../composables/useRecordingTicketContext';
+import { selectedRecordingForTicket } from '../helpers/recordingTicketSource';
 import InternalTicketForm from '../components/InternalTicketForm.vue';
 import EstablishmentPicker from '../components/EstablishmentPicker.vue';
 import TicketAssetLinks from '../components/TicketAssetLinks.vue';
@@ -65,6 +67,18 @@ const hasCustomerMaster = computed(
 );
 const route = useRoute();
 const router = useRouter();
+const recordingIntake = useRecordingTicketContext({
+  route,
+  session,
+  enabled: hasCustomerMaster,
+  edit: computed(() => props.screen === 'edit'),
+});
+const {
+  present: hasRecordingSource,
+  source: recordingSource,
+  loading: recordingLoading,
+  error: recordingError,
+} = recordingIntake;
 const key = 'ticket:edit';
 const writeKey = 'ticket:form:write';
 let requestKey = null;
@@ -89,7 +103,8 @@ const busy = computed(
     mutation.value.status === 'saving' ||
     hashingFiles.value ||
     requesterBusy.value ||
-    masterLoading.value
+    masterLoading.value ||
+    recordingLoading.value
 );
 const step = ref(0);
 const advanced = ref(false);
@@ -189,7 +204,8 @@ const quickUnit = ref('');
 const hasMasterSource = computed(
   () =>
     !edit.value &&
-    (route.query.master_company_id !== undefined ||
+    (hasRecordingSource.value ||
+      route.query.master_company_id !== undefined ||
       route.query.master_contact_id !== undefined)
 );
 const sourceUnit = computed(() =>
@@ -204,6 +220,8 @@ watch(
     () => session.state.status,
     hasCustomerMaster,
     hasMasterSource,
+    hasRecordingSource,
+    () => recordingSource.value?.contact_id,
     () => route.query.master_company_id,
     () => route.query.master_contact_id,
     sourceUnit,
@@ -223,6 +241,12 @@ watch(
       row => row.id === sourceUnit.value
     );
     if (!selectedUnit?.permissions.create_ticket) return;
+    if (
+      hasRecordingSource.value &&
+      (!recordingSource.value ||
+        selectedUnit.id !== recordingSource.value.service_desk_unit_id)
+    )
+      return;
     const request = new AbortController();
     masterController = request;
     cleanup(() => request.abort());
@@ -236,8 +260,12 @@ watch(
           unitId: selectedUnit.id,
         },
         {
-          companyId: route.query.master_company_id,
-          contactId: route.query.master_contact_id,
+          companyId: hasRecordingSource.value
+            ? undefined
+            : route.query.master_company_id,
+          contactId: hasRecordingSource.value
+            ? recordingSource.value.contact_id
+            : route.query.master_contact_id,
         },
         request.signal
       );
@@ -402,6 +430,11 @@ const requesterPhone = computed(() => {
   return selected?.phone_number || '';
 });
 const changeUnit = value => {
+  if (
+    hasRecordingSource.value &&
+    value !== recordingSource.value?.service_desk_unit_id
+  )
+    return;
   if (!busy.value && value !== draft.unit_id) {
     Object.assign(draft, blank(), { unit_id: value });
     files.value = [];
@@ -421,16 +454,28 @@ const load = () => {
   resetNames();
   operatorId.value = '';
   requestKey = null;
-  Object.assign(draft, blank());
+  Object.assign(
+    draft,
+    blank(),
+    recordingSource.value
+      ? { unit_id: recordingSource.value.service_desk_unit_id }
+      : {}
+  );
   files.value = [];
   applyRelationshipCustomer();
   if (edit.value)
     return session.load(key, 'tickets', {}, route.params.ticketId);
   return undefined;
 };
-watch([() => route.params.ticketId, () => session.state.status], load, {
-  immediate: true,
-});
+watch(
+  [
+    () => route.params.ticketId,
+    () => session.state.status,
+    () => (hasRecordingSource.value ? recordingIntake.identity.value : ''),
+  ],
+  load,
+  { immediate: true }
+);
 watch(
   [
     () => route.params.accountId,
@@ -441,6 +486,15 @@ watch(
     edit,
   ],
   loadRelationshipCustomer,
+  { immediate: true }
+);
+watch(
+  [recordingSource, busy],
+  ([value]) => {
+    if (!hasRecordingSource.value) return;
+    advanced.value = true;
+    if (value && !busy.value) changeUnit(value.service_desk_unit_id);
+  },
   { immediate: true }
 );
 watch(record, value => {
@@ -500,11 +554,29 @@ defineExpose({
   advanced,
 });
 
+const recordingMatchesDraft = computed(() => {
+  if (!hasRecordingSource.value) return true;
+  try {
+    selectedRecordingForTicket(
+      recordingSource.value,
+      session.accountId.value,
+      session.userId.value,
+      {
+        unit_id: draft.unit_id,
+        ticket: { requester_id: draft.requester_id },
+      }
+    );
+    return !!masterCustomer.value && !masterError.value;
+  } catch {
+    return false;
+  }
+});
 const maySave = computed(
   () =>
     !!session.operations &&
     !creationReceipt.value &&
     mayEdit.value &&
+    recordingMatchesDraft.value &&
     !busy.value &&
     !hashingFiles.value &&
     files.value.length <= 5 &&
@@ -564,6 +636,7 @@ const submit = async () => {
   const submissionContext = session.state.context;
   const submissionAccount = session.accountId.value;
   const submissionUser = session.userId.value;
+  const submissionSource = recordingSource.value;
   localError.value = false;
   try {
     if (!edit.value) requestKey ||= newRequestKey();
@@ -575,6 +648,13 @@ const submit = async () => {
           requestKey,
           hasCustomerMaster.value
         );
+    if (hasRecordingSource.value)
+      payload.recording_id = selectedRecordingForTicket(
+        submissionSource,
+        submissionAccount,
+        submissionUser,
+        payload
+      );
     if (!edit.value && files.value.length) {
       hashingFiles.value = true;
       const context = session.state.context;
@@ -589,6 +669,12 @@ const submit = async () => {
       payload.files = selected;
       payload.file_fingerprints = fingerprints;
     }
+    if (
+      hasRecordingSource.value &&
+      (submissionSource !== recordingSource.value ||
+        !recordingMatchesDraft.value)
+    )
+      return;
     const confirmed = await session.operations.write(
       writeKey,
       edit.value ? 'update' : 'create',
@@ -631,8 +717,35 @@ const submit = async () => {
       )
     }}
   </p>
+  <Banner
+    v-if="hasRecordingSource && recordingSource"
+    color="blue"
+    class="mb-3"
+    data-recording-ticket-origin
+  >
+    {{
+      t('JRC_CONTACT_CENTER.RECORDING_TICKET.READY', {
+        id: recordingSource.recording_id,
+      })
+    }}
+  </Banner>
+  <State
+    v-if="hasRecordingSource && !recordingSource"
+    :status="recordingLoading ? 'loading' : 'denied'"
+    retry
+    @retry="recordingIntake.refresh"
+  />
+  <p
+    v-if="hasRecordingSource && recordingError"
+    role="alert"
+    class="mb-3 text-sm text-n-ruby-11"
+    data-recording-ticket-denied
+  >
+    {{ t('JRC_CONTACT_CENTER.RECORDING_TICKET.UNAVAILABLE') }}
+  </p>
   <InternalTicketForm
     v-if="
+      !hasRecordingSource &&
       !edit &&
       (employeeOnly ||
         (!advanced && !relationshipSeed && !quickSeed && !hasMasterSource))
@@ -644,7 +757,7 @@ const submit = async () => {
     @open="openCreatedTicket"
   />
   <QuickTicketForm
-    v-else-if="!edit && !advanced"
+    v-else-if="!hasRecordingSource && !edit && !advanced"
     ref="quickForm"
     :customer-context="masterCustomer"
     :customer-context-source="hasMasterSource"
@@ -655,7 +768,7 @@ const submit = async () => {
     @cancel="cancel"
     @open="openCreatedTicket"
   />
-  <section v-else>
+  <section v-else-if="!hasRecordingSource || recordingSource">
     <header class="sd-page-heading">
       <div>
         <h2 id="sd-ticket-form-title" class="sd-page-title">
@@ -666,7 +779,7 @@ const submit = async () => {
         </p>
       </div>
       <Button
-        v-if="!edit"
+        v-if="!edit && !hasRecordingSource"
         variant="ghost"
         color="slate"
         :label="t('JRC_SERVICE_DESK.QUICK.quick_mode')"
@@ -764,7 +877,7 @@ const submit = async () => {
                 v-model:operator-id="operatorId"
                 :unit-id="draft.unit_id"
                 required
-                :disabled="busy"
+                :disabled="busy || hasRecordingSource"
                 @update:unit-id="changeUnit"
               />
               <ServiceDefinitionSelect
@@ -802,7 +915,7 @@ const submit = async () => {
                 <p class="mb-1 text-sm font-medium">{{ T.servedCompany }}</p>
                 <CompanyPicker
                   v-model="draft.company_id"
-                  :disabled="!mayEdit || busy"
+                  :disabled="!mayEdit || busy || hasRecordingSource"
                 />
               </div>
               <Input
@@ -823,7 +936,7 @@ const submit = async () => {
                 :company-id="draft.company_id"
                 :label="t('JRC_SERVICE_DESK.FIELDS.requester')"
                 :unit-id="draft.unit_id"
-                :disabled="!mayEdit || busy"
+                :disabled="!mayEdit || busy || hasRecordingSource"
                 :current-name="
                   selectedNames.requester?.name || record?.requester?.name || ''
                 "

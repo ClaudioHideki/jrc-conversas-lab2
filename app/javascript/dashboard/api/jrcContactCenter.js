@@ -46,6 +46,14 @@ const calendarIdentity = value => {
 };
 
 export default {
+  recordingTicketIntake: (accountId, id, options = {}) =>
+    axios.get(
+      `${base(accountId)}/recordings/${recordIdentity(id)}/ticket_intake`,
+      {
+        signal: options.signal,
+        timeout: 20000,
+      }
+    ),
   recordingTasks: (accountId, id, page = 1) =>
     axios.get(`${base(accountId)}/recordings/${recordIdentity(id)}/tasks`, {
       params: { page },

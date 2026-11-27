@@ -1,0 +1,34 @@
+{
+  "source_parent": "d23678fcaafcc6617fb955dc5daf6d355d573471",
+  "failed_run": 46010205112,
+  "artifact": 15206298982,
+  "artifact_sha256": "3feed27424dbafc04be35e9f1c3bdffb11c91f1b406c63ecc43fab9be6c2b285",
+  "preflight": {
+    "example_count": 83,
+    "report_sha256": "c8b4be765aecc4ef14c7a6efae80ba0dd4d917fa14b3e23113209433cbd2d3e2"
+  },
+  "reload": {
+    "example_count": 10,
+    "report_sha256": "9d9ddebc51f564398307cf757c28692e236ea6f589db0aafda7769cf4d2ee77b"
+  },
+  "committed_concurrency": {
+    "example_count": 4,
+    "report_sha256": "c42e659cf308454d03206531f6367358cb82ac2fb9a5cabc5e7c9dc3c101ba61"
+  },
+  "actual_application_reports_have_zero_failures_pending_and_outside_errors": true,
+  "obsolete_post_gate_counts": [
+    72,
+    3
+  ],
+  "new_exact_counts": [
+    83,
+    4
+  ],
+  "all_existing_schema_upgrade_identity_and_zero_error_assertions_preserved": true,
+  "additional_checks": [
+    "exact per-file inventory",
+    "unique example identity"
+  ],
+  "whole_run_or_Chrome_accepted": false,
+  "native_or_visual_results_for_the_new_Ticket_payload": false
+}

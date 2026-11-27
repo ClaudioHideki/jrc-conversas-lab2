@@ -22,6 +22,8 @@ import { routes as approvalRoutes } from 'dashboard/routes/dashboard/approvals/r
 import { routes as webphoneRoutes } from 'dashboard/routes/dashboard/webphone/routes';
 import { routes as contactCenterRoutes } from 'dashboard/routes/dashboard/jrcContactCenter/routes';
 import { routes as projectRoutes } from 'dashboard/routes/dashboard/jrcProjects/routes';
+import { createIntegratedGuard } from 'dashboard/routes/dashboard/serviceDesk/helpers/nativeIntegration';
+import ServiceDeskAPI from 'dashboard/api/serviceDesk';
 import { validateLoggedInRoutes } from 'dashboard/helper/routeHelpers';
 import '../../../../app/javascript/dashboard/assets/scss/app.scss';
 
@@ -169,6 +171,42 @@ Reflect.set(window, '__REFRESH_CC_NATIVE_ACTOR__', () =>
   refreshNativeActor(router.currentRoute.value.params.accountId)
 );
 
+// Reuse the production route definitions, components and guard factory with this
+// harness's injected store. Both account/profile and Service Desk context remain
+// actual authenticated APIs; no grants, responses or session context are forged.
+const nativeServiceDeskGuard = createIntegratedGuard(
+  store,
+  async accountId => {
+    await refreshNativeActor(accountId);
+    return store.state.nativeAccount;
+  },
+  accountId => ServiceDeskAPI.context(accountId)
+);
+const registerNativeServiceDesk = async () => {
+  if (store.state.nativeAccount?.features.jrc_service_desk !== true)
+    return false;
+  const { routes: nativeServiceDeskRoutes } = await import(
+    'dashboard/routes/dashboard/serviceDesk/routes'
+  );
+  const layout = nativeServiceDeskRoutes.find(route =>
+    route.children?.some(child => child.name === 'jrc_service_desk_new')
+  );
+  const denied = nativeServiceDeskRoutes.find(
+    route => route.name === 'jrc_service_desk_denied'
+  );
+  if (!layout || !denied)
+    throw new Error('Required native Service Desk routes missing');
+  router.addRoute({
+    ...layout,
+    children: layout.children.map(child => ({
+      ...child,
+      beforeEnter: nativeServiceDeskGuard,
+    })),
+  });
+  router.addRoute(denied);
+  return true;
+};
+
 // Native permission consumer and production layout, backed by fresh authenticated APIs.
 router.beforeEach(async to => {
   if (
@@ -210,8 +248,15 @@ app.component('woot-confirm-delete-modal', ConfirmDeleteModal);
 app.component('woot-input', WootInput);
 app.component('woot-loading-state', LoadingState);
 router.isReady().then(async () => {
+  // A native SD deep link is a selector only. The actual account/profile APIs
+  // and the unchanged native guard still authorize it before mounting a form.
+  const sdAccount = /^\/app\/accounts\/([1-9]\d*)\/service-desk(?:\/|$)/.exec(
+    window.location.pathname
+  )?.[1];
+  const bootstrapAccount =
+    router.currentRoute.value.params.accountId || sdAccount;
   if (!nativeNavigation && !store.state.nativeAccount) {
-    await refreshNativeActor(router.currentRoute.value.params.accountId);
+    await refreshNativeActor(bootstrapAccount);
   }
   // The popup and full-page link use the product's actual contact routes.
   // Load that native graph only for an account whose real API enables it.
@@ -236,6 +281,9 @@ router.isReady().then(async () => {
       throw new Error('Native contact route missing from fixture source');
     routes.forEach(route => router.addRoute(route));
   }
+  const registeredSD = await registerNativeServiceDesk();
+  if (sdAccount && registeredSD && !router.currentRoute.value.name)
+    await router.replace(router.currentRoute.value.fullPath);
   app
     .use(store)
     .use(

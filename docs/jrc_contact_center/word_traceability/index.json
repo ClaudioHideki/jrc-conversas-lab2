@@ -2,7 +2,7 @@
   "format_version": 1,
   "review_at": "2026-11-23T20:15:50.371122+00:00",
   "validated_base_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
-  "candidate_source_parent_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "candidate_source_parent_sha": "d23678fcaafcc6617fb955dc5daf6d355d573471",
   "candidate_not_yet_validated": true,
   "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
@@ -4481,5 +4481,11 @@
     "native_distinct_examples": 2977,
     "screenshot_hashes_verified": 592
   },
-  "current_figure10_literal_acceptance_percentage": 56.0
+  "current_figure10_literal_acceptance_percentage": 56.0,
+  "next_manual_native_ticket_delivery": {
+    "document": "docs/jrc_contact_center/native_manual_recording_ticket_candidate_20261127.json",
+    "native_and_Chrome_acceptance": false,
+    "literal_554_IDs_and_statuses_preserved": true,
+    "no_new_module_model_migration_or_grant": true
+  }
 }

@@ -14,16 +14,13 @@ class Api::V1::Accounts::JrcServiceDesk::TicketsController < Api::V1::Accounts::
   end
 
   def create
-    values = body_values(%w[unit_id ticket conversation_id service_id files internal_request])
+    values = body_values(%w[unit_id ticket conversation_id service_id files internal_request recording_id])
     unit = policy_scope(::JrcServiceDesk::Unit).find(::JrcServiceDesk::Input.id(values.fetch('unit_id')))
     authorize ::JrcServiceDesk::Ticket.new(account: Current.account, unit: unit), :create?
     internal_request = values.fetch('internal_request', false)
     internal_request = true if internal_request == 'true' # Multipart form transport.
     raise ArgumentError unless [true, false].include?(internal_request)
-    ticket = ::JrcServiceDesk::CreateTicketWorkflowService.new(user_context: pundit_user).call(
-      unit_id: unit.id, attributes: creation_attributes(values.fetch('ticket')), conversation_id: values['conversation_id'],
-      service_id: values['service_id'], files: values.fetch('files', []), internal_request: internal_request,
-      idempotency_key: request.headers['Idempotency-Key'])
+    ticket = create_native_ticket(values, unit, internal_request)
     link_id = values['conversation_id'] && ticket.ticket_conversations.find_by(conversation_id: ::JrcServiceDesk::Input.id(values['conversation_id']))&.id
     opening_note = if values.fetch('files', []).any?
                      ticket.ticket_notes.find_by!(idempotency_key: "opening:#{Digest::SHA256.hexdigest(request.headers['Idempotency-Key'])}")
@@ -131,6 +128,19 @@ class Api::V1::Accounts::JrcServiceDesk::TicketsController < Api::V1::Accounts::
   end
 
   private
+
+  def create_native_ticket(values, unit, internal_request)
+    inputs = { unit_id: unit.id, attributes: creation_attributes(values.fetch('ticket')), conversation_id: values['conversation_id'],
+               service_id: values['service_id'], files: values.fetch('files', []), internal_request: internal_request,
+               idempotency_key: request.headers['Idempotency-Key'] }
+    if values.key?('recording_id')
+      return ::JrcContactCenter::RecordingTicketIntake.new(account: Current.account, member: Current.account_user).call(
+        recording_id: ::JrcServiceDesk::Input.id(values['recording_id']), **inputs
+      )
+    end
+
+    ::JrcServiceDesk::CreateTicketWorkflowService.new(user_context: pundit_user).call(**inputs)
+  end
 
   def creation_attributes(value)
     return value unless value.is_a?(String)

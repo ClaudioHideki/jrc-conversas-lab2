@@ -3460,6 +3460,13 @@
       "UNKNOWN": "O resultado da solicitação ainda não foi confirmado. Preserve os mesmos campos para consultar ou repetir com segurança; confira os vínculos antes de criar outra ação.",
       "CHANGED": "O contexto da chamada ou do usuário mudou. Reabra a chamada com seu acesso atual.",
       "SCOPE_UNAVAILABLE": "O contexto operacional da gravação não está disponível para vincular a tarefa. Atualize a gravação e confira o vínculo à unidade."
+    },
+    "RECORDING_TICKET": {
+      "OPEN": "Criar chamado desta gravação",
+      "LOADING": "Verificando acesso ao Service Desk…",
+      "UNAVAILABLE": "Não foi possível autorizar o chamado desta gravação. Confira seu acesso e o vínculo da unidade; nenhum chamado foi criado.",
+      "READY": "Chamado vinculado à gravação {id}. Revise e confirme os dados no formulário do Service Desk.",
+      "RETRY": "Verificar novamente"
     }
   }
 }

@@ -51,6 +51,7 @@ const create = overrides =>
         },
         RecordingEndingActions: true,
         RecordingManualTasks: true,
+        RecordingTicketAction: true,
         RecordingTaskCreate: {
           name: 'RecordingTaskCreate',
           props: ['accountId', 'recordingId', 'authorityKey'],
@@ -501,4 +502,29 @@ describe('authorized native recording details popup', () => {
     expect(wrapper.emitted('close')).toBeUndefined();
     expect(openDialog).toHaveBeenCalledTimes(1);
   });
+});
+
+it('offers the native Ticket form from the recording task tab only with operational and listening authority', async () => {
+  const wrapper = create({
+    capabilities: { recordings_listen: true, operate: true },
+  });
+  expect(
+    wrapper.findComponent({ name: 'RecordingTicketAction' }).exists()
+  ).toBe(false);
+  await wrapper.get('[data-recording-actions-open]').trigger('click');
+  expect(
+    wrapper.getComponent({ name: 'RecordingTicketAction' }).props()
+  ).toMatchObject({
+    accountId: 1,
+    recordingId: item.id,
+    callSessionId: item.call_session_id,
+    callId: item.unique_id,
+    enabled: true,
+  });
+  await wrapper.setProps({
+    capabilities: { recordings_listen: true, operate: false },
+  });
+  expect(
+    wrapper.findComponent({ name: 'RecordingTicketAction' }).exists()
+  ).toBe(false);
 });

@@ -1,0 +1,83 @@
+{
+  "source_parent": "d23678fcaafcc6617fb955dc5daf6d355d573471",
+  "original_Word_documents": {
+    "JRC_Conversas_Call_Center_Parte_1_Especificacao_DEV_Com_Imagens.docx": "5db370d9b7598a720d32f7f60eba4e22b4b61878327bd4459176ff729fe7a2c8",
+    "JRC_Conversas_Call_Center_Parte_1_Detalhamento_Funcional_23_Imagens.docx": "8f9300cf1940012f71be1a97903a192f7b5a18667e6da6664b9f972866e7e88b"
+  },
+  "related_clauses_not_yet_accepted": [
+    "D1-P0210-C01",
+    "D1-P0211-C01",
+    "D1-P0216-C01",
+    "D2-P0405-C04",
+    "D2-P0411-C01",
+    "D2-P0416-C03",
+    "D2-P0416-C05",
+    "D2-P0419-C01"
+  ],
+  "functional_delivery": [
+    "Existing native Ticket form opens from the recording context and task tab.",
+    "Read-only preview binds current actor/account/recording/call/contact and the authorized native Service Desk unit.",
+    "Existing native customer directory resolves the requester; query identifiers do not grant access.",
+    "Existing native form confirms the actual Ticket creation; no automatic submit or fallback to unrelated intake.",
+    "Existing workflow transaction and request key bind an append-only private recording-origin context.",
+    "Current permissions and historical replay are checked again on the server; altered replay and cross-unit duplication are blocked.",
+    "An account, actor, recording or effective-scope change clears the previous recording draft."
+  ],
+  "native_modules_reused": [
+    "Customer Master contact directory and customer context",
+    "Call Center current recording source/permissions",
+    "Service Desk route guard, layout, dialog, form, workflow, event projection and idempotency"
+  ],
+  "prepared_validation_not_results": {
+    "authenticated_request_cases": 21,
+    "committed_PostgreSQL_contention_and_rollback_cases": 3,
+    "owned_seed_refusal_case": 1,
+    "Vue": "transport, identity/destination validation, stale response, actor/scope withdrawal and native form integration",
+    "Chrome": "extend the existing four quality cases in desktop/mobile and actual light/dark; native receipt and reload, exact replay, conflict, denied caller, unchanged ACW/Projects/provider-command counts"
+  },
+  "manual_native_administrator_access_preserved_separately_from_automatic_executor_explicit_grants": true,
+  "recording_origin_private_under_existing_event_projection": true,
+  "no_new_models_migrations_automatic_grants_or_external_provider_operations": true,
+  "divergences_and_remaining": [
+    "Native tests and Chrome must run on this payload before any acceptance.",
+    "The actual Service Desk route graph must pass the existing startup probe; static checks are not runtime proof.",
+    "Tasks and Tickets reuse their own native dialogs; a unified chronology and all CRM/Relationship context remain separate outstanding clauses.",
+    "Real PABX operations/ACKs and external Nico homologation remain outside this internal delivery.",
+    "A native request regression now prepares review-save independence with an existing pending Ticket. This is not a claim that the cross-order Save-and-Conclude browser scenario has run."
+  ],
+  "native_or_Chrome_acceptance": false,
+  "whole_figure_or_Part1_accepted": false,
+  "code_paths": [
+    "app/controllers/api/v1/accounts/jrc_contact_center/recording_ticket_intakes_controller.rb",
+    "app/controllers/api/v1/accounts/jrc_service_desk/tickets_controller.rb",
+    "app/javascript/dashboard/api/jrcContactCenter.js",
+    "app/javascript/dashboard/api/serviceDeskOperationsClient.js",
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTicketAction.vue",
+    "app/javascript/dashboard/routes/dashboard/serviceDesk/composables/useRecordingTicketContext.js",
+    "app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/recordingTicketSource.js",
+    "app/javascript/dashboard/routes/dashboard/serviceDesk/views/TicketFormView.vue",
+    "app/services/jrc_contact_center/recording_ticket_intake.rb",
+    "app/services/jrc_service_desk/create_ticket_workflow_service.rb",
+    "config/routes/jrc_contact_center.rb"
+  ],
+  "native_spec_paths": [
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_concurrency_spec.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_spec.rb",
+    "spec/services/jrc_contact_center/synthetic_recording_ticket_seed_spec.rb"
+  ],
+  "Vue_spec_paths": [
+    "app/javascript/dashboard/api/specs/serviceDeskOperationsRecording.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTicketAction.spec.js",
+    "app/javascript/dashboard/routes/dashboard/serviceDesk/composables/useRecordingTicketContext.spec.js",
+    "app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/recordingTicketSource.spec.js",
+    "app/javascript/dashboard/routes/dashboard/serviceDesk/views/spec/RecordingTicketForm.spec.js"
+  ],
+  "Chrome_spec_paths": [
+    "tests/playwright/tests/e2e/ui/call-center-recording-ticket-native.mjs"
+  ],
+  "literal_limit": "Ticket creation covers only part of clauses that also require CRM/Relationship, linked lists, full chronology or notifications. No combined clause promoted on prepared code."
+}

@@ -14,6 +14,7 @@ import RecordingAccessHistory from './RecordingAccessHistory.vue';
 import QualityReviewDialog from './QualityReviewDialog.vue';
 import RecordingTranscript from './RecordingTranscript.vue';
 import RecordingCallContext from './RecordingCallContext.vue';
+import RecordingTicketAction from './RecordingTicketAction.vue';
 import QualityReviewHistory from './QualityReviewHistory.vue';
 import RecordingEndingActions from './RecordingEndingActions.vue';
 import RecordingAnalysis from './RecordingAnalysis.vue';
@@ -361,6 +362,7 @@ onMounted(() => dialog.value.open());
         role="tabpanel"
         :aria-labelledby="identity('tab', 'context')"
         :account-id="accountId"
+        :recording-id="item.id"
         :call-session-id="item.call_session_id"
         :call-id="item.unique_id"
         :operational-context-allowed="capabilities.operate === true"
@@ -372,6 +374,15 @@ onMounted(() => dialog.value.open());
         :aria-labelledby="identity('tab', 'actions')"
         class="space-y-4"
       >
+        <RecordingTicketAction
+          v-if="capabilities.recordings_listen && capabilities.operate"
+          :key="`ticket-${accountId}-${item.id}`"
+          :account-id="accountId"
+          :recording-id="item.id"
+          :call-session-id="item.call_session_id"
+          :call-id="item.unique_id"
+          enabled
+        />
         <RecordingManualTasks
           v-if="capabilities.recordings_listen"
           :key="`${accountId}-${item.id}`"

@@ -26,7 +26,7 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
   private
 
   def workflow_options(options)
-    raise ArgumentError unless (options.keys - %i[conversation_id service_id origin_channel files internal_request]).empty?
+    raise ArgumentError unless (options.keys - %i[conversation_id service_id origin_channel files internal_request recording_origin]).empty?
 
     internal_request = options.fetch(:internal_request, false)
     raise ArgumentError unless [true, false].include?(internal_request)
@@ -37,7 +37,24 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
     { conversation_id: optional_id(options[:conversation_id]),
       service_id: optional_id(options[:service_id]),
       origin_channel: options.fetch(:origin_channel, 'manual'), files: files, internal_request: internal_request,
-      file_fingerprints: uploads.map { |file| file.except(:io).deep_stringify_keys } }
+      file_fingerprints: uploads.map { |file| file.except(:io).deep_stringify_keys },
+      recording_origin: recording_origin(options[:recording_origin]) }
+  end
+
+  # Internal server-generated identity only. Request bodies never accept this object.
+  def recording_origin(value)
+    return if value.nil?
+
+    ids = %w[recording_id call_session_id contact_id unit_id issuer_company_id business_unit_id]
+    fields = ids + %w[queue_id schema_version call_id]
+    origin = JrcServiceDesk::Input.attributes(value, fields)
+    raise ArgumentError unless origin.keys.sort == fields.sort && origin['schema_version'].eql?(1)
+    call_id = origin['call_id']
+    raise ArgumentError unless call_id.is_a?(String) && call_id.valid_encoding? && call_id.present? && !call_id.match?(/[\x00-\x1f\x7f]/)
+
+    ids.each { |key| origin[key] = JrcServiceDesk::Input.id(origin.fetch(key)) }
+    origin['queue_id'] = optional_id(origin['queue_id'])
+    origin
   end
 
   def optional_id(value)
@@ -69,6 +86,8 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
   end
 
   def same_creation_context?(ticket, marker, inputs)
+    return false unless marker&.data&.fetch('recording_origin', nil) == inputs[:recording_origin]
+
     previous = marker&.data&.fetch('conversation_id', nil)
     files = marker&.data&.fetch('file_fingerprints', []) || []
     input_service_id = marker&.data&.key?('input_service_id') ? marker.data['input_service_id'] : ticket.service_id
@@ -88,6 +107,7 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
       JrcServiceDesk::LinkConversationService.new(user_context: context.to_h).call(ticket_id: ticket.id, conversation_id: conversation_id)
     end
     marker = { 'conversation_id' => conversation_id }
+    marker['recording_origin'] = inputs[:recording_origin] if inputs[:recording_origin]
     marker['internal_request'] = true if inputs[:internal_request]
     marker['input_service_id'] = inputs[:service_id] if ticket.service_id != inputs[:service_id]
     marker['file_fingerprints'] = inputs[:file_fingerprints] if inputs[:files].any?

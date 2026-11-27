@@ -1830,5 +1830,10 @@
     "sha256": "f4aa21310e2f01dd2e0eb37d40a5daeb2ec7f09039a9317e269ca7e6bef83105",
     "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
     "whole_figure_or_Part1_accepted": false
+  },
+  "next_native_manual_Ticket_delivery_not_acceptance": {
+    "document": "docs/jrc_contact_center/native_manual_recording_ticket_candidate_20261127.json",
+    "native_or_Chrome_acceptance": false,
+    "all_existing_clause_statuses_preserved": true
   }
 }

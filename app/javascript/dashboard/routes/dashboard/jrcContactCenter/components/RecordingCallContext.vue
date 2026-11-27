@@ -3,11 +3,13 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcContactCenter';
 import LinkedContactMaster from './LinkedContactMaster.vue';
+import RecordingTicketAction from './RecordingTicketAction.vue';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
   callSessionId: { type: [String, Number], required: true },
   callId: { type: String, required: true },
+  recordingId: { type: [String, Number], default: null },
   operationalContextAllowed: { type: Boolean, default: false },
 });
 const { t } = useI18n();
@@ -152,6 +154,16 @@ onBeforeUnmount(() => {
         :enabled="operationalContextAllowed"
         show-history
         @updated="load"
+      />
+      <RecordingTicketAction
+        v-if="linked && recordingId"
+        :key="`${accountId}-${recordingId}-${callSessionId}`"
+        :account-id="accountId"
+        :recording-id="recordingId"
+        :call-session-id="callSessionId"
+        :call-id="callId"
+        :contact-id="call.contact_id"
+        :enabled="operationalContextAllowed"
       />
       <p class="text-xs text-n-slate-11">{{ text('NATIVE_MASTER_LIMIT') }}</p>
     </template>
