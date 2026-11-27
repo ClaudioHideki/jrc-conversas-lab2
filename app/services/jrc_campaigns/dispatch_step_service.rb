@@ -106,10 +106,15 @@ class JrcCampaigns::DispatchStepService
 
   def sending_rejection
     campaign.reload.ensure_approved!
-    raise ArgumentError, JrcCampaigns::AudienceConfirmation::MESSAGE unless JrcCampaigns::AudienceConfirmation.new(campaign).includes_recipient?(recipient)
+    contact = recipient.contact
+    if contact && contact.account_id != campaign.account_id
+      raise ArgumentError, 'O destinatário está vinculado a um contato de outra conta.'
+    end
+
+    return JrcCampaigns::AudienceConfirmation::MESSAGE unless JrcCampaigns::AudienceConfirmation.new(campaign).includes_recipient?(recipient)
     return 'A mensagem não pertence à campanha aprovada.' unless step.campaign_id == campaign.id
 
-    return 'Contato bloqueado.' if recipient.contact&.reload&.blocked?
+    return 'Contato bloqueado.' if contact&.reload&.blocked?
     return nil if campaign.email?
 
     eligibility.rejection_reason

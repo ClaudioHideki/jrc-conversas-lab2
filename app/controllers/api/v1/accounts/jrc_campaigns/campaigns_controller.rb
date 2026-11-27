@@ -24,6 +24,8 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
     render json: serialize(@campaign)
   rescue ActiveRecord::RecordInvalid => e
     render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+  rescue ArgumentError => e
+    render json: { errors: [e.message] }, status: :unprocessable_entity
   end
 
   def index
