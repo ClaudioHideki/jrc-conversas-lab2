@@ -1,0 +1,10 @@
+{
+  "source_parent": "ef75e9b31e2d8362a9526ee568e9305e394535a3",
+  "failed_run": 46026179249,
+  "actual_directed_Vue_passed": 305,
+  "actual_lint_findings": 1,
+  "original_lint_report_sha256": "53b4896582e700a2552b9fc96d1db7c6996fe93ef353551705792b604538437c",
+  "change": "Align the existing SQL where chain; all non-whitespace bytes, predicates, parameters and native scope remain identical.",
+  "functional_change_test_or_workflow_change": false,
+  "native_or_Chrome_accepted": false
+}

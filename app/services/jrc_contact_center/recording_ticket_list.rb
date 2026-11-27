@@ -33,7 +33,7 @@ class JrcContactCenter::RecordingTicketList
   def authorized_collection(record, call)
     origin = { recording_origin: { schema_version: 1, recording_id: record.id, call_session_id: call.id, call_id: call.external_session_id } }
     events = JrcServiceDesk::TicketEvent.where(account_id: @account.id, event_type: 'creation_context_recorded')
-                                      .where('data @> ?::jsonb', origin.to_json).select(:ticket_id)
+                                        .where('data @> ?::jsonb', origin.to_json).select(:ticket_id)
     selected = JrcServiceDesk::Ticket.where(account_id: @account.id, id: events)
     context = { account: @account, account_user: @member, user: @member.user }
     JrcServiceDesk::TicketQuery.new(user_context: context, scope: selected,
