@@ -31,8 +31,7 @@ RSpec.describe 'Authorized recording links to existing native ending actions', :
                                             'call_session_id' => source_call.id.to_s, 'call_id' => record.external_unique_id,
                                             'items' => [], 'meta' => { 'page' => 1, 'per_page' => 20, 'total' => 0, 'pages' => 0 })
     expect(response.headers.fetch('Cache-Control')).to include('private', 'no-store')
-    expect(JrcContactCenter::Command.where(account: account)).to be_empty
-    expect(JrcContactCenter::EndingActionOrigin.where(account: account)).to be_empty
+    expect([JrcContactCenter::Command.where(account: account), JrcContactCenter::EndingActionOrigin.where(account: account)]).to all(be_empty)
   end
 
   it 'returns only the native minimal own qualification identity without private notes or invented completion' do
@@ -40,7 +39,7 @@ RSpec.describe 'Authorized recording links to existing native ending actions', :
     get path, headers: headers, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').sole).to eq('id' => qualification.id.to_s, 'account_user_id' => member.id.to_s,
-                                                          'started_at' => nil, 'completed_at' => nil)
+                                                           'started_at' => nil, 'completed_at' => nil)
     expect(response.body).not_to include('SYNTHETIC private ACW notes', 'recording_reference', 'synthetic-password')
     expect(qualification.reload.attributes).to eq(original)
   end

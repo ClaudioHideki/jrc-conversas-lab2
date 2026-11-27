@@ -1,0 +1,22 @@
+{
+  "parent": "e82c9563a212980c4d389f427f71a62686aaaafc",
+  "failed_run": 45931073100,
+  "failed_job": 140283574734,
+  "failed_report_sha256": "34880e838cb55ce94a00490e5bb2439ff8553078f0ff6f34dd3ae4b1981f7c91",
+  "corrected_offenses": 10,
+  "source_sha256": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/recording_ending_contexts_controller.rb": "851a5780de415ae0239a13ee3eb771c49f29eba1edc573a19fdf8c2f77e1c772",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_ending_contexts_spec.rb": "d1b81e0fdf19fba4b5b1efc1db7d18bf004831be24144aa54c8761f74e120205",
+    "script/jrc_call_center_recording_actions_evidence.rb": "d128dbb87eea110c25eb6db1432011a0801357e5c189c2643ae5f72d0b1aa262"
+  },
+  "parent_sources": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/recording_ending_contexts_controller.rb": "d99039e04ffd80956464430ce616438e6cc7fff9dbb8ad63b7fbc7672c8387dd",
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_ending_contexts_spec.rb": "bc8029854c1c0a8b8a290ee108a98db967452fc492b90057dfdb18bd35094fac",
+    "script/jrc_call_center_recording_actions_evidence.rb": "62fd3ca256e1b349e2564fa54cb10d55877668ed784c032ddbf3d7c12c7a78a8"
+  },
+  "all_eleven_environment_conditions_preserved": true,
+  "all_nine_native_examples_and_original_assertions_preserved": true,
+  "no_rule_suppressed": true,
+  "native_or_Chrome_acceptance": false,
+  "whole_Part1_accepted": false
+}
