@@ -7,5 +7,5 @@ class JrcCampaigns::TestDelivery < ApplicationRecord
 
   validates :idempotency_key, :payload_digest, :phone_number, presence: true
   validates :idempotency_key, uniqueness: { scope: :account_id }
-  validates :status, inclusion: { in: %w[sending sent failed unknown] }
+  validates :status, inclusion: { in: %w[queued sending accepted held sent delivered read failed unknown] }
 end

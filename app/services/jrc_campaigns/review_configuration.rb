@@ -29,7 +29,22 @@ class JrcCampaigns::ReviewConfiguration
     )
     segment = JrcCustomers::CampaignSegment.new(campaign)
     result['customer_segment'] = segment.review_evidence if segment.selected?
+    if campaign.review_snapshot.to_h.dig('configuration', 'meta_templates')
+      result['meta_templates'] = template_definitions
+    end
     result.merge(connector_configuration)
+  end
+
+  def template_definitions
+    steps = campaign.steps.select { |step| step.kind == 'template' }
+    return [] if steps.empty?
+
+    campaign.sending_inbox_links.filter_map do |link|
+      next unless link.inbox.channel.is_a?(Channel::Whatsapp)
+
+      { 'inbox_id' => link.inbox.id,
+        'definitions' => steps.map { |step| JrcCampaigns::TemplateConfiguration.new(inbox: link.inbox, step: step.attributes).validate! } }
+    end
   end
 
   # Called only inside the short Campaign lock. Freeze the existing source rows until the write commits.

@@ -6,6 +6,15 @@ class Webhooks::WhatsappEventsJob < MutexApplicationJob
   retry_on LockAcquisitionError, wait: 2.seconds, attempts: 20
 
   def perform(params = {})
+    if params[:object] == 'whatsapp_business_account'
+      envelopes = Array(params[:entry]).flat_map do |entry|
+        Array(entry[:changes]).map { |change| params.merge(entry: [entry.merge(changes: [change])]) }
+      end
+      if envelopes.length > 1
+        envelopes.each { |envelope| perform(envelope) }
+        return
+      end
+    end
     channel = find_channel_from_whatsapp_business_payload(params)
 
     if channel_is_inactive?(channel)

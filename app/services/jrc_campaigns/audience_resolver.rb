@@ -63,7 +63,8 @@ class JrcCampaigns::AudienceResolver
       end
 
       if campaign.whatsapp?
-        policy = JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: destination, contact: entry.contact)
+        policy = JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: destination, contact: entry.contact,
+                                                     purpose: 'whatsapp_campaigns')
         reason = policy.rejection_reason
         if reason
           counters[reason == 'Telefone inválido.' ? :without_destination_count : :without_consent_count] += 1

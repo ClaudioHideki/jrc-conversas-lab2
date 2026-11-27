@@ -5,6 +5,7 @@ class JrcCampaigns::EligibilityPolicy
     @contact = contact
   end
 
+  # Prior registration is optional; a recorded withdrawal and safety blocks still apply.
   def rejection_reason
     list_rejection_reason
   end
@@ -24,9 +25,7 @@ class JrcCampaigns::EligibilityPolicy
     return reason if reason
 
     records = JrcCampaigns::Consent.where(account: account, phone_number: phone_number)
-    if records.where.not(revoked_at: nil).exists? && !records.active.exists?
-      return 'Consentimento positivo revogado para este destinatário.'
-    end
+    return 'Consentimento positivo revogado para este destinatário.' if records.where.not(revoked_at: nil).exists? && !records.active.exists?
 
     nil
   end

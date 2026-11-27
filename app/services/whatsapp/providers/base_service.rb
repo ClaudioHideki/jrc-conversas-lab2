@@ -33,6 +33,7 @@ class Whatsapp::Providers::BaseService
 
   def process_response(response, message)
     parsed_response = response.parsed_response
+    message.capture_provider_response(parsed_response) if message.respond_to?(:capture_provider_response)
     if response.success? && parsed_response['error'].blank?
       parsed_response['messages'].first['id']
     else
@@ -42,6 +43,15 @@ class Whatsapp::Providers::BaseService
   end
 
   def handle_error(response, message)
+    if message.respond_to?(:capture_provider_response)
+      code = message.provider_response.to_h.dig('error', 'code')
+      Rails.logger.warn("[WHATSAPP_CAMPAIGN_PROVIDER] rejection_code=#{code.presence || 'unknown'}")
+      message.external_error = code == '132012' ? 'Formato dos parâmetros incompatível com o template aprovado.' : 'Solicitação rejeitada pela API WhatsApp.'
+      message.status = :failed
+      message.save!
+      return
+    end
+
     Rails.logger.error response.body
     return if message.blank?
 

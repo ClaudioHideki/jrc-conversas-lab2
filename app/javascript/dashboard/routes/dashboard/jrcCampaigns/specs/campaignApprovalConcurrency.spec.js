@@ -20,7 +20,11 @@ const campaign = {
   sending_window: { days: [1], start: '08:00', end: '18:00' },
   campaign_inboxes: [],
   steps: [],
-  review_snapshot: { configuration: {}, recipients: [] },
+  estimated_recipients: 1,
+  review_snapshot: {
+    configuration: {},
+    recipients: [{ destination: '+5511999990001' }],
+  },
 };
 
 describe('campaign approval pending requests', () => {

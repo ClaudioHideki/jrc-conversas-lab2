@@ -28,3 +28,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [0005-encerramento-manual-sem-bloqueio-sla](0005-encerramento-manual-sem-bloqueio-sla.md): encerramento manual por usuários com acesso, sem requisitos extras e com tempos/SLA reais preservados.
 
 - [0007-nico-consumo-confirmado-limites-provedor](0007-nico-consumo-confirmado-limites-provedor.md): controle pelo provedor, teto local opcional e consumo incerto preservado.
+
+- [0014-campanhas-fluxo-validado-gopure](0014-campanhas-fluxo-validado-gopure.md) — fluxo validado integrado ao JRC Conversas.

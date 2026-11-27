@@ -620,7 +620,10 @@ Rails.application.routes.draw do
                 post :import_csv
               end
             end
-            resource :metadata, only: :show, controller: :metadata
+            resource :metadata, only: :show, controller: :metadata do
+              post :template_media
+              post :sync_templates
+            end
             resources :blacklists, only: [:index, :create, :destroy]
             resources :sanitized_lists, only: [:index, :show, :create, :destroy]
             resources :media_assets, only: :create
@@ -629,6 +632,7 @@ Rails.application.routes.draw do
                 post :audience_preview
                 get :analytics
                 post :test_message
+                post :validate_message
               end
               member do
                 post :launch

@@ -105,3 +105,8 @@ Uma tarefa deve registrar problema, escopo, critério de aceite, evidência/arqu
 - [x] Reproduzir ausência de espera após Retry-After e implementar recuperação limitada à inferência rejeitada, sem repetição de ferramentas.
 - [ ] Executar regressão completa, CI do SHA final e publicar runtime.
 - [ ] Implantar somente no ambiente autorizado e homologar conhecimento. Registro: docs/adr/20261123-groq-retry-after.md.
+
+## Campanhas do GoPure no JRC — 27/11/2026
+
+- [x] Integrar o assistente e as regras de Campanhas, preservando permissões e conectores do JRC. [Decisão](docs/adr/0014-campanhas-fluxo-validado-gopure.md)
+- [ ] Confirmar a regressão da candidata, a equivalência das referências remotas e a imagem publicada por digest.

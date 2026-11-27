@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useMutationObserver } from '@vueuse/core';
 import { Line } from 'vue-chartjs';
 import {
   CategoryScale,
@@ -26,6 +27,21 @@ ChartJS.register(
   PointElement,
   Tooltip
 );
+
+const dark = ref(false);
+onMounted(() => {
+  const updateTheme = () => {
+    dark.value =
+      document.body.classList.contains('dark') ||
+      document.documentElement.classList.contains('dark');
+  };
+  updateTheme();
+  useMutationObserver([document.body, document.documentElement], updateTheme, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+});
+const textColor = computed(() => (dark.value ? '#cbd5e1' : '#334155'));
 
 const metrics = [
   { key: 'sent', color: '#2563eb' },
@@ -55,21 +71,34 @@ const chartData = computed(() => ({
   })),
 }));
 
-const chartOptions = {
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: { intersect: false, mode: 'index' },
   plugins: {
     legend: {
       position: 'bottom',
-      labels: { boxWidth: 9, boxHeight: 9, usePointStyle: true },
+      labels: {
+        boxWidth: 9,
+        boxHeight: 9,
+        usePointStyle: true,
+        color: textColor.value,
+        font: { weight: '500' },
+      },
     },
   },
   scales: {
-    x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } },
-    y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
+    x: {
+      grid: { display: false },
+      ticks: { maxTicksLimit: 10, color: textColor.value },
+    },
+    y: {
+      beginAtZero: true,
+      grid: { color: dark.value ? '#334155' : '#e2e8f0' },
+      ticks: { color: textColor.value },
+    },
   },
-};
+}));
 </script>
 
 <template>

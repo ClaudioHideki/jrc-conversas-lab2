@@ -83,10 +83,13 @@ class JrcCampaigns::LaunchService
       return
     end
 
+    cloud_only = campaign.whatsapp? && campaign.sending_inbox_links.all? do |link|
+      link.inbox.channel_type == 'Channel::Whatsapp' && link.inbox.channel.provider == 'whatsapp_cloud'
+    end
     cursor = Time.current
     window = JrcCampaigns::ScheduleWindow.new(campaign)
     execution.recipients.order(:id).each do |recipient|
-      cursor += random_delay.seconds
+      cursor += random_delay.seconds unless cloud_only
       scheduled_at = window.next_time(cursor)
       recipient.update!(scheduled_at: scheduled_at)
       JrcCampaigns::DispatchStepJob.set(wait_until: scheduled_at).perform_later(recipient.id, campaign.steps.first.id)

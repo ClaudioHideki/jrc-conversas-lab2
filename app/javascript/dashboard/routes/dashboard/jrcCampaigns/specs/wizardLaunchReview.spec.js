@@ -114,6 +114,14 @@ describe('campaign wizard launch and required human review', () => {
         id: 8,
         name: 'QA sender',
         connector,
+        templates: [
+          {
+            name: 'qa_template',
+            language: 'pt_BR',
+            status: 'APPROVED',
+            components: [{ type: 'BODY', text: 'Synthetic message' }],
+          },
+        ],
         health_status: 'CONNECTED',
       };
       const wrapper = mount(CampaignWizard, {

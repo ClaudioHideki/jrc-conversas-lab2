@@ -2,7 +2,7 @@ name: Campanhas - fluxo de lista candidato
 
 on:
   push:
-    branches: [codex/campaign-list-workflow-20261022]
+    branches: [codex/campaign-list-workflow-20261022, codex/consolidacao-campanhas-20261127]
   workflow_dispatch:
 
 permissions:
@@ -47,8 +47,12 @@ jobs:
           persist-credentials: false
       - name: Preservar a base instalada
         run: |
-          git merge-base --is-ancestor 9b1393a47782c4e2734dea09519787bb532df71b HEAD
-          git diff --check 9b1393a47782c4e2734dea09519787bb532df71b HEAD
+          base=9b1393a47782c4e2734dea09519787bb532df71b
+          if [ "$GITHUB_REF_NAME" = codex/consolidacao-campanhas-20261127 ]; then
+            base=b2aaf1b49bb31aa9c59ba5468e2f7a4e4bbc028a
+          fi
+          git merge-base --is-ancestor "$base" HEAD
+          git diff --check "$base" HEAD
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version-file: .nvmrc
@@ -76,5 +80,10 @@ jobs:
       - name: Regressao Rails, isolamento, bloqueios e transportes
         run: |
           bundle exec rspec spec/services/jrc_campaigns spec/requests/api/v1/accounts/jrc_campaigns --format progress
+          if [ "$GITHUB_REF_NAME" = codex/consolidacao-campanhas-20261127 ]; then
+            bundle exec rspec spec/services/whatsapp/providers/whatsapp_cloud_service_spec.rb \
+              spec/services/whatsapp/incoming_message_whatsapp_cloud_service_spec.rb \
+              spec/requests/jrc_nico_helpdesk_campaign_draft_spec.rb --format progress
+          fi
       - name: Fonte preservada
         run: git diff --exit-code

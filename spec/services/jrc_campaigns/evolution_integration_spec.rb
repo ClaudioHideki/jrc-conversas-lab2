@@ -49,7 +49,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
         body: { key: { id: 'qa-provider-id', fromMe: true, remoteJid: "#{number}@s.whatsapp.net" }, status: 'PENDING' }.to_json }
     end
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: contact.phone_number,
-                                 evidence: 'QA only: campaign and individual test authorization', granted_at: Time.current, purpose: 'whatsapp_campaigns')
+                                  evidence: 'QA only: campaign and individual test authorization', granted_at: Time.current, purpose: 'whatsapp_campaigns')
   end
 
   context 'with an approved campaign' do
@@ -174,7 +174,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
   end
 
   it 'requires explicit confirmation for an individual test' do
-    expect { JrcCampaigns::TestMessageService.new(**test_options.merge(operator_confirmed: false)).perform }.to raise_error(ArgumentError, /Confirme/)
+    expect { JrcCampaigns::TestMessageService.new(**test_options, operator_confirmed: false).perform }.to raise_error(ArgumentError, /Confirme/)
     expect(a_request(:post, send_url)).not_to have_been_made
   end
 
@@ -200,7 +200,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
     original = consent.attributes
     first = JrcCampaigns::TestMessageService.new(**test_options).perform
     travel 61.seconds do
-      second = JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform
+      second = JrcCampaigns::TestMessageService.new(**test_options, idempotency_key: SecureRandom.uuid).perform
       expect(second[:status]).to eq('sent')
       expect(second[:test_delivery_id]).not_to eq(first[:test_delivery_id])
     end
@@ -229,7 +229,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
     JrcCampaigns::Consent.find_by!(account: account, phone_number: contact.phone_number).update!(revoked_at: Time.current)
     travel 61.seconds do
       expect do
-        JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform
+        JrcCampaigns::TestMessageService.new(**test_options, idempotency_key: SecureRandom.uuid).perform
       end.to raise_error(ArgumentError, /revogado/)
     end
     expect(a_request(:post, send_url)).to have_been_made.once
@@ -326,14 +326,15 @@ RSpec.describe 'Evolution campaign integration', type: :request do
     end
 
     it 'keeps a worker claim consumed after a restart without calling the provider' do
-      payload_digest = Digest::SHA256.hexdigest([inbox.id, contact.phone_number, { 'kind' => 'text', 'body' => 'Homologação', 'media_url' => nil, 'file_name' => nil }.to_json].to_json)
+      payload_digest = Digest::SHA256.hexdigest([inbox.id, contact.phone_number,
+                                                 { 'kind' => 'text', 'body' => 'Homologação', 'media_url' => nil, 'file_name' => nil }.to_json].to_json)
       claimed = JrcCampaigns::TestDelivery.create!(account: account, inbox: inbox, requested_by: admin,
-                                                  idempotency_key: test_idempotency_key, phone_number: contact.phone_number, payload_digest: payload_digest)
+                                                   idempotency_key: test_idempotency_key, phone_number: contact.phone_number, payload_digest: payload_digest)
       authorization.update!(consumed_at: Time.current, test_delivery: claimed)
       expect(JrcCampaigns::TestMessageService.new(**test_options).perform[:status]).to eq('unknown')
       expect(a_request(:post, send_url)).not_to have_been_made
       expect do
-        JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform
+        JrcCampaigns::TestMessageService.new(**test_options, idempotency_key: SecureRandom.uuid).perform
       end.to raise_error(ArgumentError)
     end
 
@@ -385,7 +386,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
   it 'rejects reusing a test key for a different message' do
     JrcCampaigns::TestMessageService.new(**test_options).perform
     expect do
-      JrcCampaigns::TestMessageService.new(**test_options.merge(step: { kind: 'text', body: 'Changed' })).perform
+      JrcCampaigns::TestMessageService.new(**test_options, step: { kind: 'text', body: 'Changed' }).perform
     end.to raise_error(ArgumentError, /outra solicitação/)
     expect(a_request(:post, send_url)).to have_been_made.once
   end
@@ -400,10 +401,83 @@ RSpec.describe 'Evolution campaign integration', type: :request do
     foreign_account = create(:account)
     foreign_account.enable_features!('jrc_campaigns')
     foreign_admin = create(:user, account: foreign_account, role: :administrator)
-    get "/api/v1/accounts/#{foreign_account.id}/jrc_campaigns/test_deliveries/#{result[:test_delivery_id]}", headers: foreign_admin.create_new_auth_token
+    get "/api/v1/accounts/#{foreign_account.id}/jrc_campaigns/test_deliveries/#{result[:test_delivery_id]}",
+        headers: foreign_admin.create_new_auth_token
     expect(response).to have_http_status(:not_found)
     get path, headers: create(:user, account: account, role: :agent).create_new_auth_token
     expect(response).to have_http_status(:forbidden)
+  end
+
+  context 'with an uploaded campaign image' do
+    let(:image_bytes) { Vips::Image.black(2, 2).pngsave_buffer }
+    let(:asset) do
+      account.jrc_campaign_media_assets.create!(kind: 'image', created_by: admin,
+                                                file: { io: StringIO.new(image_bytes), filename: 'convite.png', content_type: 'image/png' })
+    end
+    let(:image_step) do
+      { kind: 'image', body: 'Convite com legenda', media_asset_id: asset.id, media_url: 'https://expired.example.test/image', file_name: 'convite.png' }
+    end
+    let(:media_send_url) { 'https://evolution.example.test/message/sendMedia/demo' }
+
+    before do
+      stub_request(:post, media_send_url).to_return(
+        status: 201, headers: { 'Content-Type' => 'application/json' },
+        body: { key: { id: 'qa-image-id', fromMe: true, remoteJid: '5511999999000@s.whatsapp.net' }, status: 'PENDING' }.to_json
+      )
+    end
+
+    it 'sends imported bytes and caption without fetching the temporary URL, preserving idempotency' do
+      first = JrcCampaigns::TestMessageService.new(**test_options, step: image_step).perform
+      second = JrcCampaigns::TestMessageService.new(**test_options, step: image_step).perform
+      expect(first[:status]).to eq('sent')
+      expect(second[:test_delivery_id]).to eq(first[:test_delivery_id])
+      expect(a_request(:get, image_step[:media_url])).not_to have_been_made
+      expect(a_request(:post, media_send_url).with do |request|
+        payload = JSON.parse(request.body)
+        bytes = Base64.strict_decode64(payload.fetch('media'))
+        payload.values_at('number', 'mediatype', 'caption', 'fileName', 'mimetype') ==
+          ['5511999999000', 'image', 'Convite com legenda', 'image.jpg', 'image/jpeg'] &&
+          bytes.start_with?("\xFF\xD8".b) && Vips::Image.new_from_buffer(bytes, '').width == 2
+      end).to have_been_made.once
+      message = Message.find(JrcCampaigns::TestDelivery.find(first[:test_delivery_id]).metadata.fetch('message_id'))
+      expect(message.attachments.sole.file.blob_id).to eq(asset.file.blob_id)
+      expect(message.content).to eq('Convite com legenda')
+    end
+
+    it 'sends and records an approved image campaign through the selected inbox' do
+      campaign.steps.create!(**image_step, position: 0)
+      campaign.request_review!
+      campaign.approve!(admin, campaign.review_digest)
+      campaign.update!(status: 'running')
+      2.times { JrcCampaigns::DispatchStepService.new(recipient: recipient, step: campaign.steps.sole).perform }
+      delivery = recipient.deliveries.sole
+      expect(delivery).to have_attributes(status: 'sent', inbox_id: inbox.id)
+      expect(a_request(:post, media_send_url)).to have_been_made.once
+      expect(Message.find(delivery.metadata.fetch('message_id')).attachments.sole.file.blob_id).to eq(asset.file.blob_id)
+    end
+
+    it 'recovers the local image record without resending the provider operation' do
+      allow(JrcCampaigns::EvolutionMessageRecorder).to receive(:call).and_raise(ActiveRecord::RecordInvalid)
+      result = JrcCampaigns::TestMessageService.new(**test_options, step: image_step).perform
+      expect(result[:status]).to eq('sent')
+      allow(JrcCampaigns::EvolutionMessageRecorder).to receive(:call).and_call_original
+      stub_request(:post, 'https://evolution.example.test/chat/findMessages/demo').to_return(
+        headers: { 'Content-Type' => 'application/json' }, body: { messages: { records: [] } }.to_json
+      )
+      JrcCampaigns::EvolutionStatusJob.new.perform('test', result[:test_delivery_id])
+      message = Message.find(JrcCampaigns::TestDelivery.find(result[:test_delivery_id]).metadata.fetch('message_id'))
+      expect(message.attachments.sole.file.blob_id).to eq(asset.file.blob_id)
+      expect(a_request(:post, media_send_url)).to have_been_made.once
+    end
+
+    it 'rejects an uploaded asset from another account before the provider send' do
+      foreign_asset = create(:account).jrc_campaign_media_assets.create!(kind: 'image',
+                                                                         file: { io: StringIO.new(image_bytes), filename: 'private.png',
+                                                                                 content_type: 'image/png' })
+      result = JrcCampaigns::TestMessageService.new(**test_options, step: image_step.merge(media_asset_id: foreign_asset.id)).perform
+      expect(result[:status]).to eq('failed')
+      expect(a_request(:post, media_send_url)).not_to have_been_made
+    end
   end
 
   %w[image document video audio].each do |kind|
@@ -417,7 +491,8 @@ RSpec.describe 'Evolution campaign integration', type: :request do
         status: 201, headers: { 'Content-Type' => 'application/json' },
         body: { key: { id: "qa-#{kind}", fromMe: true, remoteJid: '5511999999000@s.whatsapp.net' } }.to_json
       )
-      result = JrcCampaigns::TestMessageService.new(**test_options.merge(step: { kind: kind, media_url: 'https://media.example.test/file', body: '' })).perform
+      result = JrcCampaigns::TestMessageService.new(**test_options, step: { kind: kind, media_url: 'https://media.example.test/file',
+                                                                            body: '' }).perform
       expect(result[:message_id]).to eq("qa-#{kind}")
       expect(result[:delivery_confirmed]).to be(false)
       expect(a_request(:post, "https://evolution.example.test/message/#{endpoint}/demo").with do |request|
@@ -431,7 +506,8 @@ RSpec.describe 'Evolution campaign integration', type: :request do
 
   it 'does not expose the Evolution internal network through a media URL' do
     allow(Resolv).to receive(:getaddresses).with('internal.example.test').and_return(['127.0.0.1'])
-    result = JrcCampaigns::TestMessageService.new(**test_options.merge(step: { kind: 'image', media_url: 'https://internal.example.test/secret' })).perform
+    result = JrcCampaigns::TestMessageService.new(**test_options, step: { kind: 'image',
+                                                                          media_url: 'https://internal.example.test/secret' }).perform
     expect(result[:status]).to eq('failed')
     expect(a_request(:post, 'https://evolution.example.test/message/sendMedia/demo')).not_to have_been_made
   end
@@ -439,7 +515,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
   it 'does not request a provider send after a media download times out' do
     allow(Resolv).to receive(:getaddresses).with('media.example.test').and_return(['93.184.216.34'])
     stub_request(:get, 'https://media.example.test/file').to_timeout
-    result = JrcCampaigns::TestMessageService.new(**test_options.merge(step: { kind: 'image', media_url: 'https://media.example.test/file' })).perform
+    result = JrcCampaigns::TestMessageService.new(**test_options, step: { kind: 'image', media_url: 'https://media.example.test/file' }).perform
     expect(result[:status]).to eq('failed')
     expect(a_request(:post, 'https://evolution.example.test/message/sendMedia/demo')).not_to have_been_made
   end
@@ -447,7 +523,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
   it 'rejects media whose response type differs from the selected kind' do
     allow(Resolv).to receive(:getaddresses).with('media.example.test').and_return(['93.184.216.34'])
     stub_request(:get, 'https://media.example.test/file').to_return(headers: { 'Content-Type' => 'text/html' }, body: '<html>not an image</html>')
-    result = JrcCampaigns::TestMessageService.new(**test_options.merge(step: { kind: 'image', media_url: 'https://media.example.test/file' })).perform
+    result = JrcCampaigns::TestMessageService.new(**test_options, step: { kind: 'image', media_url: 'https://media.example.test/file' }).perform
     expect(result[:status]).to eq('failed')
     expect(a_request(:post, 'https://evolution.example.test/message/sendMedia/demo')).not_to have_been_made
   end
@@ -455,7 +531,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
   it 'rejects media above the conservative size limit before requesting the provider' do
     allow(Resolv).to receive(:getaddresses).with('media.example.test').and_return(['93.184.216.34'])
     stub_request(:get, 'https://media.example.test/file').to_return(headers: { 'Content-Type' => 'image/png' }, body: 'x' * (10.megabytes + 1))
-    result = JrcCampaigns::TestMessageService.new(**test_options.merge(step: { kind: 'image', media_url: 'https://media.example.test/file' })).perform
+    result = JrcCampaigns::TestMessageService.new(**test_options, step: { kind: 'image', media_url: 'https://media.example.test/file' }).perform
     expect(result[:status]).to eq('failed')
     expect(a_request(:post, 'https://evolution.example.test/message/sendMedia/demo')).not_to have_been_made
   end
@@ -474,7 +550,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
 
   it 'rejects an inbox from another account even if the ID is supplied directly' do
     expect do
-      JrcCampaigns::TestMessageService.new(**test_options.merge(account: create(:account)))
+      JrcCampaigns::TestMessageService.new(**test_options, account: create(:account))
     end.to raise_error(ActiveRecord::RecordNotFound)
   end
 

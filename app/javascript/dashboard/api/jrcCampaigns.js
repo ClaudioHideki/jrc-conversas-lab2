@@ -98,8 +98,18 @@ class JrcCampaignsAPI extends ApiClient {
     return axios.get(`${this.url}/analytics`, { params });
   }
 
+  validateMessage(payload) {
+    return axios.post(`${this.url}/validate_message`, {
+      test_message: payload,
+    });
+  }
+
   testMessage(payload) {
     return axios.post(`${this.url}/test_message`, { test_message: payload });
+  }
+
+  testDeliveries() {
+    return axios.get(`${super.baseUrl()}/jrc_campaigns/test_deliveries`);
   }
 
   testDelivery(id) {
@@ -157,10 +167,33 @@ class JrcCampaignsAPI extends ApiClient {
     );
   }
 
-  uploadMedia(file, kind) {
+  syncTemplates(inboxId) {
+    return axios.post(
+      `${super.baseUrl()}/jrc_campaigns/metadata/sync_templates`,
+      { inbox_id: inboxId }
+    );
+  }
+
+  templateMedia(inboxId, name, language) {
+    return axios.post(
+      `${super.baseUrl()}/jrc_campaigns/metadata/template_media`,
+      { inbox_id: inboxId, name, language }
+    );
+  }
+
+  importMetaMedia(url, kind) {
+    return axios.post(`${super.baseUrl()}/jrc_campaigns/media_assets`, {
+      url,
+      kind,
+      meta_template: true,
+    });
+  }
+
+  uploadMedia(file, kind, metaTemplate = false) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('kind', kind);
+    formData.append('meta_template', String(metaTemplate));
     return axios.post(
       `${super.baseUrl()}/jrc_campaigns/media_assets`,
       formData,

@@ -8,9 +8,9 @@ class JrcCampaigns::ScheduleWindow
     14.times do
       return within_day(time) if allowed_day?(time) && before_end?(time)
 
-      time = (time + 1.day).beginning_of_day
+      time = time.advance(days: 1).beginning_of_day
     end
-    base_time
+    raise ArgumentError, 'Nenhuma janela de envio válida encontrada.'
   end
 
   def time_zone

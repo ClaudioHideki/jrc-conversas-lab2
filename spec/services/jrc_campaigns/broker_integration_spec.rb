@@ -6,7 +6,10 @@ RSpec.describe 'Broker campaign transport', type: :request do
   let(:origin) { 'https://broker.example.test' }
   let(:integration_id) { SecureRandom.uuid }
   let(:instance_id) { SecureRandom.uuid }
-  let(:inbox) { create(:inbox, account: account, channel: create(:channel_api, account: account, webhook_url: "#{origin}/v1/integrations/chatwoot/#{integration_id}/events")) }
+  let(:inbox) do
+    create(:inbox, account: account,
+                   channel: create(:channel_api, account: account, webhook_url: "#{origin}/v1/integrations/chatwoot/#{integration_id}/events"))
+  end
   let(:contact) { create(:contact, account: account, phone_number: '+5511999999000') }
   let(:prefix) { "#{origin}/v1/integrations/chatwoot/control" }
   let(:transport) do
@@ -19,17 +22,24 @@ RSpec.describe 'Broker campaign transport', type: :request do
   end
   let(:step) { campaign.steps.create!(kind: 'text', body: 'Synthetic message', position: 0) }
   let(:execution) { campaign.executions.create!(run_number: 1, status: 'running') }
-  let(:recipient) { execution.recipients.create!(campaign: campaign, inbox: inbox, contact: contact, phone_number: contact.phone_number, destination: contact.phone_number) }
+  let(:recipient) do
+    execution.recipients.create!(campaign: campaign, inbox: inbox, contact: contact, phone_number: contact.phone_number,
+                                 destination: contact.phone_number)
+  end
   let(:service) { JrcCampaigns::DispatchStepService.new(recipient: recipient, step: step) }
 
   around do |example|
     with_modified_env('JRC_BROKER_ENABLED' => 'true', 'JRC_BROKER_ALLOWED_ORIGINS' => origin, 'FRONTEND_URL' => 'https://central.example.test',
-                      'JRC_BROKER_CREDENTIAL_KEY' => Base64.strict_encode64('s' * 32)) { example.run }
+                      'JRC_BROKER_CREDENTIAL_KEY' => Base64.strict_encode64('s' * 32)) do
+      travel_to(Time.utc(2026, 11, 25, 15)) { example.run }
+    end
   end
+
   before do
     account.enable_features!('jrc_broker', 'jrc_campaigns')
     ciphertext = JrcBroker::Configuration.credential_store.encrypt(account_id: account.id, token: 'synthetic-scoped-key')
-    JrcBrokerIntegration.create!(account: account, broker_origin: origin, organization_id: SecureRandom.uuid, destination_revision: 1, encrypted_control_key: ciphertext)
+    JrcBrokerIntegration.create!(account: account, broker_origin: origin, organization_id: SecureRandom.uuid, destination_revision: 1,
+                                 encrypted_control_key: ciphertext)
     JrcBrokerInboxBinding.create!(account: account, inbox: inbox, integration_id: integration_id, instance_id: instance_id)
     stub_request(:get, "#{prefix}/context").to_return(headers: { 'Content-Type' => 'application/json' },
       body: { organizationId: JrcBrokerIntegration.find_by!(account: account).organization_id, accountId: account.id, destinationRevision: 1, chatwootOrigin: 'https://central.example.test' }.to_json)
@@ -476,7 +486,8 @@ RSpec.describe 'Broker campaign transport', type: :request do
       expect(recipient.reload).to be_processing
       accept_native_callback(message)
       receipt_url = "#{prefix}/connections/#{integration_id}/conversations/#{message.conversation.display_id}/campaign-messages/#{message.id}"
-      receipt = { protocol: 'chatwoot-campaigns/v1', integrationId: integration_id, conversationId: message.conversation.display_id, messageId: message.id }
+      receipt = { protocol: 'chatwoot-campaigns/v1', integrationId: integration_id, conversationId: message.conversation.display_id,
+                  messageId: message.id }
       stub_request(:get, receipt_url).to_return(headers: { 'Content-Type' => 'application/json' }, body: receipt.merge(status: 'queued').to_json)
       JrcCampaigns::BrokerStatusJob.perform_now('campaign', delivery.id)
       expect(a_request(:get, receipt_url)).to have_been_made.once
@@ -514,7 +525,7 @@ RSpec.describe 'Broker campaign transport', type: :request do
       accept_native_callback(message)
       url = "#{prefix}/connections/#{integration_id}/conversations/#{message.conversation.display_id}/campaign-messages/#{message.id}"
       stub_request(:get, url).to_return(headers: { 'Content-Type' => 'application/json' }, body: { protocol: 'chatwoot-campaigns/v1', integrationId: integration_id,
-        conversationId: message.conversation.display_id, messageId: message.id, status: 'queued' }.to_json)
+                                                                                                   conversationId: message.conversation.display_id, messageId: message.id, status: 'queued' }.to_json)
       JrcCampaigns::BrokerStatusJob.perform_now('campaign', delivery.id, 19)
       expect(a_request(:get, url)).to have_been_made.once
       expect(delivery.reload).to be_unknown
@@ -531,7 +542,7 @@ RSpec.describe 'Broker campaign transport', type: :request do
       accept_native_callback(message)
       url = "#{prefix}/connections/#{integration_id}/conversations/#{message.conversation.display_id}/campaign-messages/#{message.id}"
       stub_request(:get, url).to_return(headers: { 'Content-Type' => 'application/json' }, body: { protocol: 'chatwoot-campaigns/v1', integrationId: integration_id,
-        conversationId: message.conversation.display_id + 1, messageId: message.id, status: 'read' }.to_json)
+                                                                                                   conversationId: message.conversation.display_id + 1, messageId: message.id, status: 'read' }.to_json)
       JrcCampaigns::BrokerStatusJob.perform_now('campaign', delivery.id)
       expect(a_request(:get, url)).to have_been_made.once
       expect(delivery.reload.sent_at).to be_nil
@@ -539,14 +550,18 @@ RSpec.describe 'Broker campaign transport', type: :request do
     end
 
     it 'invalidates approval when the confirmed sender identity changes' do
-      stub_request(:get, "#{prefix}/connections/#{integration_id}/campaign-transport").to_return(headers: { 'Content-Type' => 'application/json' }, body: transport.merge(identityRevision: 3).to_json)
+      stub_request(:get, "#{prefix}/connections/#{integration_id}/campaign-transport").to_return(headers: { 'Content-Type' => 'application/json' },
+                                                                                                 body: transport.merge(identityRevision: 3).to_json)
       service.perform
       expect(recipient.deliveries.sole).to be_skipped
       expect(account.messages.count).to eq(0)
     end
 
     it 'keeps Broker-owned automations protected' do
-      stub_request(:get, "#{prefix}/connections/#{integration_id}/campaign-transport").to_return(headers: { 'Content-Type' => 'application/json' }, body: transport.merge(ready: false, reason: 'CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED').to_json)
+      stub_request(:get, "#{prefix}/connections/#{integration_id}/campaign-transport").to_return(headers: { 'Content-Type' => 'application/json' },
+                                                                                                 body: transport.merge(
+                                                                                                   ready: false, reason: 'CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED'
+                                                                                                 ).to_json)
       service.perform
       expect(recipient.deliveries.sole).to be_failed
       expect(account.messages.count).to eq(0)
@@ -587,7 +602,8 @@ RSpec.describe 'Broker campaign transport', type: :request do
   end
 
   it 'claims a test idempotently without reporting a local message as provider sent' do
-    options = { account: account, user: admin, phone_number: contact.phone_number, inbox_id: inbox.id, step: { kind: 'text', body: 'Synthetic test' }, idempotency_key: SecureRandom.uuid, operator_confirmed: true }
+    options = { account: account, user: admin, phone_number: contact.phone_number, inbox_id: inbox.id,
+                step: { kind: 'text', body: 'Synthetic test' }, idempotency_key: SecureRandom.uuid, operator_confirmed: true }
     first = JrcCampaigns::TestMessageService.new(**options).perform
     second = JrcCampaigns::TestMessageService.new(**options).perform
     expect(first).to eq(second)
@@ -600,7 +616,8 @@ RSpec.describe 'Broker campaign transport', type: :request do
   end
 
   it 'does not allow a test without explicit confirmation or revoked consent' do
-    options = { account: account, user: admin, phone_number: contact.phone_number, inbox_id: inbox.id, step: { kind: 'text', body: 'Synthetic test' }, idempotency_key: SecureRandom.uuid }
+    options = { account: account, user: admin, phone_number: contact.phone_number, inbox_id: inbox.id,
+                step: { kind: 'text', body: 'Synthetic test' }, idempotency_key: SecureRandom.uuid }
     expect { JrcCampaigns::TestMessageService.new(**options).perform }.to raise_error(ArgumentError, /Confirme/)
     JrcCampaigns::Consent.where(account: account).update_all(revoked_at: Time.current)
     expect { JrcCampaigns::TestMessageService.new(**options, operator_confirmed: true).perform }.to raise_error(ArgumentError, /Consentimento/)
@@ -610,10 +627,10 @@ RSpec.describe 'Broker campaign transport', type: :request do
 
   it 'uses an attachment owned by the account without requesting its storage URL' do
     asset = JrcCampaigns::MediaAsset.create!(account: account, created_by: admin, kind: 'document',
-      file: { io: StringIO.new('%PDF-1.4 synthetic fixture'), filename: 'fixture.pdf', content_type: 'application/pdf' })
+                                             file: { io: StringIO.new('%PDF-1.4 synthetic fixture'), filename: 'fixture.pdf', content_type: 'application/pdf' })
     result = JrcCampaigns::TestMessageService.new(account: account, user: admin, phone_number: contact.phone_number, inbox_id: inbox.id,
-      step: { kind: 'document', body: 'Synthetic attachment', media_asset_id: asset.id, media_url: 'https://storage.example.test/not-requested' },
-      idempotency_key: SecureRandom.uuid, operator_confirmed: true).perform
+                                                  step: { kind: 'document', body: 'Synthetic attachment', media_asset_id: asset.id, media_url: 'https://storage.example.test/not-requested' },
+                                                  idempotency_key: SecureRandom.uuid, operator_confirmed: true).perform
     delivery = JrcCampaigns::TestDelivery.find(result.fetch(:test_delivery_id))
     message = account.messages.find(delivery.metadata.fetch('message_id'))
     expect(message.attachments.sole.file.blob).to eq(asset.file.blob)
@@ -622,10 +639,11 @@ RSpec.describe 'Broker campaign transport', type: :request do
 
   it 'rejects a media asset belonging to another Account' do
     other = create(:account)
-    asset = JrcCampaigns::MediaAsset.create!(account: other, kind: 'document', file: { io: StringIO.new('%PDF-1.4 synthetic'), filename: 'fixture.pdf', content_type: 'application/pdf' })
+    asset = JrcCampaigns::MediaAsset.create!(account: other, kind: 'document',
+                                             file: { io: StringIO.new('%PDF-1.4 synthetic'), filename: 'fixture.pdf', content_type: 'application/pdf' })
     expect do
       JrcCampaigns::TestMessageService.new(account: account, user: admin, phone_number: contact.phone_number, inbox_id: inbox.id,
-        step: { kind: 'document', media_asset_id: asset.id }, idempotency_key: SecureRandom.uuid, operator_confirmed: true).perform
+                                           step: { kind: 'document', media_asset_id: asset.id }, idempotency_key: SecureRandom.uuid, operator_confirmed: true).perform
     end.to raise_error(ActiveRecord::RecordNotFound)
     expect(account.messages.count).to eq(0)
     expect(JrcCampaigns::TestDelivery.where(account: account).count).to eq(0)
@@ -634,7 +652,7 @@ RSpec.describe 'Broker campaign transport', type: :request do
   it 'rejects private-network media without creating a message or leaking its URL' do
     expect do
       JrcCampaigns::TestMessageService.new(account: account, user: admin, phone_number: contact.phone_number, inbox_id: inbox.id,
-        step: { kind: 'document', media_url: 'http://127.0.0.1/private.pdf' }, idempotency_key: SecureRandom.uuid, operator_confirmed: true).perform
+                                           step: { kind: 'document', media_url: 'http://127.0.0.1/private.pdf' }, idempotency_key: SecureRandom.uuid, operator_confirmed: true).perform
     end.to raise_error(ArgumentError, /mídia pública/)
     expect(account.messages.count).to eq(0)
     expect(JrcCampaigns::TestDelivery.where(account: account).count).to eq(0)

@@ -2,8 +2,12 @@ require 'digest'
 
 class JrcCampaigns::EvolutionTestService
   def initialize(connector:, user:, phone_number:, step:, idempotency_key:, operator_confirmed:)
-    @connector, @user, @phone_number, @step = connector, user, phone_number, step
-    @idempotency_key, @operator_confirmed = idempotency_key, operator_confirmed
+    @connector = connector
+    @user = user
+    @phone_number = phone_number
+    @step = step
+    @idempotency_key = idempotency_key
+    @operator_confirmed = operator_confirmed
   end
 
   def perform
@@ -17,17 +21,24 @@ class JrcCampaigns::EvolutionTestService
         unresolved = JrcCampaigns::TestDelivery.where(account: account, inbox: connector.inbox, phone_number: phone_number, status: %w[sending unknown])
         raise ArgumentError, 'Teste anterior pendente ou desconhecido; reconcilie o resultado antes de reenviar.' if unresolved.exists?
         unless JrcCampaigns::Consent.active.exists?(account: account, phone_number: phone_number, purpose: 'whatsapp_campaigns')
-          @authorization = JrcCampaigns::TestAuthorization.available.where(account: account, inbox: connector.inbox, phone_number: phone_number).lock.first
+          @authorization = JrcCampaigns::TestAuthorization.available.where(account: account, inbox: connector.inbox,
+                                                                           phone_number: phone_number).lock.first
+          if !@authorization && JrcCampaigns::TestAuthorization.exists?(account: account, inbox: connector.inbox, phone_number: phone_number)
+            raise ArgumentError, 'Autorização de teste indisponível, revogada ou já utilizada.'
+          end
         end
         eligibility!
         @delivery = JrcCampaigns::TestDelivery.create!(account: account, inbox: connector.inbox, requested_by: user,
-                                                      idempotency_key: idempotency_key, phone_number: phone_number, payload_digest: digest,
-                                                      metadata: { 'step' => step, 'connector' => connector.public_configuration })
+                                                       idempotency_key: idempotency_key, phone_number: phone_number, payload_digest: digest,
+                                                       metadata: { 'step' => step, 'connector' => connector.public_configuration })
         @authorization&.update!(consumed_at: Time.current, test_delivery: delivery)
       end
     end
     if existing
-      raise ArgumentError, 'Esta chave de teste já foi usada para outra solicitação.' unless existing.payload_digest == digest && existing.requested_by_id == user.id
+      unless existing.payload_digest == digest && existing.requested_by_id == user.id
+        raise ArgumentError,
+              'Esta chave de teste já foi usada para outra solicitação.'
+      end
 
       return result(existing)
     end
@@ -79,7 +90,7 @@ class JrcCampaigns::EvolutionTestService
 
   def eligibility!
     policy = JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: phone_number, purpose: 'whatsapp_campaigns')
-    reason = policy.safety_rejection_reason
+    reason = policy.rejection_reason
     raise ArgumentError, reason if reason
     raise ArgumentError, 'Template Meta exige uma caixa WhatsApp oficial.' if step['kind'] == 'template'
     raise ArgumentError, 'O número remetente não pode ser o destinatário do teste.' if phone_number.delete_prefix('+') == connector.sender_number

@@ -24,7 +24,7 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     }
 
     response = HTTParty.post(
-      "#{phone_id_path}/messages",
+      message_endpoint(message),
       headers: api_headers,
       body: request_body.to_json,
       **(message.is_a?(Message) && message.additional_attributes.to_h['whatsapp_retry'].present? ? { timeout: 20 } : {})
@@ -38,6 +38,33 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     whatsapp_channel.mark_message_templates_updated
     templates = fetch_whatsapp_templates("#{business_account_path}/message_templates?access_token=#{whatsapp_channel.provider_config['api_key']}")
     whatsapp_channel.update(message_templates: templates, message_templates_last_updated: Time.now.utc) if templates.present?
+  end
+
+  def load_templates!
+    templates = []
+    cursor = nil
+    seen_cursors = Set.new
+    path = "#{Whatsapp::CloudApiEndpoint.base_url}/#{Whatsapp::GraphApiVersion.current}/#{whatsapp_channel.provider_config.fetch('business_account_id')}"
+
+    100.times do
+      query = { limit: 100 }
+      query[:after] = cursor if cursor
+      response = HTTParty.get("#{path}/message_templates", headers: api_headers, query: query, timeout: 20)
+      data = response.parsed_response
+      unless response.success? && data.is_a?(Hash) && data['data'].is_a?(Array)
+        raise JrcCampaigns::TemplateSyncService::Error, 'Não foi possível consultar os modelos no provedor.'
+      end
+
+      templates.concat(data['data'])
+      return templates unless data.dig('paging', 'next').present?
+
+      cursor = data.dig('paging', 'cursors', 'after')
+      if cursor.blank? || !seen_cursors.add?(cursor)
+        raise JrcCampaigns::TemplateSyncService::Error, 'Paginação inválida no catálogo de modelos.'
+      end
+    end
+
+    raise JrcCampaigns::TemplateSyncService::Error, 'Limite de páginas excedido no catálogo de modelos.'
   end
 
   def fetch_whatsapp_templates(url)
@@ -135,7 +162,6 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     ENV.fetch('WHATSAPP_CLOUD_BASE_URL', 'https://graph.facebook.com')
   end
 
-  # TODO: See if we can unify the API versions and for both paths and make it consistent with out facebook app API versions
   def phone_id_path(version = 'v13.0')
     "#{api_base_path}/#{version}/#{whatsapp_channel.provider_config['phone_number_id']}"
   end
@@ -144,9 +170,16 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     "#{api_base_path}/v14.0/#{whatsapp_channel.provider_config['business_account_id']}"
   end
 
+  def message_endpoint(message, default: 'v13.0')
+    return "#{phone_id_path(default)}/messages" unless message.respond_to?(:capture_provider_response)
+
+    base_url = Whatsapp::CloudApiEndpoint.base_url
+    "#{base_url}/#{Whatsapp::GraphApiVersion.current}/#{whatsapp_channel.provider_config.fetch('phone_number_id')}/messages"
+  end
+
   def send_text_message(phone_number, message)
     response = HTTParty.post(
-      "#{phone_id_path}/messages",
+      message_endpoint(message),
       headers: api_headers,
       body: {
         messaging_product: 'whatsapp',
@@ -168,7 +201,7 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     return unless type_content
 
     response = HTTParty.post(
-      "#{phone_id_path('v24.0')}/messages",
+      message_endpoint(message, default: 'v24.0'),
       headers: api_headers,
       body: {
         :messaging_product => 'whatsapp',
@@ -302,7 +335,7 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     payload = create_payload_based_on_items(message)
 
     response = HTTParty.post(
-      "#{phone_id_path}/messages",
+      message_endpoint(message),
       headers: api_headers,
       body: {
         messaging_product: 'whatsapp',

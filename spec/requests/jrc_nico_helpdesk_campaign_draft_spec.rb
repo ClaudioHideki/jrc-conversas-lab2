@@ -16,8 +16,10 @@ RSpec.describe 'HelpDesk exact incident campaign drafts', type: :request do
   let(:incident) do
     event
     JrcServiceDesk::CreateIncidentService.new(user_context: sd_context).call(unit_id: sd_unit.id,
-      attributes: { title: 'Reviewed native mass incident', severity: 'high', ticket_ids: mass_tickets.map(&:id) },
-      idempotency_key: SecureRandom.uuid)
+                                                                             attributes: {
+                                                                               title: 'Reviewed native mass incident', severity: 'high', ticket_ids: mass_tickets.map(&:id)
+                                                                             },
+                                                                             idempotency_key: SecureRandom.uuid)
   end
   let(:inbox) do
     create(:channel_whatsapp, account: sd_account, sync_templates: false, validate_provider_config: false).inbox
@@ -32,11 +34,11 @@ RSpec.describe 'HelpDesk exact incident campaign drafts', type: :request do
   def native_action_event
     mass_tickets.each do |row|
       JrcNico::Helpdesk::TicketProfile.create!(account: sd_account, unit: sd_unit, ticket: row, company_id: row.company_id,
-        case_kind: 'defect', defect_key: 'synthetic.mass')
+                                               case_kind: 'defect', defect_key: 'synthetic.mass')
     end
     policy
     captured = JrcNico::Helpdesk::Capture.new(sd_account_user).call(ticket: ticket.reload, trigger: 'monitor',
-      origin_key: "campaign-draft:#{ticket.id}")
+                                                                    origin_key: "campaign-draft:#{ticket.id}")
     expect(captured.pluck(:rule_key)).to eq(['R04'])
     expect(captured.first.evidence.fetch('ticket_ids')).to eq(mass_tickets.map(&:id).sort)
     JrcNico::Helpdesk::EventJob.perform_now(captured.first.id)
@@ -54,7 +56,7 @@ RSpec.describe 'HelpDesk exact incident campaign drafts', type: :request do
     command = approved_action(approval)
     row = JrcCampaigns::Campaign.find(command.result.fetch('id'))
     expect(row).to have_attributes(account_id: sd_account.id, created_by_id: sd_user.id, status: 'draft', trigger_type: 'manual',
-      audience_type: 'sanitized_list', inbox_id: nil, approved_at: nil, approved_by_id: nil, scheduled_at: nil, message_body: '')
+                                   audience_type: 'sanitized_list', inbox_id: nil, approved_at: nil, approved_by_id: nil, scheduled_at: nil, message_body: '')
     expect(row.campaign_inboxes.first).to have_attributes(inbox_id: inbox.id, enabled: false)
     expect(row.sending_inbox_links).to be_empty
     expect(row.steps).to be_empty
@@ -65,7 +67,8 @@ RSpec.describe 'HelpDesk exact incident campaign drafts', type: :request do
     expect(list.entries.pluck(:metadata).flat_map { |value| value.fetch('ticket_ids') }.sort).to eq(mass_tickets.map(&:id).sort)
     expect(row.metadata.dig('nico_helpdesk', 'command_id')).to eq(command.id)
     expect(command.result.dig('provenance', 'list_digest')).to match(/\A[a-f0-9]{64}\z/)
-    expect(JrcCampaigns::AudienceResolver.new(row).entries).to be_empty # no consent was invented
+    expect(JrcCampaigns::AudienceResolver.new(row).entries.map(&:phone_number)).to contain_exactly('+5511991112233')
+    expect(JrcCampaigns::Consent.where(account: sd_account)).to be_empty
     get "/api/v1/accounts/#{sd_account.id}/jrc_campaigns/campaigns/#{row.id}", headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('id')).to eq(row.id)
@@ -172,8 +175,8 @@ RSpec.describe 'HelpDesk exact incident campaign drafts', type: :request do
     action = preview.fetch('actions').find { |row| row.fetch('tool') == 'prepare_incident_campaign' }
     expect do
       post "#{base}/group_prepare", params: { event_id: event.id, group_key: selected_group, input: input,
-        tool: action.fetch('tool'), arguments: action.fetch('arguments'), preview_digest: preview.fetch('preview_digest') },
-        headers: headers, as: :json
+                                              tool: action.fetch('tool'), arguments: action.fetch('arguments'), preview_digest: preview.fetch('preview_digest') },
+                                    headers: headers, as: :json
     end.not_to change(JrcCampaigns::SanitizedList, :count)
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcCampaigns::Campaign.where(account: sd_account).count).to eq(1)

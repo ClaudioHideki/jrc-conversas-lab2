@@ -6,12 +6,12 @@
       "REJECTIONS": "Destinatários inelegíveis e motivo da rejeição",
       "SENDER": "Remetente:",
       "WARNING": "Evolution Demo é uma integração não oficial. Volumes baixos não eliminam o risco de bloqueio. Os limites incluem campanhas e testes desta caixa; envios normais da conversa não entram nesses limites.",
-      "CONFIRM_TEST": "Confirmar teste Evolution? Remetente: {sender}. Destinatário: {recipient}. Bloqueios e revogações serão verificados antes do envio. Uma resposta aceita não confirma entrega ao WhatsApp.",
+      "CONFIRM_TEST": "Confirmar teste Evolution? Remetente: {sender}. Destinatário: {recipient}. Blacklist, bloqueios e recusas registradas serão verificados antes do envio. Uma resposta aceita não confirma entrega ao WhatsApp.",
       "TEST_ACCEPTED": "Evolution retornou o ID da mensagem. A confirmação de entrega ainda está pendente.",
       "TEST_UNCONFIRMED": "Teste sem confirmação de envio. Não reenviar antes de conferir o resultado; consulte o histórico do teste.",
       "CONTINUOUS_HELP": "O teste individual usa o destinatário informado e exige sua confirmação explícita. Blacklist, bloqueios e revogações continuam válidos. Nenhum registro de consentimento será criado pelo teste.",
       "NEW_TEST": "Preparar novo teste",
-      "NEW_TEST_CONFIRM": "Preparar outra solicitação de teste? Isso permite enviar novamente, inclusive o mesmo conteúdo, e respeita blacklist, bloqueios e revogações. Nenhuma mensagem será enviada até clicar em Enviar teste e confirmar remetente e destinatário.",
+      "NEW_TEST_CONFIRM": "Preparar outra solicitação de teste? Isso permite enviar novamente, inclusive o mesmo conteúdo, e respeita blacklist, bloqueios e recusas registradas. Nenhuma mensagem será enviada até clicar em Enviar teste e confirmar remetente e destinatário.",
       "WAIT_INTERVAL": "Aguarde o intervalo configurado da caixa antes de preparar outro teste. A consulta do resultado anterior permanece disponível."
     },
     "TITLE": "Campanhas",
@@ -144,7 +144,7 @@
       "SOURCE": "Origem dos contatos",
       "SOURCE_IMPORT": "Importar CSV",
       "OTHER_SOURCES": "Etiquetas, caixas, CRM e listas salvas",
-      "SOURCE_IMPORT_HELP": "Escolha um arquivo com os contatos desta campanha.",
+      "SOURCE_IMPORT_HELP": "Escolha uma lista sanitizada salva ou envie um novo CSV com os contatos desta campanha.",
       "SOURCE_MANUAL": "Digitar números",
       "SOURCE_MANUAL_HELP": "Cole os números sem precisar preparar um arquivo.",
       "MANUAL_NUMBERS_HELP": "Um número por linha, com código do país e DDD. Você também pode colar nome,telefone,email.",
@@ -251,6 +251,7 @@
       "STEP_CONFIG_SHORT": "Configurações",
       "STEP_MESSAGES_SHORT": "Mensagens",
       "STEP_REVIEW_SHORT": "Revisão",
+      "NO_RECIPIENTS_HELP": "Não há destinatários selecionados aptos. Confira a seleção, os números e os bloqueios na etapa Público.",
       "AUDIENCE_TITLE": "Defina o público da campanha",
       "AUDIENCE_SUBTITLE": "Escolha a origem dos contatos que receberão esta campanha.",
       "SOURCE_ALL_HELP": "Enviar para toda a base de contatos aptos.",
@@ -383,7 +384,13 @@
       "JARVIS_MESSAGES_PENDING": "Revise a sequência: há {messages} mensagens e {variables} variáveis identificadas com pendências.",
       "JARVIS_REVIEW_BLOCKED": "Encontrei bloqueios críticos. Corrija os itens em vermelho antes de iniciar.",
       "JARVIS_REVIEW_READY": "Campanha pronta para envio. Não encontrei bloqueios críticos.",
-      "EMAIL_COMPLIANCE": "Os e-mails serão enviados pela caixa selecionada usando a configuração SMTP ou OAuth existente. Respostas retornam para a conversa da campanha."
+      "EMAIL_COMPLIANCE": "Os e-mails serão enviados pela caixa selecionada usando a configuração SMTP ou OAuth existente. Respostas retornam para a conversa da campanha.",
+      "CLOUD_PACING_TITLE": "Envio pela API oficial da Meta",
+      "CLOUD_PACING_HELP": "Sem intervalo artificial entre destinatários. O processamento segue a fila e a capacidade da Meta, respeitando os limites da conta, os templates e a janela de envio.",
+      "CLOUD_DURATION": "Conforme fila e capacidade da Meta",
+      "SAVED_LISTS_CSV_HELP": "Escolha uma lista já sanitizada ou selecione “Importar novo CSV” para enviar outro arquivo. A prévia considera somente a opção selecionada.",
+      "NO_SAVED_LISTS_CSV": "Ainda não há listas sanitizadas nesta conta. Importe um CSV abaixo para criar uma lista.",
+      "NEW_CSV_OPTION": "Importar novo CSV"
     },
     "SANITIZE": {
       "LIST_COUNTS": "{whatsapp} WhatsApp · {email} e-mail · {total} importados",
@@ -404,6 +411,7 @@
       "LISTS": "Listas sanitizadas",
       "NO_LISTS": "Nenhuma lista sanitizada criada.",
       "FORMAT_HELP": "Aceita CSV com vírgula, ponto e vírgula ou tabulação, com cabeçalho nome,telefone,email opcional. Campos com separadores devem usar aspas. A validação final ocorre antes de criar a lista.",
+      "DIRECT_FLOW_HELP": "Depois de sanitizar, use a lista em uma campanha, escolha os destinatários e o remetente e revise o envio. Blacklist, contatos bloqueados e recusas registradas continuam sendo respeitados.",
       "NOT_AUTHORIZATION": "Revise os contatos da lista e selecione a caixa/número remetente antes de iniciar. Blacklist, bloqueios, revogações e as regras do canal continuam respeitados.",
       "PARSED": "{count} contatos lidos. Confira os dados antes de sanitizar.",
       "PARSE_ERROR": "Não foi possível ler a lista. Confira o separador e as aspas dos campos antes de continuar.",
@@ -441,7 +449,15 @@
       "STATUS": "Status",
       "SENT_AT": "Enviado em",
       "ERROR": "Erro",
-      "NO_DATA": "Ainda não há dados de execução para esta campanha."
+      "NO_DATA": "Ainda não há dados de execução para esta campanha.",
+      "READ_RECEIPT_HELP": "Atualização automática a cada 15 segundos. A leitura só aparece quando confirmada pelo WhatsApp; sem essa confirmação, a mensagem pode permanecer como Entregue.",
+      "ERROR_CODE": "Código do provedor: {code}",
+      "ERROR_DETAILS": "Detalhes técnicos",
+      "ERROR_MESSAGES": {
+        "ECOSYSTEM": "A Meta restringiu a entrega desta mensagem de marketing para este destinatário. Aguarde pelo menos 24 horas antes de uma nova tentativa; a liberação não é garantida.",
+        "UNDELIVERABLE": "Não foi possível entregar a mensagem. Confira o número e se o destinatário consegue enviar uma mensagem ao WhatsApp remetente e está com o aplicativo atualizado.",
+        "UNKNOWN": "O envio apresentou uma falha. Consulte o código e os detalhes técnicos para identificar a causa."
+      }
     },
     "ALERTS": {
       "LOAD_FAILED": "Não foi possível carregar Campanhas.",
@@ -463,7 +479,8 @@
       "TEST_FAILED": "Não foi possível enviar a mensagem de teste.",
       "MESSAGE_VALID": "Mensagem validada. O preview está pronto.",
       "MESSAGE_INVALID": "A mensagem ainda possui campos ou variáveis pendentes.",
-      "RECIPIENTS_LOAD_FAILED": "Não foi possível carregar os destinatários."
+      "RECIPIENTS_LOAD_FAILED": "Não foi possível carregar os destinatários.",
+      "REPORT_LOAD_FAILED": "Não foi possível atualizar o relatório. Tente novamente."
     },
     "DAYS": {
       "0": "Dom",
@@ -491,6 +508,7 @@
       "REQUEST": "Solicitação de teste #{id}"
     },
     "GOVERNANCE": {
+      "AUDIENCE_CHANGED": "The selected audience differs from the consolidated audience. Refresh the preview and review your selection before approval or sending.",
       "REVIEW": "Revisar e aprovar envio",
       "SAVE_FOR_REVIEW": "Salvar e revisar",
       "APPROVE": "Aprovar este público e configuração",
@@ -597,7 +615,7 @@
       "TEST_QUEUED": "Teste enfileirado no Broker. Aguarde e consulte o resultado antes de tentar outro envio.",
       "TEST_RESULT": "Resultado do teste Broker",
       "REFRESH_SENDERS": "Atualizar caixas e números remetentes",
-      "CONFIRM_TEST": "Confirmar teste pelo Broker? Caixa/número: {sender}. Destinatário: {recipient}. Bloqueios e revogações serão verificados. Aguarde o recibo antes de reenviar.",
+      "CONFIRM_TEST": "Confirmar teste pelo Broker? Caixa/número: {sender}. Destinatário: {recipient}. Blacklist, bloqueios e recusas registradas serão verificados. Aguarde o recibo antes de reenviar.",
       "REASONS": {
         "CONFIGURATION_REQUIRED": "Esta caixa ainda está sendo vinculada à integração do Broker desta conta. Atualize os remetentes em instantes. Se persistir, confira a integração em Conectar seu WhatsApp.",
         "BROKER_UPDATE_OR_CONFIGURATION_REQUIRED": "Atualize a API e os workers do Broker para a versão compatível e confira o vínculo desta caixa em Conectar seu WhatsApp.",
@@ -609,6 +627,51 @@
         "DIRECT_EVOLUTION_CONFIGURATION_REQUIRED": "Esta caixa usa a Evolution diretamente. Configure o remetente desta conta para campanhas ou migre a conexão pelo procedimento do Broker. O nome da caixa, sozinho, não autoriza disparos."
       },
       "RESULT_STATUS": "#{id} · {status}"
+    },
+    "META": {
+      "MEDIA": "Required header: {kind}",
+      "HTTPS_URL": "Public HTTPS URL",
+      "IMPORT_URL": "Import URL",
+      "UPLOADING": "Uploading and validating…",
+      "UPLOADED": "Upload complete",
+      "REMOVE": "Remove media",
+      "MEDIA_ERROR": "Could not import media. Check format, size and availability.",
+      "UNSUPPORTED": "This template contains a component not supported by campaigns. Sending is blocked.",
+      "VARIABLE": "{section} variable {variable}: fixed value or recipient field",
+      "BUTTON_VARIABLE": "URL variable: {name}",
+      "INCOMPLETE": "Required components are missing or invalid. Sending is blocked.",
+      "PREVIEW": "Template media preview",
+      "SYNC": "Update Meta templates",
+      "SYNC_FAILED": "Template update failed. The previous catalog was preserved.",
+      "SYNCED": "Last update",
+      "TIMEZONE": "Fuso horário",
+      "SAO_PAULO_TIMEZONE": "São Paulo — America/Sao_Paulo",
+      "CONFIRM_TEST": "Send one test from {sender} to {recipient}? Provider acceptance does not confirm delivery.",
+      "ACCEPTED": "Accepted by provider; awaiting delivery confirmation.",
+      "HELD": "Held for quality assessment.",
+      "UNKNOWN": "Unknown outcome. Automatic resend blocked.",
+      "VALIDATE": "Configuration validated without sending.",
+      "EXAMPLE_UNAVAILABLE": "The approved template example is unavailable or expired. Upload a file or import a public HTTPS URL.",
+      "HISTORY": "Test history",
+      "REFRESH": "Refresh status",
+      "ACCEPTED_AT": "Accepted",
+      "DELIVERED_AT": "Delivered",
+      "READ_AT": "Read",
+      "TEST_RESULT": "Meta test result"
+    },
+    "DELETE_CONFIRM": "Excluir a campanha “{name}” e seu histórico de disparos e relatórios? Esta ação não pode ser desfeita.",
+    "DELETE_NAMED": "Excluir campanha {name}",
+    "DELETE_ACTIVE_HELP": "Cancele a campanha antes de excluí-la.",
+    "RECIPIENT_STATUS": {
+      "queued": "Na fila",
+      "processing": "Processando",
+      "sent": "Enviada",
+      "delivered": "Entregue",
+      "read": "Lida",
+      "replied": "Respondida",
+      "failed": "Falhou",
+      "skipped": "Ignorada",
+      "canceled": "Cancelada"
     }
   }
 }

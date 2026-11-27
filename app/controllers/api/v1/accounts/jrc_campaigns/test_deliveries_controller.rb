@@ -14,8 +14,8 @@ class Api::V1::Accounts::JrcCampaigns::TestDeliveriesController < Api::V1::Accou
   end
 
   def serialize(delivery)
-    delivery.as_json(only: [:id, :inbox_id, :phone_number, :external_id, :status, :error_message, :created_at]).merge(
-      provider_status: delivery.metadata['provider_status'], message_id: delivery.metadata['message_id'],
+    delivery.as_json(only: [:id, :inbox_id, :phone_number, :external_id, :status, :error_message, :error_code, :accepted_at, :sent_at, :delivered_at, :read_at, :failed_at, :requested_by_id, :created_at]).merge(
+      provider_status: delivery.metadata['provider_status'], template: delivery.metadata['template'], language: delivery.metadata['language'], message_id: delivery.metadata['message_id'],
       delivery_confirmed: delivery.metadata['provider_status'].in?(%w[delivered read])
     )
   end

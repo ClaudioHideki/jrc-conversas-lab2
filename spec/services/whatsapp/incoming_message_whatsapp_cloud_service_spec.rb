@@ -351,13 +351,15 @@ describe Whatsapp::IncomingMessageWhatsappCloudService do
                                 inbox: whatsapp_channel.inbox, contact_inbox: contact_inbox)
 
           original_message = create(:message,
+                                    account: whatsapp_channel.account,
+                                    inbox: whatsapp_channel.inbox,
                                     conversation: conversation,
                                     source_id: 'wamid.ORIGINAL_MESSAGE_ID',
                                     content: 'Original message')
 
           described_class.new(inbox: whatsapp_channel.inbox, params: reply_params).perform
 
-          reply_message = whatsapp_channel.inbox.messages.last
+          reply_message = whatsapp_channel.inbox.messages.find_by!(source_id: 'wamid.REPLY_MESSAGE_ID')
           expect(reply_message.content).to eq('This is a reply')
           expect(reply_message.content_attributes['in_reply_to']).to eq(original_message.id)
           expect(reply_message.content_attributes['in_reply_to_external_id']).to eq('wamid.ORIGINAL_MESSAGE_ID')
@@ -368,7 +370,7 @@ describe Whatsapp::IncomingMessageWhatsappCloudService do
         it 'does not set in_reply_to (discards the reply reference)' do
           described_class.new(inbox: whatsapp_channel.inbox, params: reply_params).perform
 
-          reply_message = whatsapp_channel.inbox.messages.last
+          reply_message = whatsapp_channel.inbox.messages.find_by!(source_id: 'wamid.REPLY_MESSAGE_ID')
           expect(reply_message.content).to eq('This is a reply')
           expect(reply_message.content_attributes['in_reply_to']).to be_nil
           expect(reply_message.content_attributes['in_reply_to_external_id']).to be_nil

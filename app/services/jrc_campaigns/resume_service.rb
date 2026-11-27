@@ -16,7 +16,8 @@ class JrcCampaigns::ResumeService
 
       JrcCampaigns::BrokerRecoveryResume.new(recipient: recipient, step: step).perform
       recipient.update!(metadata: recipient.metadata.to_h.except('pending_step_id'))
-      JrcCampaigns::DispatchStepJob.perform_later(recipient.id, step.id)
+      JrcCampaigns::DispatchStepJob.set(wait_until: JrcCampaigns::ScheduleWindow.new(campaign).next_time(Time.current)).perform_later(recipient.id,
+                                                                                                                                      step.id)
     end
   end
 

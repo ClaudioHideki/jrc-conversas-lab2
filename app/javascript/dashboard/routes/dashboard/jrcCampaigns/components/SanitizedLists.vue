@@ -75,11 +75,11 @@ const removeList = async id => {
       <h2 class="text-xl font-semibold text-n-slate-12">
         {{ $t('JRC_CAMPAIGNS.SANITIZE.TITLE') }}
       </h2>
-      <p class="mt-1 text-sm text-n-slate-10">
-        {{ $t('JRC_CAMPAIGNS.SANITIZE.SUBTITLE') }}
+      <p class="mt-1 text-sm text-n-slate-11">
+        {{ t('JRC_CAMPAIGNS.SANITIZE.SUBTITLE') }}
       </p>
-      <p class="mt-3 rounded-lg bg-n-blue-2 p-3 text-sm text-n-slate-11">
-        {{ t('JRC_CAMPAIGNS.SANITIZE.NOT_AUTHORIZATION') }}
+      <p class="mt-3 rounded-lg bg-n-blue-2 p-3 text-sm text-n-slate-12">
+        {{ t('JRC_CAMPAIGNS.SANITIZE.DIRECT_FLOW_HELP') }}
       </p>
     </div>
 
@@ -111,7 +111,7 @@ const removeList = async id => {
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-background px-3 py-2 font-mono text-xs"
         />
       </label>
-      <p class="mt-2 text-xs text-n-slate-11">
+      <p class="mt-2 text-xs text-n-slate-12">
         {{ t('JRC_CAMPAIGNS.SANITIZE.FORMAT_HELP') }}
       </p>
       <p
@@ -124,7 +124,7 @@ const removeList = async id => {
       <p
         v-else-if="parsedEntries.length"
         role="status"
-        class="mt-3 text-sm text-n-slate-11"
+        class="mt-3 text-sm text-n-slate-12"
       >
         {{
           t('JRC_CAMPAIGNS.SANITIZE.PARSED', { count: parsedEntries.length })
@@ -147,56 +147,56 @@ const removeList = async id => {
       class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7"
     >
       <div class="rounded-xl border border-n-weak p-4">
-        <div class="text-xs text-n-slate-10">
-          {{ $t('JRC_CAMPAIGNS.SANITIZE.TOTAL') }}
+        <div class="text-xs text-n-slate-11">
+          {{ t('JRC_CAMPAIGNS.SANITIZE.TOTAL') }}
         </div>
         <div class="mt-1 text-2xl font-semibold">
           {{ result.stats.total || 0 }}
         </div>
       </div>
       <div class="rounded-xl border border-n-weak p-4">
-        <div class="text-xs text-n-slate-10">
-          {{ $t('JRC_CAMPAIGNS.SANITIZE.VALID') }}
+        <div class="text-xs text-n-slate-11">
+          {{ t('JRC_CAMPAIGNS.SANITIZE.VALID') }}
         </div>
         <div class="mt-1 text-2xl font-semibold text-n-teal-11">
           {{ result.stats.valid || 0 }}
         </div>
       </div>
       <div class="rounded-xl border border-n-weak p-4">
-        <div class="text-xs text-n-slate-10">
-          {{ $t('JRC_CAMPAIGNS.SANITIZE.INVALID') }}
+        <div class="text-xs text-n-slate-11">
+          {{ t('JRC_CAMPAIGNS.SANITIZE.INVALID') }}
         </div>
         <div class="mt-1 text-2xl font-semibold text-n-ruby-11">
           {{ result.stats.invalid || 0 }}
         </div>
       </div>
       <div class="rounded-xl border border-n-weak p-4">
-        <div class="text-xs text-n-slate-10">
-          {{ $t('JRC_CAMPAIGNS.SANITIZE.DUPLICATE') }}
+        <div class="text-xs text-n-slate-11">
+          {{ t('JRC_CAMPAIGNS.SANITIZE.DUPLICATE') }}
         </div>
         <div class="mt-1 text-2xl font-semibold">
           {{ result.stats.duplicate || 0 }}
         </div>
       </div>
       <div class="rounded-xl border border-n-weak p-4">
-        <div class="text-xs text-n-slate-10">
-          {{ $t('JRC_CAMPAIGNS.SANITIZE.BLACKLISTED') }}
+        <div class="text-xs text-n-slate-11">
+          {{ t('JRC_CAMPAIGNS.SANITIZE.BLACKLISTED') }}
         </div>
         <div class="mt-1 text-2xl font-semibold">
           {{ result.stats.blacklisted || 0 }}
         </div>
       </div>
       <div class="rounded-xl border border-n-weak p-4">
-        <div class="text-xs text-n-slate-10">
-          {{ $t('JRC_CAMPAIGNS.SANITIZE.VALID_PHONE') }}
+        <div class="text-xs text-n-slate-11">
+          {{ t('JRC_CAMPAIGNS.SANITIZE.VALID_PHONE') }}
         </div>
         <div class="mt-1 text-2xl font-semibold text-n-teal-11">
           {{ result.stats.valid_phone || 0 }}
         </div>
       </div>
       <div class="rounded-xl border border-n-weak p-4">
-        <div class="text-xs text-n-slate-10">
-          {{ $t('JRC_CAMPAIGNS.SANITIZE.VALID_EMAIL') }}
+        <div class="text-xs text-n-slate-11">
+          {{ t('JRC_CAMPAIGNS.SANITIZE.VALID_EMAIL') }}
         </div>
         <div class="mt-1 text-2xl font-semibold text-n-blue-11">
           {{ result.stats.valid_email || 0 }}
@@ -220,7 +220,7 @@ const removeList = async id => {
           {{ t('JRC_CAMPAIGNS.SANITIZE.DETAILS') }}
         </summary>
         <div class="mt-3 overflow-auto">
-          <table class="w-full text-left text-sm text-n-slate-11">
+          <table class="w-full text-left text-sm text-n-slate-12">
             <thead>
               <tr>
                 <th class="p-2">{{ t('JRC_CAMPAIGNS.SANITIZE.CONTACT') }}</th>
@@ -238,9 +238,9 @@ const removeList = async id => {
               >
                 <td class="p-2">{{ entry.name }}</td>
                 <td class="p-2">
-                  {{ entry.normalized_phone || entry.phone_number }}<br />{{
-                    entry.normalized_email || entry.email
-                  }}
+                  {{ entry.normalized_phone || entry.phone_number }}
+                  <br />
+                  {{ entry.normalized_email || entry.email }}
                 </td>
                 <td class="p-2">
                   {{ entry.reason || t('JRC_CAMPAIGNS.SANITIZE.VALID') }}
@@ -257,7 +257,7 @@ const removeList = async id => {
       </h3>
       <div
         v-if="!lists.length"
-        class="rounded-xl border border-dashed border-n-weak p-8 text-center text-sm text-n-slate-10"
+        class="rounded-xl border border-dashed border-n-weak p-8 text-center text-sm text-n-slate-11"
       >
         {{ $t('JRC_CAMPAIGNS.SANITIZE.NO_LISTS') }}
       </div>
@@ -269,7 +269,7 @@ const removeList = async id => {
         >
           <div>
             <div class="font-medium text-n-slate-12">{{ list.name }}</div>
-            <div class="mt-1 text-xs text-n-slate-10">
+            <div class="mt-1 text-xs text-n-slate-11">
               {{
                 $t('JRC_CAMPAIGNS.SANITIZE.LIST_COUNTS', {
                   whatsapp: list.stats?.valid_phone ?? list.stats?.valid ?? 0,

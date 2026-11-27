@@ -15,6 +15,11 @@ class JrcCampaigns::ApprovalService
         'configuration' => prepared.configuration,
         'recipients' => recipient_snapshot
       }
+      templates = configuration.template_definitions
+      snapshot['configuration']['meta_templates'] = templates if templates.any?
+      unless JrcCampaigns::AudienceConfirmation.new(campaign).valid_snapshot?(snapshot['recipients'])
+        reject!(JrcCampaigns::AudienceConfirmation::MESSAGE)
+      end
       campaign.update!(review_snapshot: snapshot, review_digest: digest(snapshot), approved_digest: nil, approved_by: nil,
                        approved_at: nil, approval_expires_at: nil)
     end
@@ -88,7 +93,10 @@ class JrcCampaigns::ApprovalService
     return false unless actual == expected
 
     segment = JrcCustomers::CampaignSegment.new(campaign)
-    !segment.selected? || segment.reviewed_contacts_visible?(snapshot.fetch('recipients'))
+    (!segment.selected? || segment.reviewed_contacts_visible?(snapshot.fetch('recipients'))) &&
+      JrcCampaigns::AudienceConfirmation.new(campaign).valid_snapshot?(snapshot['recipients'])
+  rescue ArgumentError, ActiveRecord::RecordNotFound
+    false
   end
 
   def configuration

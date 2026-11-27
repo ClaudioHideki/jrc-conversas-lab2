@@ -21,6 +21,10 @@ export const evolutionMinimumInterval = inboxes =>
   );
 
 export const testResultAlert = data => {
+  if (data.status === 'accepted') return 'JRC_CAMPAIGNS.META.ACCEPTED';
+  if (data.status === 'held') return 'JRC_CAMPAIGNS.META.HELD';
+  if (data.connector === 'official' && data.status === 'unknown')
+    return 'JRC_CAMPAIGNS.META.UNKNOWN';
   if (data.test_delivery_id && data.status === 'sending')
     return 'JRC_CAMPAIGNS.BROKER.TEST_QUEUED';
   if (!data.test_delivery_id) return 'JRC_CAMPAIGNS.ALERTS.TEST_SENT';

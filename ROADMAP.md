@@ -67,3 +67,7 @@ Release funcional `5c3fb7f` publicada e implantada no Grupo JRC após CI 49/49, 
 ### Consumo NICO — 23/11/2026
 
 Candidata isolada sobre LAB2 e6bd4cc9: registro confirmado e estimado separado, limite local opcional e observação dos limites da API. Histórico incerto preservado; sem alteração de outros ambientes. CI e implantação continuam gates próprios. Ver ADR0007.
+
+### Fluxo de Campanhas — 27/11/2026
+
+> Levar o fluxo validado de Campanhas do GoPure ao JRC Conversas com aprovação de público e recibos por caixa. O aceite exige validação sobre o SHA consolidado. [Escopo](docs/adr/0014-campanhas-fluxo-validado-gopure.md)

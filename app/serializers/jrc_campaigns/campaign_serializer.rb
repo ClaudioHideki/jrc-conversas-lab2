@@ -56,7 +56,7 @@ class JrcCampaigns::CampaignSerializer
   end
 
   def step_json(step)
-    step.as_json(only: [:id, :position, :kind, :subject, :body, :media_url, :file_name, :template_name, :template_namespace, :template_language,
+    step.as_json(only: [:id, :position, :kind, :subject, :body, :media_url, :file_name, :media_asset_id, :template_name, :template_namespace, :template_language,
                         :template_params, :inbox_overrides, :delay_after_seconds, :only_if_no_reply, :follow_up_after_hours])
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_24_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_25_190100) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1919,6 +1919,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_24_120000) do
     t.string "kind"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "source_key"
+    t.index ["account_id", "source_key"], name: "idx_campaign_template_media_source", unique: true, where: "(source_key IS NOT NULL)"
     t.index ["account_id"], name: "index_jrc_campaign_media_assets_on_account_id"
     t.index ["created_by_id"], name: "index_jrc_campaign_media_assets_on_created_by_id"
   end
@@ -1986,6 +1988,21 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_24_120000) do
     t.index ["created_by_id"], name: "index_jrc_campaign_sanitized_lists_on_created_by_id"
   end
 
+  create_table "jrc_campaign_status_events", force: :cascade do |t|
+    t.bigint "inbox_id", null: false
+    t.string "external_id", null: false
+    t.string "status", null: false
+    t.string "fingerprint", null: false
+    t.jsonb "provider_errors", default: [], null: false
+    t.datetime "occurred_at", null: false
+    t.datetime "matched_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inbox_id", "external_id"], name: "idx_campaign_status_wamid"
+    t.index ["inbox_id", "fingerprint"], name: "idx_campaign_status_idempotency", unique: true
+    t.index ["inbox_id"], name: "index_jrc_campaign_status_events_on_inbox_id"
+  end
+
   create_table "jrc_campaign_steps", force: :cascade do |t|
     t.bigint "campaign_id", null: false
     t.integer "position", default: 0, null: false
@@ -2043,7 +2060,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_24_120000) do
     t.jsonb "metadata", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "accepted_at"
+    t.datetime "sent_at"
+    t.datetime "delivered_at"
+    t.datetime "read_at"
+    t.datetime "failed_at"
+    t.string "error_code"
     t.index ["account_id", "idempotency_key"], name: "idx_jrc_campaign_test_idempotency", unique: true
+    t.index ["inbox_id", "external_id"], name: "idx_campaign_test_wamid"
     t.index ["account_id"], name: "index_jrc_campaign_test_deliveries_on_account_id"
     t.index ["inbox_id"], name: "index_jrc_campaign_test_deliveries_on_inbox_id"
     t.index ["requested_by_id"], name: "index_jrc_campaign_test_deliveries_on_requested_by_id"
@@ -7166,6 +7190,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_24_120000) do
   add_foreign_key "jrc_campaign_sanitized_lists", "accounts"
   add_foreign_key "jrc_campaign_sanitized_lists", "users", column: "created_by_id"
   add_foreign_key "jrc_campaign_steps", "jrc_campaign_media_assets", column: "media_asset_id", on_delete: :nullify
+  add_foreign_key "jrc_campaign_status_events", "inboxes"
   add_foreign_key "jrc_campaign_steps", "jrc_campaigns", column: "campaign_id"
   add_foreign_key "jrc_campaign_test_authorizations", "accounts"
   add_foreign_key "jrc_campaign_test_authorizations", "inboxes"

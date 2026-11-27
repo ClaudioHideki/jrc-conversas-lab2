@@ -35,10 +35,18 @@ class JrcCampaigns::TemplateRenderer
       'contact' => {
         'name' => recipient.name.to_s,
         'phone_number' => recipient.phone_number.to_s,
+        'custom_attributes' => authorized_custom_attributes(contact),
         'email' => email.to_s
       },
       'inbox' => { 'name' => inbox.name.to_s },
       'account' => { 'name' => recipient.campaign.account.name.to_s }
     }
+  end
+
+  def authorized_custom_attributes(contact)
+    return {} unless contact && contact.account_id == recipient.campaign.account.id
+
+    keys = recipient.campaign.account.custom_attribute_definitions.contact_attribute.pluck(:attribute_key)
+    contact.custom_attributes.to_h.slice(*keys)
   end
 end

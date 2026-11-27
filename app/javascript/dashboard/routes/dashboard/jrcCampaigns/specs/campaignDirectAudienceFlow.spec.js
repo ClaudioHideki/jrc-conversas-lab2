@@ -41,6 +41,7 @@ const savedCampaign = {
   approval_valid: false,
   created_at: '2026-10-26T12:00:00Z',
   delivery_channel: 'whatsapp',
+  estimated_recipients: 2,
   audience_type: 'sanitized_list',
   audience_config: { sanitized_list_id: 42 },
   rotation_mode: 'round_robin',

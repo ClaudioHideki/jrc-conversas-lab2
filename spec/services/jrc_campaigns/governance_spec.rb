@@ -6,7 +6,17 @@ RSpec.describe 'Campaign sending governance' do # rubocop:disable RSpec/Describe
   let(:admin) { create(:user, account: account, role: :administrator) }
   let(:inbox) { create(:inbox, account: account, channel: create(:channel_whatsapp, account: account)) }
   let(:contact) { create(:contact, account: account, phone_number: '+5511999999999') }
-  let(:campaign) { JrcCampaigns::Campaign.create!(account: account, inbox: inbox, name: 'Pilot') }
+  let(:campaign) do
+    JrcCampaigns::Campaign.create!(sending_window: { start: '00:00', end: '23:59', days: [0, 1, 2, 3, 4, 5, 6], timezone: 'UTC' }, account: account,
+                                   inbox: inbox, name: 'Pilot')
+  end
+
+  around do |example|
+    travel_to(Time.utc(2026, 11, 25, 15))
+    example.run
+  ensure
+    travel_back
+  end
 
   before do
     stub_request(:post, 'https://waba.360dialog.io/v1/configs/webhook')
@@ -37,7 +47,10 @@ RSpec.describe 'Campaign sending governance' do # rubocop:disable RSpec/Describe
   context 'with a GoPure email campaign' do
     let(:inbox) { create(:inbox, account: account, channel: create(:channel_email, account: account)) }
     let(:contact) { create(:contact, account: account, email: 'campaign@example.test', phone_number: nil) }
-    let(:campaign) { JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Email GoPure', delivery_channel: 'email') }
+    let(:campaign) do
+      JrcCampaigns::Campaign.create!(sending_window: { start: '00:00', end: '23:59', days: [0, 1, 2, 3, 4, 5, 6], timezone: 'UTC' }, account: account,
+                                     inbox: inbox, created_by: admin, name: 'Email GoPure', delivery_channel: 'email')
+    end
     let(:step) { campaign.steps.create!(kind: 'email', position: 0, subject: 'GoPure', body: 'Olá') }
 
     it 'approves the email destination and sends once through the existing email sender' do
@@ -51,7 +64,8 @@ RSpec.describe 'Campaign sending governance' do # rubocop:disable RSpec/Describe
       message = create(:message, account: account, inbox: inbox, conversation: mail_conversation, message_type: :outgoing)
       sender = instance_double(JrcCampaigns::EmailSender)
       allow(JrcCampaigns::EmailSender).to receive(:new).and_return(sender)
-      expect(sender).to receive(:perform).once.and_return(external_id: 'qa-mail-id', contact: contact, conversation: mail_conversation, message: message)
+      expect(sender).to receive(:perform).once.and_return(external_id: 'qa-mail-id', contact: contact, conversation: mail_conversation,
+                                                          message: message)
       2.times { JrcCampaigns::DispatchStepService.new(recipient: recipient, step: step).perform }
       expect(recipient.reload).to be_sent
       expect(recipient.deliveries.sole.external_id).to eq('qa-mail-id')
@@ -68,7 +82,7 @@ RSpec.describe 'Campaign sending governance' do # rubocop:disable RSpec/Describe
 
   context 'with recorded consent' do
     before do
-      JrcCampaigns::Consent.create!(account: account, phone_number: contact.phone_number, evidence: 'Signed form', recorded_by: admin,
+      JrcCampaigns::Consent.create!(account: account, phone_number: contact.phone_number, evidence: 'Signed form', purpose: 'whatsapp_campaigns', recorded_by: admin,
                                     granted_at: Time.current)
     end
 
@@ -105,7 +119,7 @@ RSpec.describe 'Campaign sending governance' do # rubocop:disable RSpec/Describe
     end
 
     it 'rejects freeform test sends outside the conversation window despite opt-in' do
-      test = JrcCampaigns::TestMessageService.new(account: account, user: admin, phone_number: contact.phone_number,
+      test = JrcCampaigns::TestMessageService.new(account: account, user: admin, idempotency_key: SecureRandom.uuid, operator_confirmed: true, phone_number: contact.phone_number,
                                                   inbox_id: inbox.id, step: { kind: 'text', body: 'Hello' })
       expect { test.perform }.to raise_error(ArgumentError, /janela/)
     end

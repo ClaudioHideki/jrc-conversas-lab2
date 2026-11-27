@@ -15,7 +15,7 @@ class JrcCampaigns::ProviderMessageProxy
     end
   end
 
-  attr_accessor :external_error, :status
+  attr_accessor :external_error, :status, :provider_response
   attr_reader :content_type, :content_attributes
 
   def initialize(kind:, body:, media_url: nil, file_name: nil)
@@ -25,6 +25,15 @@ class JrcCampaigns::ProviderMessageProxy
     @file_name = file_name
     @content_type = 'text'
     @content_attributes = {}
+  end
+
+  def capture_provider_response(value)
+    data = value.is_a?(Hash) ? value : {}
+    @provider_response = Array(data['messages']).first.to_h.slice('message_status')
+    error = data['error'].is_a?(Hash) ? data['error'] : {}
+    safe_error = error.slice('code', 'error_subcode', 'type').transform_values(&:to_s)
+                      .select { |_key, item| item.match?(/\A[a-zA-Z0-9_]{1,64}\z/) }
+    @provider_response['error'] = safe_error if safe_error.present?
   end
 
   def attachments

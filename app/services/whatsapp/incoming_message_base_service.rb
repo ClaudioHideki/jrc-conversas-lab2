@@ -44,29 +44,27 @@ class Whatsapp::IncomingMessageBaseService
       set_conversation
       create_messages
     end
-    unless outgoing_echo
-      JrcCampaigns::ReplyTrackerService.call(contact: @contact, inbox: @inbox, conversation: @conversation)
-    end
+    return if outgoing_echo
+
+    JrcCampaigns::ReplyTrackerService.call(contact: @contact, inbox: @inbox, conversation: @conversation)
   end
 
   def process_statuses
-    status = @processed_params[:statuses].first
-    if inbox.channel.is_a?(Channel::Whatsapp) && inbox.channel.provider == 'whatsapp_cloud'
-      return if Whatsapp::RetryReceiptService.new(inbox, status).perform
+    @processed_params[:statuses].each do |status|
+      if inbox.channel.is_a?(Channel::Whatsapp) && inbox.channel.provider == 'whatsapp_cloud'
+        next if Whatsapp::RetryReceiptService.new(inbox, status).perform
+      end
+
+      JrcCampaigns::MetaStatusService.record(inbox: inbox, external_id: status[:id], status: status[:status],
+                                             errors: status[:errors], timestamp: status[:timestamp])
+      next unless find_message_by_source_id(status[:id])
+      next if @message.additional_attributes.to_h['whatsapp_retry'].present?
+
+      update_whatsapp_identifiers_from_status(status)
+      update_message_with_status(@message, status)
+    rescue ArgumentError => e
+      Rails.logger.warn("[WHATSAPP_STATUS] inbox_id=#{inbox.id} error_class=#{e.class}")
     end
-
-    JrcCampaigns::StatusTrackerService.call(
-      external_id: status[:id],
-      status: status[:status],
-      errors: status[:errors]
-    )
-    return unless find_message_by_source_id(status[:id])
-    return if @message.additional_attributes.to_h['whatsapp_retry'].present?
-
-    update_whatsapp_identifiers_from_status(status)
-    update_message_with_status(@message, status)
-  rescue ArgumentError => e
-    Rails.logger.error "Error while processing whatsapp status update #{e.message}"
   end
 
   def update_message_with_status(message, status)

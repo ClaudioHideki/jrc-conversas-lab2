@@ -86,7 +86,7 @@ const addList = async () => {
     <p
       v-else-if="parsed.entries.length"
       role="status"
-      class="text-sm text-n-slate-11"
+      class="text-sm text-n-slate-12"
     >
       {{ t('JRC_CAMPAIGNS.SANITIZE.PARSED', { count: parsed.entries.length }) }}
     </p>

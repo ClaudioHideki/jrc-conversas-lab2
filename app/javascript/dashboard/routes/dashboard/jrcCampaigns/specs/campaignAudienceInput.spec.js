@@ -48,6 +48,67 @@ describe('audience input inside the campaign', () => {
     expect(wrapper.emitted('refreshSenders')).toHaveLength(1);
   });
 
+  it('offers every saved sanitized list directly in CSV import without creating another list', async () => {
+    const lists = Array.from({ length: 25 }, (_, i) => ({
+      id: i + 1,
+      name: `Saved list ${i + 1}`,
+    }));
+    const wrapper = mount(CampaignWizard, {
+      props: { metadata: { sanitized_lists: lists } },
+      global: { mocks: { $t: key => key } },
+    });
+    await flushPromises();
+    wrapper.vm.form.name = 'Saved audience';
+    wrapper.vm.form.steps[0].body = 'Preserved message';
+    await wrapper.vm.selectAudience('import_csv');
+    await flushPromises();
+    const select = wrapper.get('[data-testid="campaign-sanitized-list"]');
+    expect(select.findAll('option')).toHaveLength(26);
+    lists.forEach(list => expect(select.text()).toContain(list.name));
+    await select.setValue('22');
+    await wrapper.vm.refreshAudiencePreview();
+    expect(wrapper.vm.buildPayload()).toMatchObject({
+      audience_type: 'sanitized_list',
+      audience_config: { sanitized_list_id: 22 },
+    });
+    expect(api.audiencePreview.mock.lastCall[0]).toMatchObject({
+      audience_config: { sanitized_list_id: 22 },
+    });
+    expect(wrapper.vm.form.steps[0].body).toBe('Preserved message');
+    expect(wrapper.find('input[type="file"]').exists()).toBe(false);
+    expect(api.createSanitizedList).not.toHaveBeenCalled();
+    wrapper.vm.form.audience_config.recipient_selection_mode = 'include';
+    wrapper.vm.form.audience_config.recipient_selection_keys = [
+      'sanitized_entry:old',
+    ];
+    await select.setValue('23');
+    await flushPromises();
+    expect(wrapper.vm.form.audience_config.sanitized_list_id).toBe(23);
+    expect(wrapper.vm.form.audience_config.recipient_selection_keys).toEqual(
+      []
+    );
+    await select.setValue(select.findAll('option')[0].element.value);
+    await flushPromises();
+    expect(wrapper.vm.form.audience_config.sanitized_list_id).toBeNull();
+    expect(wrapper.find('input[type="file"]').exists()).toBe(true);
+    expect(wrapper.vm.sourceValid).toBe(false);
+  });
+
+  it('keeps CSV upload available when no saved lists exist', async () => {
+    const wrapper = mount(CampaignWizard, {
+      props: { metadata: { sanitized_lists: [] } },
+      global: { mocks: { $t: key => key } },
+    });
+    await wrapper.vm.selectAudience('import_csv');
+    await flushPromises();
+    expect(
+      wrapper.get('[data-testid="campaign-sanitized-list"]').element.disabled
+    ).toBe(true);
+    expect(wrapper.find('input[type="file"]').exists()).toBe(true);
+    expect(wrapper.text()).toContain('JRC_CAMPAIGNS.WIZARD.NO_SAVED_LISTS_CSV');
+    expect(wrapper.vm.form.audience_config.sanitized_list_id).toBeNull();
+  });
+
   it('does not replace the selected list preview with an older pending request', async () => {
     let resolveOld;
     api.audiencePreview.mockImplementationOnce(

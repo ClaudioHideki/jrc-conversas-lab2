@@ -13,21 +13,21 @@ RSpec.describe JrcCampaigns::EligibilityPolicy do
 
   it 'preserves a recorded withdrawal even after importing the number again' do
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: phone, evidence: 'Historical',
-                                 granted_at: 2.days.ago, revoked_at: 1.day.ago)
+                                  granted_at: 2.days.ago, revoked_at: 1.day.ago)
     expect(policy.list_rejection_reason).to match(/revogad/)
     expect(policy.rejection_reason).to match(/revogad/)
   end
 
   it 'accepts a subsequent active consent without deleting the withdrawal history' do
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: phone, evidence: 'Historical',
-                                 granted_at: 2.days.ago, revoked_at: 1.day.ago)
+                                  granted_at: 2.days.ago, revoked_at: 1.day.ago)
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: phone, evidence: 'New permission', granted_at: Time.current)
     expect(policy.list_rejection_reason).to be_nil
   end
 
   it 'does not use another account permission to override this account withdrawal' do
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: phone, evidence: 'Historical',
-                                 granted_at: 2.days.ago, revoked_at: 1.day.ago)
+                                  granted_at: 2.days.ago, revoked_at: 1.day.ago)
     other = create(:account)
     JrcCampaigns::Consent.create!(account: other, recorded_by: admin, phone_number: phone, evidence: 'Other account', granted_at: Time.current)
     expect(policy.list_rejection_reason).to match(/revogad/)
@@ -38,7 +38,7 @@ RSpec.describe JrcCampaigns::EligibilityPolicy do
     expect(policy.list_rejection_reason).to eq('Destinatário na blacklist.')
   end
 
-  it 'lets the operator select the list before choosing the sender without granting consent' do
+  it 'presents eligible contacts before sender choice without consent registration' do
     create(:contact, account: account, phone_number: phone)
     campaign = JrcCampaigns::Campaign.new(account: account, created_by: admin, name: 'List preview')
     expect(JrcCampaigns::AudienceResolver.new(campaign).entries.map(&:phone_number)).to include(phone)
@@ -54,6 +54,7 @@ RSpec.describe JrcCampaigns::EligibilityPolicy do
     create(:contact, account: account, phone_number: phone)
     inbox = create(:inbox, account: account, channel: create(:channel_api, account: account))
     campaign = JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Unconfigured inbox')
-    expect(JrcCampaigns::AudienceResolver.new(campaign).entries).to be_empty
+    expect(campaign.sending_inbox_links).to be_empty
+    expect { campaign.launch! }.to raise_error(ActiveRecord::RecordInvalid)
   end
 end

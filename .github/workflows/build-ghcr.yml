@@ -23,6 +23,10 @@ on:
         description: Run de projects-portal-candidate.yml no mesmo SHA e branch para release consolidada
         type: string
         required: false
+      campaign_validation_run_id:
+        description: Run de campaign-workflow-candidate.yml no mesmo SHA e branch
+        type: string
+        required: false
       base_sha:
         description: SHA base da integracao para validar tambem commits de correcao (opcional)
         type: string
@@ -125,6 +129,20 @@ jobs:
           assert run['conclusion'] == 'success', 'Projects and Portal validation has not passed'
           print('Exact consolidated Projects and Portal integration confirmed:', run['html_url'])
           PYTHON
+
+      - name: Exigir validacao de Campanhas no SHA exato
+        if: inputs.publish && inputs.component == 'app' && github.ref_name == 'codex/consolidacao-campanhas-20261127'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CAMPAIGN_RUN_ID: ${{ inputs.campaign_validation_run_id }}
+        run: |
+          test "$GITHUB_SHA" = "$SOURCE_SHA"
+          [[ "$CAMPAIGN_RUN_ID" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CAMPAIGN_RUN_ID" |
+            jq --exit-status --arg sha "$SOURCE_SHA" --arg branch "$GITHUB_REF_NAME" '
+              .head_sha == $sha and .head_branch == $branch and
+              .path == ".github/workflows/campaign-workflow-candidate.yml" and .conclusion == "success"
+            '
 
       - name: Baixar a revisao exata
         uses: actions/checkout@v4
@@ -473,7 +491,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Confirmar main e branch sincronizadas antes de publicar
-        if: inputs.publish && github.ref_name == 'codex/diagnostico-latencia-ramal-20261126'
+        if: inputs.publish && (github.ref_name == 'codex/diagnostico-latencia-ramal-20261126' || github.ref_name == 'codex/consolidacao-campanhas-20261127')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
