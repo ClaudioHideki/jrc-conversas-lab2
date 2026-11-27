@@ -1,0 +1,18 @@
+{
+  "parent": "312e24451c597a746d82b46b82bc4905c2085c73",
+  "failed_run": 45946680938,
+  "failed_job": 140332860858,
+  "artifact": 15175102693,
+  "artifact_sha256": "fe82c12279fd65aae33a0c7dc9c3b6fe926fce9d53a91faa2ab91515a78fe754",
+  "report_sha256": "59ccbe1b9273f7eac4ce108aef36cf3f0eba3fdc0d8f8acfeaee6df655c0168a",
+  "cause": "Vue Test Utils wrapper.vm does not expose the setup expose-only method; observe the same shared spy injected into expose, not an undefined wrapper property.",
+  "source_sha256": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "cad10ca0e9cf694f5db43da85a8f94fa0a6d29b745a871538e3f0c97349f41f4"
+  },
+  "parent_sources": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js": "305053adbde2cd46e73b91e00cf85c0e01fcc4d99c8405c5a6db1a5fef7e76d9"
+  },
+  "all_13_examples_and_every_behavioral_assertion_preserved": true,
+  "product_code_changed": false,
+  "native_or_Chrome_acceptance": false
+}

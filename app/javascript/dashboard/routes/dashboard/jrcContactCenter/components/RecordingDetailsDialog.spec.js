@@ -1,14 +1,16 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import RecordingDetailsDialog from './RecordingDetailsDialog.vue';
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 enableAutoUnmount(afterEach);
+const openDialog = vi.fn();
+beforeEach(() => openDialog.mockClear());
 const Dialog = defineComponent({
   emits: ['close'],
   setup(_, { slots, expose, emit }) {
-    expose({ open: vi.fn(), close: () => emit('close') });
+    expose({ open: openDialog, close: () => emit('close') });
     return () => h('section', slots.default?.());
   },
 });
@@ -348,8 +350,7 @@ describe('authorized native recording details popup', () => {
     const wrapper = create({
       capabilities: { recordings_listen: true, operate: true },
     });
-    const nativeDialog = wrapper.getComponent(Dialog);
-    expect(nativeDialog.vm.open).toHaveBeenCalledTimes(1);
+    expect(openDialog).toHaveBeenCalledTimes(1);
     await wrapper.get('[data-recording-actions-open]').trigger('click');
     wrapper.getComponent({ name: 'RecordingManualTasks' }).vm.$emit('create');
     await flushPromises();
@@ -361,7 +362,7 @@ describe('authorized native recording details popup', () => {
     });
     creator.vm.$emit('close');
     await flushPromises();
-    expect(nativeDialog.vm.open).toHaveBeenCalledTimes(2);
+    expect(openDialog).toHaveBeenCalledTimes(2);
     expect(
       wrapper
         .getComponent({ name: 'RecordingManualTasks' })
@@ -390,7 +391,7 @@ describe('authorized native recording details popup', () => {
     expect(
       wrapper.findComponent({ name: 'RecordingManualTasks' }).exists()
     ).toBe(false);
-    expect(wrapper.getComponent(Dialog).vm.open).toHaveBeenCalledTimes(1);
+    expect(openDialog).toHaveBeenCalledTimes(1);
     expect(wrapper.emitted('playback')).toBeUndefined();
   });
 
@@ -409,6 +410,6 @@ describe('authorized native recording details popup', () => {
       wrapper.findComponent({ name: 'RecordingManualTasks' }).exists()
     ).toBe(false);
     expect(wrapper.emitted('close')).toBeUndefined();
-    expect(wrapper.getComponent(Dialog).vm.open).toHaveBeenCalledTimes(1);
+    expect(openDialog).toHaveBeenCalledTimes(1);
   });
 });
