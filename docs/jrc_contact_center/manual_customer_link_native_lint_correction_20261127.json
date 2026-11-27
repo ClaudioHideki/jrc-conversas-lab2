@@ -1,0 +1,201 @@
+{
+  "source_parent": "be8680de302ce7f4d20d5982c560a1bf275fa81c",
+  "failed_run": 46074135257,
+  "artifact": 15233788259,
+  "artifact_sha256": "fdb1cd6e3dec3e2bea06be27977d34220828bd85dc48944d93efdd4841c3c4a5",
+  "native_lint_report_sha256": "660905a00a63370f2ba30413f0f57e83c1631938d4e35a59cf35b7cb2e369610",
+  "exact_findings": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_links_spec.rb": [
+      {
+        "severity": "convention",
+        "message": "Align the arguments of a method call if they span more than one line.",
+        "cop_name": "Layout/ArgumentAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 33,
+          "start_column": 44,
+          "last_line": 33,
+          "last_column": 75,
+          "length": 32,
+          "line": 33,
+          "column": 44
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Align the keys of a hash literal if they span more than one line.",
+        "cop_name": "Layout/HashAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 33,
+          "start_column": 44,
+          "last_line": 33,
+          "last_column": 75,
+          "length": 32,
+          "line": 33,
+          "column": 44
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Align the arguments of a method call if they span more than one line.",
+        "cop_name": "Layout/ArgumentAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 34,
+          "start_column": 44,
+          "last_line": 34,
+          "last_column": 61,
+          "length": 18,
+          "line": 34,
+          "column": 44
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Align the keys of a hash literal if they span more than one line.",
+        "cop_name": "Layout/HashAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 34,
+          "start_column": 44,
+          "last_line": 34,
+          "last_column": 61,
+          "length": 18,
+          "line": 34,
+          "column": 44
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Avoid using `update_all` because it skips validations.",
+        "cop_name": "Rails/SkipsModelValidations",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 151,
+          "start_column": 60,
+          "last_line": 151,
+          "last_column": 69,
+          "length": 10,
+          "line": 151,
+          "column": 60
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Avoid using `update_all` because it skips validations.",
+        "cop_name": "Rails/SkipsModelValidations",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 183,
+          "start_column": 48,
+          "last_line": 183,
+          "last_column": 57,
+          "length": 10,
+          "line": 183,
+          "column": 48
+        }
+      }
+    ],
+    "app/services/jrc_contact_center/recording_customer_link_audit.rb": [
+      {
+        "severity": "convention",
+        "message": "Assignment Branch Condition size for call is too high. [<7, 26, 6> 27.59/26]",
+        "cop_name": "Metrics/AbcSize",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 8,
+          "start_column": 3,
+          "last_line": 24,
+          "last_column": 5,
+          "length": 1085,
+          "line": 8,
+          "column": 3
+        }
+      }
+    ],
+    "spec/services/jrc_contact_center/recording_customer_link_audit_spec.rb": [
+      {
+        "severity": "convention",
+        "message": "Align the arguments of a method call if they span more than one line.",
+        "cop_name": "Layout/ArgumentAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 13,
+          "start_column": 32,
+          "last_line": 13,
+          "last_column": 74,
+          "length": 43,
+          "line": 13,
+          "column": 32
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Align the keys of a hash literal if they span more than one line.",
+        "cop_name": "Layout/HashAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 13,
+          "start_column": 32,
+          "last_line": 13,
+          "last_column": 74,
+          "length": 43,
+          "line": 13,
+          "column": 32
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Avoid using `update_all` because it skips validations.",
+        "cop_name": "Rails/SkipsModelValidations",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 49,
+          "start_column": 60,
+          "last_line": 49,
+          "last_column": 69,
+          "length": 10,
+          "line": 49,
+          "column": 60
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Avoid using `update_all` because it skips validations.",
+        "cop_name": "Rails/SkipsModelValidations",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 65,
+          "start_column": 56,
+          "last_line": 65,
+          "last_column": 65,
+          "length": 10,
+          "line": 65,
+          "column": 56
+        }
+      }
+    ]
+  },
+  "minimum_corrections": [
+    "Align continuation arguments to the actual first argument column.",
+    "Prepare revocation through each native model update!, retaining validation/callbacks and all denial assertions.",
+    "Extract the unchanged authorized native contact subquery to one private method; preserve evaluation order, SQL, historical snapshots and fail-closed rescue."
+  ],
+  "directed_346_Vue_with_zero_outside_error_gate_passed": true,
+  "all_existing_native_and_browser_cases_retained": true,
+  "rules_config_exclusions_or_permissions_changed": false,
+  "new_feature_scope": false,
+  "native_or_Chrome_acceptance": false
+}

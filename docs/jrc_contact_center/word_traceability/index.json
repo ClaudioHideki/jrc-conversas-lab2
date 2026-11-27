@@ -4567,5 +4567,11 @@
     "process_result": "failed",
     "all_346_assertions_passed_is_not_an_approval": true,
     "zero_outside_errors_still_required": true
+  },
+  "manual_customer_link_native_lint_pending_correction": {
+    "document": "docs/jrc_contact_center/manual_customer_link_native_lint_correction_20261127.json",
+    "eleven_findings_preserved": true,
+    "all_346_directed_Vue_passed_without_ignored_errors": true,
+    "native_or_Chrome_acceptance": false
   }
 }

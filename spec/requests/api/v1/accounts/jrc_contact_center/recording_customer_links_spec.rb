@@ -30,8 +30,8 @@ RSpec.describe 'Explicit initial customer linkage from a native recording', :pab
     get path, headers: actor.create_new_auth_token
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body).to include('account_id' => account.id.to_s, 'user_id' => actor.id.to_s,
-                                           'recording_id' => record.id.to_s, 'call_session_id' => source_call.id.to_s,
-                                           'can_link' => true, 'already_linked' => false)
+                                            'recording_id' => record.id.to_s, 'call_session_id' => source_call.id.to_s,
+                                            'can_link' => true, 'already_linked' => false)
     expect(response.headers.fetch('Cache-Control')).to include('private', 'no-store')
     expect(response.body).not_to include(contact.name, 'contact_id', 'recording_reference', 'synthetic-password')
     expect(source_call.reload.contact_id).to be_nil
@@ -148,7 +148,7 @@ RSpec.describe 'Explicit initial customer linkage from a native recording', :pab
 
   it 'rejects a recording after its source unit becomes inaccessible' do
     original = input
-    account.jrc_crm_user_business_units.where(user: actor).update_all(active: false)
+    account.jrc_crm_user_business_units.where(user: actor).find_each { |link| link.update!(active: false) }
     write_link(original)
     expect(response).to have_http_status(:not_found)
     expect(source_call.reload.contact_id).to be_nil
@@ -180,7 +180,7 @@ RSpec.describe 'Explicit initial customer linkage from a native recording', :pab
 
   it 'reports unavailable native recording access without returning a successful preview or partially linking a contact' do
     original = input
-    account.sip_credentials.where(user: actor).update_all(enabled: false)
+    account.sip_credentials.where(user: actor).find_each { |credential| credential.update!(enabled: false) }
     get path, headers: actor.create_new_auth_token
     expect(response).to have_http_status(:service_unavailable)
     expect(response.parsed_body).to eq('error' => 'recording_contact_link_source_unavailable')

@@ -8,8 +8,7 @@ class JrcContactCenter::RecordingCustomerLinkAudit < JrcContactCenter::Recording
   def call
     return @relation.none unless history_available? && @policy.operate? && @policy.recordings_listen?
 
-    directory = JrcCustomers::ContactDirectory.new(account: @account, actor: @member.user)
-    contacts = directory.scope.reselect(Arel.sql('contacts.id::text')).to_sql
+    contacts = authorized_contact_ids_sql
     reader = JrcContactCenter::RecordedCalls.new(account: @account, member: @member)
     recordings = reader.records.reselect(Arel.sql('telephony_call_records.id::text')).to_sql
     rows = @relation.where(associated_type: 'Account', associated_id: @account.id, comment: COMMENT,
@@ -21,5 +20,12 @@ class JrcContactCenter::RecordingCustomerLinkAudit < JrcContactCenter::Recording
     restricted_configurations(rows)
   rescue Pundit::NotAuthorizedError, Pabx::Error, ActiveRecord::RecordNotFound
     @relation.none
+  end
+
+  private
+
+  def authorized_contact_ids_sql
+    directory = JrcCustomers::ContactDirectory.new(account: @account, actor: @member.user)
+    directory.scope.reselect(Arel.sql('contacts.id::text')).to_sql
   end
 end

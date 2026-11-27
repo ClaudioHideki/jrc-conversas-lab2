@@ -10,7 +10,7 @@ RSpec.describe JrcContactCenter::RecordingCustomerLinkAudit, :pabx do
   let(:native_audits) { Audited.audit_class.where(associated: account) }
   let(:ordinary) do
     Audited.audit_class.create!(auditable: account, associated: account, user: actor, action: 'update',
-                               comment: 'SYNTHETIC unrelated native audit', audited_changes: { 'synthetic' => true })
+                                comment: 'SYNTHETIC unrelated native audit', audited_changes: { 'synthetic' => true })
   end
 
   before do
@@ -46,7 +46,7 @@ RSpec.describe JrcContactCenter::RecordingCustomerLinkAudit, :pabx do
 
   it 'rechecks the current source unit coverage while preserving the stored event' do
     target = link_audit
-    account.jrc_crm_user_business_units.where(user: actor).update_all(active: false)
+    account.jrc_crm_user_business_units.where(user: actor).find_each { |link| link.update!(active: false) }
     expect(protected_native_list).not_to include(target)
     expect(target.reload.id).to be_present
     expect(protected_native_list).to include(ordinary)
@@ -62,7 +62,7 @@ RSpec.describe JrcContactCenter::RecordingCustomerLinkAudit, :pabx do
 
   it 'does not use a historical recording right when the personal native SIP association is disabled' do
     target = link_audit
-    SipCredential.where(account: account, user: actor).update_all(enabled: false)
+    SipCredential.where(account: account, user: actor).find_each { |credential| credential.update!(enabled: false) }
     expect(protected_native_list).not_to include(target)
     expect(protected_native_list).to include(ordinary)
   end
