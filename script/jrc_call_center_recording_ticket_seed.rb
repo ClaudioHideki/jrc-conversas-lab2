@@ -50,9 +50,11 @@ class JrcContactCenter::SyntheticRecordingTicketSeed
     raise 'Owned synthetic recording Ticket scope required' unless runtime
 
     marker = account.settings.fetch(JrcContactCenter::SyntheticRecordingsSeed::MARKER)
-    identities = [account.name.start_with?('SYNTHETIC pause '), account.name.end_with?('-recordings'),
+    account_id = account.id
+    account_name = account.name
+    identities = [account_name.start_with?('SYNTHETIC pause '), account_name.end_with?('-recordings'),
                   marker.fetch('source_sha') == ENV.fetch('GITHUB_SHA'), marker.fetch('record_ids').uniq.length == 24,
-                  operator.account_id == account.id, queue.account_id == account.id]
+                  operator.account_id == account_id, queue.account_id == account_id]
     raise 'Exact owned recording Ticket identities required' unless identities.all?
   end
 

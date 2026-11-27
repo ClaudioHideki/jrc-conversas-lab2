@@ -15,6 +15,7 @@ import QualityReviewDialog from './QualityReviewDialog.vue';
 import RecordingTranscript from './RecordingTranscript.vue';
 import RecordingCallContext from './RecordingCallContext.vue';
 import RecordingTicketAction from './RecordingTicketAction.vue';
+import RecordingLinkedTickets from './RecordingLinkedTickets.vue';
 import QualityReviewHistory from './QualityReviewHistory.vue';
 import RecordingEndingActions from './RecordingEndingActions.vue';
 import RecordingAnalysis from './RecordingAnalysis.vue';
@@ -382,6 +383,15 @@ onMounted(() => dialog.value.open());
           :call-session-id="item.call_session_id"
           :call-id="item.unique_id"
           enabled
+        />
+        <RecordingLinkedTickets
+          v-if="capabilities.recordings_listen"
+          :key="`linked-tickets-${accountId}-${item.id}`"
+          :account-id="accountId"
+          :recording-id="item.id"
+          :call-session-id="item.call_session_id"
+          :call-id="item.unique_id"
+          :authority-key="JSON.stringify([accountId, item.id, capabilities])"
         />
         <RecordingManualTasks
           v-if="capabilities.recordings_listen"

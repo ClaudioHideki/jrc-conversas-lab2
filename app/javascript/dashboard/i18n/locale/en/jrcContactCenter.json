@@ -3466,7 +3466,12 @@
       "LOADING": "Verificando acesso ao Service Desk…",
       "UNAVAILABLE": "Não foi possível autorizar o chamado desta gravação. Confira seu acesso e o vínculo da unidade; nenhum chamado foi criado.",
       "READY": "Chamado vinculado à gravação {id}. Revise e confirme os dados no formulário do Service Desk.",
-      "RETRY": "Verificar novamente"
+      "RETRY": "Verificar novamente",
+      "LINKED_TITLE": "Chamados vinculados à gravação",
+      "LINKED_EMPTY": "Nenhum chamado vinculado disponível no seu escopo atual.",
+      "LINKED_DENIED": "Sem acesso aos chamados vinculados neste contexto.",
+      "LINKED_ERROR": "Não foi possível consultar os chamados. Atualize para tentar novamente.",
+      "LINKED_LABEL": "#{number} — {title}"
     }
   }
 }

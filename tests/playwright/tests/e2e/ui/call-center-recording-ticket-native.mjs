@@ -219,6 +219,41 @@ export async function verifyNativeRecordingTicket(parent, info, target) {
     expect(readback.status()).toBe(200);
     expect((await readback.json()).ticket.id).toBe(native.id);
     await capture('persisted-native-ticket-after-reload');
+    await page.goto(
+      `/app/accounts/${account}/contact-center/gravacoes?native_navigation=1&recordings_q=${encodeURIComponent(record.call_id)}`
+    );
+    await expect(page.locator('[data-recording-row]')).toHaveCount(1);
+    await page.locator('[data-recording-details]').click();
+    const listPath = `/api/v1/accounts/${account}/jrc_contact_center/recordings/${record.id}/tickets`;
+    const linkedResponse = page.waitForResponse(
+      response =>
+        response.request().method() === 'GET' &&
+        new URL(response.url()).pathname === listPath
+    );
+    await page.locator('[data-recording-actions-open]').click();
+    const listResponse = await linkedResponse;
+    expect(listResponse.status()).toBe(200);
+    const linked = await listResponse.json();
+    expect(linked.account_id).toBe(account);
+    expect(linked.user_id).toBe(before.actor_id);
+    expect(linked.recording_id).toBe(record.id);
+    expect(linked.items).toHaveLength(1);
+    expect(linked.items[0]).toMatchObject({
+      id: native.id,
+      number: native.id,
+      title,
+    });
+    expect(linked.meta).toEqual({ page: 1, per_page: 20, total: 1, pages: 1 });
+    const list = page.locator('[data-recording-linked-tickets]');
+    const linkedTicket = list.getByRole('link').filter({ hasText: title });
+    await expect(linkedTicket).toBeVisible();
+    await capture('linked-native-ticket-in-recording-actions');
+    await linkedTicket.click();
+    await expect(page.getByText(title, { exact: true }).first()).toBeVisible();
+    const deniedList = await parent.request.get(origin + listPath, {
+      headers: target.scoped,
+    });
+    expect(deniedList.status()).toBe(403);
     const final = witness();
     expect(final.ticket_count).toBe(1);
     expect(final.tickets).toEqual(after.tickets);
@@ -236,6 +271,9 @@ export async function verifyNativeRecordingTicket(parent, info, target) {
           actual_dark_theme: dark,
           actual_native_preview: source,
           native_form_and_post: true,
+          linked_native_ticket_page: linked,
+          actual_link_navigation_after_create_and_reload: true,
+          denied_linked_list_status: deniedList.status(),
           explicit_native_form_confirmation_before_create: true,
           original_agent_nonadministrator: true,
           replay_status: replay.status(),

@@ -273,3 +273,6 @@ Priorizar grupos utilizáveis e reaproveitar provas: ACW/ações nativas, Servic
 
 
 - Lote funcional das figuras 21/22/23: formulário nativo de chamado a partir da gravação, solicitante e unidade derivados no servidor, permissões atuais, origem privada auditada e chave idempotente nativa. Reutilizados Cadastro Mestre e Service Desk, sem novo cadastro, migration ou grant. Preparados 25 testes Rails, 57 Vue e ampliação dos quatro fluxos Chrome existentes; ainda sem aceite. A correção do inventário final foi reproduzida contra o artefato d236 (83/10/4), com oito verificações leves do gate, sem dispensar casos ou regressões. A entrega continua no mesmo lote, preservando os 80 requisitos aceitos e as dependências externas separadas.
+
+
+- Complemento funcional de chamados vinculados às gravações: lista paginada de 20 itens, título/status atuais e abertura no Service Desk existente. O filtro usa a origem privada imutável e a TicketQuery/Presenter nativas; revalida acesso à gravação e ao destino, sem novo cadastro, modelo, migration ou direito. Preparados 11 casos Rails e 15 Vue adicionais, com retorno/lista/navegação nos mesmos quatro fluxos Chrome. Agrupada a última infração ABC do seed sintético (27 das 28 anteriores já removidas), mantendo todas as condições de isolamento. Ainda sem aceite nativo/visual; os 95 passos anteriores da CI foram preservados.

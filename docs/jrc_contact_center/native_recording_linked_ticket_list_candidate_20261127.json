@@ -1,0 +1,37 @@
+{
+  "source_parent": "62363de150ee452c2e7d93a509e3c4f4cb108206",
+  "figures": [
+    21,
+    22
+  ],
+  "related_clauses": [
+    "D1-P0210-C01",
+    "D1-P0211-C01",
+    "D2-P0411-C01",
+    "D2-P0416-C03"
+  ],
+  "delivery": "Read and open only native Service Desk Tickets linked by immutable recording origin; title, status and pagination through TicketQuery and Presenter.",
+  "reuse": [
+    "QualityReviewSource current recording authority",
+    "Service Desk TicketQuery, policy, read projection and existing detail route"
+  ],
+  "security": [
+    "No source selector grants destination rights",
+    "Current actor/scope clears stale rows and late responses",
+    "No recording-origin or native Ticket description exposed in list",
+    "Historical origin survives mapping change without widening destination visibility"
+  ],
+  "pending_not_results": {
+    "new_native": 11,
+    "new_Vue": 15,
+    "same_four_Chrome_extended": true
+  },
+  "no_new_models_migrations_grants_or_provider_operations": true,
+  "last_synthetic_guard_lint_fix": "Read account ID/name once; preserve every original environment, name, marker, actor and queue condition.",
+  "native_or_Chrome_acceptance": false,
+  "whole_figure_or_Part1_accepted": false,
+  "remaining": [
+    "Full native CRM/Relationship context and combined chronological actions remain separate Word clauses.",
+    "The current grouped creation/list payload still needs its own complete native/browser acceptance."
+  ]
+}

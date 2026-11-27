@@ -1238,5 +1238,10 @@
     "document": "docs/jrc_contact_center/native_manual_recording_ticket_candidate_20261127.json",
     "native_or_Chrome_acceptance": false,
     "all_existing_clause_statuses_preserved": true
+  },
+  "native_recording_linked_ticket_list_pending_validation": {
+    "document": "docs/jrc_contact_center/native_recording_linked_ticket_list_candidate_20261127.json",
+    "status": "implemented_pending_native_and_four_mode_Chrome",
+    "no_literal_requirement_status_changed": true
   }
 }

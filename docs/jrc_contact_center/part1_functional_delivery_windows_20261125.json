@@ -271,7 +271,7 @@
     "effective_work_hours_not_inferred_from_CI_wait_or_example_count": true
   },
   "current_24_effective_hour_delivery": {
-    "parent": "d23678fcaafcc6617fb955dc5daf6d355d573471",
+    "parent": "62363de150ee452c2e7d93a509e3c4f4cb108206",
     "status": "implemented_pending_native_and_visual_validation",
     "figures": [
       21,
@@ -279,11 +279,11 @@
       23
     ],
     "document": "docs/jrc_contact_center/native_manual_recording_ticket_candidate_20261127.json",
-    "user_outcome": "Open the existing Service Desk form from a permitted recording, create one real ticket with requester/call origin, reopen it and preserve current scope and independent review/ACW.",
+    "user_outcome": "Open the existing Service Desk form from a permitted recording, create one real ticket with requester/call origin, reopen it and preserve current scope and independent review/ACW. Return to recording Actions, paginate authorized linked Tickets and navigate to their current native status/detail.",
     "grouped_with": "Repair the final exact report inventory against the real d236 artifact; no criterion removed.",
     "planned_not_results": {
-      "new_native": 25,
-      "new_Vue": 57,
+      "new_native_since_d236": 36,
+      "new_Vue_since_d236": 72,
       "existing_Chrome_extended": 4
     },
     "last_complete_accepted": {
@@ -291,8 +291,8 @@
       "run": 45984659600
     },
     "remaining_development": [
-      "Recording-linked ticket list and complete native Relationship/CRM context",
-      "Bounded administrative gaps from literal Word clauses"
+      "Full native CRM/Relationship context and combined chronology",
+      "Bounded administrative gaps from the literal Word clauses"
     ],
     "remaining_homologation": [
       "Native and four-mode browser validation of current and preceding grouped flows"

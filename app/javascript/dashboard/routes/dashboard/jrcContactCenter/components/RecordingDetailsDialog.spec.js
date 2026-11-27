@@ -52,6 +52,7 @@ const create = overrides =>
         RecordingEndingActions: true,
         RecordingManualTasks: true,
         RecordingTicketAction: true,
+        RecordingLinkedTickets: true,
         RecordingTaskCreate: {
           name: 'RecordingTaskCreate',
           props: ['accountId', 'recordingId', 'authorityKey'],
@@ -526,5 +527,29 @@ it('offers the native Ticket form from the recording task tab only with operatio
   });
   expect(
     wrapper.findComponent({ name: 'RecordingTicketAction' }).exists()
+  ).toBe(false);
+});
+
+it('mounts only the native linked Ticket reader for a listener without granting create or destination view', async () => {
+  const wrapper = create({
+    capabilities: { recordings_listen: true, operate: false, audit: false },
+  });
+  await wrapper.get('[data-recording-actions-open]').trigger('click');
+  expect(
+    wrapper.findComponent({ name: 'RecordingTicketAction' }).exists()
+  ).toBe(false);
+  expect(
+    wrapper.getComponent({ name: 'RecordingLinkedTickets' }).props()
+  ).toMatchObject({
+    accountId: 1,
+    recordingId: item.id,
+    callSessionId: item.call_session_id,
+    callId: item.unique_id,
+  });
+  await wrapper.setProps({
+    capabilities: { recordings_listen: false, operate: false, audit: false },
+  });
+  expect(
+    wrapper.findComponent({ name: 'RecordingLinkedTickets' }).exists()
   ).toBe(false);
 });

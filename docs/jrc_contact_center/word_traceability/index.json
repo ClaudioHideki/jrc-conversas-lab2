@@ -2,7 +2,7 @@
   "format_version": 1,
   "review_at": "2026-11-23T20:15:50.371122+00:00",
   "validated_base_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
-  "candidate_source_parent_sha": "d23678fcaafcc6617fb955dc5daf6d355d573471",
+  "candidate_source_parent_sha": "62363de150ee452c2e7d93a509e3c4f4cb108206",
   "candidate_not_yet_validated": true,
   "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
@@ -4487,5 +4487,12 @@
     "native_and_Chrome_acceptance": false,
     "literal_554_IDs_and_statuses_preserved": true,
     "no_new_module_model_migration_or_grant": true
+  },
+  "native_ticket_creation_and_list_group": {
+    "candidate_not_yet_validated": true,
+    "document": "docs/jrc_contact_center/native_recording_linked_ticket_list_candidate_20261127.json",
+    "current_native_Ruby_gate_remaining": 1,
+    "previous_27_findings_corrected": true,
+    "305_directed_Vue_and_3995_distinct_Rails_are_planned_not_results": true
   }
 }
