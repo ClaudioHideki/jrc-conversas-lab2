@@ -111,9 +111,18 @@ RSpec.describe 'Native authorized original recording transcript', :pabx do
     name = "cc_synthetic_transcript_audit_#{Integer(account.id)}"
     condition = "associated_id <> #{Integer(account.id)} OR COALESCE(audited_changes ->> 'operation', '') <> 'transcript'"
     ApplicationRecord.connection.add_check_constraint(:audits, condition, name: name)
-    expect do
-      ApplicationRecord.transaction(requires_new: true) { get path, headers: headers, as: :json }
-    end.to raise_error(ActiveRecord::StatementInvalid, /cc_synthetic_transcript_audit_/)
+    violations = []
+    observer = lambda do |*args|
+      failure = args.last[:exception_object]
+      failure = failure.cause while failure && !failure.is_a?(PG::CheckViolation)
+      violations << failure.result.error_field(PG::Result::PG_DIAG_CONSTRAINT_NAME) if failure
+    end
+    ActiveSupport::Notifications.subscribed(observer, 'sql.active_record') do
+      expect do
+        ApplicationRecord.transaction(requires_new: true) { get path, headers: headers, as: :json }
+      end.to raise_error(ActiveRecord::StatementInvalid)
+    end
+    expect(violations).to eq([name])
     expect(audit_rows).to be_empty
     expect(JrcContactCenter::QualityReviewRevision.where(account: account)).to be_empty
   end

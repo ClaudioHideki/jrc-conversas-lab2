@@ -1,0 +1,20 @@
+{
+  "stage": {
+    "name": "exact_original_PG_constraint_witness_and_complete_63_case_preflight_map",
+    "source_sha256": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb": "2ccd570dd5bf26836399612ca3903d4ada24c593b177a07820c1b60ffb713e72",
+      ".github/workflows/call-center-administration.yml": "e5a25587697822ffe8b75890417f53c8820b38de855a0b48fad16870bb050a0b"
+    },
+    "parent_sources": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb": "6897e874a3fdd094a2fa918b623a73683da8490bfc98629b15bd69db00e399d6",
+      ".github/workflows/call-center-administration.yml": "65762a79830206d087575d5f941649f9538a66b66b3784d6a15ad50f06ad42ba"
+    }
+  },
+  "failed_run": 45917799950,
+  "failed_report_sha256": "f182b83941b30af185111bf7d267f487dcaf44320bc19b99e79d3251c60ef3af",
+  "exact_constraint_name_must_be_observed_in_real_PG_CheckViolation": true,
+  "database_refusal_request_failure_and_empty_persistence_all_required": true,
+  "no_application_behavior_or_security_gate_removed": true,
+  "required_native_examples_unchanged": 63,
+  "native_or_Chrome_acceptance": false
+}
