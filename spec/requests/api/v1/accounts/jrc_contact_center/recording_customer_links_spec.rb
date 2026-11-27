@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe 'Explicit initial customer linkage from a native recording', :pabx do
   include_context 'with native authorized quality review source'
 
-  let(:contact) { create(:contact, account: account, company: company, name: 'SYNTHETIC selected existing person') }
+  let(:contact) { create(:contact, account: account, master_company: company, name: 'SYNTHETIC selected existing person') }
   let(:path) { "/api/v1/accounts/#{account.id}/jrc_contact_center/recordings/#{record.id}/customer_link" }
   let(:input) do
     { 'contact_id' => contact.id.to_s, 'call_session_id' => source_call.id.to_s,
@@ -45,7 +45,7 @@ RSpec.describe 'Explicit initial customer linkage from a native recording', :pab
     initial_count = account.contacts.count
     write_link
     expect(response).to have_http_status(:ok)
-    expect(source_call.reload).to have_attributes(contact_id: contact.id, company_id: company.id)
+    expect(source_call.reload).to have_attributes(contact_id: contact.id, company_id: company.id, company: contact.master_company)
     expect(source_call.attributes.except('contact_id', 'company_id', 'lock_version', 'updated_at')).to eq(before)
     expect(account.contacts.count).to eq(initial_count)
     audit = link_audits.sole
@@ -115,7 +115,7 @@ RSpec.describe 'Explicit initial customer linkage from a native recording', :pab
       original = input
       role.update!(permissions: role.permissions - [right])
       write_link(original)
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:unauthorized)
       expect(source_call.reload.contact_id).to be_nil
       expect(link_audits).to be_empty
     end
@@ -125,7 +125,7 @@ RSpec.describe 'Explicit initial customer linkage from a native recording', :pab
     member.update!(role: :administrator)
     role.update!(permissions: role.permissions - ['jrc_contact_center_recordings_listen'])
     write_link
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:unauthorized)
     expect(source_call.reload.contact_id).to be_nil
   end
 
@@ -139,7 +139,7 @@ RSpec.describe 'Explicit initial customer linkage from a native recording', :pab
 
   it 'rejects a same-account contact whose company is outside the current corporate coverage' do
     hidden_company = account.master_companies.create!(name: 'SYNTHETIC uncovered customer company', relationship_type: 'internal')
-    hidden = create(:contact, account: account, company: hidden_company)
+    hidden = create(:contact, account: account, master_company: hidden_company)
     write_link(input.merge('contact_id' => hidden.id.to_s))
     expect(response).to have_http_status(:not_found)
     expect(source_call.reload.contact_id).to be_nil
@@ -195,7 +195,7 @@ RSpec.describe 'Explicit initial customer linkage from a native recording', :pab
       original = input
       account.disable_features!(feature)
       write_link(original)
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:unauthorized)
       expect(source_call.reload.contact_id).to be_nil
       expect(link_audits).to be_empty
     end

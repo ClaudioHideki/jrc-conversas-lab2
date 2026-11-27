@@ -7,7 +7,7 @@ RSpec.describe 'Initial recording customer-link transaction contention', :pabx d
   self.use_transactional_tests = false
   include_context 'with native authorized quality review source'
 
-  let(:contact) { create(:contact, account: account, company: company, name: 'SYNTHETIC explicit initial contact') }
+  let(:contact) { create(:contact, account: account, master_company: company, name: 'SYNTHETIC explicit initial contact') }
   let(:state) { { ready: Queue.new, results: Queue.new } }
   let(:input) do
     { 'contact_id' => contact.id.to_s, 'call_session_id' => source_call.id.to_s,

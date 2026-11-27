@@ -1,0 +1,15 @@
+{
+  "source_parent": "7684a573b20b85e32846a7291d58b2457cfb9601",
+  "confirmed_native_handler": {
+    "path": "app/controllers/concerns/request_exception_handler.rb",
+    "sha256": "e36f19e09f71d51a15d5ddd1f380e95cc2977587c369b24fbd4074ddbf9e107e",
+    "Pundit_NotAuthorized_HTTP": 401
+  },
+  "native_controller_contract": "RecordingCustomerLinksController inherits the normal Account/Call Center Pundit handler and does not override its status. Existing quality review APIs using the same source also require 401. Other explicit-operation 403 overrides remain unchanged.",
+  "minimum_correction": "Align three literal expectations covering six generated denial cases to the exact inherited 401, keeping denied state, absent linkage, no audit and all authentication checks.",
+  "new_authorization_controller_or_policy_override": false,
+  "accepted_broad_status_range": false,
+  "all_28_request_examples_preserved": true,
+  "reasons_for_doing_before_another_CI": "The native company-fixture error prevented these branches from executing. Reading the inherited handler proves their contract without another avoidable trial.",
+  "native_or_Chrome_acceptance": false
+}

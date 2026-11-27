@@ -1,0 +1,24 @@
+{
+  "source_parent": "7684a573b20b85e32846a7291d58b2457cfb9601",
+  "failed_run": 46074918094,
+  "artifact": 15233454905,
+  "artifact_sha256": "cf9b9f1ac253a90c0d1e850817a145b00669ea63f024cce0cd7802a98a3a3494",
+  "report_sha256": "8d2c66d74bef071973c519ffefa7711761d7ffb9421eaa076323771164a3d4aa",
+  "native_preflight_examples": 49,
+  "failed_fixture_examples": 37,
+  "confirmed_native_contract": "Contact.master_company explicitly belongs to JrcCustomers::Company via company_id. Enterprise Contact.company expects Company. Both company models intentionally share companies IDs/rows; distinct AR objects cannot be interchanged.",
+  "product_service_preserved": "The existing writer already persists contact.company_id from the authorized locked contact. Both native company adapters share this FK/row. No product change is necessary; do not add a second lookup or alter models, FK mappings, directory coverage or permissions.",
+  "fixture_correction": "Create and reassign through the existing master_company association with native validation/callbacks. Retain every denial and real PG concurrency case.",
+  "stronger_existing_success_assertion": "The existing success example also requires the exact native master-company association, without adding or dropping an example.",
+  "native_sources_read_at_exact_parent": {
+    "app/models/contact.rb": "b8fe9d39024ce497d449f9cb96d2be4c421b499e197a0a2cf88afb4a06528176",
+    "app/models/jrc_customers/company.rb": "aafe3e668b93536f20ed103c66df0511c2f1250cb760be7f2ece79b596463bac",
+    "app/models/concerns/jrc_customers/contact_master.rb": "3dd5960f62e01d3cce2a2656d395b63eb0569e480328b79d08bd60b092fcd0c2",
+    "app/policies/jrc_customers/directory_policy.rb": "319486052b37e5e93c769db724522a0f5031f1c586321d8d7267d98301a2babe",
+    "app/services/jrc_customers/contact_directory.rb": "68f99616e9208b0a735ba3ed339810640404536b8e617b55c37f5434f039a6d8",
+    "enterprise/app/models/company.rb": "039aadb0228213f1e95d5bee4e91e8992ba2dfebe43802e7a273d3207326226a"
+  },
+  "all_cases_permissions_and_historical_snapshots_preserved": true,
+  "old_failures_not_accepted_or_reclassified": true,
+  "native_or_Chrome_acceptance": false
+}

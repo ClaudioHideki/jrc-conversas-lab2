@@ -4573,5 +4573,17 @@
     "eleven_findings_preserved": true,
     "all_346_directed_Vue_passed_without_ignored_errors": true,
     "native_or_Chrome_acceptance": false
+  },
+  "native_master_company_association_pending_correction": {
+    "document": "docs/jrc_contact_center/native_master_company_association_correction_20261127.json",
+    "real_native_lint_gate_passed_before_fixture_failure": true,
+    "all_37_fixture_failures_preserved": true,
+    "native_or_Chrome_acceptance": false
+  },
+  "native_manual_denial_contract_alignment": {
+    "document": "docs/jrc_contact_center/native_manual_link_denial_contract_alignment_20261127.json",
+    "native_401_inherited_handler_preserved": true,
+    "no_permission_or_product_change": true,
+    "native_or_Chrome_acceptance": false
   }
 }

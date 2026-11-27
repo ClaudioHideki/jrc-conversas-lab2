@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe JrcContactCenter::RecordingCustomerLinkAudit, :pabx do
   include_context 'with native authorized quality review source'
 
-  let(:contact) { create(:contact, account: account, company: company, name: 'SYNTHETIC audit-scoped existing contact') }
+  let(:contact) { create(:contact, account: account, master_company: company, name: 'SYNTHETIC audit-scoped existing contact') }
   let(:context) { { account: account, account_user: member.reload, user: actor.reload } }
   let(:native_audits) { Audited.audit_class.where(associated: account) }
   let(:ordinary) do
@@ -55,7 +55,7 @@ RSpec.describe JrcContactCenter::RecordingCustomerLinkAudit, :pabx do
   it 'rechecks the native master coverage of the linked person on every read' do
     target = link_audit
     hidden = account.master_companies.create!(name: 'SYNTHETIC uncovered audit company', relationship_type: 'internal')
-    contact.update!(company: hidden)
+    contact.update!(master_company: hidden)
     expect(protected_native_list).not_to include(target)
     expect(protected_native_list).to include(ordinary)
   end
