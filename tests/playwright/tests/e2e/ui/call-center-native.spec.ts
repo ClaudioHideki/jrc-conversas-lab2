@@ -5267,6 +5267,68 @@ test('local pause duration supervisor shows authorized real elapsed evidence wit
       2
     ) + '\n'
   );
+  const [detailResponse] = await Promise.all([
+    page.waitForResponse(
+      item =>
+        item.request().method() === 'GET' &&
+        new URL(item.url()).pathname === new URL(api).pathname + '/supervisor'
+    ),
+    page
+      .locator(`[data-supervisor-agent-details="${local.account_user_id}"]`)
+      .click(),
+  ]);
+  expect(detailResponse.status()).toBe(200);
+  const currentAgent = (await detailResponse.json()).agents.find(
+    agent => agent.account_user_id === local.account_user_id
+  );
+  expect(currentAgent).toBeTruthy();
+  const detail = page.locator('[data-supervisor-agent-detail]');
+  await expect(detail).toBeVisible();
+  await expect(detail).toContainText(currentAgent.name);
+  for (const queue of currentAgent.queues)
+    await expect(detail).toContainText(queue.name);
+  expect(await detail.locator('form, input, select, audio').count()).toBe(0);
+  const detailContrast = await contrast(detail.locator('h3'));
+  expect(detailContrast.ratio).toBeGreaterThanOrEqual(4.5);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page
+      .locator('html')
+      .evaluate(element => element.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  const detailScreenshot = `.codex/call-center-native-e2e/${info.project.name}-supervisor-agent-details.png`;
+  await page.screenshot({ path: detailScreenshot, fullPage: false });
+  await detail.locator('[data-supervisor-agent-detail-close]').click();
+  await expect(detail).toHaveCount(0);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-supervisor-agent-details.json`,
+    JSON.stringify(
+      {
+        sha: process.env.GITHUB_SHA,
+        project: info.project.name,
+        account_id: String(target.account_id),
+        synthetic: true,
+        actual_dark_theme: info.project.name.endsWith('dark'),
+        actual_current_native_GET_before_open: true,
+        account_user_id: currentAgent.account_user_id,
+        state_version: currentAgent.state_version,
+        currently_authorized_queue_ids: currentAgent.queues.map(
+          queue => queue.id
+        ),
+        read_only_and_explicit_close: true,
+        no_automatic_UI_write_or_PABX_command: writes.length === 0,
+        contrast: detailContrast,
+        screenshot: detailScreenshot,
+        whole_figure_or_Part1_accepted: false,
+      },
+      null,
+      2
+    ) + '\n'
+  );
   expect(writes).toEqual([]);
 });
 

@@ -1,0 +1,30 @@
+{
+  "product_parent": "037cfe06fedc7d630f5f1f4e10525eb5e328c9b7",
+  "literal_requirement": "D2-P0177-C04",
+  "no_new_API_model_permission_migration_or_provider_operation": true,
+  "same_native_supervisor_GET_reauthorizes_before_open": true,
+  "only_existing_whitelisted_state_and_authorized_queue_names": true,
+  "current_poll_failure_profile_or_scope_loss_removes_detail": true,
+  "UI_tests_and_real_Chrome_required_before_staging": true,
+  "native_or_Chrome_acceptance": false,
+  "active_CI_snapshot_untouched": true,
+  "failed_parent_not_accepted": true,
+  "failed_run": 45966439866,
+  "actual_parent_directed_Vue_passed": 200,
+  "actual_parent_lint_offenses": 2,
+  "native_lint_failure_report_sha256": "2d994dfd3c6645a4058c177d7b05bfe7bd41d2eb592141a56bd990ae369bb7c3",
+  "exact_style_correction_plan_sha256": "be2fe02336588ada38d469b1c32d096e1f687a0a44c8a5f44bb62d20cb53d3e3",
+  "all_existing_14_native_cases_and_assertions_preserved": true,
+  "seven_new_Vue_cases_prepared_not_executed": true,
+  "same_four_real_Chrome_cases_extended": true,
+  "new_Chrome_cases": 0,
+  "expected_not_results": {
+    "native_distinct": 3941,
+    "main_Vue": 2123,
+    "directed_Vue": 207,
+    "Chrome": 288,
+    "PNG": 848
+  },
+  "no_heavy_local_tests_builds_or_installations": true,
+  "whole_Part1_accepted": false
+}

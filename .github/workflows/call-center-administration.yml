@@ -177,11 +177,11 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 200
+          assert report['numTotalTests'] == report['numPassedTests'] == 207
           assert report['numFailedTests'] == report['numPendingTests'] == 0
           assert len(report['testResults']) == 15 and all(row['status'] == 'passed' for row in report['testResults'])
           expected = {'useScopedRecordings.spec.js': 28, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 16, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 13, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 10, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 8}
-          expected.update({'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9, 'SupervisorPage.spec.js': 18})
+          expected.update({'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9, 'SupervisorPage.spec.js': 25})
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           expected_new = {'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9}

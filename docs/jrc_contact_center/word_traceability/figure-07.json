@@ -1318,7 +1318,13 @@
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "next_functional_candidate": {
+        "document": "docs/jrc_contact_center/native_supervisor_agent_details_candidate_20261127.json",
+        "sha256": "1ac753d720a4b0cb278e4951bc7df618839513bf6f3a83fa8aef2b5b6a3cf0a8",
+        "implementation": "Selection performs the existing scoped supervisor GET and opens a read-only native Dialog with current state, elapsed time and currently authorized queues. Poll/profile/account/access loss clears it.",
+        "new_native_or_Chrome_acceptance": false
+      }
     },
     {
       "id": "D2-P0178-C01",

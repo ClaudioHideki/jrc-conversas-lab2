@@ -30,13 +30,11 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
     { 'code' => 'synthetic_duration', 'name' => 'SYNTHETIC PRIVATE duration name', 'category' => 'SYNTHETIC', 'active' => true,
       'minimum_minutes' => 0, 'default_minutes' => 1, 'maximum_minutes' => 1, 'unit_ids' => [pause_queue.unit_id], 'custom_role_ids' => [] }
   end
-  let(:qualifying_call) do
-    JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,
-                                          direction: 'inbound', status: 'ended', started_at: 1.minute.ago, ended_at: Time.current,
-                                          current_unit: pause_queue.unit, current_queue: pause_queue)
-  end
   let(:native_pending) do
-    JrcContactCenter::Qualification.create!(account: account, account_user: member, call_session: qualifying_call,
+    call = JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,
+                                                 direction: 'inbound', status: 'ended', started_at: 1.minute.ago, ended_at: Time.current,
+                                                 current_unit: pause_queue.unit, current_queue: pause_queue)
+    JrcContactCenter::Qualification.create!(account: account, account_user: member, call_session: call,
                                             channel: 'voice', started_at: Time.current, acw_limit_seconds: 60)
   end
   let(:endpoint) { "/api/v1/accounts/#{account.id}/jrc_contact_center/supervisor" }

@@ -4400,5 +4400,12 @@
     "document": "docs/jrc_contact_center/literal_supervision_no_automatic_access_acceptance_20261127.json",
     "sha256": "239886ab86574dfe12dfbf5396ec39b88e32fb126e4f778aac3ac800c333a2a9",
     "source_sha": "c1ce1698bbec07acea60c9751d9af6342c397cf1"
+  },
+  "next_native_supervisor_agent_detail": {
+    "document": "docs/jrc_contact_center/native_supervisor_agent_details_candidate_20261127.json",
+    "sha256": "1ac753d720a4b0cb278e4951bc7df618839513bf6f3a83fa8aef2b5b6a3cf0a8",
+    "figure_document": "docs/jrc_contact_center/word_traceability/figure-07.json",
+    "figure_sha256": "9eec49d9d55b1cc7d59a90238aa856b9f796218990d539d77dc8091b2b483551",
+    "native_or_browser_accepted": false
   }
 }

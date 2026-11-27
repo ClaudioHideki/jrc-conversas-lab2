@@ -5,7 +5,12 @@ import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import VisualShowcasePage from '../components/visual/VisualShowcasePage.vue';
 import SupervisorPage from './SupervisorPage.vue';
 
-const mocks = vi.hoisted(() => ({ route: null, user: null }));
+const mocks = vi.hoisted(() => ({
+  route: null,
+  user: null,
+  dialogOpen: null,
+  dialogClose: null,
+}));
 vi.mock('dashboard/composables/store', () => ({
   useMapGetter: () => mocks.user,
 }));
@@ -18,6 +23,8 @@ describe('native supervisor observed data', () => {
   let wrapper;
   beforeEach(() => {
     vi.useFakeTimers();
+    mocks.dialogOpen = vi.fn();
+    mocks.dialogClose = vi.fn();
     mocks.route = reactive({ params: { accountId: '1' } });
     mocks.user = ref({
       id: 4,
@@ -503,5 +510,204 @@ describe('native supervisor observed data', () => {
     expect(
       wrapper.findAll('[data-supervisor-native-state-duration]')
     ).toHaveLength(0);
+  });
+
+  const observedAgent = {
+    account_user_id: '42',
+    name: 'SYNTHETIC permitted operator',
+    state: 'available',
+    state_version: '7',
+    eligible: false,
+    provider_confirmed: false,
+    queues: [{ id: '81', name: 'SYNTHETIC permitted queue' }],
+    state_notice: {
+      state: 'available',
+      state_version: '7',
+      elapsed_seconds: 61,
+    },
+    metadata: { justification: 'SYNTHETIC PRIVATE reason never displayed' },
+  };
+  const detailOptions = {
+    global: {
+      stubs: {
+        VisualSectionCard: { template: '<section><slot /></section>' },
+        Dialog: {
+          template: '<section data-native-detail-dialog><slot /></section>',
+          methods: {
+            open() {
+              mocks.dialogOpen();
+            },
+            close() {
+              mocks.dialogClose();
+            },
+          },
+        },
+      },
+    },
+  };
+
+  it('reads native current authority again before opening only the selected authorized agent detail', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValue({
+      data: { agents: [observedAgent], queues: [] },
+    });
+    wrapper = shallowMount(SupervisorPage, detailOptions);
+    await flushPromises();
+    let finish;
+    JrcContactCenterAPI.supervisor.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    await wrapper.get('[data-supervisor-agent-details="42"]').trigger('click');
+    expect(wrapper.find('[data-supervisor-agent-detail]').exists()).toBe(false);
+    expect(mocks.dialogOpen).not.toHaveBeenCalled();
+    finish({
+      data: {
+        agents: [
+          {
+            ...observedAgent,
+            state_notice: {
+              ...observedAgent.state_notice,
+              elapsed_seconds: 62,
+            },
+          },
+        ],
+        queues: [],
+      },
+    });
+    await flushPromises();
+    const detail = wrapper.get('[data-supervisor-agent-detail]');
+    expect(detail.text()).toContain(observedAgent.name);
+    expect(detail.text()).toContain('01:02');
+    expect(detail.text()).toContain('SYNTHETIC permitted queue');
+    expect(detail.text()).not.toContain('SYNTHETIC PRIVATE');
+    expect(detail.find('form, input, select, audio').exists()).toBe(false);
+    expect(mocks.dialogOpen).toHaveBeenCalledTimes(1);
+    await detail.get('[data-supervisor-agent-detail-close]').trigger('click');
+    expect(wrapper.find('[data-supervisor-agent-detail]').exists()).toBe(false);
+  });
+
+  it('does not open stale agent details after a rejected current native read', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: { agents: [observedAgent], queues: [] },
+    });
+    wrapper = shallowMount(SupervisorPage, detailOptions);
+    await flushPromises();
+    JrcContactCenterAPI.supervisor.mockRejectedValueOnce({
+      response: { status: 403 },
+    });
+    await wrapper.get('[data-supervisor-agent-details="42"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-supervisor-agent-detail]').exists()).toBe(false);
+    expect(
+      wrapper.get('[data-supervisor-agent-detail-error]').text()
+    ).toContain('acesso atual');
+    expect(mocks.dialogOpen).not.toHaveBeenCalled();
+  });
+
+  it('closes visible details when a current poll removes the agent from the permitted source', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValue({
+      data: { agents: [observedAgent], queues: [] },
+    });
+    wrapper = shallowMount(SupervisorPage, detailOptions);
+    await flushPromises();
+    await wrapper.get('[data-supervisor-agent-details="42"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-supervisor-agent-detail]').text()).toContain(
+      observedAgent.name
+    );
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: { agents: [], queues: [] },
+    });
+    await vi.advanceTimersByTimeAsync(5000);
+    await flushPromises();
+    expect(wrapper.find('[data-supervisor-agent-detail]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain(observedAgent.name);
+  });
+
+  it('does not restore a pending detail read after a profile change', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: { agents: [observedAgent], queues: [] },
+    });
+    wrapper = shallowMount(SupervisorPage, detailOptions);
+    await flushPromises();
+    let finish;
+    JrcContactCenterAPI.supervisor.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    await wrapper.get('[data-supervisor-agent-details="42"]').trigger('click');
+    mocks.user.value.accounts[0].permissions = [];
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: { agents: [], queues: [] },
+    });
+    await flushPromises();
+    finish({ data: { agents: [observedAgent], queues: [] } });
+    await flushPromises();
+    expect(wrapper.find('[data-supervisor-agent-detail]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain(observedAgent.name);
+    expect(mocks.dialogOpen).not.toHaveBeenCalled();
+  });
+
+  it('clears an opened detail synchronously on account navigation and never transfers its old context', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValue({
+      data: { agents: [observedAgent], queues: [] },
+    });
+    wrapper = shallowMount(SupervisorPage, detailOptions);
+    await flushPromises();
+    await wrapper.get('[data-supervisor-agent-details="42"]').trigger('click');
+    await flushPromises();
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: { agents: [], queues: [] },
+    });
+    mocks.route.params.accountId = '2';
+    await flushPromises();
+    expect(wrapper.find('[data-supervisor-agent-detail]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain(observedAgent.name);
+    expect(JrcContactCenterAPI.supervisor).toHaveBeenLastCalledWith('2');
+  });
+
+  it('does not present an absent agent from a successful scoped read as an empty authorized detail', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: { agents: [observedAgent], queues: [] },
+    });
+    wrapper = shallowMount(SupervisorPage, detailOptions);
+    await flushPromises();
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: { agents: [], queues: [] },
+    });
+    await wrapper.get('[data-supervisor-agent-details="42"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-supervisor-agent-detail]').exists()).toBe(false);
+    expect(
+      wrapper.get('[data-supervisor-agent-detail-error]').text()
+    ).toContain('acesso atual');
+    expect(mocks.dialogOpen).not.toHaveBeenCalled();
+  });
+
+  it('keeps state and queue details current on the native poll without exposing raw provider metadata', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValue({
+      data: { agents: [observedAgent], queues: [] },
+    });
+    wrapper = shallowMount(SupervisorPage, detailOptions);
+    await flushPromises();
+    await wrapper.get('[data-supervisor-agent-details="42"]').trigger('click');
+    await flushPromises();
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: {
+        agents: [{ ...observedAgent, queues: [], state_notice: null }],
+        queues: [],
+      },
+    });
+    await vi.advanceTimersByTimeAsync(5000);
+    await flushPromises();
+    const detail = wrapper.get('[data-supervisor-agent-detail]');
+    expect(detail.text()).not.toContain('01:01');
+    expect(detail.text()).not.toContain('SYNTHETIC permitted queue');
+    expect(detail.text()).not.toContain('SYNTHETIC PRIVATE');
+    expect(detail.find('form, input, select, audio').exists()).toBe(false);
   });
 });

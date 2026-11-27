@@ -182,13 +182,13 @@
     "no_capacity_retention_or_provider_claim": true
   },
   "active_grouped_increment": {
-    "document": "docs/jrc_contact_center/grouped_task_review_supervisor_candidate_20261127.json",
-    "sha256": "dcc0fba7f1d552a3e68a7b9a749757e46bd8f2bba05fbb40411ce78f77cc6681",
-    "parent": "6fb6713f593bd7af0c7894f92cd0514a14e9c0b2",
+    "document": "docs/jrc_contact_center/native_supervisor_agent_details_candidate_20261127.json",
+    "sha256": "1ac753d720a4b0cb278e4951bc7df618839513bf6f3a83fa8aef2b5b6a3cf0a8",
+    "parent": "037cfe06fedc7d630f5f1f4e10525eb5e328c9b7",
     "parent_accepted": false,
-    "next_validation": "One isolated native/Vue/assets/288-Chrome run; heavy work stays on GitHub.",
+    "prior_200_directed_Vue_passed_without_repeating_them_as_new_cases": true,
     "usable_delivery_requires_native_and_browser_acceptance": true,
-    "previous_checkpoints_and_554_ids_preserved": true,
+    "no_other_own_CI_in_parallel": true,
     "effective_hours_not_measured_not_fabricated": true
   }
 }

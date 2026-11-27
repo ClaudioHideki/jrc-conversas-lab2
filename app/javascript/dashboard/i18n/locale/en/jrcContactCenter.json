@@ -134,7 +134,17 @@
       "UNOBSERVED": "Nenhuma leitura atual disponível.",
       "OBSERVED_AGENTS": "{available} disponíveis · {inCall} em chamada (estado local)",
       "RATE_PENDING": "Taxa pendente de definição e fonte operacional; nenhum percentual estimado.",
-      "STATE_DURATION": "Tempo no estado: {elapsed}"
+      "STATE_DURATION": "Tempo no estado: {elapsed}",
+      "AGENT_DETAILS": {
+        "OPEN": "Ver detalhes de {name}",
+        "TITLE": "Detalhes do agente",
+        "STATE": "Estado observado",
+        "DURATION": "Tempo no estado observado",
+        "ELIGIBILITY": "Elegibilidade atual",
+        "VERSION": "Versão do estado",
+        "QUEUES": "Filas atualmente autorizadas",
+        "UNAVAILABLE": "Não foi possível consultar o agente no seu acesso atual. Atualize a supervisão e tente novamente."
+      }
     },
     "CONTROL_DESK": {
       "UNVERIFIED": "Eventos sem assinatura verificada: {count}",

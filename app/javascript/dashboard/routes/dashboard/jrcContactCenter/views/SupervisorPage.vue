@@ -1,8 +1,9 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import { useMapGetter } from 'dashboard/composables/store';
 import { agentStateLabels } from '../agentStateLabels';
@@ -25,6 +26,19 @@ const snapshot = ref(null);
 const accountId = computed(() => route.params.accountId);
 const currentUser = useMapGetter('getCurrentUser');
 const polling = ref(false);
+const agentDialog = ref(null);
+const selectedAgentId = ref('');
+const openingAgent = ref(false);
+const agentDetailError = ref(false);
+const selectedAgent = computed(() =>
+  snapshot.value?.agents.find(
+    agent => String(agent.account_user_id) === selectedAgentId.value
+  )
+);
+const closeAgentDetails = () => {
+  selectedAgentId.value = '';
+  agentDialog.value?.close();
+};
 const contextKey = computed(() => {
   const account = currentUser.value?.accounts?.find(
     row => String(row.id) === String(accountId.value)
@@ -137,6 +151,53 @@ const load = async () => {
     if (version === generation) loading.value = false;
   }
 };
+// A detail never grants new access: opening performs the same native scoped
+// read, and the existing poll remains the authority for every visible field.
+const openAgentDetails = async id => {
+  if (
+    loading.value ||
+    polling.value ||
+    openingAgent.value ||
+    !snapshot.value?.agents.some(
+      agent => String(agent.account_user_id) === String(id)
+    )
+  )
+    return;
+  const scope = contextKey.value;
+  openingAgent.value = true;
+  agentDetailError.value = false;
+  closeAgentDetails();
+  try {
+    await load();
+    if (scope !== contextKey.value) return;
+    const agent =
+      !failed.value &&
+      snapshot.value?.agents.find(
+        row => String(row.account_user_id) === String(id)
+      );
+    if (!agent) {
+      agentDetailError.value = true;
+      return;
+    }
+    selectedAgentId.value = String(agent.account_user_id);
+    await nextTick();
+    if (scope === contextKey.value && selectedAgent.value)
+      agentDialog.value?.open();
+  } finally {
+    openingAgent.value = false;
+  }
+};
+watch(
+  contextKey,
+  () => {
+    closeAgentDetails();
+    agentDetailError.value = false;
+  },
+  { flush: 'sync' }
+);
+watch(selectedAgent, agent => {
+  if (!agent) closeAgentDetails();
+});
 watch(contextKey, load, { immediate: true });
 const acwPoll = setInterval(async () => {
   if (loading.value || polling.value || !currentUser.value?.id) return;
@@ -164,6 +225,7 @@ const acwPoll = setInterval(async () => {
 onBeforeUnmount(() => {
   generation += 1;
   clearInterval(acwPoll);
+  closeAgentDetails();
 });
 </script>
 
@@ -177,6 +239,14 @@ onBeforeUnmount(() => {
     />
 
     <section class="space-y-5 px-4 pb-6 sm:px-6">
+      <p
+        v-if="agentDetailError"
+        role="alert"
+        class="text-sm text-n-ruby-11"
+        data-supervisor-agent-detail-error
+      >
+        {{ t('JRC_CONTACT_CENTER.SUPERVISOR.AGENT_DETAILS.UNAVAILABLE') }}
+      </p>
       <div class="flex items-center justify-between gap-3">
         <p class="text-sm text-n-amber-11">
           {{ t('JRC_CONTACT_CENTER.SUPERVISOR.SLA_PENDING') }}
@@ -274,9 +344,20 @@ onBeforeUnmount(() => {
                 }}
               </span>
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-semibold text-n-slate-12">
+                <button
+                  type="button"
+                  class="max-w-full break-words text-left text-sm font-semibold text-n-blue-11 underline decoration-dotted underline-offset-4 disabled:opacity-50"
+                  :disabled="loading || polling || openingAgent"
+                  :aria-label="
+                    t('JRC_CONTACT_CENTER.SUPERVISOR.AGENT_DETAILS.OPEN', {
+                      name: agent.name,
+                    })
+                  "
+                  :data-supervisor-agent-details="agent.account_user_id"
+                  @click="openAgentDetails(agent.account_user_id)"
+                >
                   {{ agent.name }}
-                </p>
+                </button>
                 <p
                   v-if="!agent.pause_notice && stateDuration(agent) !== null"
                   class="mt-1 text-xs text-n-slate-11"
@@ -412,5 +493,94 @@ onBeforeUnmount(() => {
         </div>
       </VisualSectionCard>
     </section>
+    <Dialog
+      v-if="selectedAgent"
+      ref="agentDialog"
+      :title="t('JRC_CONTACT_CENTER.SUPERVISOR.AGENT_DETAILS.TITLE')"
+      :show-confirm-button="false"
+      :show-cancel-button="false"
+      :use-form="false"
+      contained
+      @close="closeAgentDetails"
+    >
+      <div
+        class="min-w-0 space-y-4 text-sm text-n-slate-12"
+        data-supervisor-agent-detail
+      >
+        <h3 class="break-words font-semibold">{{ selectedAgent.name }}</h3>
+        <p
+          class="rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-n-blue-11"
+        >
+          {{ t('JRC_CONTACT_CENTER.SUPERVISOR.LOCAL_SOURCE') }}
+        </p>
+        <dl class="grid min-w-0 gap-3 sm:grid-cols-2">
+          <div>
+            <dt class="text-n-slate-11">
+              {{ t('JRC_CONTACT_CENTER.SUPERVISOR.AGENT_DETAILS.STATE') }}
+            </dt>
+            <dd>{{ labels[selectedAgent.state] }}</dd>
+          </div>
+          <div>
+            <dt class="text-n-slate-11">
+              {{ t('JRC_CONTACT_CENTER.SUPERVISOR.AGENT_DETAILS.DURATION') }}
+            </dt>
+            <dd>
+              {{
+                stateDuration(selectedAgent) ??
+                t('JRC_CONTACT_CENTER.SUPERVISOR.UNOBSERVED')
+              }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-n-slate-11">
+              {{ t('JRC_CONTACT_CENTER.SUPERVISOR.AGENT_DETAILS.ELIGIBILITY') }}
+            </dt>
+            <dd>
+              {{
+                selectedAgent.eligible
+                  ? t('JRC_CONTACT_CENTER.AGENT.ELIGIBLE')
+                  : t('JRC_CONTACT_CENTER.AGENT.NOT_ELIGIBLE')
+              }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-n-slate-11">
+              {{ t('JRC_CONTACT_CENTER.SUPERVISOR.AGENT_DETAILS.VERSION') }}
+            </dt>
+            <dd class="break-all">{{ selectedAgent.state_version }}</dd>
+          </div>
+        </dl>
+        <section class="space-y-2">
+          <h4 class="font-semibold">
+            {{ t('JRC_CONTACT_CENTER.SUPERVISOR.AGENT_DETAILS.QUEUES') }}
+          </h4>
+          <ul v-if="selectedAgent.queues?.length" class="space-y-2">
+            <li
+              v-for="queue in selectedAgent.queues"
+              :key="queue.id"
+              class="break-words rounded-lg border border-n-weak p-2"
+            >
+              {{ queue.name }}
+            </li>
+          </ul>
+          <p v-else>{{ t('JRC_CONTACT_CENTER.COMMON.EMPTY') }}</p>
+        </section>
+        <p
+          v-if="selectedAgent.pause_notice?.exceeded"
+          role="status"
+          class="rounded-lg bg-n-amber-2 p-3 text-n-amber-11"
+        >
+          {{ t('JRC_CONTACT_CENTER.PAUSE_CATALOG.EXCEEDED') }}
+        </p>
+        <button
+          type="button"
+          class="rounded-lg border border-n-weak px-3 py-2"
+          data-supervisor-agent-detail-close
+          @click="closeAgentDetails"
+        >
+          {{ t('JRC_CONTACT_CENTER.RECORDINGS.CLOSE') }}
+        </button>
+      </div>
+    </Dialog>
   </div>
 </template>
