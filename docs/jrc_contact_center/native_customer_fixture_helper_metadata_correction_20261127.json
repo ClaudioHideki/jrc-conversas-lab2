@@ -1,0 +1,18 @@
+{
+  "source_parent": "488c471c24695de7f201bc0f3d6960407785a137",
+  "run": 46043341335,
+  "artifact": 15220584115,
+  "artifact_sha256": "ca2db299e9f667ec6c7c04302c780fe778ee1637e8ee8f25a6b38a4739464afa",
+  "actual_native_preflight": {
+    "duration": 6.506909476,
+    "example_count": 12,
+    "failure_count": 2,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "cause": "The two fixture guard examples reuse the quality context; its PabxHelpers module is included only for :pabx examples.",
+  "correction": "Use that same existing native metadata tag; do not replace the helper, mock ownership or change the guards.",
+  "product_changed_by_this_metadata_correction": false,
+  "all_12_native_cases_and_ownership_assertions_preserved": true,
+  "native_or_Chrome_acceptance": false
+}

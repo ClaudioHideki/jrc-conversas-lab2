@@ -271,38 +271,33 @@
     "effective_work_hours_not_inferred_from_CI_wait_or_example_count": true
   },
   "current_24_effective_hour_delivery": {
-    "candidate_source_parent": "38e297bf2fa6292193267ea6a62ede65fd883a26",
+    "candidate_source_parent": "488c471c24695de7f201bc0f3d6960407785a137",
     "status": "prepared_not_natively_or_visually_accepted",
     "figures": [
+      17,
       21,
       22
     ],
-    "document": "docs/jrc_contact_center/native_recording_customer_records_candidate_20261127.json",
-    "user_outcome": "Consult the exact caller native CRM contracts and opportunities, permitted Projects, native Tickets and unified timeline inside recording Context, with original paging and current permissions.",
-    "grouped_with": "Minimum correction of the nine confirmed shared Ticket lint findings; existing last-agent review accepted from unchanged verified evidence.",
-    "one_own_CI_at_a_time": true,
-    "planned_not_results": {
-      "new_Vue": 18,
-      "main_Vue_expected": 2247,
-      "directed_Vue_expected": 320,
-      "customer_focused_Vue_expected": 41,
-      "customer_native_preflight_expected": 12,
-      "new_guard_native_examples": 2,
-      "existing_native_contact_examples_newly_covered": 5,
-      "existing_Chrome_cases_extended": 4,
-      "new_original_screenshots": 20
+    "documents": [
+      "docs/jrc_contact_center/native_recording_customer_records_candidate_20261127.json",
+      "docs/jrc_contact_center/native_recording_result_filter_candidate_20261127.json"
+    ],
+    "user_outcomes": [
+      "Consult native contracts, CRM opportunities, permitted Projects, Tickets and unified history from exact recording context.",
+      "Filter the native recording list by result and direction, restore criteria and pagination on reload and clear filters explicitly."
+    ],
+    "prepared_not_results": {
+      "distinct_Rails": 4012,
+      "main_Vue": 2252,
+      "directed_Vue": 325,
+      "Chrome": 288,
+      "original_PNG": 916
     },
-    "effort_recording": "Effective work hours are not inferred from elapsed time or CI duration.",
-    "external_dependencies_separate": [
-      "PABX commands, publication and ACK",
-      "External Nico provider execution",
-      "Real retention and commercial policy configuration"
-    ],
-    "remaining_internal_work": [
-      "Literal remaining administrative and sentiment-dashboard gaps",
-      "Full visual acceptance of the current and new grouped flows"
-    ],
-    "whole_Part1_accepted": false
+    "one_own_CI_at_a_time": true,
+    "previous_blocker": "Missing :pabx metadata on two fixture guard examples; no ownership assertion relaxed.",
+    "external_provider_homologation_not_claimed": true,
+    "effort_recording": "Effective work hours are not inferred from elapsed time, CI duration or example count.",
+    "whole_figure_or_Part1_accepted": false
   },
   "following_independent_functional_delivery": {
     "figures": [
@@ -350,5 +345,39 @@
     "run": 46034015466,
     "status": "native_and_Vue_passed_nine_shared_Ticket_lint_findings_build_and_Chrome_not_run",
     "diagnosis": "docs/jrc_contact_center/native_ticket_workflow_lint_correction_20261127.json"
+  },
+  "recording_customer_group_before_result_filter_extension": {
+    "candidate_source_parent": "38e297bf2fa6292193267ea6a62ede65fd883a26",
+    "status": "prepared_not_natively_or_visually_accepted",
+    "figures": [
+      21,
+      22
+    ],
+    "document": "docs/jrc_contact_center/native_recording_customer_records_candidate_20261127.json",
+    "user_outcome": "Consult the exact caller native CRM contracts and opportunities, permitted Projects, native Tickets and unified timeline inside recording Context, with original paging and current permissions.",
+    "grouped_with": "Minimum correction of the nine confirmed shared Ticket lint findings; existing last-agent review accepted from unchanged verified evidence.",
+    "one_own_CI_at_a_time": true,
+    "planned_not_results": {
+      "new_Vue": 18,
+      "main_Vue_expected": 2247,
+      "directed_Vue_expected": 320,
+      "customer_focused_Vue_expected": 41,
+      "customer_native_preflight_expected": 12,
+      "new_guard_native_examples": 2,
+      "existing_native_contact_examples_newly_covered": 5,
+      "existing_Chrome_cases_extended": 4,
+      "new_original_screenshots": 20
+    },
+    "effort_recording": "Effective work hours are not inferred from elapsed time or CI duration.",
+    "external_dependencies_separate": [
+      "PABX commands, publication and ACK",
+      "External Nico provider execution",
+      "Real retention and commercial policy configuration"
+    ],
+    "remaining_internal_work": [
+      "Literal remaining administrative and sentiment-dashboard gaps",
+      "Full visual acceptance of the current and new grouped flows"
+    ],
+    "whole_Part1_accepted": false
   }
 }

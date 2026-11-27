@@ -2,6 +2,10 @@
 
 # Reuses both native scopes. Similar phone numbers or provider aliases never establish a recording's origin.
 class JrcContactCenter::RecordedCalls
+  RESULT_FILTERS = {
+    'direction' => (Pabx::Contract::DIRECTIONS.values + ['unknown']).uniq.freeze,
+    'status' => (Pabx::Contract::STATUSES.values + ['unknown']).uniq.freeze
+  }.freeze
   attr_reader :period
 
   def initialize(account:, member:)
@@ -30,7 +34,8 @@ class JrcContactCenter::RecordedCalls
   def filtered(params)
     @period = period_for(params)
     relation = records.where(started_at: @period)
-    search(with_operating_filters(relation, params), params[:q]).order(started_at: :desc, id: :desc)
+    relation = with_result_filters(with_operating_filters(relation, params), params)
+    search(relation, params[:q]).order(started_at: :desc, id: :desc)
   end
 
   # Aggregate the same authorized, filtered relation before pagination. Missing
@@ -83,6 +88,18 @@ class JrcContactCenter::RecordedCalls
   def authorize!(action)
     allowed = @access.policy.public_send("recordings_#{action}?") && @member.user.active_for_authentication?
     raise Pundit::NotAuthorizedError unless allowed
+  end
+
+  def with_result_filters(relation, params)
+    RESULT_FILTERS.each do |field, allowed|
+      value = params[field]
+      next if value.nil? || value == ''
+
+      raise JrcContactCenter::OperationError, 'invalid_recording_filter' unless value.is_a?(String) && allowed.include?(value)
+
+      relation = relation.where(field => value)
+    end
+    relation
   end
 
   def identifier!(value)

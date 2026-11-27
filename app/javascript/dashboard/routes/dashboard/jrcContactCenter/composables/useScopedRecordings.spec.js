@@ -188,6 +188,8 @@ describe('current-scope recording browser state', () => {
       q: 'SYNTHETIC',
       unit_id: '4',
       queue_id: '5',
+      status: 'answered',
+      direction: 'inbound',
     };
     await state.apply();
     await flushPromises();
@@ -207,6 +209,8 @@ describe('current-scope recording browser state', () => {
       q: '',
       unit_id: '',
       queue_id: '',
+      status: '',
+      direction: '',
       page: 1,
       per_page: 20,
     });
@@ -233,6 +237,52 @@ describe('current-scope recording browser state', () => {
     expect(routeQuery.value).toEqual({ preserved_other_module: 'yes' });
     expect(state.page.value).toBe(1);
   });
+
+  it('restores native result and direction from the URL, preserves both across pages and removes them explicitly', async () => {
+    const { state, routeQuery } = fixture({
+      recordings_status: 'answered',
+      recordings_direction: 'inbound',
+      recordings_page: '2',
+    });
+    await flushPromises();
+    expect(API.recordings).toHaveBeenCalledWith(
+      '1',
+      expect.objectContaining({
+        status: 'answered',
+        direction: 'inbound',
+        page: 2,
+      })
+    );
+    state.changePage(1);
+    await flushPromises();
+    expect(routeQuery.value).toMatchObject({
+      recordings_status: 'answered',
+      recordings_direction: 'inbound',
+    });
+    await state.clearFilters();
+    await flushPromises();
+    expect(routeQuery.value).toEqual({ preserved_other_module: 'yes' });
+    expect(API.recordings).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ status: '', direction: '', page: 1 })
+    );
+  });
+
+  it.each([
+    { recordings_status: ['answered', 'unanswered'] },
+    { recordings_direction: ['inbound', 'outbound'] },
+    { recordings_status: { value: 'answered' } },
+    { recordings_direction: { value: 'inbound' } },
+  ])(
+    'does not query a wider list for non-scalar result/direction criteria %j',
+    async query => {
+      const { state } = fixture(query);
+      await flushPromises();
+      expect(state.error.value).toBe('ERROR');
+      expect(state.items.value).toEqual([]);
+      expect(API.recordings).not.toHaveBeenCalled();
+    }
+  );
 
   it('rejects ambiguous multi-valued recording URL criteria instead of silently querying a broader list', async () => {
     const { state } = fixture({ recordings_unit_id: ['4', '5'] });

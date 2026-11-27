@@ -12,7 +12,15 @@ export const useScopedRecordings = ({
   const meta = ref({ page: 1, per_page: 20, total: 0, pages: 0 });
   const period = ref(null);
   const summary = ref(null);
-  const filters = ref({ from: '', to: '', q: '', unit_id: '', queue_id: '' });
+  const filters = ref({
+    from: '',
+    to: '',
+    q: '',
+    unit_id: '',
+    queue_id: '',
+    status: '',
+    direction: '',
+  });
   const page = ref(1);
   const capabilities = ref({});
   const loading = ref(false);
@@ -248,7 +256,15 @@ export const useScopedRecordings = ({
       return false;
     }
   };
-  const ownKeys = ['from', 'to', 'q', 'unit_id', 'queue_id'];
+  const ownKeys = [
+    'from',
+    'to',
+    'q',
+    'unit_id',
+    'queue_id',
+    'status',
+    'direction',
+  ];
   const persist = async (criteria, targetPage) => {
     const query = { ...routeQuery.value };
     ownKeys.forEach(key => {
@@ -264,7 +280,18 @@ export const useScopedRecordings = ({
   };
   const apply = () => persist(filters.value, 1);
   const clearFilters = () =>
-    persist({ from: '', to: '', q: '', unit_id: '', queue_id: '' }, 1);
+    persist(
+      {
+        from: '',
+        to: '',
+        q: '',
+        unit_id: '',
+        queue_id: '',
+        status: '',
+        direction: '',
+      },
+      1
+    );
   const changePage = value => {
     if (
       !Number.isSafeInteger(value) ||

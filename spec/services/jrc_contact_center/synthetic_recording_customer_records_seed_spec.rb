@@ -1,7 +1,7 @@
 require 'rails_helper'
 require Rails.root.join('script/jrc_call_center_recordings_seed')
 
-RSpec.describe JrcContactCenter::SyntheticRecordingCustomerRecordsSeed do
+RSpec.describe JrcContactCenter::SyntheticRecordingCustomerRecordsSeed, :pabx do
   include_context 'with native manual recording ticket intake'
 
   def mark_owned_source

@@ -80,6 +80,54 @@ const labels = computed(() => ({
   NO_MEASUREMENT: t('JRC_CONTACT_CENTER.RECORDINGS.NO_MEASUREMENT'),
 }));
 const copy = key => labels.value[key];
+const resultFilters = computed(() => [
+  {
+    key: 'status',
+    label: t('JRC_CONTACT_CENTER.RECORDINGS.RESULT_FILTER'),
+    options: [
+      {
+        value: 'answered',
+        label: t('JRC_CONTACT_CENTER.RECORDINGS.RESULT_ANSWERED'),
+      },
+      {
+        value: 'unanswered',
+        label: t('JRC_CONTACT_CENTER.RECORDINGS.RESULT_UNANSWERED'),
+      },
+      { value: 'busy', label: t('JRC_CONTACT_CENTER.RECORDINGS.RESULT_BUSY') },
+      {
+        value: 'congestion',
+        label: t('JRC_CONTACT_CENTER.RECORDINGS.RESULT_CONGESTION'),
+      },
+      {
+        value: 'unknown',
+        label: t('JRC_CONTACT_CENTER.RECORDINGS.RESULT_UNKNOWN'),
+      },
+    ],
+  },
+  {
+    key: 'direction',
+    label: t('JRC_CONTACT_CENTER.RECORDINGS.DIRECTION_FILTER'),
+    options: [
+      {
+        value: 'inbound',
+        label: t('JRC_CONTACT_CENTER.RECORDINGS.DIRECTION_INBOUND'),
+      },
+      {
+        value: 'outbound',
+        label: t('JRC_CONTACT_CENTER.RECORDINGS.DIRECTION_OUTBOUND'),
+      },
+      {
+        value: 'local',
+        label: t('JRC_CONTACT_CENTER.RECORDINGS.DIRECTION_LOCAL'),
+      },
+      { value: 'api', label: t('JRC_CONTACT_CENTER.RECORDINGS.DIRECTION_API') },
+      {
+        value: 'unknown',
+        label: t('JRC_CONTACT_CENTER.RECORDINGS.DIRECTION_UNKNOWN'),
+      },
+    ],
+  },
+]);
 const periodDuration = computed(() => {
   const seconds = summary.value?.duration_seconds;
   if (seconds === null || seconds === undefined)
@@ -177,6 +225,29 @@ const duration = value =>
           :required="false"
         />
       </div>
+      <label
+        v-for="filter in resultFilters"
+        :key="filter.key"
+        class="min-w-0 text-sm"
+      >
+        {{ filter.label }}
+        <select
+          v-model="filters[filter.key]"
+          :data-recordings-filter="filter.key"
+          class="mt-1 block w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-2 p-2"
+        >
+          <option value="">
+            {{ t('JRC_CONTACT_CENTER.RECORDINGS.ALL_RESULTS') }}
+          </option>
+          <option
+            v-for="option in filter.options"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.label }}
+          </option>
+        </select>
+      </label>
       <div class="flex flex-wrap items-end gap-2">
         <button
           type="submit"

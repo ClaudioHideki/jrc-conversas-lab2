@@ -3342,7 +3342,20 @@
         "MEASURED": "Duração informada em {count} gravações.",
         "MISSING": "Gravações sem duração informada",
         "NO_DURATION": "Sem duração informada"
-      }
+      },
+      "RESULT_FILTER": "Resultado da ligação",
+      "DIRECTION_FILTER": "Sentido da ligação",
+      "ALL_RESULTS": "Todos",
+      "RESULT_ANSWERED": "Atendida",
+      "RESULT_UNANSWERED": "Não atendida",
+      "RESULT_BUSY": "Ocupado",
+      "RESULT_CONGESTION": "Congestionamento",
+      "RESULT_UNKNOWN": "Não informado pela origem",
+      "DIRECTION_INBOUND": "Recebida",
+      "DIRECTION_OUTBOUND": "Realizada",
+      "DIRECTION_LOCAL": "Interna",
+      "DIRECTION_API": "API",
+      "DIRECTION_UNKNOWN": "Não informado pela origem"
     },
     "QUALITY_REVIEW": {
       "TITLE": "Corrigir Análise do Nico",

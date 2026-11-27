@@ -1045,5 +1045,13 @@
     "native_or_Chrome_acceptance": false,
     "literal_requirement": "D2-P0349-C02",
     "no_capacity_retention_or_provider_claim": true
+  },
+  "native_result_direction_filter_candidate_not_accepted": {
+    "document": "docs/jrc_contact_center/native_recording_result_filter_candidate_20261127.json",
+    "source": "Pabx::Contract canonical normalized CDR values; current native access before filtering, totals and pagination.",
+    "new_native_HTTP_cases_prepared": 8,
+    "new_Vue_cases_prepared": 5,
+    "four_existing_browser_cases_extended_without_a_second_matrix": true,
+    "literal_statuses_preserved_until_native_and_actual_visual_review": true
   }
 }

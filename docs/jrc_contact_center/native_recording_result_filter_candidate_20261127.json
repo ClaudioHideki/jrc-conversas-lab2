@@ -1,0 +1,30 @@
+{
+  "source_parent": "488c471c24695de7f201bc0f3d6960407785a137",
+  "figure": 17,
+  "clauses": [
+    "D1-P0192-C01",
+    "D2-P0348-C01"
+  ],
+  "delivery": "Filter native recording results and direction together with period, unit, queue and search, preserving scoped period totals, page reset and URL restoration.",
+  "reuse": "Pabx::Contract canonical normalized values, RecordedCalls current scopes and existing list/pagination/composable.",
+  "new_models_catalogues_endpoints_grants_or_provider_operations": false,
+  "native_or_visual_accepted": false,
+  "source_staged": false,
+  "remaining": [
+    "Focused native and Vue tests",
+    "Real four-mode filtering, reload, clearing and denied-source proof"
+  ],
+  "whole_figure_accepted": false,
+  "grouped_correction": "docs/jrc_contact_center/native_customer_fixture_helper_metadata_correction_20261127.json",
+  "prepared_not_results": {
+    "new_native_cases": 8,
+    "new_Vue_cases": 5,
+    "existing_Chrome_cases_extended": 4,
+    "new_original_PNG": 8,
+    "expected_distinct_Rails": 4012,
+    "expected_main_Vue": 2252,
+    "expected_directed_Vue": 325,
+    "expected_Chrome": 288,
+    "expected_PNG": 916
+  }
+}

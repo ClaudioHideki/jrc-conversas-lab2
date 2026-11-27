@@ -1,3 +1,4 @@
+import { verifyNativeRecordingResultFilters } from './call-center-recording-result-filters-native.mjs';
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -625,6 +626,7 @@ export async function verifyNativeRecordingHistory(parent, info, target) {
         2
       )
     );
+    await verifyNativeRecordingResultFilters(page, info, target);
   } finally {
     await page.close();
   }

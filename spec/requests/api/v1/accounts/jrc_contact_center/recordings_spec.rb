@@ -65,6 +65,43 @@ RSpec.describe 'Control Desk recordings through both native scoped domains', :pa
     expect(response.body).not_to match(/recording_reference|synthetic-password|synthetic-user|service_url|metadata/)
   end
 
+  it 'combines canonical result and direction filters before real scoped totals and pagination' do
+    get path, headers: headers, params: { status: 'answered', direction: 'inbound' }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items').pluck('id')).to eq([record.id.to_s])
+    expect(response.parsed_body.dig('meta', 'total')).to eq(1)
+    expect(response.parsed_body.dig('summary', 'total')).to eq(1)
+    get path, headers: headers, params: { status: 'answered', direction: 'outbound' }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items')).to be_empty
+    expect(response.parsed_body.dig('meta', 'total')).to eq(0)
+    expect(response.parsed_body.dig('summary', 'total')).to eq(0)
+  end
+
+  it 'keeps an explicit native unknown result distinct from an unfiltered request' do
+    get path, headers: headers, params: { status: 'unknown' }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items')).to be_empty
+    record.update!(status: 'unknown')
+    get path, headers: headers, params: { status: 'unknown', direction: 'inbound' }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items').pluck('id')).to eq([record.id.to_s])
+  end
+
+  [
+    { status: ['answered', 'unanswered'] }, { direction: ['inbound', 'outbound'] },
+    { status: { value: 'answered' } }, { direction: { value: 'inbound' } },
+    { status: 'not_a_native_status' }, { direction: 'not_a_native_direction' }
+  ].each do |criteria|
+    it "rejects malformed native recording criteria #{criteria.inspect} without returning a broader successful list" do
+      get path, headers: headers, params: criteria
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body.fetch('error')).to eq('invalid_recording_filter')
+      expect(response.parsed_body).not_to have_key('items')
+      expect(response.body).not_to include(record.external_unique_id)
+    end
+  end
+
   it 'keeps an uncorrelated native recording unavailable without guessing from phone numbers' do
     source_call.update!(external_session_id: 'synthetic-other-identity')
     get path, headers: headers
