@@ -22,7 +22,7 @@ module JrcContactCenter::SyntheticQualityPersistenceFailure
 
   def self.mutate(connection, name, action, account)
     if action == 'enable'
-      raise 'A new owned review flow is required' if JrcContactCenter::QualityReviewRevision.where(account: account).exists?
+      raise 'A new owned review flow is required' if JrcContactCenter::QualityReviewRevision.exists?(account: account)
       raise 'Unexpected existing constraint remains preserved' if connection.check_constraint_exists?(:audits, name: name)
 
       condition = "auditable_type <> 'JrcContactCenter::QualityReviewRevision' OR associated_id <> #{Integer(account.id)}"

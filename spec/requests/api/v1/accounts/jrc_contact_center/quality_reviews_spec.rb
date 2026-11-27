@@ -169,7 +169,7 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
     get path, headers: headers, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('original')).to include('sentimento_cliente' => 'positivo', 'nota_final' => 0,
-                                                            'alerta_supervisao' => true, 'motivo_alerta' => analysis[:motivo_alerta])
+                                                              'alerta_supervisao' => true, 'motivo_alerta' => analysis[:motivo_alerta])
     expect(JrcContactCenter::QualityReviewRevision.where(account: account)).to be_empty
   end
 
@@ -180,7 +180,7 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
     get path, headers: headers, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('original')).to include('sentimento_cliente' => 'negativo', 'alerta_supervisao' => false,
-                                                            'motivo_alerta' => nil)
+                                                              'motivo_alerta' => nil)
   end
 
   it 'preserves absent legacy supervision fields instead of inventing a negative boolean value' do
@@ -197,7 +197,7 @@ RSpec.describe 'Native recorded-call human quality reviews', :pabx do
     expect(response).to have_http_status(:ok)
     row = JrcContactCenter::QualityReviewRevision.where(account: account).sole
     expect(row.original_analysis).to include('sentimento_cliente' => 'positivo', 'alerta_supervisao' => true,
-                                           'motivo_alerta' => analysis[:motivo_alerta])
+                                             'motivo_alerta' => analysis[:motivo_alerta])
     expect(row.reviewed_values.fetch('classification')).to eq('negative')
   end
 end

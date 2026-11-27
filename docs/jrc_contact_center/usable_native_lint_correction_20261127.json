@@ -1,0 +1,16 @@
+{
+  "source_parent": "3ac993a82fd7555d838f5acbec7922af2a29634a",
+  "source_sha256": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb": "6eec17580ec8f79ab1fd82a545c7f320d958b0242153ce48e833cb1d111ada5d",
+    "spec/integration/jrc_contact_center/owned_quality_persistence_failure.rb": "799f03f416c480a1e2ad072a17342ccd73df6ae75fc7f77be0da549946f0085d"
+  },
+  "parent_sources": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb": "11e28ca238f2eb1eed2215704d8c406c1360391b33959f4b90c7f97507046ac5",
+    "spec/integration/jrc_contact_center/owned_quality_persistence_failure.rb": "2b0be145aa6a78f2fc5862740a55984927c2cb9137dac0b0e8c48f63946fbefe"
+  },
+  "failed_run": 46009099535,
+  "native_lint_report_sha256": "cead0fc970075e85f7002020c6df431641f499ddf8259a56e335a32d0246fe2e",
+  "seven_offenses_only_alignment_and_equivalent_native_exists_query": true,
+  "all_16_request_examples_and_all_existing_gates_preserved": true,
+  "native_or_Chrome_acceptance": false
+}
