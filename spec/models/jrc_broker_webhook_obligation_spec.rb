@@ -10,6 +10,53 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
   end
   let(:message) { build(:message, account: account, inbox: inbox, message_type: :outgoing) }
 
+  it 'preserves the stored bytes of a public human reply while ordinary webhooks keep their presentation' do
+    message.content = "Primeira\\\r\nsegunda\n\r\n"
+    message.save!
+
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    expect(message.reload.content.bytes).to eq("Primeira\\\r\nsegunda\n\r\n".bytes)
+    expect(message.webhook_data[:content]).to eq("Primeira\nsegunda")
+    expect(obligation.payload.fetch('content').bytes).to eq(message.content.bytes)
+    expect(obligation.payload.dig('content_attributes', 'jrc_broker_outbound', 'intent_id')).to eq(obligation.delivery_id)
+  end
+
+  it 'captures the exact caption and the original attachment IDs together' do
+    message.content = "Legenda\u00A0\n"
+    attachment = message.attachments.build(account_id: account.id, file_type: :image)
+    File.open(Rails.root.join('spec/assets/avatar.png'), 'rb') do |image|
+      attachment.file.attach(io: image, filename: 'example.png', content_type: 'image/png')
+      message.save!
+    end
+
+    payload = JrcBrokerWebhookObligation.find_by!(message_id: message.id).payload
+    expect(payload.fetch('content').bytes).to eq(message.reload.content.bytes)
+    expect(payload.fetch('attachments').pluck('id')).to eq([attachment.id])
+  end
+
+  it 'sends the stored text in the signed callback with the same intent identity' do
+    message.update!(content: "Teste\n\r\n")
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    allow(SafeFetch).to receive(:fetch)
+    JrcBroker::WebhookObligationJob.perform_now(obligation.id)
+
+    expect(SafeFetch).to have_received(:fetch).once do |_url, **options|
+      body = JSON.parse(options.fetch(:body))
+      expect(body.fetch('content').bytes).to eq(message.reload.content.bytes)
+      expect(body.dig('content_attributes', 'jrc_broker_outbound', 'intent_id')).to eq(obligation.delivery_id)
+    end
+    expect(obligation.reload.state).to eq('delivered')
+  end
+
+  it 'keeps the webhook presentation for an automated message attributed to a user' do
+    message.content = "Resposta automática\n\n"
+    message.content_attributes = { 'automation_rule_id' => 7 }
+    message.save!
+
+    payload = JrcBrokerWebhookObligation.find_by!(message_id: message.id).payload
+    expect(payload.fetch('content')).to eq('Resposta automática')
+  end
+
   it 'captures the persisted public conversation number when the new association has not read it back yet' do
     expected_id = message.conversation.reload.display_id
     expect(expected_id).to be_positive

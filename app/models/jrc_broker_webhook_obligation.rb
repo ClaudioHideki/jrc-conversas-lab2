@@ -18,6 +18,8 @@ class JrcBrokerWebhookObligation < ApplicationRecord
 
   def self.callback_payload(message)
     payload = message.webhook_data.merge(event: 'message_created')
+    # The Broker compares the intent with the persisted message on a second read.
+    payload[:content] = message.content if human_reply?(message)
     # A newly inserted conversation can still have a cached nil display_id
     # until Rails reads back the value allocated by PostgreSQL.
     payload[:conversation][:id] ||= Conversation.where(id: message.conversation_id, account_id: message.account_id, inbox_id: message.inbox_id)
@@ -25,6 +27,17 @@ class JrcBrokerWebhookObligation < ApplicationRecord
     payload
   end
   private_class_method :callback_payload
+
+  def self.human_reply?(message)
+    return false unless message.outgoing? && !message.private? && message.sender_type == 'User' && message.sender_id
+
+    attributes = message.content_attributes
+    additional = message.additional_attributes
+    attributes['automation_rule_id'].nil? && attributes['jrc_broker_message_id'].nil? && !attributes['external_echo'] &&
+      attributes['jrc_broker_historical'].to_s != 'true' && additional['jrc_broker_historical'].to_s != 'true' &&
+      additional['campaign_id'].nil? && additional['jrc_campaign_broker'] != true
+  end
+  private_class_method :human_reply?
 
   def self.mark_pending!(message, binding, identity)
     outbound = { 'version' => 1, 'state' => 'PENDING', 'intent_id' => identity,
