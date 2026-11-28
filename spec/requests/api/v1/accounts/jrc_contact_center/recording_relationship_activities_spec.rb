@@ -108,7 +108,7 @@ RSpec.describe 'Native reviewed Relationship activity from a recording', :pabx, 
     unrelated = JrcRelationship::Assignment.create!(account: account, contact: create(:contact, account: account),
                                                     owner: actor, business_unit: business, status: 'active')
     get path, headers: actor.create_new_auth_token
-    expect(response.parsed_body.fetch('items').map { |item| item.fetch('id') }).to match_array([assignment.id.to_s, direct.id.to_s])
+    expect(response.parsed_body.fetch('items').map { |item| item.fetch('id') }).to contain_exactly(assignment.id.to_s, direct.id.to_s)
     expect(response.parsed_body.fetch('items').map { |item| item.fetch('id') }).not_to include(unrelated.id.to_s)
     get path, headers: actor.create_new_auth_token, params: { page: 2 }
     expect(response).to have_http_status(:ok)

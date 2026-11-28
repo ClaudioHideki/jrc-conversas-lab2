@@ -707,7 +707,12 @@ onBeforeUnmount(() => {
     </RouterLink>
     <RouterLink
       v-if="key === 'approvals' && context.native_links?.approvals"
-      :to="{ name: 'jrc_approvals', params: { accountId } }"
+      :to="{
+        name: 'jrc_approvals',
+        params: { accountId },
+        query: { module_key: 'contact_center' },
+      }"
+      data-native-contact-center-approvals
       class="inline-block text-sm text-n-blue-11"
     >
       {{ label('NATIVE_APPROVALS') }}

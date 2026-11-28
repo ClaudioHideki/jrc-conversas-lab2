@@ -36,8 +36,8 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
 
   def self.named_portfolio_groups!(values, assignment)
     2.times do |index|
-      group = JrcRelationship::PortfolioGroup.create!(**values.except(:status), name: "SYNTHETIC recording group #{index}",
-                                                      status: 'active', visibility: 'private')
+      attributes = values.except(:status).merge(name: "SYNTHETIC recording group #{index}", status: 'active', visibility: 'private')
+      group = JrcRelationship::PortfolioGroup.create!(attributes)
       group.customer_links.create!(account: values.fetch(:account), assignment: assignment, active: true)
     end
   end

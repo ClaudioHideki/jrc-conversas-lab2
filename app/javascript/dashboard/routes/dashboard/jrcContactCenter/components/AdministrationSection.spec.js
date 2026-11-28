@@ -1105,6 +1105,18 @@ describe('native PABX observation destination from the existing administrative c
       params: { accountId: '1' },
       query: { preserved: 'native-proof' },
     });
+    await wrapper.setProps({
+      card: { key: 'approvals', state: 'native_module' },
+      context: { ...context, native_links: { approvals: true } },
+    });
+    await flushPromises();
+    expect(
+      wrapper.getComponent('[data-native-contact-center-approvals]').props('to')
+    ).toEqual({
+      name: 'jrc_approvals',
+      params: { accountId: '1' },
+      query: { module_key: 'contact_center' },
+    });
     expect(API.saveUnit).not.toHaveBeenCalled();
     expect(API.saveQueue).not.toHaveBeenCalled();
   });
@@ -1122,5 +1134,12 @@ describe('native PABX observation destination from the existing administrative c
       false
     );
     expect(wrapper.find('[data-native-pabx-settings]').exists()).toBe(false);
+    await wrapper.setProps({
+      card: { key: 'approvals', state: 'native_module' },
+    });
+    await flushPromises();
+    expect(
+      wrapper.find('[data-native-contact-center-approvals]').exists()
+    ).toBe(false);
   });
 });

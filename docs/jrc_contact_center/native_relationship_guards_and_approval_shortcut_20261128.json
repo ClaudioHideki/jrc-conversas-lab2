@@ -1,0 +1,33 @@
+{
+  "parent": "3626a7027ab90f4511df819824ce68422a1ab257",
+  "failed_CI": 46139738267,
+  "artifact": 15261196982,
+  "artifact_sha256": "8b02da68a2500688e843457dd9522997dbac935d5baad8d9478c36e650ff672e",
+  "lint_cause": [
+    "Two formatting offenses caused by a keyword splat and a following multiline hash in the synthetic named-group seed",
+    "RSpec requires contain_exactly rather than match_array for the literal expected identity list"
+  ],
+  "smallest_fixes": [
+    "Construct the identical synthetic group attributes before passing one native hash to create!",
+    "Use equivalent exact unordered RSpec matcher, retaining both IDs and all seven expectations"
+  ],
+  "independent_user_delivery": {
+    "figures": [
+      1,
+      2,
+      15
+    ],
+    "existing_component": "AdministrationSection.vue",
+    "existing_route": "jrc_approvals",
+    "existing_query": {
+      "module_key": "contact_center"
+    },
+    "current_consumer_contract_verified": true,
+    "user_outcome": "The existing Control Desk approval shortcut opens its own Call Center requests in the native Central instead of an unfiltered cross-module inbox.",
+    "no_new_API_model_permission_grant_or_approval_engine": true,
+    "existing_two_Vue_cases_extended_for_route_and_denied_visibility": true
+  },
+  "all_test_example_counts_and_mandatory_steps_preserved": true,
+  "no_migrations_security_rules_runtime_service_or_index_changed": true,
+  "native_or_Chrome_accepted": false
+}
