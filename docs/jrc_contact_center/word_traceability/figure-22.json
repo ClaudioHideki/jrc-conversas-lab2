@@ -1212,7 +1212,8 @@
     }
   ],
   "divergences": [
-    "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+    "Nova Ação por tarefa nativa, reexecução idempotente, recarga dos estados e independência de Salvar e Concluir têm aceite literal em62f8f4b1.",
+    "A navegação ampliada e o fluxo nativo de chamados vinculados recebem validação própria na candidata atual. O aceite anterior não encerra todas as ações da figura."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
@@ -1267,5 +1268,48 @@
     },
     "current_literal_status_preserved_until_native_and_visual_acceptance": true,
     "existing_status_translation_and_full_CRM_destination_navigation_not_accepted": true
+  },
+  "historical_divergences_before_accepted_literal_reconciliation": [
+    "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+  ],
+  "accepted_native_functional_baseline_reconciled": {
+    "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+    "sha256": "f4aa21310e2f01dd2e0eb37d40a5daeb2ec7f09039a9317e269ca7e6bef83105",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "run": 45984659600,
+    "artifact": 15198996699,
+    "artifact_sha256": "949211f5d1f3b7f4b1cf40649ddbfb15262889427d3f97096cca34d6aa160ae3",
+    "scope": "Only exact previously accepted literal IDs. This annotation adds no acceptance and no test count.",
+    "accepted_literal_ids": [
+      "D1-P0214-C01",
+      "D2-P0416-C02",
+      "D2-P0416-C04",
+      "D2-P0418-C03",
+      "D2-P0419-C02",
+      "D2-P0421-C01",
+      "D2-P0422-C01"
+    ],
+    "current_candidate_Chrome_acceptance": false,
+    "whole_figure_accepted": false
+  },
+  "native_browser_contract_corrections_pending": {
+    "failed_parent_sha": "a042a3a6d6441f61c22eab1b01da77a0723b2143",
+    "run": 46077439752,
+    "Chrome": {
+      "passed": 284,
+      "failed": 8,
+      "logical_causes_in_four_modes": 2
+    },
+    "artifact": 15239384515,
+    "artifact_sha256": "42f5f04181d87748befc1aa8be1a69ec1cc2495bda9130bf4154661beba6d5ff",
+    "cause_and_small_correction": [
+      "Native TextArea has default empty id and label for=id. TicketFormView did not pass id; bind a unique native Vue useId, preserving the native control and its unchanged v-model, validation, permissions and payload.",
+      "The recording list native contract exposes unique_id, not call_id. Use that exact field and require equality with the independently read native call witness before selecting or writing."
+    ],
+    "shared_component_impact": "Only the full Service Desk caller receives a description id; the shared TextArea implementation and ordinary form behavior are unchanged. Add one real native TextArea regression with two instances and independent drafts.",
+    "new_Vue_prepared_not_executed": 1,
+    "same_292_Chrome_cases_all_authority_assertions_preserved": true,
+    "permissions_APIs_migrations_or_business_rules_changed": false,
+    "parent_or_new_candidate_accepted": false
   }
 }

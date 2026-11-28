@@ -652,6 +652,22 @@ onBeforeUnmount(() => {
       {{ label('ACW_GLOBAL_DENIED') }}
     </p>
     <RouterLink
+      v-if="
+        key === 'pabx' &&
+        (context.capabilities?.configure === true ||
+          context.capabilities?.supervise === true)
+      "
+      :to="{
+        name: 'jrc_contact_center_pabx',
+        params: { accountId },
+        query: route.query,
+      }"
+      class="inline-block rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+      data-native-pabx-observations-link
+    >
+      {{ t('JRC_CONTACT_CENTER.NATIVE_PABX.TITLE') }}
+    </RouterLink>
+    <RouterLink
       v-if="key === 'pabx' && context.native_links?.pabx_settings"
       :to="{ name: 'ramal_settings', params: { accountId } }"
       class="inline-block rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"

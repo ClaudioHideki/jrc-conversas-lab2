@@ -24,7 +24,7 @@ import {
 } from '../helpers/masterCustomer';
 const props = defineProps({ screen: { type: String, default: 'new' } });
 const { canAccess: mayUseMasterDirectory } = useCustomerMaster();
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref, useId, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -136,6 +136,7 @@ const blank = () => ({
 const serviceReady = ref(true);
 const catalogue = ref(null);
 const files = ref([]);
+const descriptionFieldId = useId();
 const draft = reactive(blank());
 watch(
   [
@@ -953,6 +954,7 @@ const submit = async () => {
                   maxlength="255"
                 />
                 <TextArea
+                  :id="descriptionFieldId"
                   v-model="draft.description"
                   :max-length="20000"
                   resize

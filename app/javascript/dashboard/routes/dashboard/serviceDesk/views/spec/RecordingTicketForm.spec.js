@@ -82,7 +82,7 @@ beforeEach(() => {
   });
 });
 afterEach(() => wrapper?.unmount());
-const render = async (query = { recording_id: '8' }) => {
+const render = async (query = { recording_id: '8' }, instances = 1) => {
   router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -94,9 +94,19 @@ const render = async (query = { recording_id: '8' }) => {
     ],
   });
   await router.push({ name: 'new', params: { accountId: '1' }, query });
-  wrapper = shallowMount(TicketFormView, {
+  const root =
+    instances === 2
+      ? {
+          components: { TicketFormView },
+          template: '<div><TicketFormView /><TicketFormView /></div>',
+        }
+      : TicketFormView;
+  wrapper = shallowMount(root, {
     global: {
-      stubs: { Panel: { template: '<section><slot /></section>' } },
+      stubs: {
+        Panel: { template: '<section><slot /></section>' },
+        ...(instances === 2 ? { TicketFormView: false, TextArea: false } : {}),
+      },
       plugins: [
         router,
         createI18n({
@@ -200,4 +210,25 @@ it('does not change or fetch a recording source during ordinary native intake', 
     true
   );
   expect(wrapper.find('[data-recording-ticket-origin]').exists()).toBe(false);
+});
+
+it('associates each native description label with its own editable textarea without mixing simultaneous drafts', async () => {
+  await render({ recording_id: '8' }, 2);
+  const fields = wrapper.findAll('textarea');
+  expect(fields).toHaveLength(2);
+  const ids = fields.map(field => field.attributes('id'));
+  expect(ids.every(Boolean)).toBe(true);
+  expect(new Set(ids).size).toBe(2);
+  expect(ids.map(id => wrapper.get(`label[for="${id}"]`).text())).toEqual([
+    sd.JRC_SERVICE_DESK.FIELDS.description,
+    sd.JRC_SERVICE_DESK.FIELDS.description,
+  ]);
+  await fields[0].setValue(
+    'SYNTHETIC independently labeled native description'
+  );
+  expect(fields[0].element.value).toBe(
+    'SYNTHETIC independently labeled native description'
+  );
+  expect(fields[1].element.value).toBe('');
+  expect(mocks.session.operations.write).not.toHaveBeenCalled();
 });

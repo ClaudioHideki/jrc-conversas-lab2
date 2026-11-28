@@ -1732,7 +1732,8 @@
     }
   ],
   "divergences": [
-    "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+    "Ledger persistido, versão original imutável, revisão humana com justificativa, API/UI e concorrência PostgreSQL já existem e têm aceite literal em62f8f4b1. Não reconstruir.",
+    "A recuperação visual de falha SQL e os acréscimos posteriores ainda dependem da CI/Chrome atual. Fornecedor real Nico permanece sem homologação externa; a figura inteira não está encerrada."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
@@ -1859,5 +1860,35 @@
     },
     "current_literal_status_preserved_until_native_and_visual_acceptance": true,
     "existing_status_translation_and_full_CRM_destination_navigation_not_accepted": true
+  },
+  "historical_divergences_before_accepted_literal_reconciliation": [
+    "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+  ],
+  "accepted_native_functional_baseline_reconciled": {
+    "document": "docs/jrc_contact_center/literal_recording_and_execution_acceptance_20261127.json",
+    "sha256": "f4aa21310e2f01dd2e0eb37d40a5daeb2ec7f09039a9317e269ca7e6bef83105",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "run": 45984659600,
+    "artifact": 15198996699,
+    "artifact_sha256": "949211f5d1f3b7f4b1cf40649ddbfb15262889427d3f97096cca34d6aa160ae3",
+    "scope": "Only exact previously accepted literal IDs. This annotation adds no acceptance and no test count.",
+    "accepted_literal_ids": [
+      "D1-P0214-C01",
+      "D2-P0426-C01",
+      "D2-P0427-C01",
+      "D2-P0427-C02",
+      "D2-P0427-C03",
+      "D2-P0427-C04",
+      "D2-P0427-C05",
+      "D2-P0428-C02",
+      "D2-P0429-C01",
+      "D2-P0429-C02",
+      "D2-P0429-C03",
+      "D2-P0430-C01",
+      "D2-P0432-C01",
+      "D2-P0433-C01"
+    ],
+    "current_candidate_Chrome_acceptance": false,
+    "whole_figure_accepted": false
   }
 }

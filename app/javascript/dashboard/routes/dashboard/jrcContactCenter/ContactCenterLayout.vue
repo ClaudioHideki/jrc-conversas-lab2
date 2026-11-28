@@ -1,9 +1,11 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
+import { useMapGetter } from 'dashboard/composables/store';
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 
 const route = useRoute();
 const { t } = useI18n();
@@ -12,6 +14,19 @@ const failed = ref(false);
 const mobileNavigationOpen = ref(false);
 
 const accountId = computed(() => route.params.accountId);
+const currentUser = useMapGetter('getCurrentUser');
+const accessIdentity = computed(() =>
+  JSON.stringify([
+    accountId.value,
+    currentUser.value?.id,
+    currentUser.value?.type,
+    accountMembershipAccess(
+      currentUser.value?.accounts?.find(
+        row => String(row.id) === String(accountId.value)
+      )
+    ),
+  ])
+);
 const capabilities = computed(() => context.value?.capabilities || {});
 
 const canSupervise = computed(() => capabilities.value.supervise === true);
@@ -181,13 +196,18 @@ const activeItem = computed(() =>
 
 let generation = 0;
 watch(
-  accountId,
-  async id => {
+  accessIdentity,
+  async () => {
+    const id = accountId.value;
     generation += 1;
     const version = generation;
     context.value = null;
     failed.value = false;
     mobileNavigationOpen.value = false;
+    if (!currentUser.value?.id) {
+      failed.value = true;
+      return;
+    }
     try {
       const { data } = await JrcContactCenterAPI.context(id);
       if (version === generation) context.value = data;
@@ -195,12 +215,19 @@ watch(
       if (version === generation) failed.value = true;
     }
   },
-  { immediate: true }
+  { immediate: true, flush: 'sync' }
 );
+onBeforeUnmount(() => {
+  generation += 1;
+});
 </script>
 
 <template>
-  <div v-if="context" class="flex h-full min-h-0 flex-col bg-n-background">
+  <div
+    v-if="context"
+    class="flex h-full min-h-0 flex-col bg-n-background"
+    data-native-contact-center-layout
+  >
     <header
       class="relative shrink-0 overflow-hidden border-b border-n-weak bg-n-solid-2 px-4 py-4 sm:px-6"
     >
@@ -254,6 +281,7 @@ watch(
 
     <div class="flex min-h-0 flex-1 flex-col xl:flex-row">
       <aside
+        data-contact-center-navigation
         class="border-b border-n-weak bg-n-solid-2 xl:w-64 xl:shrink-0 xl:border-b-0 xl:border-r"
         :class="mobileNavigationOpen ? 'block' : 'hidden xl:block'"
       >

@@ -190,4 +190,39 @@ describe('native cockpit source and authority', () => {
     expect(wrapper.findComponent(CallWorkspace).exists()).toBe(false);
     expect(screen(wrapper).status.tone).toBe('ruby');
   });
+
+  it('clears a selected call when native eligibility changes even if role and permissions stay the same', async () => {
+    mocks.route.query.callId = '4';
+    API.context.mockResolvedValueOnce({ data: data(9, 8, 7) });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.findComponent(CallWorkspace).exists()).toBe(true);
+    API.context.mockRejectedValueOnce({ response: { status: 401 } });
+    mocks.user.value.accounts[0].contact_center_eligible = false;
+    await flushPromises();
+    expect(API.context).toHaveBeenCalledTimes(2);
+    expect(wrapper.findComponent(CallWorkspace).exists()).toBe(false);
+    expect(screen(wrapper).metrics.map(item => item.value)).toEqual([
+      '—',
+      '—',
+      '—',
+      '—',
+    ]);
+  });
+  it('preserves the existing call workspace and counts for a presence-only membership refresh', async () => {
+    mocks.route.query.callId = '4';
+    API.context.mockResolvedValueOnce({ data: data(9, 8, 7) });
+    const wrapper = render();
+    await flushPromises();
+    mocks.user.value.accounts[0].availability = 'busy';
+    await flushPromises();
+    expect(API.context).toHaveBeenCalledTimes(1);
+    expect(wrapper.findComponent(CallWorkspace).exists()).toBe(true);
+    expect(screen(wrapper).metrics.map(item => item.value)).toEqual([
+      9,
+      8,
+      '—',
+      7,
+    ]);
+  });
 });

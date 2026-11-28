@@ -539,5 +539,17 @@
     "status": "implemented_pending_native_and_Chrome_acceptance",
     "reused_native_source": true,
     "whole_figure_accepted": false
+  },
+  "native_navigation_and_cockpit_authority_refresh_candidate": {
+    "status": "private_candidate_requires_native_and_real_Chrome_verification",
+    "functional_problem": "The native layout observed only account ID; the cockpit observed only a subset of access fields. Same-account actor/eligibility changes could retain old navigation or call context.",
+    "small_correction": "Reuse accountMembershipAccess and native context API, clear old UI synchronously, ignore obsolete responses and retain drafts for presence-only refreshes.",
+    "new_permissions_grants_endpoints_models_migrations_or_provider_operations": false,
+    "new_Vue_prepared_not_executed": 12,
+    "focused_Vue_prepared_including_seven_old_cockpit_cases": 19,
+    "reused_Chrome_modes": 4,
+    "extra_Chrome_case_identities_or_PNG": 0,
+    "current_83_accepted_requirements_unchanged": true,
+    "whole_figures_or_Part1_accepted": false
   }
 }

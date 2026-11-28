@@ -113,7 +113,7 @@ export const routes = [
       {
         path: 'pabx',
         name: 'jrc_contact_center_pabx',
-        ...visualPage('pabxMonitor'),
+        component: () => import('./views/PabxNativePage.vue'),
         meta: managementMeta,
       },
       {

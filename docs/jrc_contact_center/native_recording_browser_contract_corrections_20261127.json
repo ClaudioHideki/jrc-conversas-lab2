@@ -1,0 +1,20 @@
+{
+  "failed_parent_sha": "a042a3a6d6441f61c22eab1b01da77a0723b2143",
+  "run": 46077439752,
+  "Chrome": {
+    "passed": 284,
+    "failed": 8,
+    "logical_causes_in_four_modes": 2
+  },
+  "artifact": 15239384515,
+  "artifact_sha256": "42f5f04181d87748befc1aa8be1a69ec1cc2495bda9130bf4154661beba6d5ff",
+  "cause_and_small_correction": [
+    "Native TextArea has default empty id and label for=id. TicketFormView did not pass id; bind a unique native Vue useId, preserving the native control and its unchanged v-model, validation, permissions and payload.",
+    "The recording list native contract exposes unique_id, not call_id. Use that exact field and require equality with the independently read native call witness before selecting or writing."
+  ],
+  "shared_component_impact": "Only the full Service Desk caller receives a description id; the shared TextArea implementation and ordinary form behavior are unchanged. Add one real native TextArea regression with two instances and independent drafts.",
+  "new_Vue_prepared_not_executed": 1,
+  "same_292_Chrome_cases_all_authority_assertions_preserved": true,
+  "permissions_APIs_migrations_or_business_rules_changed": false,
+  "parent_or_new_candidate_accepted": false
+}

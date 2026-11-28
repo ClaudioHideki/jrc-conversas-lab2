@@ -490,5 +490,49 @@
     "correction": "Use E164 synthetic phone in the existing no-auto-link preview scenario. Same 49 cases and all negative assertions.",
     "product_and_permissions_changed": false,
     "native_or_visual_acceptance": false
+  },
+  "current_delivery_grouping": {
+    "source_parent": "a042a3a6d6441f61c22eab1b01da77a0723b2143",
+    "active_native_CI_run": 46077439752,
+    "group1": "Usable native recording initial contact link, native customer context/history, Tickets and tasks, plus authorized administrative source alerts.",
+    "group2": "Native PABX local configuration and diagnostics, reused existing resource navigation, three tabs, no provider operation.",
+    "acceptance": "Only literal requirements with same-source native and real four-mode Chrome evidence become accepted; CI counts alone do not close a figure.",
+    "report_interval": "Each24effective work hours; record functionality, literal requirement IDs, exact source/evidence and remaining effort. CI waiting and elapsed calendar time are not effective work hours.",
+    "hours_measured_in_this_record": null,
+    "provider_dependencies_separate": true,
+    "no_scope_reduction_or_new_architecture": true,
+    "existing_native_card_navigation": "Explicit link to the existing PABX route, visible only with current configure or supervise capability; no new permission."
+  },
+  "native_navigation_and_cockpit_authority_refresh_candidate": {
+    "status": "private_candidate_requires_native_and_real_Chrome_verification",
+    "functional_problem": "The native layout observed only account ID; the cockpit observed only a subset of access fields. Same-account actor/eligibility changes could retain old navigation or call context.",
+    "small_correction": "Reuse accountMembershipAccess and native context API, clear old UI synchronously, ignore obsolete responses and retain drafts for presence-only refreshes.",
+    "new_permissions_grants_endpoints_models_migrations_or_provider_operations": false,
+    "new_Vue_prepared_not_executed": 12,
+    "focused_Vue_prepared_including_seven_old_cockpit_cases": 19,
+    "reused_Chrome_modes": 4,
+    "extra_Chrome_case_identities_or_PNG": 0,
+    "current_83_accepted_requirements_unchanged": true,
+    "whole_figures_or_Part1_accepted": false
+  },
+  "native_browser_contract_corrections_pending": {
+    "failed_parent_sha": "a042a3a6d6441f61c22eab1b01da77a0723b2143",
+    "run": 46077439752,
+    "Chrome": {
+      "passed": 284,
+      "failed": 8,
+      "logical_causes_in_four_modes": 2
+    },
+    "artifact": 15239384515,
+    "artifact_sha256": "42f5f04181d87748befc1aa8be1a69ec1cc2495bda9130bf4154661beba6d5ff",
+    "cause_and_small_correction": [
+      "Native TextArea has default empty id and label for=id. TicketFormView did not pass id; bind a unique native Vue useId, preserving the native control and its unchanged v-model, validation, permissions and payload.",
+      "The recording list native contract exposes unique_id, not call_id. Use that exact field and require equality with the independently read native call witness before selecting or writing."
+    ],
+    "shared_component_impact": "Only the full Service Desk caller receives a description id; the shared TextArea implementation and ordinary form behavior are unchanged. Add one real native TextArea regression with two instances and independent drafts.",
+    "new_Vue_prepared_not_executed": 1,
+    "same_292_Chrome_cases_all_authority_assertions_preserved": true,
+    "permissions_APIs_migrations_or_business_rules_changed": false,
+    "parent_or_new_candidate_accepted": false
   }
 }

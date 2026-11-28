@@ -1,3 +1,4 @@
+import { verifyNativePabxReadiness } from './call-center-pabx-readiness-native.mjs';
 import { verifyNativeAuditQueryFailure, preserveNativeAuditQueryRecovery } from './call-center-audit-error-reference-native.mjs';
 import { measureLocatorTextContrast as contrast } from './call-center-text-contrast.mjs';
 import { verifyAudioRowPreview } from './call-center-audio-row-native.mjs';
@@ -684,6 +685,7 @@ test('native infrastructure nonroot cannot open infrastructure controls through 
       '-native-pabx-denied.png',
     fullPage: true,
   });
+  await verifyNativePabxReadiness(page, info, session);
 });
 
 test('native queue eligibility is rechecked before saving and preserves the reviewed selection', async ({

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import { useMapGetter } from 'dashboard/composables/store';
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import VisualShowcasePage from '../components/visual/VisualShowcasePage.vue';
 import VisualSectionCard from '../components/visual/VisualSectionCard.vue';
 import VisualStatusBadge from '../components/visual/VisualStatusBadge.vue';
@@ -34,9 +35,7 @@ const contextKey = computed(() => {
     accountId.value,
     currentUser.value?.id,
     currentUser.value?.type,
-    account?.role,
-    account?.custom_role_id,
-    account?.permissions?.slice().sort(),
+    accountMembershipAccess(account),
   ]);
 });
 const clearObserved = () => {
@@ -162,7 +161,7 @@ const load = async () => {
     if (version === generation) loading.value = false;
   }
 };
-watch(contextKey, load, { immediate: true });
+watch(contextKey, load, { immediate: true, flush: 'sync' });
 onBeforeUnmount(() => {
   generation += 1;
 });

@@ -2,7 +2,7 @@
   "format_version": 1,
   "review_at": "2026-11-23T20:15:50.371122+00:00",
   "validated_base_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
-  "candidate_source_parent_sha": "6921f12c53deb401f05e1d2708cb10767b026688",
+  "candidate_source_parent_sha": "a042a3a6d6441f61c22eab1b01da77a0723b2143",
   "candidate_not_yet_validated": true,
   "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
@@ -152,7 +152,8 @@
         "app/javascript/dashboard/routes/dashboard/webphone/PabxSettingsPanel.vue",
         "app/services/jrc_contact_center/providers/jrc_pabx_adapter.rb",
         "app/services/pabx/scope_mapping.rb",
-        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrDraftWorkspace.vue"
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrDraftWorkspace.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/PabxNativePage.vue"
       ],
       "native_spec_paths": [
         "spec/services/jrc_contact_center/ivr_draft_access_spec.rb",
@@ -184,7 +185,8 @@
       ],
       "divergences": [
         "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
-      ]
+      ],
+      "native_readonly_candidate_pending_own_acceptance": true
     },
     {
       "figure": 5,
@@ -587,7 +589,8 @@
         "app/javascript/dashboard/routes/dashboard/webphone/PabxSettingsPanel.vue",
         "app/services/jrc_contact_center/providers/jrc_pabx_adapter.rb",
         "app/services/pabx/scope_mapping.rb",
-        "app/services/jrc_contact_center/event_ingestor.rb"
+        "app/services/jrc_contact_center/event_ingestor.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/PabxNativePage.vue"
       ],
       "native_spec_paths": [
         "spec/services/jrc_contact_center/event_ingestor_spec.rb",
@@ -612,7 +615,8 @@
       ],
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "native_readonly_candidate_pending_own_acceptance": true
     },
     {
       "figure": 14,
@@ -829,8 +833,13 @@
         "spec/services/jrc_voice_quality/supabase_client_scope_spec.rb"
       ],
       "divergences": [
+        "Transcrição autorizada, sincronização por timestamps válidos, controle de áudio e revisão humana têm aceite literal em62f8f4b1; não devem ser reconstruídos.",
+        "A figura inteira permanece parcial. A homologação do fornecedor Nico e os critérios sem prova literal continuam separados."
+      ],
+      "historical_divergences_before_accepted_literal_reconciliation": [
         "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
-      ]
+      ],
+      "current_candidate_not_accepted_by_historical_evidence": true
     },
     {
       "figure": 21,
@@ -849,8 +858,13 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb"
       ],
       "divergences": [
+        "A abertura do Cadastro Mestre existente tem aceite literal em62f8f4b1. Não criar um cadastro paralelo.",
+        "Vínculo inicial explícito de contato e expansão das listas/contexto estão implementados na candidata atual, aguardando seu aceite Chrome completo; não são aprovados pelo certificado antigo."
+      ],
+      "historical_divergences_before_accepted_literal_reconciliation": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "current_candidate_not_accepted_by_historical_evidence": true
     },
     {
       "figure": 22,
@@ -872,8 +886,13 @@
         "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb"
       ],
       "divergences": [
+        "Nova Ação por tarefa nativa, reexecução idempotente, recarga dos estados e independência de Salvar e Concluir têm aceite literal em62f8f4b1.",
+        "A navegação ampliada e o fluxo nativo de chamados vinculados recebem validação própria na candidata atual. O aceite anterior não encerra todas as ações da figura."
+      ],
+      "historical_divergences_before_accepted_literal_reconciliation": [
         "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
-      ]
+      ],
+      "current_candidate_not_accepted_by_historical_evidence": true
     },
     {
       "figure": 23,
@@ -894,8 +913,13 @@
         "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb"
       ],
       "divergences": [
+        "Ledger persistido, versão original imutável, revisão humana com justificativa, API/UI e concorrência PostgreSQL já existem e têm aceite literal em62f8f4b1. Não reconstruir.",
+        "A recuperação visual de falha SQL e os acréscimos posteriores ainda dependem da CI/Chrome atual. Fornecedor real Nico permanece sem homologação externa; a figura inteira não está encerrada."
+      ],
+      "historical_divergences_before_accepted_literal_reconciliation": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "current_candidate_not_accepted_by_historical_evidence": true
     }
   ],
   "requirements_unique_count": 554,
@@ -4238,7 +4262,7 @@
     "not_full_global_implementation_estimate": true
   },
   "figure10_proven_literal_percentage": 56.0,
-  "Parte1_proven_formal_lower_bound_percentage": 14.62,
+  "Parte1_proven_formal_lower_bound_percentage": 14.98,
   "full_global_reaudit_complete": false,
   "typed_durable_delivery_candidate": {
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
@@ -4603,5 +4627,60 @@
     "correction": "Use E164 synthetic phone in the existing no-auto-link preview scenario. Same 49 cases and all negative assertions.",
     "product_and_permissions_changed": false,
     "native_or_visual_acceptance": false
+  },
+  "native_PABX_readonly_candidate": {
+    "scope": "Figures4/13: replace illustrative existing PABX route with native authorized local observations, three query-backed tabs and actual resource links. Existing infrastructure/credential settings remain protected.",
+    "source_parent": "a042a3a6d6441f61c22eab1b01da77a0723b2143",
+    "native_API_reused": [
+      "administration",
+      "integrations/health"
+    ],
+    "new_model_migration_permission_or_provider_operation": false,
+    "Vue_cases_prepared_not_results": 23,
+    "reused_Chrome_cases": 4,
+    "additional_original_PNG_prepared_not_results": 20,
+    "whole_figure_or_Part1_accepted": false,
+    "external_dependencies": [
+      "PABX technical command/ACK contract and external homologation; not inferred from stored configuration or local events."
+    ],
+    "formal_554_status_counts_unchanged": true,
+    "focused_Vue_cases_including_34_preserved_cases": 57,
+    "existing_card_entry_reuses_native_control_capabilities": true,
+    "browser_profile_swap_uses_real_authenticated_profile_API": true,
+    "real_restricted_corporate_unit_profile_reused": true
+  },
+  "historical_percentage_before_pause_identity_save_cancel": 14.62,
+  "historical_candidate_source_parent_before_native_PABX": "6921f12c53deb401f05e1d2708cb10767b026688",
+  "native_navigation_and_cockpit_authority_refresh_candidate": {
+    "status": "private_candidate_requires_native_and_real_Chrome_verification",
+    "functional_problem": "The native layout observed only account ID; the cockpit observed only a subset of access fields. Same-account actor/eligibility changes could retain old navigation or call context.",
+    "small_correction": "Reuse accountMembershipAccess and native context API, clear old UI synchronously, ignore obsolete responses and retain drafts for presence-only refreshes.",
+    "new_permissions_grants_endpoints_models_migrations_or_provider_operations": false,
+    "new_Vue_prepared_not_executed": 12,
+    "focused_Vue_prepared_including_seven_old_cockpit_cases": 19,
+    "reused_Chrome_modes": 4,
+    "extra_Chrome_case_identities_or_PNG": 0,
+    "current_83_accepted_requirements_unchanged": true,
+    "whole_figures_or_Part1_accepted": false
+  },
+  "native_browser_contract_corrections_pending": {
+    "failed_parent_sha": "a042a3a6d6441f61c22eab1b01da77a0723b2143",
+    "run": 46077439752,
+    "Chrome": {
+      "passed": 284,
+      "failed": 8,
+      "logical_causes_in_four_modes": 2
+    },
+    "artifact": 15239384515,
+    "artifact_sha256": "42f5f04181d87748befc1aa8be1a69ec1cc2495bda9130bf4154661beba6d5ff",
+    "cause_and_small_correction": [
+      "Native TextArea has default empty id and label for=id. TicketFormView did not pass id; bind a unique native Vue useId, preserving the native control and its unchanged v-model, validation, permissions and payload.",
+      "The recording list native contract exposes unique_id, not call_id. Use that exact field and require equality with the independently read native call witness before selecting or writing."
+    ],
+    "shared_component_impact": "Only the full Service Desk caller receives a description id; the shared TextArea implementation and ordinary form behavior are unchanged. Add one real native TextArea regression with two instances and independent drafts.",
+    "new_Vue_prepared_not_executed": 1,
+    "same_292_Chrome_cases_all_authority_assertions_preserved": true,
+    "permissions_APIs_migrations_or_business_rules_changed": false,
+    "parent_or_new_candidate_accepted": false
   }
 }

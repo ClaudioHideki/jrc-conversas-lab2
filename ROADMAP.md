@@ -276,3 +276,14 @@ Priorizar grupos utilizáveis e reaproveitar provas: ACW/ações nativas, Servic
 
 
 - Complemento funcional de chamados vinculados às gravações: lista paginada de 20 itens, título/status atuais e abertura no Service Desk existente. O filtro usa a origem privada imutável e a TicketQuery/Presenter nativas; revalida acesso à gravação e ao destino, sem novo cadastro, modelo, migration ou direito. Preparados 11 casos Rails e 15 Vue adicionais, com retorno/lista/navegação nos mesmos quatro fluxos Chrome. Agrupada a última infração ABC do seed sintético (27 das 28 anteriores já removidas), mantendo todas as condições de isolamento. Ainda sem aceite nativo/visual; os 95 passos anteriores da CI foram preservados.
+
+
+### Prioridade funcional da Parte 1 — 27/11/2026
+
+Agrupar entregas utilizáveis, preservando os dois Word e os 554 requisitos: concluir o lote em CI de gravação→cliente→chamados/tarefas e alertas de origem; em seguida validar a consulta técnica nativa do PABX e os atalhos já existentes. Reutilizar aceites literais anteriores, sem reconstruir funcionalidades. Cada24horas efetivas deve haver demonstração dos fluxos concluídos, requisitos com evidência e esforço restante. Contratos/ACKs e homologação externa PABX/Nico continuam registrados separadamente e não impedem as entregas internas seguras. Build/publicação/deploy permanecem fora deste trabalho.
+
+
+- Correção funcional agrupada das figuras 1/11 com a consulta PABX: navegação e cockpit passam a revalidar a identidade e todos os campos de acesso nativos, inclusive elegibilidade, sem herdar capacidades do ator anterior. A alteração de presença preserva o rascunho. Preparados 12 casos Vue novos, preservados sete anteriores; os quatro cenários Chrome do mesmo lote também conferem o menu após troca autenticada de perfil e a abertura mobile. Nenhum grant, API, migration ou comando externo foi adicionado. Ainda exige testes no runner e capturas reais; os 83 aceites literais existentes permanecem inalterados.
+
+
+- CI 46077439752/a042a3a6: 284 Chrome aprovados e oito falhas, em dois comportamentos repetidos nos quatro modos; candidata não homologada. Corrigida a associação acessível do campo Descrição no formulário nativo do Service Desk, com useId existente e uma regressão de dois formulários independentes; o TextArea compartilhado permanece intacto. O teste de vínculo manual passa a usar unique_id, campo real do catálogo nativo, e exige igualdade com a testemunha SQL antes da gravação. Todos os 292 casos, as validações, os escopos e as asserções de auditoria foram mantidos. Correções agrupadas com PABX/navegação para uma única próxima CI. Registro: docs/jrc_contact_center/native_recording_browser_contract_corrections_20261127.json. Ainda sem aceite nativo/visual, publicação ou deploy.

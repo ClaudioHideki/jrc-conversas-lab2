@@ -1080,3 +1080,47 @@ describe('global ACW administrative popup revision', () => {
     );
   });
 });
+
+describe('native PABX observation destination from the existing administrative card', () => {
+  it('preserves query context and offers only the existing read-only route with current control capability', async () => {
+    mocks.route.query.preserved = 'native-proof';
+    const wrapper = mount(AdministrationSection, {
+      props: {
+        accountId: '1',
+        card: { key: 'pabx', state: 'available' },
+        context,
+      },
+      global: {
+        stubs: {
+          Dialog,
+          RouterLink: { props: ['to'], template: '<a><slot /></a>' },
+        },
+      },
+    });
+    await flushPromises();
+    expect(
+      wrapper.getComponent('[data-native-pabx-observations-link]').props('to')
+    ).toEqual({
+      name: 'jrc_contact_center_pabx',
+      params: { accountId: '1' },
+      query: { preserved: 'native-proof' },
+    });
+    expect(API.saveUnit).not.toHaveBeenCalled();
+    expect(API.saveQueue).not.toHaveBeenCalled();
+  });
+  it('does not infer control or infrastructure access from native administrative card visibility', async () => {
+    const wrapper = mountSection('pabx');
+    await wrapper.setProps({
+      context: {
+        ...context,
+        capabilities: { configure: false, supervise: false },
+        native_links: {},
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-native-pabx-observations-link]').exists()).toBe(
+      false
+    );
+    expect(wrapper.find('[data-native-pabx-settings]').exists()).toBe(false);
+  });
+});

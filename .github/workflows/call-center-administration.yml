@@ -139,6 +139,32 @@ jobs:
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           PY
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/PabxNativePage.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.spec.js \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile=/tmp/call-center-pabx-native-vitest.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-pabx-native-vitest.json').read_text())
+          assert report['numTotalTests'] == report['numPassedTests'] == 57
+          assert report['numFailedTests'] == report['numPendingTests'] == 0
+          assert len(report['testResults']) == 2 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'PabxNativePage.spec.js': 21, 'AdministrationSection.spec.js': 36}
+          assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
+          assert all(case['status'] == 'passed' and not case.get('failureMessages') for row in report['testResults'] for case in row['assertionResults'])
+          PY
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/ContactCenterLayout.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/AgentCockpit.spec.js \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile=/tmp/call-center-navigation-authority-vitest.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-navigation-authority-vitest.json').read_text())
+          assert report['numTotalTests'] == report['numPassedTests'] == 19
+          assert report['numFailedTests'] == report['numPendingTests'] == 0
+          assert len(report['testResults']) == 2 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'ContactCenterLayout.spec.js': 10, 'AgentCockpit.spec.js': 9}
+          assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
+          assert all(case['status'] == 'passed' and not case.get('failureMessages') for row in report['testResults'] for case in row['assertionResults'])
+          PY
       - name: Focused native recordings selection, shared player and retained ACW target controls
         run: |
           node --test --test-reporter=tap tests/playwright/tests/e2e/ui/call-center-text-contrast-dispatch.test.mjs > /tmp/call-center-contrast-dispatch.txt
@@ -177,12 +203,12 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 346
+          assert report['numTotalTests'] == report['numPassedTests'] == 347
           assert report['numFailedTests'] == report['numPendingTests'] == 0
           assert len(report['testResults']) == 26 and all(row['status'] == 'passed' for row in report['testResults'])
           expected = {'useScopedRecordings.spec.js': 33, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 18, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 14, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 14, 'RecordingCustomerLink.spec.js': 19, 'RecordingCustomerRecords.spec.js': 13, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 12}
           expected.update({'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9, 'SupervisorPage.spec.js': 26, 'LinkedContactMaster.spec.js': 10, 'ContactDetailsDialog.spec.js': 3, 'Contact360Panel.spec.js': 7})
-          expected.update({'RecordingLinkedTickets.spec.js': 14, 'RecordingTicketAction.spec.js': 12, 'useRecordingTicketContext.spec.js': 13, 'recordingTicketSource.spec.js': 13, 'RecordingTicketForm.spec.js': 6, 'serviceDeskOperationsRecording.spec.js': 12})
+          expected.update({'RecordingLinkedTickets.spec.js': 14, 'RecordingTicketAction.spec.js': 12, 'useRecordingTicketContext.spec.js': 13, 'recordingTicketSource.spec.js': 13, 'RecordingTicketForm.spec.js': 7, 'serviceDeskOperationsRecording.spec.js': 12})
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           expected_new = {'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9}
@@ -1921,6 +1947,27 @@ jobs:
               expected_images = {f".codex/call-center-native-e2e/{flow['project']}-ending-activation-{stage}.png" for stage in ['review', 'recorded', 'stale']}
               assert len(flow['screenshots']) == 3 and set(flow['screenshots']) == expected_images
               assert all(Path(path).is_file() for path in expected_images)
+          native_pabx = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-pabx-native-readiness.json')]
+          assert len(native_pabx) == 4 and {row['project'] for row in native_pabx} == {'desktop-light', 'desktop-dark', 'mobile-light', 'mobile-dark'}
+          for flow in native_pabx:
+              assert flow['sha'] == os.environ['GITHUB_SHA'] and flow['synthetic'] is True
+              assert flow['account_id'] and len(flow['native_health_sha256']) == 64
+              assert set(flow['counts']) == {'queues', 'memberships', 'events', 'commands'}
+              assert all(type(value) is int and value >= 0 for value in flow['counts'].values())
+              assert flow['actual_dark_theme'] == flow['project'].endswith('dark')
+              assert flow['contrast']['ratio'] >= 4.5 and flow['horizontal_overflow'] is False
+              assert flow['native_queue_navigation'] is flow['query_and_reload_preserved'] is flow['protected_settings_absent'] is True
+              assert flow['denied_status'] == flow['foreign_status'] == 401 and flow['browser_writes'] == []
+              assert flow['native_provider_configured'] is flow['provider_operation_or_external_homologation'] is False
+              assert flow['unit_scope_revalidated_against_native_API'] is True and len(flow['unit_scoped_health_sha256']) == 64
+              assert set(flow['unit_scoped_counts']) == set(flow['counts']) and all(type(value) is int and value >= 0 for value in flow['unit_scoped_counts'].values())
+              assert flow['unit_scoped_counts']['queues'] < flow['counts']['queues']
+              assert flow['profile_changed_through_real_native_API'] is flow['old_authorized_counts_cleared'] is flow['native_actor_restored'] is True and flow['profile_denied_http'] == 401
+              assert flow['native_navigation_reauthorized_after_profile_change'] is flow['native_navigation_restored_from_current_API'] is True
+              assert flow['mobile_native_menu_checked_after_profile_denial'] == flow['project'].startswith('mobile')
+              expected_images = {f".codex/call-center-native-e2e/{flow['project']}-pabx-native-{stage}.png" for stage in ['general', 'sync', 'diagnostic', 'unit-scope', 'profile-denied']}
+              assert len(flow['screenshots']) == 5 and {row['path'] for row in flow['screenshots']} == expected_images
+              assert all(Path(row['path']).is_file() and hashlib.sha256(Path(row['path']).read_bytes()).hexdigest() == row['sha256'] for row in flow['screenshots'])
           native_leads = json.loads(Path('/tmp/call-center-native-lead-vitest.json').read_text())
           assert native_leads['numPassedTests'] == native_leads['numTotalTests'] > 0
           assert native_leads['numFailedTests'] == native_leads['numPendingTests'] == 0

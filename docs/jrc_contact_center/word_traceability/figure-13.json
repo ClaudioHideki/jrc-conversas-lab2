@@ -1959,5 +1959,12 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "native_readonly_candidate": {
+    "page": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/PabxNativePage.vue",
+    "Vue": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/PabxNativePage.spec.js",
+    "Chrome_helper": "tests/playwright/tests/e2e/ui/call-center-pabx-readiness-native.mjs",
+    "no_actual_new_acceptance": true,
+    "remaining": "Provider test/sync/diagnostic jobs and confirmations need technical contract and authorized external environment. Protected native infrastructure fields are reused rather than duplicated."
+  }
 }
