@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useLocale } from 'shared/composables/useLocale';
 import Avatar from 'dashboard/components-next/avatar/Avatar.vue';
 import TeleportWithDirection from 'dashboard/components-next/TeleportWithDirection.vue';
 import PaginationFooter from 'dashboard/components-next/pagination/PaginationFooter.vue';
@@ -14,7 +15,8 @@ const props = defineProps({
   contextLabels: { type: Array, required: true },
 });
 const emit = defineEmits(['close']);
-const { t, locale } = useI18n();
+const { t } = useI18n();
+const { resolvedLocale } = useLocale();
 const dialog = ref(null);
 const expanded = ref(false);
 const search = ref('');
@@ -68,18 +70,18 @@ const totals = computed(() => funnelTotals(filtered.value));
 const formatDate = value =>
   value === null || value === undefined
     ? '—'
-    : new Intl.DateTimeFormat(locale.value, {
+    : new Intl.DateTimeFormat(resolvedLocale.value, {
         timeZone: props.report.timezone,
       }).format(value);
 const money = (value, currency) =>
-  formatFunnelMoney(value, currency, locale.value);
+  formatFunnelMoney(value, currency, resolvedLocale.value);
 const exportRows = () =>
   exportFunnelDeals(
     filtered.value,
     props.report.stages,
     t,
     formatDate,
-    locale.value,
+    resolvedLocale.value,
     props.report.month
   );
 watch([search, stage, owner], () => {

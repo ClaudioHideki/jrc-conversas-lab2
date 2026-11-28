@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import { useLocale } from 'shared/composables/useLocale';
 import FunnelAPI from 'dashboard/api/crm/funnel';
 import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import CrmListingHeader from '../../components/shared/CrmListingHeader.vue';
@@ -18,7 +19,12 @@ import { exportFunnelDeals } from './exportFunnel';
 const route = useRoute();
 const router = useRouter();
 const store = useStore();
-const { t, n, locale } = useI18n();
+const { t } = useI18n();
+const { resolvedLocale } = useLocale();
+const numberFormatter = computed(
+  () => new Intl.NumberFormat(resolvedLocale.value)
+);
+const formatNumber = value => numberFormatter.value.format(value);
 const initialFilters = () => ({
   month: '',
   pipeline_id: '',
@@ -184,21 +190,21 @@ const timeColors = [
 const dayLabel = value => {
   if (value === null || value === undefined) return '—';
   const count = Math.round(value * 10) / 10;
-  return t('CRM.SALES_FUNNEL.DAYS', { count: n(count) }, count);
+  return t('CRM.SALES_FUNNEL.DAYS', { count: formatNumber(count) }, count);
 };
 const percent = value =>
   value === undefined || value === null
     ? '—'
-    : `${n(Math.round(value * 10) / 10)}%`;
+    : `${formatNumber(Math.round(value * 10) / 10)}%`;
 const formatDate = value =>
   value === null || value === undefined
     ? '—'
-    : new Intl.DateTimeFormat(locale.value, {
+    : new Intl.DateTimeFormat(resolvedLocale.value, {
         timeZone: report.value.timezone,
       }).format(value);
 const monthLabel = computed(() => {
   if (!applied.value.month) return '';
-  return new Intl.DateTimeFormat(locale.value, {
+  return new Intl.DateTimeFormat(resolvedLocale.value, {
     month: 'long',
     year: 'numeric',
     timeZone: 'UTC',
@@ -218,7 +224,7 @@ const contextLabels = computed(() =>
 const money = rows =>
   funnelTotals(rows)
     .map(([currency, cents]) =>
-      formatFunnelMoney(cents, currency, locale.value)
+      formatFunnelMoney(cents, currency, resolvedLocale.value)
     )
     .join(' · ') || '—';
 const cards = computed(() => {
@@ -234,7 +240,7 @@ const cards = computed(() => {
     ? [
         [
           t('CRM.SALES_FUNNEL.PORTFOLIO'),
-          n(data.entry.rows.length),
+          formatNumber(data.entry.rows.length),
           'i-lucide-briefcase-business',
           data.entry.rows,
         ],
@@ -246,13 +252,13 @@ const cards = computed(() => {
         ],
         [
           t('CRM.SALES_FUNNEL.ACTIVITY_LABEL'),
-          n(data.withoutActivity.length),
+          formatNumber(data.withoutActivity.length),
           'i-lucide-calendar-clock',
           data.withoutActivity,
         ],
         [
           t('CRM.SALES_FUNNEL.STALLED_LABEL'),
-          n(data.stalled.length),
+          formatNumber(data.stalled.length),
           'i-lucide-clock-3',
           data.stalled,
         ],
@@ -260,13 +266,13 @@ const cards = computed(() => {
     : [
         [
           t('CRM.SALES_FUNNEL.ENTRIES'),
-          n(data.entry.rows.length),
+          formatNumber(data.entry.rows.length),
           'i-lucide-filter',
           data.entry.rows,
         ],
         [
           t('CRM.SALES_FUNNEL.WON'),
-          n(data.won.length),
+          formatNumber(data.won.length),
           'i-lucide-trophy',
           data.won,
         ],
@@ -345,7 +351,7 @@ const exportReport = () =>
     report.value.stages,
     t,
     formatDate,
-    locale.value,
+    resolvedLocale.value,
     report.value.month
   );
 </script>
@@ -564,7 +570,7 @@ const exportReport = () =>
                 >
                   <span class="block break-words">{{ stageLabel(stage) }}</span>
                   <strong class="block leading-none tabular-nums">{{
-                    n(stage.rows.length)
+                    formatNumber(stage.rows.length)
                   }}</strong>
                 </button>
               </div>
@@ -724,7 +730,7 @@ const exportReport = () =>
                   {{ stageLabel(item) }}
                 </th>
                 <td class="px-3 py-1.5 tabular-nums">
-                  {{ n(item.rows.length) }}
+                  {{ formatNumber(item.rows.length) }}
                 </td>
                 <td class="px-3 py-1.5">{{ money(item.rows) }}</td>
                 <td v-if="!portfolio" class="px-3 py-1.5 tabular-nums">
