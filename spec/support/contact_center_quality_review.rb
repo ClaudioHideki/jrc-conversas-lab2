@@ -62,10 +62,13 @@ RSpec.shared_context 'with native authorized quality review source' do
     create(:sip_credential, account: account, user: replacement, enabled: true, extension: '1410', call_history_extension: '1410')
     account.jrc_crm_user_business_units.create!(user: replacement, scope: 'BUSINESS_UNIT', company: company, business_unit: business,
                                                 active: true, structure_managed: true)
-    context = { account: account, account_user: member, user: replacement }
-    expect(JrcContactCenter::ModulePolicy.new(context, :contact_center).quality_review?).to be(true)
-    expect(JrcContactCenter::RecordedCalls.new(account: account, member: member).records.pluck(:id)).to include(record.id)
+    expect_reassigned_quality_member_authorized!(replacement)
     replacement
   end
 
+  def expect_reassigned_quality_member_authorized!(replacement)
+    context = { account: account, account_user: member, user: replacement }
+    expect(JrcContactCenter::ModulePolicy.new(context, :contact_center).quality_review?).to be(true)
+    expect(JrcContactCenter::RecordedCalls.new(account: account, member: member).records.pluck(:id)).to include(record.id)
+  end
 end

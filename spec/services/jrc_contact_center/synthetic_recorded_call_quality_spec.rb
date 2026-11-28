@@ -42,7 +42,7 @@ RSpec.describe SyntheticRecordedCallQuality do
     expect(Account).not_to receive(:find)
     with_modified_env(GITHUB_ACTIONS: 'false') do
       expect do
-        SyntheticRecordedCallQuality.metrics(account_id: 1, call_ids: ['SYNTHETIC-not-owned'], observed_before: Time.current)
+        described_class.metrics(account_id: 1, call_ids: ['SYNTHETIC-not-owned'], observed_before: Time.current)
       end.to raise_error(RuntimeError, /Owned recording media boundary/)
     end
   end
@@ -54,5 +54,4 @@ RSpec.describe SyntheticRecordedCallQuality do
     end
     expect(JrcVoiceQuality::AnalysisMetricReader.ancestors).to eq(before)
   end
-
 end

@@ -100,5 +100,4 @@ RSpec.describe JrcContactCenter::QualityReviewSource, :pabx do
       expect { reader.call(record.id) { raise 'Different actor source callback' } }.to raise_error(Pundit::NotAuthorizedError)
     end
   end
-
 end
