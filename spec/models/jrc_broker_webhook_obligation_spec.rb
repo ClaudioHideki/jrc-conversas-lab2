@@ -10,6 +10,43 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
   end
   let(:message) { build(:message, account: account, inbox: inbox, message_type: :outgoing) }
 
+  describe 'terminal conversation repair' do
+    let(:original) { create(:message, account: account, inbox: inbox, message_type: :outgoing, content: "Exact bytes\n") }
+    let(:row) { JrcBrokerWebhookObligation.find_by!(message_id: original.id) }
+    let(:repair) do
+      JrcBroker::TerminalConversationRepair.new(account_id: account.id, inbox_id: inbox.id, message_id: original.id, delivery_id: row.delivery_id)
+    end
+
+    before do
+      original.update_columns(status: :failed)
+      payload = row.payload.deep_dup
+      payload.fetch('conversation')['id'] = nil
+      row.update!(payload: payload, state: 'failed', attempts: 1, last_error_code: 'JRC_BROKER_DELIVERY_REJECTED')
+    end
+
+    it 'repairs one proven field under a pinned review and leaves the terminal original unscheduled' do
+      before_payload = row.payload.deep_dup
+      review = repair.perform
+      expect(review.fetch(:result)).to eq('eligible')
+      expect(row.reload.payload).to eq(before_payload)
+      expect { repair.perform(expected_sha256: review.fetch(:sha256)) }.not_to have_enqueued_job
+      expect(row.reload.payload).to eq(before_payload.deep_merge('conversation' => { 'id' => original.conversation.reload.display_id }))
+      expect(row.attributes.values_at('state', 'attempts', 'last_error_code')).to eq(['failed', 1, 'JRC_BROKER_DELIVERY_REJECTED'])
+      expect(original.reload).to be_failed
+      expect(repair.perform(expected_sha256: review.fetch(:sha256)).fetch(:result)).to eq('already_corrected')
+    end
+
+    it 'requires an unchanged review, exact bytes and the same persisted contact route' do
+      digest = repair.perform.fetch(:sha256)
+      row.update!(payload: row.payload.deep_merge('created_at' => 'changed-after-review'))
+      expect { repair.perform(expected_sha256: digest) }.to raise_error(ArgumentError)
+      row.update!(payload: row.payload.merge('content' => original.content.chomp))
+      expect { repair.perform }.to raise_error(ArgumentError, /bytes/)
+      row.update!(payload: row.payload.deep_merge('content' => original.content, 'conversation' => { 'contact_inbox' => { 'source_id' => 'different' } }))
+      expect { repair.perform }.to raise_error(ArgumentError, /route/)
+    end
+  end
+
   it 'preserves the stored bytes of a public human reply while ordinary webhooks keep their presentation' do
     message.content = "Primeira\\\r\nsegunda\n\r\n"
     message.save!
