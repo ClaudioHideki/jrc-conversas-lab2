@@ -1,0 +1,30 @@
+{
+  "parent": "626e9cb413217411fd87c6d355d7aa5638ce530a",
+  "run": 46152750268,
+  "artifact": 15266567150,
+  "artifact_sha256": "153a301e3395a2e0dbcc364f38a24b782a4964db4407ca533b7737a9fd8cf018",
+  "native_policy_RSpec_verified": {
+    "examples": 42,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "targeted_Vue_passed": 59,
+  "focused_native_Ruby_lint": {
+    "files": 10,
+    "offenses": 0
+  },
+  "incremental_native_Ruby_lint": {
+    "files": 846,
+    "offenses": 2,
+    "path": "script/jrc_call_center_e2e_seed.rb",
+    "line": 198,
+    "cops": [
+      "Layout/ArgumentAlignment",
+      "Layout/HashAlignment"
+    ]
+  },
+  "correction": "Remove one leading space from the new synthetic queue name argument. The entire seed is otherwise byte-identical. No fixture data, scenario, assertion, count, runtime or lint rule changes.",
+  "formatter_secondary_failure": "The optional suggestion extractor returned no source for the offending seed. Correct the real source offense; do not bypass or weaken the extractor.",
+  "native_browser_or_whole_figure_acceptance": false
+}
