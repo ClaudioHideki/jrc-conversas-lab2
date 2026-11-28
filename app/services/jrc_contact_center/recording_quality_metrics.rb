@@ -14,11 +14,9 @@ class JrcContactCenter::RecordingQualityMetrics
   def summary
     counts = SENTIMENTS.index_with { |sentiment| @rows.values.count { |row| classification(row) == sentiment } }
     analyzed = @rows.length
-    scores = @rows.values.filter_map { |row| quality_score(row) }
     { universe: @call_ids.length, analyzed: analyzed, without_analysis: @call_ids.length - analyzed,
       unclassified: analyzed - counts.values.sum, counts: counts, denominator: 'latest_original_analyses',
-      percentages: counts.transform_values { |count| analyzed.positive? ? (100.0 * count / analyzed).round(2) : nil },
-      quality_measured: scores.length, quality_average: scores.any? ? (scores.sum.to_f / scores.length).round(2) : nil }
+      percentages: counts.transform_values { |count| analyzed.positive? ? (100.0 * count / analyzed).round(2) : nil } }.merge(quality_summary)
   end
 
   def selected_ids(filter)
@@ -26,10 +24,7 @@ class JrcContactCenter::RecordingQualityMetrics
 
     raise JrcContactCenter::OperationError, 'invalid_recording_filter' unless filter.is_a?(String) && FILTERS.include?(filter)
 
-    @call_ids.select do |id|
-      row = @rows[id]
-      filter == 'without_analysis' ? row.nil? : row && classification(row) == filter
-    end
+    @call_ids.select { |id| selected_row?(@rows[id], filter) }
   end
 
   def present(id)
@@ -40,6 +35,15 @@ class JrcContactCenter::RecordingQualityMetrics
   end
 
   private
+
+  def quality_summary
+    scores = @rows.values.filter_map { |row| quality_score(row) }
+    { quality_measured: scores.length, quality_average: scores.any? ? (scores.sum.to_f / scores.length).round(2) : nil }
+  end
+
+  def selected_row?(row, filter)
+    filter == 'without_analysis' ? row.nil? : row && classification(row) == filter
+  end
 
   def classification(row)
     value = row['sentimento_cliente']

@@ -17,9 +17,7 @@ class JrcVoiceQuality::AnalysisMetricReader < JrcVoiceQuality::SupabaseClient
   READ_SECONDS = 24
 
   def call(account_id:, call_ids:, observed_before:)
-    ids = Array(call_ids).map { |id| resource_id!(id) }.uniq
-    unavailable! unless ids.length <= MAX_CALLS && observed_before.is_a?(Time)
-    account = scope_id!(account_id)
+    account, ids = input!(account_id, call_ids, observed_before)
     return {} if ids.empty?
 
     raise_configuration! unless configured?
@@ -30,6 +28,13 @@ class JrcVoiceQuality::AnalysisMetricReader < JrcVoiceQuality::SupabaseClient
   end
 
   private
+
+  def input!(account_id, call_ids, observed_before)
+    ids = Array(call_ids).map { |id| resource_id!(id) }.uniq
+    unavailable! unless ids.length <= MAX_CALLS && observed_before.is_a?(Time)
+
+    [scope_id!(account_id), ids]
+  end
 
   def batches(ids)
     size = 0
@@ -50,16 +55,21 @@ class JrcVoiceQuality::AnalysisMetricReader < JrcVoiceQuality::SupabaseClient
     MAX_PAGES.times do
       unavailable! if clock >= budget.fetch(:deadline)
       rows = read_page(account, ids, cutoff, rows_read, budget)
-      unavailable! unless rows.is_a?(Array) && rows.length <= PAGE_SIZE
-      unavailable! if clock >= budget.fetch(:deadline)
+      verify_page!(rows, budget)
       return latest if rows.empty?
 
       rows_read += rows.length
-      budget[:rows] += rows.length
-      unavailable! if budget.fetch(:rows) > MAX_ROWS
       rows.each { |row| retain_latest!(latest, row, account, ids, cutoff) }
     end
     unavailable!
+  end
+
+  def verify_page!(rows, budget)
+    unavailable! unless rows.is_a?(Array) && rows.length <= PAGE_SIZE
+    unavailable! if clock >= budget.fetch(:deadline)
+
+    budget[:rows] += rows.length
+    unavailable! if budget.fetch(:rows) > MAX_ROWS
   end
 
   def read_page(account, ids, cutoff, offset, budget)
@@ -80,19 +90,25 @@ class JrcVoiceQuality::AnalysisMetricReader < JrcVoiceQuality::SupabaseClient
   end
 
   def retain_latest!(latest, row, account, ids, cutoff)
-    verify_analysis_row!(row, account, ids)
-    unavailable! unless row.keys.sort == FIELDS.sort
-    analysis_id = resource_id!(row.fetch('analise_id'))
-    timestamp = Time.iso8601(row.fetch('analise_criada_em'))
-    unavailable! if timestamp > cutoff || !row['analise_criada_em'].is_a?(String)
+    candidate = validated_metric!(row, account, ids, cutoff)
     id = row.fetch('call_id').to_s
     previous = latest[id]
-    candidate = row.slice(*FIELDS).merge('analise_id' => analysis_id)
     # The view may repeat an analysis through its native transcription join.
-    unavailable! if previous && previous['analise_id'] == analysis_id && previous != candidate
+    unavailable! if previous && previous['analise_id'] == candidate['analise_id'] && previous != candidate
     latest[id] = candidate if !previous || newer?(candidate, previous)
   rescue KeyError, ArgumentError, TypeError
     unavailable!
+  end
+
+  def validated_metric!(row, account, ids, cutoff)
+    verify_analysis_row!(row, account, ids)
+    unavailable! unless row.keys.sort == FIELDS.sort
+
+    analysis_id = resource_id!(row.fetch('analise_id'))
+    timestamp = Time.iso8601(row.fetch('analise_criada_em'))
+    unavailable! if timestamp > cutoff || !row['analise_criada_em'].is_a?(String)
+
+    row.slice(*FIELDS).merge('analise_id' => analysis_id)
   end
 
   def newer?(candidate, previous)

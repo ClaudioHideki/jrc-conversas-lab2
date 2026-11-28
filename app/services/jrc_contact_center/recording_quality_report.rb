@@ -48,7 +48,7 @@ class JrcContactCenter::RecordingQualityReport
 
   def identity(reader, relation)
     records = relation.reorder(:id).limit(MAX_RECORDS + 1).pluck(:id, :external_unique_id, :updated_at)
-    ids = records.map { |row| row[1] }
+    ids = records.pluck(1)
     raise JrcContactCenter::OperationError, 'quality_summary_range_too_large' if records.length > MAX_RECORDS
     raise JrcContactCenter::OperationError, 'quality_summary_source_unavailable' unless ids.uniq.length == ids.length
 
@@ -62,16 +62,18 @@ class JrcContactCenter::RecordingQualityReport
     raise JrcContactCenter::OperationError, 'quality_summary_source_unavailable' unless calls.length == ids.length
 
     units, queues = cohort_links(calls)
-    valid = calls.all? do |row|
-      unit, queue = row.values_at(2, 3)
-      (unit.nil? || units.include?(unit)) && (queue.nil? || (queues.key?(queue) && queues[queue] == unit))
-    end
+    valid = calls.all? { |row| valid_cohort_link?(row, units, queues) }
     raise ActiveRecord::RecordNotFound unless valid
   end
 
+  def valid_cohort_link?(row, units, queues)
+    unit, queue = row.values_at(2, 3)
+    (unit.nil? || units.include?(unit)) && (queue.nil? || (queues.key?(queue) && queues[queue] == unit))
+  end
+
   def cohort_links(calls)
-    units = JrcContactCenter::Unit.where(account: @account, id: calls.map { |row| row[2] }.uniq).pluck(:id)
-    queues = JrcContactCenter::Queue.where(account: @account, id: calls.map { |row| row[3] }.uniq).pluck(:id, :unit_id).to_h
+    units = JrcContactCenter::Unit.where(account: @account, id: calls.pluck(2).uniq).pluck(:id)
+    queues = JrcContactCenter::Queue.where(account: @account, id: calls.pluck(3).uniq).pluck(:id, :unit_id).to_h
     [units, queues]
   end
 end

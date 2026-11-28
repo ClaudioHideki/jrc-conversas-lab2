@@ -22,9 +22,8 @@ RSpec.describe JrcVoiceQuality::AnalysisMetricReader do
   it 'reads only thin account-scoped metrics through the existing view and preserves the native zero score' do
     allow(reader).to receive(:request).with(:get, '/vw_qualidade_pabx_dashboard', any_args).and_return([row], [])
     expect(read.fetch('synthetic-a')).to eq(row)
-    expect(reader).to have_received(:request).with(:get, '/vw_qualidade_pabx_dashboard',
-                                                  hash_including(query: hash_including(account_id: 'eq.1', offset: 0,
-                                                                                      select: described_class::FIELDS.join(','))))
+    expected_query = hash_including(account_id: 'eq.1', offset: 0, select: described_class::FIELDS.join(','))
+    expect(reader).to have_received(:request).with(:get, '/vw_qualidade_pabx_dashboard', hash_including(query: expected_query))
     expect(described_class::FIELDS).not_to include('texto_transcrito', 'payload_completo', 'telefone_origem', 'arquivo_audio')
   end
 

@@ -53,8 +53,10 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').length).to eq(2)
     expect(response.parsed_body.fetch('meta')).to include('total' => 22, 'page' => 2, 'pages' => 11)
-    expect(response.parsed_body.fetch('quality_summary')).to include('universe' => 22, 'analyzed' => 21, 'without_analysis' => 1,
-                                                                    'counts' => { 'positivo' => 1, 'negativo' => 20, 'neutro' => 0 })
+    expect(response.parsed_body.fetch('quality_summary')).to include(
+      'universe' => 22, 'analyzed' => 21, 'without_analysis' => 1,
+      'counts' => { 'positivo' => 1, 'negativo' => 20, 'neutro' => 0 }
+    )
     expect(metric_reader).to have_received(:call).with(account_id: account.id, call_ids: array_including(record.external_unique_id),
                                                        observed_before: a_kind_of(Time))
   end
@@ -64,8 +66,10 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     metric_rows[negative.external_unique_id] = metric_row(negative.external_unique_id, sentiment: 'negativo', score: 80)
     get path, headers: headers, params: { sentiment: 'negativo', status: 'answered', direction: 'inbound' }
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body.fetch('items').sole).to include('id' => negative.id.to_s, 'unique_id' => negative.external_unique_id,
-                                                               'quality' => hash_including('sentiment' => 'negativo', 'quality_score' => 80))
+    expect(response.parsed_body.fetch('items').sole).to include(
+      'id' => negative.id.to_s, 'unique_id' => negative.external_unique_id,
+      'quality' => hash_including('sentiment' => 'negativo', 'quality_score' => 80)
+    )
     expect(response.parsed_body.dig('meta', 'total')).to eq(1)
     expect(response.parsed_body.dig('quality_summary', 'analyzed')).to eq(2)
     expect(response.parsed_body.dig('quality_summary', 'percentages', 'negativo')).to eq(50.0)
@@ -89,13 +93,17 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     metric_rows[negative.external_unique_id] = metric_row(negative.external_unique_id, sentiment: 'negativo')
     get path, headers: headers, params: { queue_id: queue.id }
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body.fetch('quality_summary')).to include('universe' => 1, 'analyzed' => 1,
-                                                                    'percentages' => { 'positivo' => 100.0, 'neutro' => 0.0, 'negativo' => 0.0 })
+    expect(response.parsed_body.fetch('quality_summary')).to include(
+      'universe' => 1, 'analyzed' => 1,
+      'percentages' => { 'positivo' => 100.0, 'neutro' => 0.0, 'negativo' => 0.0 }
+    )
     expect(response.parsed_body.fetch('items').pluck('id')).to eq([record.id.to_s])
     get path, headers: headers, params: { queue_id: second_queue.id }
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body.fetch('quality_summary')).to include('universe' => 1, 'analyzed' => 1,
-                                                                    'percentages' => { 'positivo' => 0.0, 'neutro' => 0.0, 'negativo' => 100.0 })
+    expect(response.parsed_body.fetch('quality_summary')).to include(
+      'universe' => 1, 'analyzed' => 1,
+      'percentages' => { 'positivo' => 0.0, 'neutro' => 0.0, 'negativo' => 100.0 }
+    )
     expect(response.parsed_body.fetch('items').pluck('id')).to eq([negative.id.to_s])
   end
 
@@ -103,8 +111,10 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     metric_rows.clear
     get path, headers: headers, params: { sentiment: 'without_analysis' }
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body.fetch('quality_summary')).to include('analyzed' => 0, 'without_analysis' => 1, 'quality_average' => nil,
-                                                                    'percentages' => { 'positivo' => nil, 'neutro' => nil, 'negativo' => nil })
+    expect(response.parsed_body.fetch('quality_summary')).to include(
+      'analyzed' => 0, 'without_analysis' => 1, 'quality_average' => nil,
+      'percentages' => { 'positivo' => nil, 'neutro' => nil, 'negativo' => nil }
+    )
     expect(response.parsed_body.fetch('items').sole.fetch('quality')).to eq('available' => false, 'sentiment' => nil, 'quality_score' => nil)
   end
 
