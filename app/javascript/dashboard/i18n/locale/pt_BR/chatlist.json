@@ -9,6 +9,10 @@
       "404": "Não há conversas ativas neste grupo."
     },
     "FAILED_TO_SEND": "Falha ao enviar",
+    "MIRROR_ATTACHMENT_ERROR": "Falha ao obter o anexo no Atendimento",
+    "CHANNEL_RECEIPT_SENT": "Enviada no WhatsApp",
+    "CHANNEL_RECEIPT_DELIVERED": "Entregue no WhatsApp",
+    "CHANNEL_RECEIPT_READ": "Lida no WhatsApp",
     "WHATSAPP_RETRY": {
       "MARKETING": "A Meta restringiu a entrega desta mensagem de marketing (131049). O reenvio está bloqueado até a revisão; a entrega posterior não é garantida.",
       "DESTINATION": "A Meta não conseguiu entregar esta mensagem (131026). Verifique o destinatário antes de considerar uma nova tentativa. O reenvio está bloqueado.",

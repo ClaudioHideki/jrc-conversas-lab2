@@ -37,6 +37,31 @@ beforeEach(() => {
 });
 
 describe('Broker outbound delivery evidence', () => {
+  it.each(['DELIVERED', 'READ'])(
+    'shows a committed direct provider %s without a Broker canonical ID',
+    state => {
+      useMessageContext().contentAttributes.value = {
+        jrcBrokerLegacyUnconfirmed: true,
+        jrcDeliveryProjection: { kind: 'DIRECT_EVOLUTION_RECEIPT_V1', state },
+      };
+      const indicator = shallowMount(MessageMeta).findComponent(MessageStatus);
+      expect(indicator.props('status')).toBe(state.toLowerCase());
+      expect(indicator.props('statusLabel')).toBe('');
+    }
+  );
+
+  it('retains the clock for an unsupported direct provider state', () => {
+    useMessageContext().contentAttributes.value = {
+      jrcBrokerOutbound: { version: 1, state: 'PENDING' },
+      jrcDeliveryProjection: {
+        kind: 'DIRECT_EVOLUTION_RECEIPT_V1',
+        state: 'SENT',
+      },
+    };
+    expect(
+      shallowMount(MessageMeta).findComponent(MessageStatus).props('status')
+    ).toBe('progress');
+  });
   it('keeps a pre-upgrade durable reply unconfirmed using read-only display evidence', () => {
     useMessageContext().contentAttributes.value = {
       jrcBrokerLegacyUnconfirmed: true,

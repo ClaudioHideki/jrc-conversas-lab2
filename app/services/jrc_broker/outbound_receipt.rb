@@ -20,12 +20,27 @@ class JrcBroker::OutboundReceipt
     validate_proof!
     @message.with_lock do
       validate_context!
+      projection = JrcBroker::ProjectionReceipt.current(@message, @message.content_attributes.to_h)
+      if projection
+        raise Error, 'broker_delivery_identity_changed' unless projection['kind'] == 'BROKER_MIRROR_RECEIPT_V1' &&
+                                                               projection['canonical_message_id'] == @proof['canonical_message_id'] &&
+                                                               projection['provider_key_sha256'] == Digest::SHA256.hexdigest(@proof['provider_message_id'].to_s)
+        next false if RANK.fetch(@proof['state'], 0) < RANK.fetch(projection['state'])
+      end
       prior = @message.content_attributes.to_h[KEY].to_h
       validate_identity!(prior)
       next false if stale?(prior)
 
       attributes = @message.content_attributes.to_h.merge(KEY => prior.merge(@proof),
                                                           'external_error' => @status == 'failed' ? @external_error : nil)
+      # The media failure describes the mirror attachment. A transport ACK must
+      # not remove that diagnostic or trigger a message_updated webhook.
+      if @message.failed? && JrcBroker::ProjectionReceipt::MEDIA_ERRORS.include?(@message.external_error) &&
+         @message.content_attributes['jrc_broker_message_id'].present? && @message.attachments.exists? && RANK.key?(@proof['state'])
+        raise Error, 'broker_delivery_identity_changed' unless @message.content_attributes['jrc_broker_message_id'] == @proof['canonical_message_id']
+
+        next @message.update_columns(content_attributes: @message.content_attributes.to_h.merge(KEY => prior.merge(@proof))) # rubocop:disable Rails/SkipsModelValidations
+      end
       @message.update!(status: @status, content_attributes: attributes)
       JrcCampaigns::BrokerStatusJob.enqueue_for(@message)
       true

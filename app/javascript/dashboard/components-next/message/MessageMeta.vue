@@ -126,6 +126,13 @@ const isRead = computed(() => {
 });
 
 const statusToShow = computed(() => {
+  const projection = contentAttributes.value?.jrcDeliveryProjection;
+  if (
+    isAPIInbox.value &&
+    projection?.kind === 'DIRECT_EVOLUTION_RECEIPT_V1' &&
+    ['DELIVERED', 'READ'].includes(projection.state)
+  )
+    return projection.state.toLowerCase();
   if (isAPIInbox.value && contentAttributes.value?.jrcBrokerLegacyUnconfirmed)
     return MESSAGE_STATUS.PROGRESS;
 
@@ -155,6 +162,7 @@ const statusToShow = computed(() => {
 });
 
 const statusLabel = computed(() => {
+  if (['read', 'delivered'].includes(statusToShow.value)) return '';
   if (isAPIInbox.value && contentAttributes.value?.jrcBrokerLegacyUnconfirmed)
     return t('CHAT_LIST.BROKER_UNKNOWN');
 

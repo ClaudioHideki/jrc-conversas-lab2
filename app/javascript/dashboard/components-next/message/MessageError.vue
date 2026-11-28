@@ -35,6 +35,25 @@ const brokerOutbound = computed(
 const legacyUnconfirmed = computed(
   () => contentAttributes?.value?.jrcBrokerLegacyUnconfirmed === true
 );
+const mirrorMedia = computed(() => {
+  const marker = contentAttributes?.value?.jrcBrokerMessageId;
+  return (
+    /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(marker ?? '') &&
+    ['MEDIA_DOWNLOAD_FAILED', 'MEDIA_NOT_FOUND'].includes(props.error) &&
+    attachments.value?.length > 0
+  );
+});
+const mirrorChannelLabel = computed(() => {
+  const proof = contentAttributes?.value?.jrcDeliveryProjection;
+  if (proof?.kind !== 'BROKER_MIRROR_RECEIPT_V1')
+    return t('CHAT_LIST.BROKER_UNKNOWN');
+  const states = {
+    SENT: t('CHAT_LIST.CHANNEL_RECEIPT_SENT'),
+    DELIVERED: t('CHAT_LIST.CHANNEL_RECEIPT_DELIVERED'),
+    READ: t('CHAT_LIST.CHANNEL_RECEIPT_READ'),
+  };
+  return states[proof.state] || t('CHAT_LIST.BROKER_UNKNOWN');
+});
 const rejectionProven = computed(() => {
   const proof = contentAttributes?.value?.jrcBrokerDelivery;
   return (
@@ -74,7 +93,12 @@ const policyCode = computed(() =>
 );
 
 const canRetry = computed(() => {
-  if (attempt.value || brokerOutbound.value || legacyUnconfirmed.value)
+  if (
+    mirrorMedia.value ||
+    attempt.value ||
+    brokerOutbound.value ||
+    legacyUnconfirmed.value
+  )
     return false;
   const hasContent = content.value !== null;
   const hasAttachments = attachments.value && attachments.value.length > 0;
@@ -91,7 +115,15 @@ const canRetry = computed(() => {
 
 <template>
   <div class="text-xs text-n-ruby-11 flex flex-wrap items-center gap-1.5">
-    <span v-if="attempt" role="status" class="select-text">
+    <span
+      v-if="mirrorMedia"
+      role="status"
+      class="flex flex-wrap gap-2 select-text"
+    >
+      <span class="text-n-slate-11">{{ mirrorChannelLabel }}</span>
+      <span>{{ t('CHAT_LIST.MIRROR_ATTACHMENT_ERROR') }}</span>
+    </span>
+    <span v-else-if="attempt" role="status" class="select-text">
       {{ attemptLabel }}
     </span>
     <span v-else-if="brokerUnconfirmed" role="status" class="select-text">

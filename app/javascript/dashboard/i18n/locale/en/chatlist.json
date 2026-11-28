@@ -9,6 +9,10 @@
       "404": "There are no active conversations in this group."
     },
     "FAILED_TO_SEND": "Failed to send",
+    "MIRROR_ATTACHMENT_ERROR": "Could not fetch the attachment for this conversation",
+    "CHANNEL_RECEIPT_SENT": "Sent on WhatsApp",
+    "CHANNEL_RECEIPT_DELIVERED": "Delivered on WhatsApp",
+    "CHANNEL_RECEIPT_READ": "Read on WhatsApp",
     "WHATSAPP_RETRY": {
       "MARKETING": "Meta restricted delivery of this marketing message (131049). Retry is blocked pending review; delivery is not guaranteed later.",
       "DESTINATION": "Meta could not deliver this message (131026). Verify the destination before considering a new attempt. Retry is blocked.",

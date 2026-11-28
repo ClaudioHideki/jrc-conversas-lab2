@@ -21,6 +21,42 @@ beforeEach(() => {
 
 describe('WhatsApp failure explanation', () => {
   it.each([
+    ['MEDIA_DOWNLOAD_FAILED', 'READ', 'Read on WhatsApp'],
+    ['MEDIA_NOT_FOUND', 'DELIVERED', 'Delivered on WhatsApp'],
+    ['MEDIA_NOT_FOUND', 'SENT', 'Sent on WhatsApp'],
+    ['MEDIA_DOWNLOAD_FAILED', null, 'WhatsApp send not confirmed'],
+  ])(
+    'separates mirror media error %s from channel evidence %s',
+    (error, state, expected) => {
+      useMessageContext().attachments.value = [{ id: 1 }];
+      useMessageContext().contentAttributes.value = {
+        jrcBrokerMessageId: 'd1000000-0000-4000-8000-000000000001',
+        jrcDeliveryProjection: state
+          ? { kind: 'BROKER_MIRROR_RECEIPT_V1', state }
+          : undefined,
+      };
+      const wrapper = mount(MessageError, { props: { error } });
+      expect(wrapper.text()).toContain(expected);
+      expect(wrapper.text()).toContain(
+        'Could not fetch the attachment for this conversation'
+      );
+      expect(wrapper.text()).toContain(error);
+      expect(wrapper.text()).not.toContain('Failed to send');
+      expect(wrapper.find('button').exists()).toBe(false);
+    }
+  );
+
+  it('keeps ordinary failed messages on the original failure path', () => {
+    useMessageContext().attachments.value = [{ id: 1 }];
+    const wrapper = mount(MessageError, {
+      props: { error: 'MEDIA_NOT_FOUND' },
+    });
+    expect(wrapper.text()).toContain('Failed to send');
+    expect(wrapper.text()).not.toContain(
+      'Could not fetch the attachment for this conversation'
+    );
+  });
+  it.each([
     [null, 'WhatsApp send not confirmed'],
     [
       { version: 1, outcome: 'rejected', uncertain: false, accepted: false },

@@ -214,7 +214,10 @@ class Message < ApplicationRecord
   end
 
   def display_content_attributes
-    attributes = content_attributes.to_h.except('jrc_broker_legacy_unconfirmed')
+    attributes = content_attributes.to_h.except('jrc_broker_legacy_unconfirmed', JrcBroker::ProjectionReceipt::DISPLAY)
+    projection = JrcBroker::ProjectionReceipt.current(self, attributes)
+    attributes.delete(JrcBroker::ProjectionReceipt::POINTER)
+    attributes[JrcBroker::ProjectionReceipt::DISPLAY] = projection.slice('kind', 'state') if projection
     return attributes unless legacy_broker_outbound?(attributes)
 
     obligation = if has_attribute?('jrc_broker_obligation_exists')
