@@ -64,6 +64,7 @@ export async function verifyNativeRecordingRelationship(parent, info, target) {
     await page.goto(url);
     await expect(page.locator('[data-recording-row]')).toHaveCount(1);
     await page.locator('[data-recording-details]').click();
+    await page.locator('[data-recording-context-open]').click();
     const entry = page.locator('[data-open-recording-relationship]');
     await expect(entry).toBeVisible();
     const contrast = await measureLocatorTextContrast(entry);
@@ -123,6 +124,7 @@ export async function verifyNativeRecordingRelationship(parent, info, target) {
     expect(denied.status()).toBe(401);
     await page.goto(url);
     await page.locator('[data-recording-details]').click();
+    await page.locator('[data-recording-context-open]').click();
     await page.locator('[data-open-recording-relationship]').click();
     await expect(page.locator('[data-recording-relationship-portfolio]')).toBeVisible();
     await page.evaluate(async headers => {

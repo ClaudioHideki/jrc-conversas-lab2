@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { computed, defineComponent, ref } from 'vue';
-import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import {
+  enableAutoUnmount,
+  flushPromises,
+  mount,
+  RouterLinkStub,
+} from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import RecordingRelationshipAction from './RecordingRelationshipAction.vue';
 
@@ -71,7 +76,7 @@ const setup = (props = {}) =>
       enabled: true,
       ...props,
     },
-    global: { stubs: { OpsModal, RouterLink: true } },
+    global: { stubs: { OpsModal, RouterLink: RouterLinkStub } },
   });
 const open = async wrapper => {
   await wrapper.get('[data-open-recording-relationship]').trigger('click');

@@ -1,0 +1,25 @@
+{
+  "source_parent": "4c8f792306788db3bd91b42ea38d4c7588114e6d",
+  "failed_run": 46128971581,
+  "failed_job": 140929739358,
+  "artifact_id": 15257236879,
+  "artifact_sha256": "a67622f5b5f8bb80b89525c663c2a6025c917d365b20cad3d71dae4c53e30535",
+  "focused_Vue_actual": {
+    "passed": 390,
+    "failed": 1,
+    "total": 391,
+    "pending": 0
+  },
+  "cause": "The bare RouterLink:true Vue Test Utils stub has no to prop. Use its native RouterLinkStub so the existing exact CRM destination assertion remains effective.",
+  "additional_browser_precondition": "The existing native RecordingDetailsDialog starts on recording. The new flow must explicitly open its Context tab before using RecordingCallContext.",
+  "all_Vue_case_and_assertion_AST_preserved": true,
+  "two_missing_native_Context_tab_clicks_only": true,
+  "light_static_results": {
+    "ESLint_errors": 0,
+    "ESLint_warnings": 0,
+    "Node_syntax": "passed",
+    "native_VTU_RouterLinkStub_to_prop_verified": true
+  },
+  "product_permissions_models_migrations_or_data_changed": false,
+  "native_or_Chrome_accepted": false
+}
