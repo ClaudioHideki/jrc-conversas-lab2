@@ -161,10 +161,10 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-pabx-native-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 67
+          assert report['numTotalTests'] == report['numPassedTests'] == 69
           assert report['numFailedTests'] == report['numPendingTests'] == 0
           assert len(report['testResults']) == 3 and all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'PabxNativePage.spec.js': 21, 'AdministrationSection.spec.js': 36, 'PauseOperationalWorkspace.spec.js': 10}
+          expected = {'PabxNativePage.spec.js': 21, 'AdministrationSection.spec.js': 38, 'PauseOperationalWorkspace.spec.js': 10}
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' and not case.get('failureMessages') for row in report['testResults'] for case in row['assertionResults'])
           PY

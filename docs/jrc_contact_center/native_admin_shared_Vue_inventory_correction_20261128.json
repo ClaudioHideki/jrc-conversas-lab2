@@ -1,0 +1,28 @@
+{
+  "parent": "a137f248adc491b82580299282bd4706f0fe4508",
+  "failed_run": 46149487139,
+  "artifact": 15264259925,
+  "artifact_sha256": "8ce59aabe6e780cdcb77505a3d6a1c12f3f16dd20d4e4efbabfe19ca54936f6e",
+  "report_sha256": "9f65cd3105436327f8c322e503f057337e9e30eab0429ae52f8b6c134fb8c864",
+  "actual_total_passed": 69,
+  "old_67_case_identities_retained_passed": true,
+  "new_two_counter_UI_case_names": [
+    "native administrative counter errors remain independent from panel access keeps authorized native cards usable while marking one failed count without stale or fictitious zero",
+    "native administrative counter errors remain independent from panel access retries through the existing panel refresh and distinguishes an observed zero from an unavailable count"
+  ],
+  "old_inventory_failure_reproduced": true,
+  "new_exact_guard_passed_real_report": true,
+  "tamper_controls_rejected": [
+    "dropped_case",
+    "missing_suite",
+    "duplicated_suite",
+    "wrong_suite",
+    "failure",
+    "pending",
+    "failed_suite",
+    "failed_case"
+  ],
+  "pure_controls_passed": 10,
+  "no_application_code_or_tests_changed": true,
+  "new_whole_CI_or_Chrome_accepted": false
+}
