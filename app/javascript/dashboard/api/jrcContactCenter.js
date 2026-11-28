@@ -46,6 +46,17 @@ const calendarIdentity = value => {
 };
 
 export default {
+  unitRecordingPolicyDraft: (accountId, unitId, options = {}) =>
+    axios.get(
+      `${base(accountId)}/unit_recording_policy_drafts/${recordIdentity(unitId)}`,
+      { signal: options.signal, timeout: 20000 }
+    ),
+  updateUnitRecordingPolicyDraft: (accountId, unitId, draft, revision) =>
+    axios.patch(
+      `${base(accountId)}/unit_recording_policy_drafts/${recordIdentity(unitId)}`,
+      { recording_policy_draft: draft, expected_revision: revision },
+      { timeout: 20000 }
+    ),
   recordingRelationshipActivities: (accountId, id, page = 1, options = {}) =>
     axios.get(
       `${base(accountId)}/recordings/${recordIdentity(id)}/relationship_activities`,

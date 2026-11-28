@@ -1889,7 +1889,8 @@
         "PROVIDER_SOURCE": "Consultar integração autorizada",
         "PENDING_ACW": "{count} tabulações pendentes nas chamadas do seu escopo de acesso.",
         "ACW_SOURCE": "Conferir pendências na supervisão"
-      }
+      },
+      "COUNTER_UNAVAILABLE": "Indicador indisponível. Atualize o painel para tentar novamente."
     },
     "CONFIGURATION_AUDIT": {
       "TITLE": "Auditoria administrativa",
@@ -3614,6 +3615,35 @@
       "PAGINATION_VALUE": "Página {page} de {pages}",
       "CHOICE": "{label} — vínculo #{id}",
       "TIME_ZONE": "Fuso horário: {zone}"
+    },
+    "RECORDING_POLICY_DRAFT": {
+      "OPEN": "Configurar rascunho de gravação",
+      "TITLE": "Rascunho da política de gravação",
+      "LOCAL_ONLY": "Configuração interna da unidade. Este rascunho não altera a gravação, não publica no PABX e não aplica retenção ou exclusão de arquivos. A aplicação depende da homologação do fornecedor.",
+      "SELECT_UNIT": "Selecione uma unidade autorizada",
+      "SELECT": "Selecione",
+      "MODE": "Modo pretendido",
+      "AUTOMATIC": "Automática",
+      "ON_DEMAND": "Sob demanda",
+      "SCOPE": "Filas abrangidas pelo rascunho",
+      "WHOLE_UNIT": "Todas as filas da unidade",
+      "SELECTED_QUEUES": "Selecionar filas da unidade",
+      "SEARCH_QUEUES": "Buscar fila",
+      "SEARCH": "Buscar",
+      "SELECTED_COUNT": "Filas selecionadas:",
+      "QUEUE_ERROR": "Não foi possível carregar as filas. Refaça a busca.",
+      "NOTICE": "Texto do aviso ao cliente",
+      "RETENTION": "Retenção pretendida, em dias (opcional)",
+      "RETENTION_HELP": "Deixe em branco se ainda não estiver definida. Nenhum prazo legal é presumido, aplicado ou usado para excluir arquivos.",
+      "RELOAD": "Recarregar e descartar alterações locais",
+      "SAVE": "Salvar rascunho interno",
+      "SAVED": "Rascunho salvo. Nenhuma configuração foi aplicada ao PABX.",
+      "LOAD_ERROR": "Não foi possível carregar o rascunho autorizado. Recarregue para tentar novamente.",
+      "CONFLICT": "A unidade mudou desde a leitura. Recarregue a versão atual antes de editar e salvar novamente.",
+      "INVALID": "Revise os campos e as filas permitidas. O rascunho local foi preservado.",
+      "UNKNOWN_RESULT": "Não foi possível confirmar o resultado. Recarregue antes de tentar salvar novamente.",
+      "QUEUE_ID": "Fila",
+      "REMOVE": "Remover seleção"
     }
   }
 }

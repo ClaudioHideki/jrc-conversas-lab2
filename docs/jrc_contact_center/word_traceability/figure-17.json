@@ -1053,5 +1053,58 @@
     "new_Vue_cases_prepared": 5,
     "four_existing_browser_cases_extended_without_a_second_matrix": true,
     "literal_statuses_preserved_until_native_and_actual_visual_review": true
+  },
+  "native_local_recording_policy_draft_candidate_not_accepted": {
+    "reference_parent": "22ce9b2dae6b5b4b4cfa9531b953442c690751b3",
+    "requirements_partially_addressed": [
+      "D1-P0188-C01",
+      "D1-P0190-C01",
+      "D1-P0191-C01",
+      "D1-P0193-C01",
+      "D1-P0198-C01"
+    ],
+    "reuses": [
+      "Existing authorized Unit settings and queue scope",
+      "Native ConfigurationWrite Account/Unit locks, current authority, revision and redacted audit",
+      "Existing General/recordings administrative card and native Dialog",
+      "Native profile refresh and audit API in real Chrome"
+    ],
+    "usable_internal_increment": [
+      "Explicit local recording mode and unit/queue selection",
+      "Optional notice and retention intent without default legal duration",
+      "Persist, reload, stale edit handling and uncertain response recovery"
+    ],
+    "does_not_implement": [
+      "PABX commands, publication, provider ACK or applied configuration",
+      "Automatic recording behavior or retention/deletion/hold execution",
+      "URA, extension, team and call-type policy selectors",
+      "Storage capacity or provider legal/compliance attestation"
+    ],
+    "planned_native_examples": 39,
+    "planned_Vue_examples": 21,
+    "planned_real_Chrome_modes": [
+      "desktop-light",
+      "desktop-dark",
+      "mobile-light",
+      "mobile-dark"
+    ],
+    "planned_real_Chrome_scenarios": 4,
+    "screenshots_per_mode": 6,
+    "native_or_Chrome_accepted": false,
+    "complete_figure_accepted": false,
+    "candidate_code_reference_paths": [
+      "app/services/jrc_contact_center/recording_policy_draft.rb",
+      "app/controllers/api/v1/accounts/jrc_contact_center/unit_recording_policy_drafts_controller.rb",
+      "app/models/jrc_contact_center/unit.rb",
+      "app/services/jrc_contact_center/configuration_audit_snapshot.rb",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingPolicyDraftEditor.vue",
+      "app/javascript/dashboard/api/jrcContactCenter.js"
+    ],
+    "candidate_tests_not_acceptance": [
+      "spec/services/jrc_contact_center/recording_policy_draft_spec.rb",
+      "spec/requests/api/v1/accounts/jrc_contact_center/unit_recording_policy_drafts_spec.rb",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingPolicyDraftEditor.spec.js",
+      "tests/playwright/tests/e2e/ui/call-center-recording-policy-draft-native.mjs"
+    ]
   }
 }

@@ -203,17 +203,27 @@ onBeforeUnmount(() => {
             {{ t(`JRC_CONTACT_CENTER.ADMIN.CARDS.${card.key}.DESCRIPTION`) }}
           </p>
           <span
-            v-if="card.count !== null"
+            v-if="card.count !== null && !card.count_error"
             class="text-xl font-bold text-n-slate-12"
             >{{ card.count }}</span
           >
           <span
-            v-if="card.count !== null && countLabels[card.key]"
+            v-if="
+              card.count !== null && !card.count_error && countLabels[card.key]
+            "
             class="text-xs text-n-slate-11"
             data-card-count-label
           >
             {{ countLabels[card.key] }}
           </span>
+          <p
+            v-if="card.count_error"
+            role="alert"
+            class="break-words text-xs text-n-ruby-11"
+            data-card-count-error
+          >
+            {{ t('JRC_CONTACT_CENTER.ADMIN.COUNTER_UNAVAILABLE') }}
+          </p>
           <span class="mt-auto text-xs text-n-blue-11" data-card-state>{{
             stateLabels[card.local_state || card.state]
           }}</span>

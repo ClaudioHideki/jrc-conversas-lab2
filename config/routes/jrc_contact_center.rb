@@ -14,6 +14,7 @@ namespace :api, defaults: { format: 'json' } do
           post :reprocess, on: :member
         end
         resources :units, only: %i[index show create update]
+        resources :unit_recording_policy_drafts, only: %i[show update]
         resources :queues, only: %i[index show create update]
         resources :queue_memberships, only: %i[index show create update]
         resources :call_sessions, only: %i[index show] do

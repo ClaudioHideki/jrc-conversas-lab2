@@ -17,6 +17,7 @@ import EndingReasonCatalog from './EndingReasonCatalog.vue';
 import EndingScopedRuleEditor from './EndingScopedRuleEditor.vue';
 import AudioFolderLibrary from './AudioFolderLibrary.vue';
 import CalendarLibrary from './CalendarLibrary.vue';
+import RecordingPolicyDraftEditor from './RecordingPolicyDraftEditor.vue';
 import QueueWithdrawalConfirmation from './QueueWithdrawalConfirmation.vue';
 import TeamRosterWithdrawalConfirmation from './TeamRosterWithdrawalConfirmation.vue';
 import { useQueueWithdrawalReview } from '../composables/useQueueWithdrawalReview';
@@ -1380,5 +1381,14 @@ onBeforeUnmount(() => {
         </p>
       </div>
     </Dialog>
+    <RecordingPolicyDraftEditor
+      v-if="
+        ['general', 'recordings'].includes(key) &&
+        context.capabilities.configure
+      "
+      :account-id="accountId"
+      :context="context"
+      @changed="key === 'general' && load()"
+    />
   </section>
 </template>

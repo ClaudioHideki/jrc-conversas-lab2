@@ -1,0 +1,62 @@
+{
+  "parent": "22ce9b2dae6b5b4b4cfa9531b953442c690751b3",
+  "figure": 17,
+  "Word_files": {
+    "JRC_Conversas_Call_Center_Parte_1_Especificacao_DEV_Com_Imagens.docx": "5db370d9b7598a720d32f7f60eba4e22b4b61878327bd4459176ff729fe7a2c8",
+    "JRC_Conversas_Call_Center_Parte_1_Detalhamento_Funcional_23_Imagens.docx": "8f9300cf1940012f71be1a97903a192f7b5a18667e6da6664b9f972866e7e88b"
+  },
+  "matrix_reference": "docs/jrc_contact_center/word_traceability/figure-17.json",
+  "scope": "Local authorized unit draft only; no provider or retention operation",
+  "native_or_Chrome_accepted": false,
+  "new_tables_migrations_dependencies_permissions_or_grants": false,
+  "expected_new_native_cases": 39,
+  "expected_new_Vue_cases": 21,
+  "expected_Chrome_total": 304,
+  "old_Chrome_scenarios_retained": 300,
+  "expected_screenshots_added": 24,
+  "external_dependencies": [
+    "Provider publication and applied version, runtime recording and retention/hold semantics remain unhomologated."
+  ],
+  "static_checks": {
+    "Vue_SFC": true,
+    "new_component_and_spec_ESLint_errors": 0,
+    "new_component_and_spec_ESLint_warnings": 0,
+    "workflow_YAML": true,
+    "all_prior_workflow_steps_preserved": true,
+    "new_browser_helper_JS_syntax": true,
+    "Bash_Ruby_Rails_Vue_Chrome": "Not executed locally; required in GitHub Linux.",
+    "Chrome_counter_AST_tests": 22,
+    "all_old_counter_rejection_cases_retained": true
+  },
+  "grouped_administration_counter_isolation": {
+    "figures": [
+      1,
+      2
+    ],
+    "requirement": "D2-P0067-C01",
+    "runtime_change": "Only a canceled native count query becomes an unavailable indicator. Authorization errors are propagated and stale/zero counts are not displayed.",
+    "new_native_cases": 3,
+    "new_Vue_cases": 2,
+    "fault_boundary": "Native counter I/O fault is injected in service tests; two Vue cases do not constitute native browser fault homologation.",
+    "literal_accepted": false
+  },
+  "expected_group_new_native_cases": 42,
+  "expected_group_new_Vue_cases": 23,
+  "expected_group_focused_Vue_including_existing_regressions": 59,
+  "expected_full_native_main": 3610,
+  "expected_full_Vue_main": 2414,
+  "group": "Existing native administration: scoped recording draft and isolated unavailable counters",
+  "required_prior_guard_correction": "docs/jrc_contact_center/quality_report_inventory_update_20261128.json",
+  "preceding_native_results_not_whole_acceptance": {
+    "sha": "22ce9b2dae6b5b4b4cfa9531b953442c690751b3",
+    "run": 46143565760,
+    "artifact": 15265000039,
+    "artifact_sha256": "84cd6e81b7e47390400981f00ec9ea58fbdc61b343de2eadbf8925311c45b728",
+    "native_main": 3568,
+    "Vue_main": 2391,
+    "relationship_contention": 3,
+    "failures_pending_outside_errors": 0,
+    "Chrome_executed": false,
+    "CI_conclusion": "failure_obsolete_final_inventory"
+  }
+}

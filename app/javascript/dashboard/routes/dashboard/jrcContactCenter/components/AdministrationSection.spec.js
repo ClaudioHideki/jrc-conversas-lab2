@@ -1143,3 +1143,58 @@ describe('native PABX observation destination from the existing administrative c
     ).toBe(false);
   });
 });
+
+describe('native administrative counter errors remain independent from panel access', () => {
+  const mountOverview = () =>
+    mount(ControlDeskPage, {
+      global: {
+        stubs: {
+          RouterLink: { template: '<a><slot /></a>' },
+          RecentConfigurationActivity: true,
+          AdministrationPendingAlerts: true,
+        },
+      },
+    });
+  const panel = count => ({
+    data: {
+      cards: [
+        {
+          key: 'queues',
+          state: 'available',
+          count,
+          ...(count === 999 ? { count_error: true } : {}),
+        },
+        { key: 'general', state: 'available', count: 3 },
+      ],
+      capabilities: {},
+      provider: { configured: false },
+    },
+  });
+
+  it('keeps authorized native cards usable while marking one failed count without stale or fictitious zero', async () => {
+    API.administration.mockReset().mockResolvedValue(panel(999));
+    const wrapper = mountOverview();
+    await flushPromises();
+    expect(
+      wrapper.get('[data-card="queues"] [data-card-count-error]').text()
+    ).toBe('JRC_CONTACT_CENTER.ADMIN.COUNTER_UNAVAILABLE');
+    expect(wrapper.get('[data-card="queues"]').text()).not.toContain('999');
+    expect(wrapper.find('[data-card="queues"] .text-xl').exists()).toBe(false);
+    expect(wrapper.get('[data-card="general"] .text-xl').text()).toBe('3');
+  });
+
+  it('retries through the existing panel refresh and distinguishes an observed zero from an unavailable count', async () => {
+    API.administration
+      .mockReset()
+      .mockResolvedValueOnce(panel(999))
+      .mockResolvedValueOnce(panel(0));
+    const wrapper = mountOverview();
+    await flushPromises();
+    await wrapper.get('button').trigger('click');
+    await flushPromises();
+    expect(API.administration).toHaveBeenCalledTimes(2);
+    expect(wrapper.find('[data-card-count-error]').exists()).toBe(false);
+    expect(wrapper.get('[data-card="queues"] .text-xl').text()).toBe('0');
+    expect(wrapper.get('[data-card="general"] .text-xl').text()).toBe('3');
+  });
+});

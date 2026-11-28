@@ -1,0 +1,43 @@
+{
+  "source_parent": "22ce9b2dae6b5b4b4cfa9531b953442c690751b3",
+  "failed_run": 46143565760,
+  "artifact": 15265000039,
+  "artifact_sha256": "84cd6e81b7e47390400981f00ec9ea58fbdc61b343de2eadbf8925311c45b728",
+  "captured_reports_sha256": {
+    "call-center-quality-review-preflight.json": "e2ec867d443143b4a4cc3b8b7a76d430fdc8730f2d4ea40bf2ff093e941bc0b5",
+    "call-center-quality-review-reload.json": "7f864826bf219aad633559be2990c701b5a49e82ec24ac94a0a1a70a6386282f",
+    "call-center-quality-review-concurrency-rspec.json": "7616643b95f4b25e1e6fe1c8614b87741730fa43c4e0011e298a99d41cd22ba9"
+  },
+  "old_inventory_reproduced_as_failure": true,
+  "exact_executed_new_guard_accepts_real_87_10_4_cases": true,
+  "tamper_controls_rejected": [
+    "missing_example",
+    "duplicate_identity",
+    "wrong_file",
+    "failure",
+    "pending",
+    "outside_error",
+    "failed_case",
+    "missing_report"
+  ],
+  "pure_guard_controls_passed": 10,
+  "new_Rails_Vue_Chrome_or_PABX_tests_executed": false,
+  "all_original_identity_file_inventory_and_zero_error_checks_preserved": true,
+  "cause": "Two existing source/synthetic guards grew from 10 to 12 and 4 to 6 cases. All 87 real preflight cases passed; the final workflow inventory was still 83.",
+  "exact_preflight_inventory_updates": {
+    "spec/services/jrc_contact_center/quality_review_source_spec.rb": {
+      "before": 10,
+      "after": 12
+    },
+    "spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb": {
+      "before": 4,
+      "after": 6
+    }
+  },
+  "source_specs_changed": false,
+  "whole_run_or_Chrome_accepted": false,
+  "current_source_hashes": {
+    "spec/services/jrc_contact_center/quality_review_source_spec.rb": "5b46a757b7a81fea7068b302d8ece879e08aeda539b9ef8e60ac5b5c657e4a75",
+    "spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb": "68e58643cc6bfb48e9d2038cfdd7a3ee8628d0053fbd5f3a04aacceca2679b6e"
+  }
+}

@@ -287,3 +287,9 @@ Agrupar entregas utilizáveis, preservando os dois Word e os 554 requisitos: con
 
 
 - CI 46077439752/a042a3a6: 284 Chrome aprovados e oito falhas, em dois comportamentos repetidos nos quatro modos; candidata não homologada. Corrigida a associação acessível do campo Descrição no formulário nativo do Service Desk, com useId existente e uma regressão de dois formulários independentes; o TextArea compartilhado permanece intacto. O teste de vínculo manual passa a usar unique_id, campo real do catálogo nativo, e exige igualdade com a testemunha SQL antes da gravação. Todos os 292 casos, as validações, os escopos e as asserções de auditoria foram mantidos. Correções agrupadas com PABX/navegação para uma única próxima CI. Registro: docs/jrc_contact_center/native_recording_browser_contract_corrections_20261127.json. Ainda sem aceite nativo/visual, publicação ou deploy.
+
+## Control Desk Parte 1 — entregas funcionais agrupadas
+
+A próxima entrega reúne o fechamento da integração de gravações com atividades nativas do Relacionamento, o acesso filtrado à Central de Aprovações e o rascunho local da política de gravação por unidade. Reutiliza os serviços, permissões, persistência, revisão e auditoria existentes; não cria um cadastro paralelo nem publica comandos no PABX.
+
+Registrar uma entrega a cada 24 horas efetivas de trabalho, com funcionalidades utilizáveis, IDs dos requisitos aceitos, evidências nativas e visuais e esforço remanescente. Checkpoints e quantidade de testes não representam, por si, conclusão da figura ou da Parte 1. Avançar nos grupos internos independentes enquanto a CI estiver em execução, sem sobrepor CIs.

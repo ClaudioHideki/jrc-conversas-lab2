@@ -42,8 +42,14 @@ class JrcContactCenter::Administration
     CARDS.filter_map do |key, (permission, state)|
       next unless card_allowed?(key, permission)
 
-      { key: key, state: state, local_state: local_state_for(key), count: count_for(key) }
+      { key: key, state: state, local_state: local_state_for(key) }.merge(card_count(key))
     end
+  end
+
+  def card_count(key)
+    { count: count_for(key) }
+  rescue ActiveRecord::QueryCanceled
+    { count: nil, count_error: true }
   end
 
   # This describes existing local screens, never applied provider capabilities.

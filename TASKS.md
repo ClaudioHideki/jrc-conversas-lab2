@@ -1155,3 +1155,17 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 
 
 - CI 46077439752/a042a3a6: 284 Chrome aprovados e oito falhas, em dois comportamentos repetidos nos quatro modos; candidata não homologada. Corrigida a associação acessível do campo Descrição no formulário nativo do Service Desk, com useId existente e uma regressão de dois formulários independentes; o TextArea compartilhado permanece intacto. O teste de vínculo manual passa a usar unique_id, campo real do catálogo nativo, e exige igualdade com a testemunha SQL antes da gravação. Todos os 292 casos, as validações, os escopos e as asserções de auditoria foram mantidos. Correções agrupadas com PABX/navegação para uma única próxima CI. Registro: docs/jrc_contact_center/native_recording_browser_contract_corrections_20261127.json. Ainda sem aceite nativo/visual, publicação ou deploy.
+
+## Control Desk Parte 1 — pacote funcional em validação
+
+- [x] Corrigir o nome da variável nativa do banco no gate de concorrência do Relacionamento; os três casos passaram no runner do checkpoint `22ce9b2d` (CI `46143565760`). O aceite consolidado ainda depende dos artefatos e do restante da CI.
+- [ ] Validar o novo popup de rascunho de gravação, reutilizando unidade, filas, revisão e auditoria nativas: salvar, recarregar, remover seleções de outras páginas e recuperar conflito ou resposta perdida.
+- [ ] Executar os 39 casos Rails e 21 Vue preparados, além dos quatro cenários Chrome adicionais (desktop/celular e claro/escuro), preservando os 300 anteriores.
+- [ ] Conferir os artefatos, abrir as capturas e registrar somente os critérios literais efetivamente demonstrados.
+
+O rascunho não publica configuração no PABX, não altera gravações e não executa retenção ou exclusão. Permanecem separados o contrato do PABX, a fonte de segmentos temporizados e a definição dos destinatários das notificações por encerramento. Nenhuma dessas dependências autoriza simular sucesso operacional.
+
+- [ ] Validar a indisponibilidade isolada de contadores (figuras 1–2), sem zero fictício nem supressão de erro de autorização: três casos nativos e dois Vue preparados.
+- [x] Reproduzir a falha do inventário final 83/87 com os relatórios reais; a correção exige todos os 87 casos e rejeita oito adulterações, além do controle positivo e da reprodução negativa antiga. Não equivale a uma CI completa aprovada.
+
+- [ ] Conciliar os aceites transversais: os mesmos 554 IDs possuem 689 ocorrências nas figuras e nas diretrizes; 18 IDs já tinham estados diferentes entre famílias na origem. Nenhum estado foi alterado ou contado novamente neste pacote.

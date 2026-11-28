@@ -188,6 +188,16 @@ require_relative 'jrc_call_center_customer_master_seed'
 session[:customer_master_targets] = JrcContactCenter::SyntheticCustomerMasterSeed.call(projects: access_targets.keys)
 require_relative 'jrc_call_center_pause_seed'
 session[:pause_targets] = JrcContactCenter::SyntheticPauseSeed.call(projects: access_targets.keys)
+# Independent existing IVR account graph; only local policy intent, no provider configuration.
+session[:recording_policy_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
+session[:recording_policy_targets].each_value do |target|
+  owned_account = Account.find(target.fetch(:account_id))
+  owned_unit = JrcContactCenter::Unit.where(account: owned_account).find(target.fetch(:allowed_unit_id))
+  20.times do |index|
+    JrcContactCenter::Queue.create!(account: owned_account, unit: owned_unit, code: "SYNTHETIC-POLICY-#{index}",
+                                   name: "SYNTHETIC policy queue #{index.to_s.rjust(2, '0')}")
+  end
+end
 # Auth material is ephemeral, mode 0600, excluded from uploaded evidence.
 File.write('/tmp/call-center-e2e-session.private', session.to_json, perm: 0o600)
 puts({ account_id: account.id, synthetic: true, provider_configured: false }.to_json)

@@ -181,6 +181,17 @@ jobs:
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' and not case.get('failureMessages') for row in report['testResults'] for case in row['assertionResults'])
           PY
+      - name: Local recording policy native popup revision and failure controls
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingPolicyDraftEditor.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.spec.js --reporter=default --reporter=json --outputFile=/tmp/call-center-recording-policy-draft-vitest.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-recording-policy-draft-vitest.json').read_text())
+          assert report['numTotalTests'] == report['numPassedTests'] == 59
+          assert report['numFailedTests'] == report['numPendingTests'] == 0 and len(report['testResults']) == 2
+          assert all(suite['status'] == 'passed' and all(row['status'] == 'passed' and not row.get('failureMessages') for row in suite['assertionResults']) for suite in report['testResults'])
+          PY
       - name: Focused native recordings selection, shared player and retained ACW target controls
         run: |
           node --test --test-reporter=tap tests/playwright/tests/e2e/ui/call-center-text-contrast-dispatch.test.mjs > /tmp/call-center-contrast-dispatch.txt
@@ -335,6 +346,9 @@ jobs:
           Path('/tmp/call-center-quality-transport-incremental-lint.json').write_text(json.dumps(receipt, indent=2) + '\n')
           assert added == []
           PY
+      - name: Native local recording policy draft source lint
+        run: |
+          bundle exec rubocop app/services/jrc_contact_center/recording_policy_draft.rb app/controllers/api/v1/accounts/jrc_contact_center/unit_recording_policy_drafts_controller.rb app/models/jrc_contact_center/unit.rb app/controllers/api/v1/accounts/jrc_contact_center/units_controller.rb app/services/jrc_contact_center/configuration_audit_snapshot.rb config/initializers/contact_center_recording_policy_draft_privacy.rb config/routes/jrc_contact_center.rb spec/services/jrc_contact_center/recording_policy_draft_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/unit_recording_policy_drafts_spec.rb spec/services/jrc_contact_center/administration_spec.rb --format json --out /tmp/call-center-recording-policy-draft-lint.json
       - name: Native recording Relationship source and owned witness lint
         id: recording_relationship_lint
         run: |
@@ -370,6 +384,23 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_quality_schema_probe"); JrcContactCenter::SyntheticQualitySchemaProbe.record("fresh")'
           } > /tmp/call-center-initial-schema.log 2>&1
           cat /tmp/call-center-initial-schema.log
+      - name: Native local recording policy authorization revision privacy and audit
+        id: recording_policy_draft_preflight
+        run: |
+          bundle exec rspec spec/services/jrc_contact_center/recording_policy_draft_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/unit_recording_policy_drafts_spec.rb spec/services/jrc_contact_center/administration_spec.rb --format progress --format json --out /tmp/call-center-recording-policy-draft-rspec.json
+          python3 -B - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-recording-policy-draft-rspec.json').read_text())
+          expected = {'spec/services/jrc_contact_center/recording_policy_draft_spec.rb': 23,
+                      'spec/requests/api/v1/accounts/jrc_contact_center/unit_recording_policy_drafts_spec.rb': 16,
+                      'spec/services/jrc_contact_center/administration_spec.rb': 3}
+          assert report['summary']['example_count'] == 42 and len({row['id'] for row in report['examples']}) == 42
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert all(row['status'] == 'passed' for row in report['examples'])
+          assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == expected
+          PY
       - name: Native recording Relationship creation, identity and preserved attendance regressions
         id: recording_relationship_native
         run: |
@@ -1658,10 +1689,10 @@ jobs:
                   'spec/models/jrc_contact_center/quality_review_revision_spec.rb': 5,
                   'spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb': 16,
                   'spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb': 5,
-                  'spec/services/jrc_contact_center/quality_review_source_spec.rb': 10,
+                  'spec/services/jrc_contact_center/quality_review_source_spec.rb': 12,
                   'spec/services/jrc_contact_center/quality_review_write_spec.rb': 8,
                   'spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb': 4,
-                  'spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb': 4,
+                  'spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb': 6,
                   'spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb': 9,
                   'spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb': 6,
                   'spec/requests/api/v1/accounts/jrc_contact_center/recording_ending_contexts_spec.rb': 9,
@@ -1740,7 +1771,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 300
+          assert stats['expected'] == 304
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')

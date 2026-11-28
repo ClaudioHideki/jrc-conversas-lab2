@@ -17,8 +17,22 @@ class JrcContactCenter::Unit < JrcContactCenter::ApplicationRecord
   validate :known_timezone
   validate :corporate_links
   validate :native_calendar_catalog
+  validate :native_recording_policy_draft
 
   private
+
+  def native_recording_policy_draft
+    key = JrcContactCenter::RecordingPolicyDraft::KEY
+    previous = new_record? ? {} : settings_in_database
+    return unless settings.key?(key) || previous.key?(key)
+
+    raise JrcContactCenter::OperationError, 'recording_policy_requires_existing_unit' unless persisted? && settings.key?(key)
+
+    definition = JrcContactCenter::RecordingPolicyDraft.stored(self)
+    JrcContactCenter::RecordingPolicyDraft.authorize_queues!(unit: self, definition: definition, scope: queues)
+  rescue JrcContactCenter::OperationError, ArgumentError, KeyError, ActiveRecord::RecordNotFound
+    errors.add(:settings, JrcContactCenter::RecordingPolicyDraft::ERROR)
+  end
 
   def native_calendar_catalog
     key = JrcContactCenter::CalendarCatalogState::KEY

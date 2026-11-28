@@ -47,12 +47,16 @@ class ChromeCounterTest(unittest.TestCase):
         cls.text = WORKFLOW.read_text(encoding='utf-8')
         cls.code = compile_stats_guard(cls.text, str(WORKFLOW))
 
-    def check_report(self, *, expected=300, unexpected=0, skipped=0, flaky=0, errors=None):
+    def check_report(self, *, expected=304, unexpected=0, skipped=0, flaky=0, errors=None):
         stats = {'expected': expected, 'unexpected': unexpected, 'skipped': skipped, 'flaky': flaky}
         exec(self.code, {'__builtins__': {}}, {'stats': stats, 'report': {'errors': errors or []}})
 
-    def test_accepts_300_cases_including_four_native_relationship_flows(self):
+    def test_accepts_304_cases_including_four_native_policy_draft_flows(self):
         self.check_report()
+
+    def test_rejects_300_cases_without_four_native_policy_draft_flows(self):
+        with self.assertRaises(AssertionError):
+            self.check_report(expected=300)
 
     def test_rejects_296_cases_without_four_native_relationship_flows(self):
         with self.assertRaises(AssertionError):
@@ -95,7 +99,7 @@ class ChromeCounterTest(unittest.TestCase):
             self.check_report(expected=256)
 
     def test_rejects_missing_extra_or_zero_cases(self):
-        for count in [0, 259, 260, 263, 265, 267, 269, 271, 273, 279, 281, 291, 293]:
+        for count in [0, 259, 260, 263, 265, 267, 269, 271, 273, 279, 281, 291, 293, 303, 305]:
             with self.subTest(count=count), self.assertRaises(AssertionError):
                 self.check_report(expected=count)
 
@@ -118,7 +122,7 @@ class ChromeCounterTest(unittest.TestCase):
     def test_unrelated_executed_Vitest_assertions_do_not_become_Chrome_guards(self):
         unrelated = "\n      - name: Synthetic separate Vitest report\n        run: |\n          python3 -B - <<'PY'\n          assert report['numTotalTests'] == 81\n          assert report['numFailedTests'] == 0\n          PY\n"
         code = compile_stats_guard(self.text + unrelated, str(WORKFLOW))
-        exec(code, {'__builtins__': {}}, {'stats': {'expected': 300, 'unexpected': 0, 'skipped': 0, 'flaky': 0}, 'report': {'errors': []}})
+        exec(code, {'__builtins__': {}}, {'stats': {'expected': 304, 'unexpected': 0, 'skipped': 0, 'flaky': 0}, 'report': {'errors': []}})
 
     def test_two_executed_Playwright_stats_blocks_are_not_an_unambiguous_gate(self):
         duplicate = "\n      - name: Synthetic duplicate Playwright source\n        run: |\n          python3 -B - <<'PY'\n          stats = report['stats']\n          assert stats['expected'] == 280\n          PY\n"

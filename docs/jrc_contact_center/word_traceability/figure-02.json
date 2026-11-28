@@ -787,5 +787,18 @@
     "status": "implemented_pending_native_and_Chrome_acceptance",
     "reused_native_source": true,
     "whole_figure_accepted": false
+  },
+  "individual_counter_cancellation_candidate_not_accepted": {
+    "requirement": "D2-P0067-C01",
+    "code": [
+      "app/services/jrc_contact_center/administration.rb",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/ControlDeskPage.vue"
+    ],
+    "native_cases_prepared": 3,
+    "Vue_cases_prepared": 2,
+    "authorization_errors_not_suppressed": true,
+    "unavailable_is_not_an_operational_zero": true,
+    "complete_figure_accepted": false,
+    "native_or_Chrome_accepted": false
   }
 }

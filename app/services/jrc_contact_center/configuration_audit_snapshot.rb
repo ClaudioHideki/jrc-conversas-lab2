@@ -39,7 +39,7 @@ class JrcContactCenter::ConfigurationAuditSnapshot
   def self.attributes_for(record)
     attributes = record.as_json(only: FIELDS.fetch(record.class.name))
     if record.is_a?(JrcContactCenter::Unit)
-      attributes['settings'] = record.settings.slice('issuer_company_id', 'business_unit_id', JrcContactCenter::CalendarCatalogState::KEY)
+      attributes['settings'] = unit_settings(record)
     end
     if record.is_a?(JrcContactCenter::QueueMembership)
       attributes['participates'] = record.role == 'agent'
@@ -49,6 +49,13 @@ class JrcContactCenter::ConfigurationAuditSnapshot
       attributes['settings'] = record.settings.slice(JrcContactCenter::QueueCalendarState::KEY)
     end
     attributes
+  end
+
+  def self.unit_settings(record)
+    settings = record.settings.slice('issuer_company_id', 'business_unit_id', JrcContactCenter::CalendarCatalogState::KEY)
+    definition = JrcContactCenter::RecordingPolicyDraft.stored(record)
+    settings[JrcContactCenter::RecordingPolicyDraft::KEY] = JrcContactCenter::RecordingPolicyDraft.audit_snapshot(definition) if definition
+    settings
   end
 
   def self.scope_for(record, unit, queue)
@@ -71,5 +78,5 @@ class JrcContactCenter::ConfigurationAuditSnapshot
 
     JrcContactCenter::Queue.find_by!(account_id: record.account_id, id: record.queue_id)
   end
-  private_class_method :queue_for, :attributes_for, :scope_for, :routing_snapshot
+  private_class_method :queue_for, :attributes_for, :scope_for, :routing_snapshot, :unit_settings
 end

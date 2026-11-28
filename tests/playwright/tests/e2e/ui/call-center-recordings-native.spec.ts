@@ -1,3 +1,4 @@
+import { verifyNativeRecordingPolicyDraft } from './call-center-recording-policy-draft-native.mjs';
 import { verifyNativeRecordingRelationship } from './call-center-recording-relationship-native.mjs';
 import { verifyNativeRecordingQualityReport } from './call-center-recording-quality-report-native.mjs';
 import { test } from './cc-native-test.mjs';
@@ -62,4 +63,9 @@ test('native whole-period sentiment filters reuse real recording scopes, paginat
 test('native reviewed recording creates one authorized Relationship activity through the reused form and workflow', async ({ page }, info) => {
   test.setTimeout(180000);
   await verifyNativeRecordingRelationship(page, info, session.pause_targets[info.project.name].recordings);
+});
+
+test('native recording policy draft retains current unit authority, reviewed persistence and response-loss recovery without provider application', async ({ page }, info) => {
+  test.setTimeout(180000);
+  await verifyNativeRecordingPolicyDraft(page, info, session.recording_policy_targets[info.project.name], session.unit_id);
 });
