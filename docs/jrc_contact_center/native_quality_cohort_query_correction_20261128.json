@@ -1,0 +1,46 @@
+{
+  "source_parent": "9fe4a24333887970601599a178f38f5ef2b42b35",
+  "failed_run": 46110497577,
+  "failed_job": 140872716789,
+  "artifact": 15250752227,
+  "artifact_sha256": "232e8f918dc361b8b4de24fb6da731534530f91b4af47246a2a91b79fde6f678",
+  "main_report_sha256": "16e9bdfabb50bb7a0356c976e91f33789a95b74c37c11666a2260f71c86e88b1",
+  "main_summary": {
+    "duration": 855.282843779,
+    "example_count": 3505,
+    "failure_count": 1,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "confirmed_timed_out_operation": {
+    "duration_ms": 14000.97,
+    "sql_sha256": "298c7984183d8cc31743a72aa22f0146d7f92fcbdb5fec1299bff3004ab02f6e",
+    "bind_count": 15,
+    "failure_class": "ActiveRecord::QueryCanceled",
+    "source": [
+      {
+        "file": "/app/services/jrc_contact_center/recording_quality_report.rb",
+        "line": 50
+      },
+      {
+        "file": "/app/services/jrc_contact_center/recording_quality_report.rb",
+        "line": 45
+      },
+      {
+        "file": "/app/services/jrc_contact_center/authority_transaction.rb",
+        "line": 8
+      },
+      {
+        "file": "/app/services/jrc_contact_center/authority_transaction.rb",
+        "line": 4
+      }
+    ]
+  },
+  "statement_timeout_preserved": "14s",
+  "minimal_candidate_correction": "The unchanged native authorized call projection now uses DISTINCT before its IN membership test. IN membership already ignores duplicates; account, personal recording, unit, queue and period predicates remain unchanged. This targets the first scoped collection identified by the diagnostic; actual performance remains to be validated.",
+  "same_original_5000_row_native_case_required": true,
+  "temporary_extra_single_case_reproduction_removed_full_case_retained": true,
+  "related_group_in_same_CI": "Strict optional filter shapes, native sentiment navigation and direct native audio capture entry; all old cases and controls retained.",
+  "no_new_models_migrations_permissions_provider_operations_dependencies_or_time_limit_increase": true,
+  "native_or_Chrome_accepted": false
+}

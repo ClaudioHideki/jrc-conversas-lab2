@@ -595,5 +595,57 @@
     "report_at_24_effective_work_hours": true,
     "effective_hours_not_measured_not_fabricated": true,
     "provider_commands_and_whole_Part1_acceptance": false
+  },
+  "latest_reused_literal_calendar_delivery": {
+    "document": "docs/jrc_contact_center/literal_calendar_precedence_acceptance_20261128.json",
+    "sha256": "6dd56d24bec3252bb1b184fc5af761d082a0d74253d97f0680e72c5a35e2de0d",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "only_new_literal_clause": "D1-P0091-C01",
+    "existing_native_cases_reused_not_added": 20,
+    "existing_actual_Chrome_modes_reused_not_added": 4,
+    "existing_source_files_verified_unchanged": 13,
+    "provider_or_whole_figure_acceptance": false,
+    "new_native_or_browser_runs": 0
+  },
+  "next_independent_functional_delivery": {
+    "status": "prepared_not_natively_or_visually_accepted",
+    "figures": [
+      1,
+      3,
+      12,
+      18,
+      19
+    ],
+    "user_outcomes": [
+      "Open the existing sentiment report directly from its authorized sidebar destination.",
+      "Reject malformed supplied recording criteria instead of silently returning the default authorized cohort."
+    ],
+    "new_native_cases_prepared_not_results": 20,
+    "new_Vue_cases_prepared_not_results": 7,
+    "existing_four_native_quality_Chrome_cases_extended_not_duplicated": true,
+    "current_scale_query_timeout_requires_cause_and_correction_before_acceptance": true,
+    "business_dependent_pause_alert_policy_excluded": true,
+    "24_effective_hour_reporting_continues_without_waiting_for_boundary": true,
+    "effective_hours_not_measured_not_fabricated": true
+  },
+  "latest_reused_audio_folder_identity_delivery": {
+    "document": "docs/jrc_contact_center/literal_audio_folder_identity_acceptance_20261128.json",
+    "sha256": "01066822d96ea5252dafd82d2c132452f58347bf490d9d6c4fa5b13a8568ecee",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "unique_IDs": [
+      "D2-P0156-C01"
+    ],
+    "whole_figure_accepted": false,
+    "new_native_or_browser_runs": 0,
+    "reused_native_cases": 62,
+    "older_desktop_filter_visual_issue_not_accepted": true,
+    "global_Organizar_Pastas_label_divergence_not_silently_accepted": true
+  },
+  "next_native_direct_audio_capture_entry_candidate": {
+    "document": "docs/jrc_contact_center/native_direct_audio_capture_entry_candidate_20261128.json",
+    "sha256": "0ab3c27c991ffbc7076df7eb3a9724e14f377ed5273f0665d20dd666de44c2b7",
+    "new_Vue_prepared_not_executed": 5,
+    "same_four_original_native_capture_Chrome_cases_extended": true,
+    "whole_figure_accepted": false
   }
 }

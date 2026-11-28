@@ -1,3 +1,4 @@
+import { reviewDirectAudioCaptureEntry } from './call-center-direct-audio-capture-entry-native.mjs';
 import { verifyNativePabxReadiness } from './call-center-pabx-readiness-native.mjs';
 import { verifyNativeAuditQueryFailure, preserveNativeAuditQueryRecovery } from './call-center-audit-error-reference-native.mjs';
 import { measureLocatorTextContrast as contrast } from './call-center-text-contrast.mjs';
@@ -9622,6 +9623,7 @@ test('institutional audio folders native browser capture uses only the synthetic
     );
   });
   expect(fakeDevice).toBe(true);
+  await reviewDirectAudioCaptureEntry(page, expect);
   await library.locator('[data-new-audio-asset]').click();
   await expectContainedDialog(page);
   await dialog.locator('[data-audio-asset-name]').fill(name);
@@ -9859,6 +9861,7 @@ test('institutional audio folders native browser capture uses only the synthetic
     JSON.stringify({
       sha: process.env.GITHUB_SHA,
       synthetic: true,
+      direct_capture_entry_checked: true,
       physical_microphone: false,
       fake_device: fakeDevice,
       external_homologation: false,

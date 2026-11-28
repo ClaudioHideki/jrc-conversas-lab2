@@ -1,0 +1,151 @@
+{
+  "literal_requirement_id": "D1-P0091-C01",
+  "requirement": "Definir precedência explícita de exceções, feriados e horário regular.",
+  "approved_rule": "Exceção explícita da data > feriado > expediente semanal.",
+  "status": "implementado",
+  "evidence_source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "unchanged_current_source_sha": "85748a8060e220c09e6794527e60afc8a8b104ff",
+  "run": 45984659600,
+  "artifact": 15198996699,
+  "artifact_sha256": "949211f5d1f3b7f4b1cf40649ddbfb15262889427d3f97096cca34d6aa160ae3",
+  "independent_proof_sha256": "a82c7e016b27935676d00d51c8ccfb0703a611f989b8c1d958316c6d5990be31",
+  "unchanged_sources": {
+    "app/services/jrc_contact_center/calendar_definition.rb": "c56870015f4ba65b6f9143b13766e57791a891c920e874bea3175447e09024b6",
+    "app/services/jrc_contact_center/calendar_catalog.rb": "0598f970125a62a58df8716cef2732f67170630857722cd950931e89f6f9d3c1",
+    "app/services/jrc_contact_center/calendar_catalog_state.rb": "b18583fd4927935ed2a8f9fb8cefbbf179b8557f50efcac38d48bacaa3a5cd85",
+    "app/controllers/api/v1/accounts/jrc_contact_center/unit_calendars_controller.rb": "40aab1bbccaa7abc6fd14191d1f06d9d71c767e17fa60fe713f664bb73f70f86",
+    "app/services/jrc_service_desk/snapshot_calendar.rb": "600ca222eb74081aa91a40ba0b86913f9c504c0e646cf220fc82f972bcc8c98a",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarDetailsFields.vue": "818864c5f4bc25cc6630649f401c2d05d413b82709d4fa2f45509805b9165673",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarLibrary.vue": "61b04cd1276007f8154293140000a729960d3fb6d96e569c87552b2de9ef0f42",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarEditorDialog.vue": "66dd361e960c08eb91eac9c0de9cbb703d5c316d8df6300964791b922d96468b",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/calendarForm.js": "966aaa1b395e893bf380986b5699203cb9ac59e0204ef5b3724a8a6af1a0e856",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useUnitCalendarEditor.js": "efbeeb3da8a3a34a97eea99129edfbddc6d09bcd57f1fa8f5eef863a3d0438ec",
+    "spec/services/jrc_contact_center/calendar_definition_spec.rb": "1f1b49297326087e08447bca697b0ab421d58d8a0414540aaefc337ee2221d70",
+    "spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb": "da1a3cbf2fd3f4b55ff0d8aae91a1968d7539996383774c7e380ba3e4ed536f8",
+    "tests/playwright/tests/e2e/ui/call-center-calendar-native.mjs": "cc41ff99c385d0dbacccc7f1366782fbff53cdb58e947309daff20d78f502570"
+  },
+  "native_definition_examples_reused_not_new": 20,
+  "native_report": {
+    "path": "tmp/call-center-rspec.json",
+    "sha256": "22ebf847a37ce0180f695178b0c0859377d675ad914501e2c503944a153409da"
+  },
+  "four_real_browser_receipts": [
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-calendar-native.json",
+      "sha256": "7a5f46745abe050feeeb3e1adafc8c65be6d1b472fde5ab8f51987cba99a03e9",
+      "mode": "desktop-light",
+      "observed_precedence": [
+        "exception",
+        "holiday",
+        "weekly"
+      ],
+      "persisted_preview_working_seconds": [
+        3600,
+        0,
+        28800
+      ]
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-calendar-native.json",
+      "sha256": "2e8eb55264e3384121ad2d0c488d49428203cf3f098b5f28b230f2e2edf07ac8",
+      "mode": "desktop-dark",
+      "observed_precedence": [
+        "exception",
+        "holiday",
+        "weekly"
+      ],
+      "persisted_preview_working_seconds": [
+        3600,
+        0,
+        28800
+      ]
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-calendar-native.json",
+      "sha256": "aa83be79ac6603e810b2726d765d08c1f228d140ee67c0770c94699ba7872560",
+      "mode": "mobile-light",
+      "observed_precedence": [
+        "exception",
+        "holiday",
+        "weekly"
+      ],
+      "persisted_preview_working_seconds": [
+        3600,
+        0,
+        28800
+      ]
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-calendar-native.json",
+      "sha256": "8e790d8966efa8770178c47d7edca922b8f52a50b0c74ce98e01482703b5bc35",
+      "mode": "mobile-dark",
+      "observed_precedence": [
+        "exception",
+        "holiday",
+        "weekly"
+      ],
+      "persisted_preview_working_seconds": [
+        3600,
+        0,
+        28800
+      ]
+    }
+  ],
+  "eight_original_images_actually_opened": [
+    {
+      "file": "desktop-light-calendar-native-preview.png",
+      "sha256": "690f46b394fb2c788263514f73f27f165932da39c1115a7ba7c665423b738498",
+      "mode": "desktop-light",
+      "actually_opened_in_this_review": true
+    },
+    {
+      "file": "desktop-light-calendar-reviewed-exception.png",
+      "sha256": "fef15892f90c7aebe3b3ea909b97268cbb559e44e19e9fd79a5257b9c1d87ad5",
+      "mode": "desktop-light",
+      "actually_opened_in_this_review": true
+    },
+    {
+      "file": "desktop-dark-calendar-native-preview.png",
+      "sha256": "cef11f38062f01b403af045bd7ab681a3a130f2b77e3f8106b762e2daf7a3906",
+      "mode": "desktop-dark",
+      "actually_opened_in_this_review": true
+    },
+    {
+      "file": "desktop-dark-calendar-reviewed-exception.png",
+      "sha256": "aac5e430ee8bac242633abd3e6d0173ecac197bb4e5bc8568f75e2d5e972f1ef",
+      "mode": "desktop-dark",
+      "actually_opened_in_this_review": true
+    },
+    {
+      "file": "mobile-light-calendar-native-preview.png",
+      "sha256": "984ac73a4b2af5b93159d6b478979e772ceb58fc6fa13ba495c0cb770b154571",
+      "mode": "mobile-light",
+      "actually_opened_in_this_review": true
+    },
+    {
+      "file": "mobile-light-calendar-reviewed-exception.png",
+      "sha256": "72d80eea9bf4d7b2c829d79725aebefd99e20fc31f1b640c9621d82c7546fb8b",
+      "mode": "mobile-light",
+      "actually_opened_in_this_review": true
+    },
+    {
+      "file": "mobile-dark-calendar-native-preview.png",
+      "sha256": "31bd0ffeebe37ac6ceab91297139427b00c6a2998ee19ff3630f8877613a5aa0",
+      "mode": "mobile-dark",
+      "actually_opened_in_this_review": true
+    },
+    {
+      "file": "mobile-dark-calendar-reviewed-exception.png",
+      "sha256": "92e5be2b6d5f407cd0612a118b858c4020d4a1ff3693c90f8e3fbf4ff52cca55",
+      "mode": "mobile-dark",
+      "actually_opened_in_this_review": true
+    }
+  ],
+  "explicit_limits": [
+    "Accepts the internal exception > holiday > weekly priority only.",
+    "Does not accept overlapping multiple calendars from interval-only validation.",
+    "No claim about real PABX routing, ACKs, publication, whole figure or complete Parte 1.",
+    "Native date inputs follow the test browser locale; Portuguese date-format acceptance is separate."
+  ],
+  "no_new_application_tests_or_CI_for_this_reuse": true
+}

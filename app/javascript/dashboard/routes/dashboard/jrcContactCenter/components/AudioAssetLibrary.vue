@@ -41,6 +41,7 @@ const labels = computed(() => ({
   FILTER: t('JRC_CONTACT_CENTER.AUDIO_FILES.FILTER'),
   CLEAR: t('JRC_CONTACT_CENTER.AUDIO_FILES.CLEAR'),
   NEW: t('JRC_CONTACT_CENTER.AUDIO_FILES.NEW'),
+  RECORD_NEW: t('JRC_CONTACT_CENTER.AUDIO_FILES.RECORD_NEW'),
   LOADING: t('JRC_CONTACT_CENTER.AUDIO_FILES.LOADING'),
   ERROR: t('JRC_CONTACT_CENTER.AUDIO_FILES.ERROR'),
   EMPTY: t('JRC_CONTACT_CENTER.AUDIO_FILES.EMPTY'),
@@ -462,6 +463,26 @@ const chooseSource = method => {
   captureBusy.value = false;
   sourceMethod.value = method;
 };
+const openCapture = async () => {
+  if (
+    !canManage.value ||
+    loading.value ||
+    !maxBytes.value ||
+    saving.value ||
+    opening.value
+  )
+    return;
+  const session = editor.session.value;
+  await editor.open('upload');
+  if (
+    editor.session.value !== session + 1 ||
+    editorError.value ||
+    !canManage.value ||
+    mode.value !== 'upload'
+  )
+    return;
+  chooseSource('capture');
+};
 const captureState = value => {
   captureBusy.value = value;
   if (value) editor.chooseFile({ target: { files: [] } });
@@ -720,6 +741,15 @@ onBeforeUnmount(() => {
           @click="editor.open('upload')"
         >
           {{ label('NEW') }}
+        </button>
+        <button
+          type="button"
+          :disabled="loading || !maxBytes || saving || opening"
+          data-new-audio-capture
+          class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11 disabled:opacity-40"
+          @click="openCapture"
+        >
+          {{ label('RECORD_NEW') }}
         </button>
       </div>
     </form>

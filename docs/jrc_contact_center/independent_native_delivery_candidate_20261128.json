@@ -1,0 +1,37 @@
+{
+  "source_reference": "9166ab0556da3321e9cf814a0231787caa8336f3",
+  "functional_deliveries": [
+    "Same native recordings route gains the authorized sentiment sidebar entry and correct active state.",
+    "Native recording and quality report APIs reject malformed supplied filters while preserving valid empty defaults.",
+    "Register one unchanged, independently verified internal calendar precedence clause.",
+    "Open the existing browser audio recorder directly, with current native authority and explicit review before the existing upload."
+  ],
+  "figures": [
+    1,
+    3,
+    5,
+    6,
+    12,
+    16,
+    18,
+    19
+  ],
+  "new_native_cases_prepared_not_executed": 20,
+  "new_Vue_cases_prepared_not_executed": 12,
+  "same_four_native_quality_Chrome_cases_extended": true,
+  "new_Chrome_cases_or_PNG": 0,
+  "unapproved_pause_alert_policy_and_tests_not_included": true,
+  "all_current_mandatory_pause_alerts_preserved": true,
+  "requires_known_scale_cause_and_corrected_parent_reconciliation_before_staging": true,
+  "no_new_models_migrations_permissions_dependencies_or_provider_operations": true,
+  "native_or_Chrome_accepted": false,
+  "same_four_native_audio_capture_Chrome_cases_extended": true,
+  "expected_not_results_after_current_4117_2355_baseline": {
+    "distinct_Rails": 4137,
+    "main_Vue": 2367,
+    "focused_SD_audio_Vue": 119,
+    "focused_navigation_Vue": 35,
+    "Chrome": 296,
+    "PNG": 980
+  }
+}

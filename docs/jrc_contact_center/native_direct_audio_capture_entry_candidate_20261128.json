@@ -1,0 +1,16 @@
+{
+  "source_parent": "9fe4a24333887970601599a178f38f5ef2b42b35",
+  "figures": [
+    5,
+    6,
+    16
+  ],
+  "user_outcome": "Open the existing native recording form directly from Gravar áudio.",
+  "native_storage_API_review_unit_scope_idempotence_and_media_validation_reused": true,
+  "microphone_still_requires_the_existing_explicit_start_action": true,
+  "new_backend_model_migration_permission_or_provider_operation": false,
+  "new_Vue_cases_prepared_not_executed": 5,
+  "existing_capture_Chrome_four_modes_should_extend_without_duplicating_cases": true,
+  "Nico_synthesis_and_PABX_publication_remain_external": true,
+  "native_or_Chrome_accepted": false
+}

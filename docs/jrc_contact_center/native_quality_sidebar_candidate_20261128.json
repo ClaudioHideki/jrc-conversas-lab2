@@ -1,0 +1,29 @@
+{
+  "source_parent": "85748a8060e220c09e6794527e60afc8a8b104ff",
+  "functional_delivery": "Direct Análise de sentimentos entry in the existing native sidebar, preserving the Gravações route and query-driven report.",
+  "reused_native_route": "jrc_contact_center_recordings",
+  "reused_native_mode_query": {
+    "recordings_mode": "quality"
+  },
+  "required_current_capabilities": [
+    "recordings_view",
+    "recordings_listen"
+  ],
+  "no_administrator_fallback_or_new_permission": true,
+  "only_one_active_link_for_the_same_route": true,
+  "mobile_menu_closes_after_selection": true,
+  "all_previous_ten_case_and_original_Chrome_assertions_preserved": true,
+  "new_Vue_cases_prepared_not_executed": 7,
+  "same_four_real_Chrome_cases_extended": true,
+  "new_native_API_model_migration_or_dependency": false,
+  "existing_calendar_literal_reuse": "D1-P0091-C01",
+  "calendar_reuse_does_not_claim_PABX_or_full_overlap_acceptance": true,
+  "native_or_Chrome_accepted": false,
+  "not_whole_figure_or_Parte1_acceptance": true,
+  "current_CI_not_changed_or_duplicated": true,
+  "external_dependency_not_new_scope": {
+    "temporal_transcript_alignment": "The current native transcript DTO explicitly returns no segments and temporal_alignment=not_supplied_by_native_source. A provider-validated segment/time/speaker contract is required; do not parse invented timings from prose.",
+    "existing_transcript_search_and_playback_preserved": true,
+    "new_external_endpoints_commands_or_homologation": false
+  }
+}

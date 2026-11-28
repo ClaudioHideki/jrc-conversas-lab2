@@ -75,7 +75,8 @@
       "SURVEYS": "Pesquisas",
       "SECURITY": "Segurança e perfis",
       "MIGRATION": "Painel de migração",
-      "EXTENSIONS": "Ramais"
+      "EXTENSIONS": "Ramais",
+      "QUALITY_REPORT": "Análise de sentimentos"
     },
     "CARDS": {
       "UNITS": "Unidades",
@@ -2558,7 +2559,8 @@
       "INSPECTION_INFECTED": "Scanner: ameaça detectada",
       "INSPECTION_CHECKSUM": "Integridade divergente",
       "INSPECTION_FILTER_NOTE": "O resultado do scanner não libera prévia ou envio. A decodificação e a verificação de integridade continuam obrigatórias.",
-      "INSPECTION_FILTER_UNAVAILABLE": "Scanner: indisponível"
+      "INSPECTION_FILTER_UNAVAILABLE": "Scanner: indisponível",
+      "RECORD_NEW": "Gravar áudio"
     },
     "AUDIO_INSPECTIONS": {
       "TITLE": "Verificações técnicas desta versão",

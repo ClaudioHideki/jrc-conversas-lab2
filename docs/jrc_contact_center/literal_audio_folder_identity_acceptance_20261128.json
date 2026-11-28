@@ -1,0 +1,334 @@
+{
+  "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "run": 45984659600,
+  "artifact": 15198996699,
+  "artifact_sha256": "949211f5d1f3b7f4b1cf40649ddbfb15262889427d3f97096cca34d6aa160ae3",
+  "unique_literal_IDs": [
+    "D2-P0156-C01"
+  ],
+  "accepted_internal_outcomes": {
+    "D2-P0156-C01": "Folder changes preserve the exact native asset and version identities; folder organization is not a second audio catalogue."
+  },
+  "native_cases_reused_not_added": 62,
+  "native_report_sha256": "22ebf847a37ce0180f695178b0c0859377d675ad914501e2c503944a153409da",
+  "native_example_IDs": [
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:1]",
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:2]",
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:3]",
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:4]",
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:5]",
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:6]",
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:7]",
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:8]",
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:9]",
+    "./spec/services/jrc_contact_center/audio_asset_moves_spec.rb[1:10]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:1]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:2]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:3]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:4]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:5]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:6]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:7]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:8]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:9]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:10]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:11]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:12]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:13]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:14]",
+    "./spec/services/jrc_contact_center/audio_copies_spec.rb[1:15]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_moves_spec.rb[1:1]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_moves_spec.rb[1:2]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_moves_spec.rb[1:3]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_moves_spec.rb[1:4]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_moves_spec.rb[1:5]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_moves_spec.rb[1:6]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_moves_spec.rb[1:7]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:1]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:2]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:3]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:4]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:5]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:6]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:7]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:8]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:9]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:10]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb[1:11]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:1]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:2]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:3]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:4]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:5]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:6]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:7]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:8]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:9]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:10]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:11]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:12]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:13]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:14]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:15]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:16]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:17]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:18]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb[1:19]"
+  ],
+  "source_identity_review_sha256": "f5f3871f8b59cfe661e82c2af42156e4f9e470c3a346931df092847a45d6f20e",
+  "bounded_UI_compatibility_sha256": "258a7f36300be98be06133de2ac13846a1c575b6dfdaf652bf3e1e7702796921",
+  "current_source_compared": "9fe4a24333887970601599a178f38f5ef2b42b35",
+  "nineteen_of_twenty_sources_byte_identical": true,
+  "remaining_component_script_and_all_template_except_filter_form_byte_identical": true,
+  "actual_original_Chrome_receipts": {
+    "desktop-light-audio-folder-native-evidence.json": {
+      "sha256": "ad29f3999d7c50961400c30a3b24364e6edc162ca58abd47c8a595e0ad8e23d7",
+      "data": {
+        "synthetic": true,
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "unit": "2940",
+        "folder": "100",
+        "nested": "192",
+        "color": "rgb(28, 32, 36)",
+        "brightness": 96,
+        "stale": 409,
+        "denied": 404,
+        "denied_after_open": 401,
+        "long_folder_name_length": 120,
+        "authorized_path_depth": 2,
+        "native_lazy_tree": true,
+        "readable_folder_label_width": 152,
+        "tree_children_status": 200,
+        "collapsed_children_removed": true
+      }
+    },
+    "desktop-light-audio-selected-move-native.json": {
+      "sha256": "d3f2d450af182c22c56db7e2aaf487ec798c64c5195e57fbc3972d0e497bdb8d",
+      "data": {
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "2940",
+        "assets": [
+          "327",
+          "344"
+        ],
+        "exact_versions": [
+          "296",
+          "310"
+        ],
+        "destination": "121",
+        "moved": 200,
+        "returned_to_root": 200,
+        "stale_review": 409,
+        "operator_denied": 401,
+        "hashes_after_move": [
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f"
+        ],
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    },
+    "desktop-dark-audio-folder-native-evidence.json": {
+      "sha256": "202332ca92158ab5cf32c0cb3107c94089ec3f88e646a4303e124bca8c46f777",
+      "data": {
+        "synthetic": true,
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "unit": "3003",
+        "folder": "123",
+        "nested": "193",
+        "color": "rgb(237, 238, 240)",
+        "brightness": 715,
+        "stale": 409,
+        "denied": 404,
+        "denied_after_open": 401,
+        "long_folder_name_length": 120,
+        "authorized_path_depth": 2,
+        "native_lazy_tree": true,
+        "readable_folder_label_width": 152,
+        "tree_children_status": 200,
+        "collapsed_children_removed": true
+      }
+    },
+    "desktop-dark-audio-selected-move-native.json": {
+      "sha256": "d27a5b29e1eb58f839c847e1ee87ce4d4de22f82ce53f965037ca0dc56678161",
+      "data": {
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "3003",
+        "assets": [
+          "330",
+          "356"
+        ],
+        "exact_versions": [
+          "298",
+          "324"
+        ],
+        "destination": "144",
+        "moved": 200,
+        "returned_to_root": 200,
+        "stale_review": 409,
+        "operator_denied": 401,
+        "hashes_after_move": [
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f"
+        ],
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    },
+    "mobile-light-audio-folder-native-evidence.json": {
+      "sha256": "7186f32d91bde2388062acc18c67decaf2edb5c959a0b420cc1d70bfd246b88c",
+      "data": {
+        "synthetic": true,
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "unit": "3066",
+        "folder": "146",
+        "nested": "194",
+        "color": "rgb(28, 32, 36)",
+        "brightness": 96,
+        "stale": 409,
+        "denied": 404,
+        "denied_after_open": 401,
+        "long_folder_name_length": 120,
+        "authorized_path_depth": 2,
+        "native_lazy_tree": true,
+        "readable_folder_label_width": 220,
+        "tree_children_status": 200,
+        "collapsed_children_removed": true
+      }
+    },
+    "mobile-light-audio-selected-move-native.json": {
+      "sha256": "77af9f2bed02dba3d037c8907a1ae2aeea0f37b7d9e74ba4b23853ab8c308183",
+      "data": {
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "3066",
+        "assets": [
+          "333",
+          "368"
+        ],
+        "exact_versions": [
+          "300",
+          "338"
+        ],
+        "destination": "167",
+        "moved": 200,
+        "returned_to_root": 200,
+        "stale_review": 409,
+        "operator_denied": 401,
+        "hashes_after_move": [
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f"
+        ],
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    },
+    "mobile-dark-audio-folder-native-evidence.json": {
+      "sha256": "f4d5df81729c235f6af1b63fc996ec02498a80963736723b2c7f4fe9bba06e5a",
+      "data": {
+        "synthetic": true,
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "unit": "3129",
+        "folder": "169",
+        "nested": "195",
+        "color": "rgb(237, 238, 240)",
+        "brightness": 715,
+        "stale": 409,
+        "denied": 404,
+        "denied_after_open": 401,
+        "long_folder_name_length": 120,
+        "authorized_path_depth": 2,
+        "native_lazy_tree": true,
+        "readable_folder_label_width": 220,
+        "tree_children_status": 200,
+        "collapsed_children_removed": true
+      }
+    },
+    "mobile-dark-audio-selected-move-native.json": {
+      "sha256": "827bd7d8ceaa0b6ed0b01ade35d4a44e0005a08dca52cceb29b90274e7675e00",
+      "data": {
+        "sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "3129",
+        "assets": [
+          "336",
+          "380"
+        ],
+        "exact_versions": [
+          "302",
+          "352"
+        ],
+        "destination": "190",
+        "moved": 200,
+        "returned_to_root": 200,
+        "stale_review": 409,
+        "operator_denied": 401,
+        "hashes_after_move": [
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f"
+        ],
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    }
+  },
+  "screenshots": {
+    "desktop-light-audio-selected-move-persisted.png": {
+      "sha256": "aedc3d8f501929eaceef4a2d1bdef2cdc3cd46d628dbb19644d887c21891d7f5"
+    },
+    "desktop-dark-audio-selected-move-persisted.png": {
+      "sha256": "9f3438279e6066ca38e3509c9a787672e050396c7615afcc19e2b40fc75fb6e1"
+    },
+    "mobile-light-audio-selected-move-persisted.png": {
+      "sha256": "7a7f56acd8bf016a7aa663c6654daf8fe42ad67f69f60590a16ff5858c1d7388"
+    },
+    "mobile-dark-audio-selected-move-persisted.png": {
+      "sha256": "7731391f236432d35392227662d0891f2f1371c4e1e97f8460b52ebabfdc6936"
+    },
+    "desktop-light-audio-folder-native-tree.png": {
+      "sha256": "2c53acbab60f1cc0610bef9dc3e347a4750e308ce796413c1d1dd62bf4f471a6"
+    },
+    "desktop-dark-audio-folder-native-tree.png": {
+      "sha256": "94d616bf0e1fcdcbe2d437983995694bb215ab2910497ce9a54eb5cd8f4bdfe4"
+    },
+    "mobile-light-audio-folder-native-tree.png": {
+      "sha256": "0527f3ffef2b6435878115161177aeaa0d4b33cb41f4e2e2e8c9940b4bbe8281"
+    },
+    "mobile-dark-audio-folder-native-tree.png": {
+      "sha256": "e70f6508df85ac7c091638963d5ef7e25fa60aab3b00cb990d5e09272acf5330"
+    }
+  },
+  "all_eight_original_screenshots_actually_opened": true,
+  "visual_limit": "Old desktop filter labels overlap. The candidate already changes that form layout, but these older images do not validate the new filter layout.",
+  "new_tests_executed_for_this_certificate": 0,
+  "external_PABX_Nico_scanner_published_usage_and_whole_figure_acceptance": false,
+  "functional_reuse_with_named_entrypoint_divergence": {
+    "D2-P0154-C01": "Creating and reorganizing folders is native and tested. The Word names a global Organizar Pastas entry; current UI exposes per-folder Editar e mover, so this compound UI clause remains partial."
+  }
+}

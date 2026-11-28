@@ -1,0 +1,13 @@
+{
+  "source_parent": "9166ab0556da3321e9cf814a0231787caa8336f3",
+  "functional_gap_observed_in_code": "blank?/present? treated supplied JSON false/empty collections as omitted filters.",
+  "minimal_change": "Only nil and the native empty input string select defaults; all supplied values still pass the existing validators.",
+  "same_native_account_unit_queue_personal_recording_scopes_preserved": true,
+  "valid_dates_search_order_pagination_and_source_limits_preserved": true,
+  "no_new_API_model_permission_migration_or_dependency": true,
+  "new_native_JSON_HTTP_cases_prepared_not_executed": 20,
+  "current_CI_not_changed_or_duplicated": true,
+  "independent_of_the_pending_pause_alert_business_rule": true,
+  "not_a_claim_to_have_fixed_the_separate_scale_failure": true,
+  "native_or_Chrome_accepted": false
+}

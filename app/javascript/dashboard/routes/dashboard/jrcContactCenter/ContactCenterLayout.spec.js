@@ -192,3 +192,74 @@ it('clears authenticated data and does not issue a context request after logout'
   expect(links(wrapper)).toEqual([]);
   expect(wrapper.find('[data-native-child]').exists()).toBe(false);
 });
+
+it.each([
+  { recordings_view: true },
+  { recordings_listen: true },
+  { configure: true, reports: true },
+  { recordings_view: true, recordings_listen: 'true' },
+])(
+  'requires both recording capabilities without inferring administrator rights: %j',
+  async capabilities => {
+    API.context.mockResolvedValueOnce(response(capabilities));
+    const wrapper = render();
+    await flushPromises();
+    expect(
+      wrapper.find('[data-contact-center-destination="quality"]').exists()
+    ).toBe(false);
+  }
+);
+it('links to the existing authorized recording page and quality query rather than a parallel route', async () => {
+  API.context.mockResolvedValueOnce(
+    response({ recordings_view: true, recordings_listen: true })
+  );
+  const wrapper = render();
+  await flushPromises();
+  const target = wrapper
+    .findAllComponents({ name: 'RouterLink' })
+    .find(
+      link => link.attributes('data-contact-center-destination') === 'quality'
+    );
+  expect(target.props('to')).toEqual({
+    name: 'jrc_contact_center_recordings',
+    params: { accountId: '1' },
+    query: { recordings_mode: 'quality' },
+  });
+  expect(
+    wrapper.findAll('[data-contact-center-destination="quality"]')
+  ).toHaveLength(1);
+});
+it('identifies the active recording mode without marking both same-route links as the current page', async () => {
+  API.context.mockResolvedValueOnce(
+    response({ recordings_view: true, recordings_listen: true })
+  );
+  mocks.route.name = 'jrc_contact_center_recordings';
+  mocks.route.query = { recordings_mode: 'quality' };
+  const wrapper = render();
+  await flushPromises();
+  const current = key =>
+    wrapper
+      .get(`[data-contact-center-destination="${key}"]`)
+      .attributes('aria-current-value');
+  expect(current('quality')).toBe('page');
+  expect(current('jrc_contact_center_recordings')).toBe('false');
+  mocks.route.query = {};
+  await flushPromises();
+  expect(current('quality')).toBe('false');
+  expect(current('jrc_contact_center_recordings')).toBe('page');
+});
+it('closes the native mobile navigation after choosing the sentiment shortcut', async () => {
+  API.context.mockResolvedValueOnce(
+    response({ recordings_view: true, recordings_listen: true })
+  );
+  const wrapper = render();
+  await flushPromises();
+  const menu = wrapper.get('button[aria-expanded]');
+  await menu.trigger('click');
+  expect(menu.attributes('aria-expanded')).toBe('true');
+  await wrapper
+    .get('[data-contact-center-destination="quality"]')
+    .trigger('click');
+  expect(menu.attributes('aria-expanded')).toBe('false');
+  expect(API.context).toHaveBeenCalledTimes(1);
+});

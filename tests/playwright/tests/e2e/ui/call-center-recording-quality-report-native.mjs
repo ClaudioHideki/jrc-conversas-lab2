@@ -169,6 +169,37 @@ export async function verifyNativeRecordingQualityReport(
       0
     );
     expect(new URL(page.url()).searchParams.get('recordings_mode')).toBeNull();
+    const navigation = page.locator('[data-contact-center-navigation]');
+    const openMenu = async () => {
+      if (!(await navigation.isVisible()))
+        await page.locator('header button[aria-expanded]').click();
+    };
+    await openMenu();
+    const qualityLink = navigation.locator(
+      '[data-contact-center-destination="quality"]'
+    );
+    const recordingsLink = navigation.locator(
+      '[data-contact-center-destination="jrc_contact_center_recordings"]'
+    );
+    await expect(recordingsLink).toHaveAttribute('aria-current', 'page');
+    await expect(qualityLink).toHaveAttribute('aria-current', 'false');
+    await qualityLink.click();
+    await expect(summary).toBeVisible();
+    await expect(page.locator('[data-recording-row]')).toHaveCount(20);
+    expect(new URL(page.url()).searchParams.get('recordings_mode')).toBe(
+      'quality'
+    );
+    if (info.project.name.startsWith('mobile'))
+      await expect(
+        page.locator('header button[aria-expanded]')
+      ).toHaveAttribute('aria-expanded', 'false');
+    await openMenu();
+    await expect(qualityLink).toHaveAttribute('aria-current', 'page');
+    await expect(recordingsLink).toHaveAttribute('aria-current', 'false');
+    await recordingsLink.click();
+    await expect(summary).toHaveCount(0);
+    await expect(page.locator('[data-recording-row]')).toHaveCount(20);
+    expect(new URL(page.url()).searchParams.get('recordings_mode')).toBeNull();
     const raw = execFileSync(
       'bundle',
       [
@@ -219,6 +250,8 @@ export async function verifyNativeRecordingQualityReport(
           page2_and_reload_verified: true,
           negative_segment_without_denominator_change: true,
           original_details_and_profile_withdrawal_reused: true,
+          native_sidebar_shortcut_and_return_verified: true,
+          native_sidebar_reuses_same_route: true,
           native_read_audit_ids: nativeReads.map(row => row.id),
           foreign_account_status: 401,
           inaccessible_unit_status: 404,

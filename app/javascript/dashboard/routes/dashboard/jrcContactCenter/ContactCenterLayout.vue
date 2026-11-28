@@ -135,6 +135,16 @@ const navigationGroups = computed(() => [
         visible: capabilities.value.recordings_view === true,
       },
       {
+        key: 'quality',
+        name: 'jrc_contact_center_recordings',
+        query: { recordings_mode: 'quality' },
+        label: t('JRC_CONTACT_CENTER.NAV.QUALITY_REPORT'),
+        icon: 'i-lucide-chart-pie',
+        visible:
+          capabilities.value.recordings_view === true &&
+          capabilities.value.recordings_listen === true,
+      },
+      {
         name: 'jrc_contact_center_reports',
         label: t('JRC_CONTACT_CENTER.NAV.REPORTS'),
         icon: 'i-lucide-chart-no-axes-combined',
@@ -191,7 +201,13 @@ const visibleGroups = computed(() =>
 const activeItem = computed(() =>
   visibleGroups.value
     .flatMap(group => group.items)
-    .find(item => item.name === route.name)
+    .find(
+      item =>
+        item.name === route.name &&
+        (item.name !== 'jrc_contact_center_recordings' ||
+          (item.query?.recordings_mode === 'quality') ===
+            (route.query?.recordings_mode === 'quality'))
+    )
 );
 
 let generation = 0;
@@ -299,10 +315,20 @@ onBeforeUnmount(() => {
             <div class="space-y-1">
               <RouterLink
                 v-for="item in group.items"
-                :key="item.name"
-                :to="{ name: item.name, params: { accountId } }"
+                :key="item.key || item.name"
+                :to="{
+                  name: item.name,
+                  params: { accountId },
+                  query: item.query || {},
+                }"
+                :data-contact-center-destination="item.key || item.name"
                 class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-n-slate-11 transition hover:bg-n-alpha-2 hover:text-n-slate-12"
-                active-class="bg-n-blue-2 text-n-blue-11 shadow-sm ring-1 ring-n-blue-5"
+                :active-class="
+                  activeItem === item
+                    ? 'bg-n-blue-2 text-n-blue-11 shadow-sm ring-1 ring-n-blue-5'
+                    : ''
+                "
+                :aria-current-value="activeItem === item ? 'page' : 'false'"
                 @click="mobileNavigationOpen = false"
               >
                 <span

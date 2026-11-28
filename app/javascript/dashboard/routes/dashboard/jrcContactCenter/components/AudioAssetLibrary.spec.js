@@ -1497,3 +1497,89 @@ describe('unit scoped private audio metadata UI', () => {
     );
   });
 });
+
+it('opens the existing native recorder directly without uploading or implicitly starting a recording', async () => {
+  const wrapper = fixture({ AudioCaptureDraft: true });
+  await flushPromises();
+  await wrapper.get('[data-new-audio-capture]').trigger('click');
+  await flushPromises();
+  expect(wrapper.find('[role="dialog"]').exists()).toBe(true);
+  expect(wrapper.findComponent(AudioCaptureDraft).exists()).toBe(true);
+  expect(wrapper.find('[data-audio-asset-file]').exists()).toBe(false);
+  expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+  expect(API.receiveAudioAsset).not.toHaveBeenCalled();
+});
+it('keeps explicit review and browser origin when the direct recorder uses the same native upload', async () => {
+  const wrapper = fixture({ AudioCaptureDraft: true });
+  await flushPromises();
+  await wrapper.get('[data-new-audio-capture]').trigger('click');
+  await flushPromises();
+  await wrapper
+    .get('[data-audio-asset-name]')
+    .setValue('SYNTHETIC direct capture');
+  const file = new File(['SYNTHETIC'.padEnd(60, '0')], 'direct.ogg', {
+    type: 'audio/ogg',
+  });
+  wrapper.findComponent(AudioCaptureDraft).vm.$emit('selected', file);
+  await flushPromises();
+  expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+  await wrapper.get('[data-review-audio-asset]').setValue(true);
+  API.receiveAudioAsset.mockResolvedValueOnce({
+    data: {
+      account_id: '1',
+      item: structuredClone(row),
+      received_version: {
+        ...structuredClone(row.latest_version),
+        source_kind: 'browser_capture',
+      },
+    },
+  });
+  await wrapper.get('[role="dialog"]').trigger('submit');
+  await flushPromises();
+  expect(API.receiveAudioAsset).toHaveBeenCalledOnce();
+  const [account, body] = API.receiveAudioAsset.mock.calls[0];
+  expect(account).toBe('1');
+  expect(body.get('source_kind')).toBe('browser_capture');
+  expect(body.get('unit_id')).toBe('10');
+  expect(body.get('file')).toBe(file);
+});
+it('keeps the direct recorder unavailable before native upload limits finish loading', async () => {
+  API.audioAssets.mockImplementationOnce(() => new Promise(() => {}));
+  const wrapper = fixture({ AudioCaptureDraft: true });
+  await flushPromises();
+  expect(wrapper.get('[data-new-audio-capture]').element.disabled).toBe(true);
+  await wrapper.get('[data-new-audio-capture]').trigger('click');
+  expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+  expect(API.receiveAudioAsset).not.toHaveBeenCalled();
+});
+it('removes the direct recording action when current configuration authority is withdrawn', async () => {
+  const wrapper = fixture({ AudioCaptureDraft: true });
+  await flushPromises();
+  expect(wrapper.find('[data-new-audio-capture]').exists()).toBe(true);
+  await wrapper.setProps({
+    context: { ...context, capabilities: { configure: false } },
+  });
+  await flushPromises();
+  expect(wrapper.find('[data-new-audio-capture]').exists()).toBe(false);
+  expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+  expect(API.receiveAudioAsset).not.toHaveBeenCalled();
+});
+it('does not retain the opened direct recorder after a native operational unit switch', async () => {
+  const wrapper = fixture({ AudioCaptureDraft: true });
+  await flushPromises();
+  const opening = wrapper.get('[data-new-audio-capture]').trigger('click');
+  API.audioAssets.mockResolvedValueOnce({
+    data: {
+      items: [],
+      meta: { page: 1, pages: 0, total: 0 },
+      max_upload_bytes: 1000,
+      archive_limits: { max_entries: 20, max_bytes: 1000 },
+    },
+  });
+  await wrapper.setProps({ unitId: '11' });
+  await opening;
+  await flushPromises();
+  expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+  expect(wrapper.findComponent(AudioCaptureDraft).exists()).toBe(false);
+  expect(API.receiveAudioAsset).not.toHaveBeenCalled();
+});

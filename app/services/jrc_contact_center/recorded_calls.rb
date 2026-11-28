@@ -18,7 +18,7 @@ class JrcContactCenter::RecordedCalls
   def records
     authorize!(:view)
     native = Pabx::Access.new(account: @account, user: @member.user).records
-    native.where(has_recording: true, external_unique_id: calls.select(:external_session_id))
+    native.where(has_recording: true, external_unique_id: calls.select(:external_session_id).distinct)
   end
 
   def calls
@@ -49,7 +49,7 @@ class JrcContactCenter::RecordedCalls
 
   def with_operating_filters(relation, params)
     %w[unit queue].each do |kind|
-      next if params["#{kind}_id"].blank?
+      next if filter_missing?(params["#{kind}_id"])
 
       scope = @access.public_send("#{kind}s")
       id = scope.find(identifier!(params["#{kind}_id"])).id
@@ -109,9 +109,14 @@ class JrcContactCenter::RecordedCalls
     value
   end
 
+  # false, arrays and objects are supplied invalid values, never default scope.
+  def filter_missing?(value)
+    value.nil? || value == ''
+  end
+
   def period_for(params)
-    last = params[:to].present? ? Date.iso8601(params[:to].to_s) : Time.zone.today
-    first = params[:from].present? ? Date.iso8601(params[:from].to_s) : last - 6
+    last = filter_missing?(params[:to]) ? Time.zone.today : Date.iso8601(params[:to].to_s)
+    first = filter_missing?(params[:from]) ? last - 6 : Date.iso8601(params[:from].to_s)
     raise ArgumentError, 'invalid recording period' if first > last || (last - first).to_i >= 31
 
     first.in_time_zone.beginning_of_day..last.in_time_zone.end_of_day

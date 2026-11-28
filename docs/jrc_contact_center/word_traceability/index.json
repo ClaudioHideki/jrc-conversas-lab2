@@ -4262,7 +4262,7 @@
     "not_full_global_implementation_estimate": true
   },
   "figure10_proven_literal_percentage": 56.0,
-  "Parte1_proven_formal_lower_bound_percentage": 14.98,
+  "Parte1_proven_formal_lower_bound_percentage": 15.34,
   "full_global_reaudit_complete": false,
   "typed_durable_delivery_candidate": {
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
@@ -4483,13 +4483,13 @@
     "whole_figure_or_Part1_accepted": false
   },
   "current_unique_requirement_counts": {
-    "parcial": 413,
+    "parcial": 411,
+    "implementado": 85,
     "bloqueado": 24,
-    "implementado": 83,
     "pendente": 33,
     "implementado_sem_aceite": 1
   },
-  "current_literal_acceptance_percentage": 14.62,
+  "current_literal_acceptance_percentage": 15.34,
   "historical_literal_functional_progress_before_this_acceptance": {
     "document": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
     "sha256": "acd9ce46db35889fb85d9ac62695cc3258c7d531c6f9357990c36d5667dcded6",
@@ -4682,5 +4682,39 @@
     "same_292_Chrome_cases_all_authority_assertions_preserved": true,
     "permissions_APIs_migrations_or_business_rules_changed": false,
     "parent_or_new_candidate_accepted": false
+  },
+  "historical_counts_before_calendar_precedence_literal": {
+    "parcial": 413,
+    "bloqueado": 24,
+    "implementado": 83,
+    "pendente": 33,
+    "implementado_sem_aceite": 1
+  },
+  "current_reused_calendar_precedence_literal_acceptance": {
+    "document": "docs/jrc_contact_center/literal_calendar_precedence_acceptance_20261128.json",
+    "sha256": "6dd56d24bec3252bb1b184fc5af761d082a0d74253d97f0680e72c5a35e2de0d",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "only_new_literal_clause": "D1-P0091-C01",
+    "existing_native_cases_reused_not_added": 20,
+    "existing_actual_Chrome_modes_reused_not_added": 4,
+    "existing_source_files_verified_unchanged": 13,
+    "provider_or_whole_figure_acceptance": false
+  },
+  "unique_status_resolution": "Conservative per-ID status across all referenced figures/global requirements: bloqueado, pendente, parcial, implementado_sem_aceite, implementado.",
+  "current_reused_audio_folder_identity_literal_acceptance": {
+    "document": "docs/jrc_contact_center/literal_audio_folder_identity_acceptance_20261128.json",
+    "sha256": "01066822d96ea5252dafd82d2c132452f58347bf490d9d6c4fa5b13a8568ecee",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "unique_IDs": [
+      "D2-P0156-C01"
+    ],
+    "whole_figure_accepted": false
+  },
+  "next_native_direct_audio_capture_entry_candidate": {
+    "document": "docs/jrc_contact_center/native_direct_audio_capture_entry_candidate_20261128.json",
+    "sha256": "0ab3c27c991ffbc7076df7eb3a9724e14f377ed5273f0665d20dd666de44c2b7",
+    "new_Vue_prepared_not_executed": 5,
+    "same_four_original_native_capture_Chrome_cases_extended": true,
+    "whole_figure_accepted": false
   }
 }
