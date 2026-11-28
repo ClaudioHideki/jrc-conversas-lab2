@@ -1,0 +1,15 @@
+{
+  "source_parent": "fca6d076e5f887f8fe44b65688e6b747173f8173",
+  "actual_failed_run": 46128578966,
+  "actual_failed_job": 140928548744,
+  "sanitized_log_sha256": "57387909d563a8765c46ce3f97e8c648ae465e4d655981d568fda32c7a8677c5",
+  "cause": "Two current-workflow positive samples still supplied 296 after four actual new Relationship Chrome cases increased the strict gate to300.",
+  "minimal_correction": "Update only those current-workflow samples to300, rename the positive description accurately and add an explicit rejection of296.",
+  "counter_guard_AST_and_all_19_existing_negative_or_structure_tests_preserved": true,
+  "external_static_controls_before": 20,
+  "external_static_controls_after": 21,
+  "new_296_rejection_keeps_the_missing_four_modes_blocked": true,
+  "no_Rails_Vue_assets_or_Chrome_executed_in_failed_run": true,
+  "workflow_product_permissions_migrations_and_data_changed": false,
+  "native_or_Chrome_acceptance": false
+}
