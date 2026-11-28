@@ -130,6 +130,19 @@ it.each([
   }
 );
 
+it('offers a retry when the first shared file request failed before attachments were cached', async () => {
+  dispatch.mockResolvedValueOnce(false);
+  const wrapper = mount(InboxConversationTools, {
+    props: { accountId: 1, conversationId: 21, tool: 'shared_files' },
+    global: { plugins: [store] },
+  });
+  await flushPromises();
+  await wrapper.get('[role="alert"] button').trigger('click');
+  await flushPromises();
+  expect(dispatch).toHaveBeenCalledTimes(2);
+  expect(wrapper.findComponent({ name: 'SharedFiles' }).exists()).toBe(true);
+});
+
 it('does not mount native widgets or request data for a stale conversation from another Account', async () => {
   const wrapper = mount(InboxConversationTools, {
     props: { accountId: 2, conversationId: 21, tool: 'contact_notes' },

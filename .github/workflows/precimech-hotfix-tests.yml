@@ -82,6 +82,7 @@ jobs:
           spec/controllers/api/v1/accounts/conversations/whatsapp_eligible_retry_spec.rb
           spec/controllers/api/v1/accounts/conversations/whatsapp_batch_spec.rb
           spec/controllers/api/v1/accounts/conversations/messages_controller_spec.rb
+          spec/models/jrc_broker_webhook_obligation_spec.rb
           spec/services/whatsapp/send_on_whatsapp_service_spec.rb
           spec/services/whatsapp/providers/whatsapp_cloud_service_spec.rb
           spec/services/whatsapp/oneoff_campaign_service_spec.rb
@@ -123,6 +124,7 @@ jobs:
           app/javascript/dashboard/routes/dashboard/inbox/InboxList.spec.js
           app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js
           app/javascript/dashboard/routes/dashboard/inbox/InboxView.spec.js
+          app/javascript/dashboard/routes/dashboard/inbox/InboxConversationTools.spec.js
           app/javascript/dashboard/helper/specs/ReconnectService.spec.js
           app/javascript/dashboard/store/modules/specs/conversations/listLoading.spec.js
           app/javascript/dashboard/store/modules/conversations/specs/accessRevocation.spec.js

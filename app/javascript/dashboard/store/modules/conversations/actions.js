@@ -170,29 +170,29 @@ const actions = {
   },
 
   fetchAllAttachments: async (
-    { commit, state, rootGetters },
+    { commit, dispatch, state, rootGetters },
     conversationId
   ) => {
     const access = accessKey(state, rootGetters);
-    let attachments = [];
-
     try {
       const { data } = await ConversationApi.getAllAttachments(conversationId);
-      attachments = data.payload;
+      if (access !== accessKey(state, rootGetters)) return false;
+      commit(types.SET_ALL_ATTACHMENTS, {
+        id: conversationId,
+        data: data.payload,
+      });
+      return true;
     } catch (error) {
-      // in case of error, log the error and continue
+      if (access !== accessKey(state, rootGetters)) return false;
+      if (accessDenied(error)) {
+        dispatch('revokeConversationAccess', conversationId);
+        return false;
+      }
       Sentry.setContext('Conversation', {
         id: conversationId,
       });
       Sentry.captureException(error);
-    } finally {
-      // we run the commit even if the request fails
-      // this ensures that the `attachment` variable is always present on chat
-      if (access === accessKey(state, rootGetters))
-        commit(types.SET_ALL_ATTACHMENTS, {
-          id: conversationId,
-          data: attachments,
-        });
+      return false;
     }
   },
 
