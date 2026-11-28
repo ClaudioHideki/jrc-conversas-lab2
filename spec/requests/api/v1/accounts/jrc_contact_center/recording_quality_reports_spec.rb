@@ -38,18 +38,28 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     size.times { |index| another_record("scale-#{index}") }
   end
 
-  # Failure-only details: class and source location, never rows, source text,
-  # credentials, SQL, user headers or exception payloads.
-  def scale_request_diagnostic
-    raised = []
-    observer = TracePoint.new(:raise) do |point|
-      error = point.raised_exception
-      next unless error.is_a?(ArgumentError) || error.is_a?(JrcContactCenter::OperationError)
+  # Failure-only SQL timings and application locations; never SQL text,
+  # bindings, rows, headers, credentials or exception payloads.
+  def scale_query_diagnostic(payload, duration)
+    app_path = Rails.root.join('app').to_s
+    sites = caller_locations.select { |site| site.path.start_with?(app_path) }.first(4)
+    { duration_ms: duration.round(2), sql_sha256: Digest::SHA256.hexdigest(payload.fetch(:sql)),
+      bind_count: Array(payload[:binds]).length, failure_class: payload.dig(:exception, 0),
+      source: sites.map { |site| { file: site.path.delete_prefix(Rails.root.to_s), line: site.lineno } } }
+  end
 
-      raised << { type: error.class.name, file: point.path.delete_prefix(Rails.root.to_s), line: point.lineno }
+  def scale_request_diagnostic
+    queries = []
+    listener = lambda do |_name, started, finished, _id, payload|
+      duration = (finished - started) * 1_000
+      queries << scale_query_diagnostic(payload, duration) if duration >= 50 || payload[:exception]
     end
-    observer.enable { get path, headers: headers, params: { page: 2 } }
-    { status: response.status, error: response.parsed_body['error'], raised: raised.last(12) }
+    timeout = ApplicationRecord.connection.select_value('SHOW statement_timeout')
+    ActiveSupport::Notifications.subscribed(listener, 'sql.active_record') do
+      get path, headers: headers, params: { page: 2 }
+    end
+    { status: response.status, error: response.parsed_body['error'], statement_timeout: timeout,
+      slow_queries: queries.max_by(8) { |query| query.fetch(:duration_ms) } }
   end
 
   before do

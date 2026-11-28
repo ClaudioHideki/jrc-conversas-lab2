@@ -1,0 +1,42 @@
+{
+  "source_parent": "9166ab0556da3321e9cf814a0231787caa8336f3",
+  "failed_run": 46107041543,
+  "failed_job": 140862013660,
+  "artifact": 15248972170,
+  "artifact_sha256": "5b664c8f7991a414c1182eee5a7a9252fd4dafc2d5af9cc902471c44cbe1cb49",
+  "reports": {
+    "call-center-rspec.json": {
+      "sha256": "feccf1eac3b39cd3c70f82b47a3725e43828edffa5d0d00da490c67e8ed3634f",
+      "summary": {
+        "duration": 857.597488739,
+        "example_count": 3505,
+        "failure_count": 1,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "failure": {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb[1:3]",
+        "message": "{\"status\":422,\"error\":\"The request took too long to complete. Please try again.\",\"raised\":[]}"
+      }
+    },
+    "call-center-quality-scale-diagnostic.json": {
+      "sha256": "1f0e53a7030e916387c8c0edd2a91efb561cad94f45a125c462c850946bd2927",
+      "summary": {
+        "duration": 111.722173887,
+        "example_count": 1,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    }
+  },
+  "confirmed_failure": "Native ActiveRecord::QueryCanceled is rendered by RequestExceptionHandler as the database query timeout message.",
+  "existing_database_statement_timeout": "14s; not changed",
+  "remaining_question": "Which native SQL operation crosses the unchanged limit in the full regression.",
+  "bounded_diagnostic": "Only SQL duration, digest, bind count, exception class and up to four application file/line locations; at most eight events.",
+  "SQL_text_bind_values_rows_or_credentials_logged": false,
+  "production_or_runtime_code_changed": false,
+  "all_HTTP_requests_assertions_5000_rows_scope_checks_and_workflow_steps_preserved": true,
+  "no_timeout_increase_test_removal_or_retry": true,
+  "native_or_Chrome_accepted": false
+}
