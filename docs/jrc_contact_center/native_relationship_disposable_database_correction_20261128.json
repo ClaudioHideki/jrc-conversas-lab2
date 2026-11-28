@@ -1,0 +1,36 @@
+{
+  "parent": "7ee49798f3417224b750569ba34fe786e4732035",
+  "failed_run": 46140692246,
+  "artifact": 15262676380,
+  "artifact_sha256": "1818fd9aa552fa180d83ad2bd2894310ff083eeb673e7159e7c0afe3bc87a679",
+  "cause": "The dedicated RSpec step set PGDATABASE; the native Rails config reads POSTGRES_DATABASE, so the inherited shared database correctly failed the ownership guard before all three cases.",
+  "correction": "Set POSTGRES_DATABASE to the existing corporate_gratuity_disposable database, matching the already successful native concurrency step.",
+  "ownership_guard_unchanged": true,
+  "all_three_cases_and_all_steps_retained": true,
+  "runtime_permissions_migrations_changed": false,
+  "reports": [
+    {
+      "path": "tmp/call-center-recording-relationship-concurrency-rspec.json",
+      "sha256": "c5e2ea2da573cd1e83583e317834f56d08acaa98b83ed2385c20d736516c96f7",
+      "summary": {
+        "duration": 0.014496837,
+        "example_count": 3,
+        "failure_count": 3,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    },
+    {
+      "path": "tmp/call-center-recording-relationship-preflight.json",
+      "sha256": "0453b39c1671c31bb752c518299c96217a2e7f0268bb3823fd0251fce388f533",
+      "summary": {
+        "duration": 52.49777047,
+        "example_count": 51,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    }
+  ],
+  "native_or_Chrome_accepted": false
+}
