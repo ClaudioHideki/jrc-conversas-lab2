@@ -28,10 +28,18 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
 
   def self.relationship_portfolios!(values, viewer, contact)
     selected = JrcRelationship::Assignment.create!(**values, contact: contact)
-    20.times { JrcRelationship::Assignment.create!(**values, company_id: contact.company_id) }
-    hidden = JrcRelationship::Assignment.create!(**values, owner: viewer.user, contact: contact)
-    { assignment_id: selected.id.to_s, private_assignment_id: hidden.id.to_s, authorized_count: 21,
+    named_portfolio_groups!(values, selected)
+    hidden = JrcRelationship::Assignment.create!(**values, owner: viewer.user, company_id: contact.company_id)
+    { assignment_id: selected.id.to_s, private_assignment_id: hidden.id.to_s, authorized_count: 1, named_group_count: 2,
       contact_id: contact.id.to_s, company_id: contact.company_id.to_s, business_unit_id: values.fetch(:business_unit).id.to_s }
+  end
+
+  def self.named_portfolio_groups!(values, assignment)
+    2.times do |index|
+      group = JrcRelationship::PortfolioGroup.create!(**values.except(:status), name: "SYNTHETIC recording group #{index}",
+                                                      status: 'active', visibility: 'private')
+      group.customer_links.create!(account: values.fetch(:account), assignment: assignment, active: true)
+    end
   end
 
   def self.commercial!(account, operator, viewer, contact)
@@ -87,5 +95,6 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
                   record.account_id == account_id, ids.include?(record.id), operator.agent?]
     raise 'Exact owned recording customer context identities required' unless identities.all?
   end
-  private_class_method :commercial!, :owned!, :owned_runtime?, :stage!, :deal!, :projects!, :relationship!, :relationship_portfolios!
+  private_class_method :commercial!, :owned!, :owned_runtime?, :stage!, :deal!, :projects!, :relationship!, :relationship_portfolios!,
+                       :named_portfolio_groups!
 end

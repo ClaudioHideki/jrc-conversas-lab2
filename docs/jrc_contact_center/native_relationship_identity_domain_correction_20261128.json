@@ -1,0 +1,31 @@
+{
+  "parent": "efa1528d145399d0210e5759756ebbf60d6648c2",
+  "CI": 46137717912,
+  "artifact": 15261315501,
+  "artifact_sha256": "b8f2d99e4a9ef90d3e5cb23b0204e4cf7f34aa58a113029179421b47f0a94d12",
+  "actual_RSpec": {
+    "examples": 51,
+    "passed": 48,
+    "failed": 3,
+    "pending": 0,
+    "outside_errors": 0,
+    "all_six_native_model_cases_passed": true
+  },
+  "confirmed_native_invariants": [
+    "Assignment has one served company OR contact identity; existing rel_unique_company/contact indexes are unchanged",
+    "PortfolioGroup and PortfolioGroupAssignment represent multiple named operational portfolios sharing that same native identity",
+    "No new identity, group membership, permission, index or migration is created by the production recording action"
+  ],
+  "correction": [
+    "Use legitimate company/contact assignments for cross-target idempotency and denied-colleague tests",
+    "Exercise the actual second-page empty boundary with two authorized identities and two real named portfolio groups instead of inserting impossible duplicate assignments",
+    "The real browser fixture has one allowed contact identity, one denied company identity and two existing named groups; a read-only PostgreSQL witness verifies group count, links and exact link hash remain unchanged",
+    "Native labels describe choosing a client/contact relationship without copying a named portfolio",
+    "Run unchanged full Ruby gate after the existing targeted 51-case native gate; all103 steps and all commands preserved",
+    "Correct stale literal progress percentages to87/554 without status promotion"
+  ],
+  "same_case_counts_and_all_permission_idempotency_and_rollback_checks_preserved": true,
+  "real_browser_success_not_claimed_for_nonexistent_twenty_first_duplicate_assignment": true,
+  "new_native_test_cases": 0,
+  "native_or_Chrome_accepted": false
+}

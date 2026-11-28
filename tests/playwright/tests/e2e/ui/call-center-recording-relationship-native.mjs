@@ -76,19 +76,26 @@ export async function verifyNativeRecordingRelationship(parent, info, target) {
     const source = await preview.json();
     expect(source.user_id).toBe(before.actor_id);
     expect(source.call_id).toBe(record.call_id);
-    expect(source.meta.total).toBe(21);
+    expect(source.meta).toEqual({ page: 1, per_page: 20, total: 1, pages: 1 });
+    expect(source.items.map(row => row.id)).toEqual([destination.assignment_id]);
+    expect(before.native_portfolio_group_count).toBe(2);
+    expect(before.native_portfolio_link_count).toBe(2);
     expect(source.items.map(row => row.id)).not.toContain(destination.private_assignment_id);
     const dialog = page.getByRole('dialog').filter({ has: page.locator('[data-recording-relationship-editor]') });
     await expect(dialog).toBeVisible();
     const select = dialog.locator('[data-recording-relationship-portfolio]');
     await expect(select).toHaveValue('');
     expect(posts).toHaveLength(0);
-    const pageTwo = page.waitForResponse(response => response.request().method() === 'GET' && new URL(response.url()).pathname === path && new URL(response.url()).searchParams.get('page') === '2');
-    await dialog.locator('[data-recording-relationship-next]').click();
-    expect((await pageTwo).status()).toBe(200);
+    // Native Assignment is unique per company/contact. Multiple named groups
+    // share this same identity; they never manufacture extra destination rows.
+    const pageTwo = await page.request.get(`${origin}${path}?page=2`, { headers: target.operator });
+    expect(pageTwo.status()).toBe(200);
+    const secondPage = await pageTwo.json();
+    expect(secondPage.meta).toEqual({ page: 2, per_page: 20, total: 1, pages: 1 });
+    expect(secondPage.items).toEqual([]);
     await expect(select.locator('option')).toHaveCount(2);
-    await dialog.locator('[data-recording-relationship-previous]').click();
-    await expect(select.locator(`option[value="${destination.assignment_id}"]`)).toBeAttached();
+    await expect(dialog.locator('[data-recording-relationship-next]')).toHaveCount(0);
+    await expect(select).toHaveValue('');
     await select.selectOption(destination.assignment_id);
     const title = `SYNTHETIC recording Relationship ${info.project.name}`;
     await dialog.locator('[data-native-relationship-activity-title]').fill(title);
@@ -149,12 +156,14 @@ export async function verifyNativeRecordingRelationship(parent, info, target) {
     await capture('current-profile-denied');
     const final = witness();
     expect(final.activities).toEqual(after.activities);
-    for (const key of ['qualifications_semantic_sha256', 'ending_attempt_count', 'native_project_tasks', 'PABX_commands']) expect(final[key]).toBe(before[key]);
+    for (const key of ['qualifications_semantic_sha256', 'ending_attempt_count', 'native_project_tasks', 'PABX_commands', 'native_portfolio_group_count', 'native_portfolio_link_count', 'native_portfolio_links_sha256']) expect(final[key]).toBe(before[key]);
     expect(errors).toEqual([]);
     expect(prohibited).toEqual([]);
     fs.writeFileSync(`.codex/call-center-native-e2e/${info.project.name}-recording-relationship.json`, JSON.stringify({
       sha: process.env.GITHUB_SHA, project: info.project.name, synthetic: true, actual_dark_theme: dark,
-      source, receipt, explicit_portfolio_selection: true, native_form_reused: true, native_pagination_verified: true,
+      source, receipt, explicit_portfolio_selection: true, native_form_reused: true, native_pagination_verified: false,
+      native_unique_identity_verified: true, named_groups_preserved: true,
+      native_out_of_range_page: { status: pageTwo.status(), meta: secondPage.meta, items: secondPage.items },
       persisted_and_reloaded_native_activity: true, original_actor_nonadministrator: true,
       native_activity_dialog_reloaded: true, native_activity_profile_withdrawal_cleared: true,
       replay_status: replay.status(), conflict_status: conflict.status(), denied_status: denied.status(),

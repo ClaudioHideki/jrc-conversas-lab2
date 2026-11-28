@@ -76,8 +76,8 @@ RSpec.describe 'Native reviewed Relationship activity from a recording', :pabx, 
 
   it 'does not reuse the same request key in another authorized portfolio' do
     write_relationship
-    other = assignment.dup
-    other.save!
+    other = JrcRelationship::Assignment.create!(account: account, contact: caller_contact, owner: actor,
+                                                business_unit: business, status: 'active')
     write_relationship(relationship_input.merge('assignment_id' => other.id.to_s))
     expect(response).to have_http_status(:conflict)
     expect(activities.count).to eq(1)
@@ -97,18 +97,24 @@ RSpec.describe 'Native reviewed Relationship activity from a recording', :pabx, 
     expect(direct.actions.sole.activity_id).to eq(activities.sole.id)
   end
 
-  it 'pages multiple authorized operational portfolios without replacing or auto-selecting any of them' do
-    caller_contact.update!(company: nil)
-    source_call.update!(company: nil)
-    assignment.update!(company: nil, contact: caller_contact)
-    20.times { assignment.dup.save! }
+  it 'pages the two native customer identities without copying them for multiple operational portfolio groups' do
+    direct = JrcRelationship::Assignment.create!(account: account, contact: caller_contact, owner: actor,
+                                                 business_unit: business, status: 'active')
+    2.times do |index|
+      group = JrcRelationship::PortfolioGroup.create!(account: account, owner: actor, business_unit: business,
+                                                      name: "SYNTHETIC caller group #{index}", status: 'active', visibility: 'private')
+      group.customer_links.create!(account: account, assignment: direct, active: true)
+    end
     unrelated = JrcRelationship::Assignment.create!(account: account, contact: create(:contact, account: account),
                                                     owner: actor, business_unit: business, status: 'active')
+    get path, headers: actor.create_new_auth_token
+    expect(response.parsed_body.fetch('items').map { |item| item.fetch('id') }).to match_array([assignment.id.to_s, direct.id.to_s])
+    expect(response.parsed_body.fetch('items').map { |item| item.fetch('id') }).not_to include(unrelated.id.to_s)
     get path, headers: actor.create_new_auth_token, params: { page: 2 }
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body.fetch('meta')).to eq('page' => 2, 'per_page' => 20, 'total' => 21, 'pages' => 2)
-    expect(response.parsed_body.fetch('items').length).to eq(1)
-    expect(response.parsed_body.fetch('items').map { |item| item.fetch('id') }).not_to include(unrelated.id.to_s)
+    expect(response.parsed_body.fetch('meta')).to eq('page' => 2, 'per_page' => 20, 'total' => 2, 'pages' => 1)
+    expect(response.parsed_body.fetch('items')).to be_empty
+    expect(JrcRelationship::PortfolioGroupAssignment.where(account: account, assignment: direct).count).to eq(2)
     expect(activities).to be_empty
   end
 
@@ -168,8 +174,8 @@ RSpec.describe 'Native reviewed Relationship activity from a recording', :pabx, 
   it 'does not disclose or write an unauthorized colleague portfolio' do
     input = relationship_input.deep_dup
     colleague = create(:user, :contact_center_eligible, account: account)
-    hidden = assignment.dup
-    hidden.update!(owner: colleague)
+    hidden = JrcRelationship::Assignment.create!(account: account, contact: caller_contact, owner: colleague,
+                                                 business_unit: business, status: 'active')
     get path, headers: actor.create_new_auth_token
     expect(response.parsed_body.fetch('items').map { |item| item.fetch('id') }).not_to include(hidden.id.to_s)
     write_relationship(input.merge('assignment_id' => hidden.id.to_s))

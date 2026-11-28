@@ -13,7 +13,14 @@ class JrcContactCenter::SyntheticRecordingRelationshipEvidence
     ).order(:id).map { |activity| present(activity, baseline) }
     baseline.slice(:source_sha, :account_id, :recording_id, :call_session_id, :actor_id, :actor_role, :read_only_witness,
                    :qualifications_semantic_sha256, :ending_attempt_count, :native_project_tasks, :PABX_commands)
-            .merge(activity_count: rows.length, activities: rows, no_external_homologation: true)
+            .merge(activity_count: rows.length, activities: rows, no_external_homologation: true, **portfolio_groups(account))
+  end
+
+  def self.portfolio_groups(account)
+    links = JrcRelationship::PortfolioGroupAssignment.where(account: account).order(:id)
+                                                     .pluck(:id, :portfolio_group_id, :assignment_id, :active)
+    { native_portfolio_group_count: JrcRelationship::PortfolioGroup.where(account: account).count,
+      native_portfolio_link_count: links.length, native_portfolio_links_sha256: Digest::SHA256.hexdigest(links.to_json) }
   end
 
   def self.present(activity, baseline)
@@ -35,5 +42,5 @@ class JrcContactCenter::SyntheticRecordingRelationshipEvidence
       user_id: activity.user_id.to_s, company_id: activity.company_id&.to_s, contact_id: activity.contact_id&.to_s,
       business_unit_id: activity.business_unit_id&.to_s, due_at: activity.due_at.iso8601 }
   end
-  private_class_method :present, :activity_details
+  private_class_method :present, :activity_details, :portfolio_groups
 end

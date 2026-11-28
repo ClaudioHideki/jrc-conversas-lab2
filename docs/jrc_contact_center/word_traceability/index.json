@@ -4262,7 +4262,7 @@
     "not_full_global_implementation_estimate": true
   },
   "figure10_proven_literal_percentage": 56.0,
-  "Parte1_proven_formal_lower_bound_percentage": 15.34,
+  "Parte1_proven_formal_lower_bound_percentage": 15.7,
   "full_global_reaudit_complete": false,
   "typed_durable_delivery_candidate": {
     "document": "docs/jrc_contact_center/ending_typed_delivery_candidate_20261125.json",
@@ -4489,7 +4489,7 @@
     "pendente": 33,
     "implementado_sem_aceite": 1
   },
-  "current_literal_acceptance_percentage": 15.34,
+  "current_literal_acceptance_percentage": 15.7,
   "historical_literal_functional_progress_before_this_acceptance": {
     "document": "docs/jrc_contact_center/literal_functional_progress_current_20261125.json",
     "sha256": "acd9ce46db35889fb85d9ac62695cc3258c7d531c6f9357990c36d5667dcded6",
