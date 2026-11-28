@@ -398,7 +398,10 @@ onBeforeUnmount(() => {
                   }}
                 </p>
                 <p
-                  v-if="agent.pause_notice.exceeded"
+                  v-if="
+                    agent.pause_notice.exceeded &&
+                    agent.pause_notice.time_alert_enabled !== false
+                  "
                   role="status"
                   class="mt-1 text-n-amber-11"
                 >
@@ -567,7 +570,10 @@ onBeforeUnmount(() => {
           <p v-else>{{ t('JRC_CONTACT_CENTER.COMMON.EMPTY') }}</p>
         </section>
         <p
-          v-if="selectedAgent.pause_notice?.exceeded"
+          v-if="
+            selectedAgent.pause_notice?.exceeded &&
+            selectedAgent.pause_notice.time_alert_enabled !== false
+          "
           role="status"
           class="rounded-lg bg-n-amber-2 p-3 text-n-amber-11"
         >

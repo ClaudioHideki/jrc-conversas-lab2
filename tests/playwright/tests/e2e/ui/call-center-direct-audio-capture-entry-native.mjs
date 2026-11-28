@@ -17,6 +17,6 @@ export async function reviewDirectAudioCaptureEntry(page, expect) {
   await expect(
     dialog.getByRole('button', { name: 'Salvar', exact: true })
   ).toBeDisabled();
-  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
   await expect(dialog).toHaveCount(0);
 }

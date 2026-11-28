@@ -1,7 +1,7 @@
 # A value object for the existing AgentStateManager, not a second agent registry.
 class JrcContactCenter::PauseReasonDefinition
   FIELDS = %w[code name category description active minimum_minutes default_minutes maximum_minutes unit_ids custom_role_ids].freeze
-  OPTIONAL_FIELDS = %w[justification_required approval_required].freeze
+  OPTIONAL_FIELDS = %w[justification_required approval_required time_alert_enabled].freeze
   ALL_FIELDS = (FIELDS + OPTIONAL_FIELDS).freeze
   TIMES = %w[minimum_minutes default_minutes maximum_minutes].freeze
 

@@ -165,6 +165,10 @@ const destinations = [
   'notifications',
   'nico',
 ];
+const reasonName = code =>
+  reasons.value.find(reason => reason.code === code)?.name || code;
+const ruleDestinations = row =>
+  row.actions.filter(action => destinations.includes(action.kind));
 </script>
 
 <template>
@@ -554,6 +558,58 @@ const destinations = [
             {{ text('SEPARATOR') }}
             {{ text(`TIMINGS.${row.timing}`) }}
           </p>
+          <dl
+            class="mt-3 grid min-w-0 gap-2 text-sm sm:grid-cols-2"
+            data-ending-rule-summary
+          >
+            <div class="min-w-0">
+              <dt class="text-xs text-n-slate-11">{{ text('REASON') }}</dt>
+              <dd class="break-words" data-ending-rule-summary-reason>
+                {{ reasonName(row.reason_code) }}
+              </dd>
+            </div>
+            <div v-if="row.execution_mode" class="min-w-0">
+              <dt class="text-xs text-n-slate-11">
+                {{ text('EXECUTION_MODE') }}
+              </dt>
+              <dd class="break-words" data-ending-rule-summary-mode>
+                {{ text(`MODES.${row.execution_mode}`) }}
+              </dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="text-xs text-n-slate-11">
+                {{ text('LIST_DESTINATIONS') }}
+              </dt>
+              <dd
+                class="flex flex-wrap gap-1"
+                data-ending-rule-summary-destinations
+              >
+                <div
+                  v-for="action in ruleDestinations(row)"
+                  :key="action.kind"
+                  class="rounded-md bg-n-alpha-2 px-2 py-1 text-xs"
+                  :data-ending-rule-summary-destination="action.kind"
+                >
+                  {{ text(`DESTINATIONS.${action.kind}`) }}
+                </div>
+                <div
+                  v-if="!ruleDestinations(row).length"
+                  class="text-n-slate-11"
+                >
+                  {{ text('LIST_NO_DESTINATIONS') }}
+                </div>
+              </dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="text-xs text-n-slate-11">{{ text('CONDITIONS') }}</dt>
+              <dd class="break-words" data-ending-rule-summary-conditions>
+                {{
+                  row.conditions.outcome_codes.join(', ') ||
+                  text('LIST_NO_CONDITIONS')
+                }}
+              </dd>
+            </div>
+          </dl>
           <p v-if="!row.execution_mode" class="my-2 text-xs text-n-amber-11">
             {{ text('MODE_REVIEW_REQUIRED') }}
           </p>

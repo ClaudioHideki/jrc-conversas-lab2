@@ -1,7 +1,11 @@
+import { verifyNativePauseTimeAlert } from './call-center-pause-time-alert-native.mjs';
 import { reviewFolderOrganizationEntry } from './call-center-folder-organization-entry-native.mjs';
 import { reviewDirectAudioCaptureEntry } from './call-center-direct-audio-capture-entry-native.mjs';
 import { verifyNativePabxReadiness } from './call-center-pabx-readiness-native.mjs';
-import { verifyNativeAuditQueryFailure, preserveNativeAuditQueryRecovery } from './call-center-audit-error-reference-native.mjs';
+import {
+  verifyNativeAuditQueryFailure,
+  preserveNativeAuditQueryRecovery,
+} from './call-center-audit-error-reference-native.mjs';
 import { measureLocatorTextContrast as contrast } from './call-center-text-contrast.mjs';
 import { verifyAudioRowPreview } from './call-center-audio-row-native.mjs';
 import { verifyNativePauseCatalogEditor } from './call-center-pause-catalog-native.mjs';
@@ -1275,19 +1279,34 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
   );
   const localAlerts = page.locator('[data-administration-pending-alerts]');
   await expect(localAlerts).toBeVisible();
-  await expect(localAlerts.getByRole('heading', { name: 'Alertas e pendências' })).toBeVisible();
-  await expect(localAlerts.locator('[data-native-provider-alert]')).toContainText(
-    'A conexão PABX ainda não está configurada nesta conta.'
+  await expect(
+    localAlerts.getByRole('heading', { name: 'Alertas e pendências' })
+  ).toBeVisible();
+  await expect(
+    localAlerts.locator('[data-native-provider-alert]')
+  ).toContainText('A conexão PABX ainda não está configurada nesta conta.');
+  const providerSource = localAlerts.locator(
+    '[data-native-provider-alert-source]'
   );
-  const providerSource = localAlerts.locator('[data-native-provider-alert-source]');
-  await expect(providerSource).toHaveAttribute('href', /control-desk\/integrations(?:\?|$)/);
+  await expect(providerSource).toHaveAttribute(
+    'href',
+    /control-desk\/integrations(?:\?|$)/
+  );
   const providerAlertHref = await providerSource.getAttribute('href');
-  const alertContrast = await contrast(localAlerts.locator('[data-native-provider-alert] p'));
+  const alertContrast = await contrast(
+    localAlerts.locator('[data-native-provider-alert] p')
+  );
   expect(alertContrast.ratio).toBeGreaterThanOrEqual(4.5);
   await providerSource.click();
-  await expect(page.locator('[data-administration-section] h2')).toHaveText('Integrações');
-  await page.getByText('Voltar às configurações do Call Center', { exact: true }).click();
-  await expect(page.locator('[data-administration-pending-alerts]')).toBeVisible();
+  await expect(page.locator('[data-administration-section] h2')).toHaveText(
+    'Integrações'
+  );
+  await page
+    .getByText('Voltar às configurações do Call Center', { exact: true })
+    .click();
+  await expect(
+    page.locator('[data-administration-pending-alerts]')
+  ).toBeVisible();
   await expect(page.locator('[data-control-desk] > header')).toHaveCount(1);
   await expect(page.locator('[data-control-desk] > header')).not.toHaveCSS(
     'background-color',
@@ -1448,10 +1467,14 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
           configured: nativeAdministration.provider.configured,
           source_href: providerAlertHref,
           source_section: 'integrations',
-          authorized_source_card: nativeAdministration.cards.some(card => card.key === 'integrations'),
+          authorized_source_card: nativeAdministration.cards.some(
+            card => card.key === 'integrations'
+          ),
           native_source_navigation_completed: true,
           contrast: alertContrast,
-          actual_dark_theme: await page.evaluate(() => document.documentElement.classList.contains('dark')),
+          actual_dark_theme: await page.evaluate(() =>
+            document.documentElement.classList.contains('dark')
+          ),
           no_operational_PABX_success_inferred: true,
         },
         local_availability_verified_against_native_HTTP: true,
@@ -2406,7 +2429,13 @@ test('configuration audit filters pagination details history and verified export
     .getByRole('button', { name: 'Limpar filtros', exact: true })
     .click();
   await expect(panel.locator('[data-audit-row]').first()).toBeVisible();
-  await preserveNativeAuditQueryRecovery(page, panel, info, session.account_id, auditReference);
+  await preserveNativeAuditQueryRecovery(
+    page,
+    panel,
+    info,
+    session.account_id,
+    auditReference
+  );
   await expect(page).toHaveURL(/unrelated_filter=keep/);
   expect(new URL(page.url()).searchParams.has('audit_config_resource_id')).toBe(
     false
@@ -5360,6 +5389,7 @@ test('local pause duration supervisor shows authorized real elapsed evidence wit
     ) + '\n'
   );
   expect(writes).toEqual([]);
+  await verifyNativePauseTimeAlert(page, info, target);
 });
 
 test('pending ACW native draft persists incomplete answers and completes only after explicit tabulation', async ({

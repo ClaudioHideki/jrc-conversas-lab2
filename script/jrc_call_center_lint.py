@@ -49,15 +49,39 @@ def classify(baseline, candidate, old_source, new_source):
     return added, improved
 
 
+
+def candidate_reports(paths):
+    """Same native cops/configuration and exact paths, with one process startup."""
+    if not paths:
+        return {}
+    check = subprocess.run(['bundle', 'exec', 'rubocop', '--format', 'json', '--cache', 'false', *paths],
+                           capture_output=True, text=True)
+    if check.returncode not in (0, 1):
+        raise RuntimeError('Candidate RuboCop did not complete')
+    report = json.loads(check.stdout)
+    rows = report['files']
+    actual = [row['path'].removeprefix('./') for row in rows]
+    if len(actual) != len(paths) or len(set(actual)) != len(actual) or set(actual) != set(paths):
+        raise RuntimeError('Candidate RuboCop file identity mismatch')
+    if report['summary']['inspected_file_count'] != len(paths):
+        raise RuntimeError('Candidate RuboCop inspected count mismatch')
+    if any(not isinstance(row['offenses'], list) for row in rows):
+        raise RuntimeError('Candidate RuboCop offenses missing')
+    if report['summary']['offense_count'] != sum(len(row['offenses']) for row in rows):
+        raise RuntimeError('Candidate RuboCop offense count mismatch')
+    return {row['path'].removeprefix('./'): row['offenses'] for row in rows}
+
+
 def main():
     paths = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', BASE, 'HEAD', '--', '*.rb'], text=True).splitlines()
+    candidates = candidate_reports(paths)
     results = []
     for index, path in enumerate(paths, start=1):
         print(json.dumps({'event': 'ruby_lint_progress', 'current': index, 'total': len(paths), 'path': path}), flush=True)
         before = subprocess.run(['git', 'show', f'{BASE}:{path}'], capture_output=True, text=True)
         sources = dict(baseline=before.stdout if before.returncode == 0 else None, candidate=pathlib.Path(path).read_text())
-        reports = {}
-        for label, source in sources.items():
+        reports = {'candidate': candidates[path]}
+        for label, source in [('baseline', sources['baseline'])]:
             if source is None:
                 reports[label] = []
                 continue

@@ -5,7 +5,7 @@ import { zonedTimeToUtc } from 'date-fns-tz';
 import { useMapGetter } from 'dashboard/composables/store';
 import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import API from 'dashboard/api/jrcContactCenter';
-import OpsModal from '../../jrcOperations/components/OpsModal.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import RelationshipActivityForm from '../../jrcRelationship/RelationshipActivityForm.vue';
 import { destinationHistoryRoute } from '../../inbox/endingDestinationHistoryContract';
 
@@ -51,6 +51,8 @@ const labels = computed(() => ({
 }));
 const text = key => labels.value[key];
 const opened = ref(false);
+const dialog = ref(null);
+watch(dialog, instance => instance?.open(), { flush: 'post' });
 const busy = ref(false);
 const source = ref(null);
 const choices = ref([]);
@@ -262,10 +264,19 @@ onBeforeUnmount(close);
     >
       {{ text('OPEN') }}
     </button>
-    <OpsModal
+    <Dialog
       v-if="enabled && opened"
+      ref="dialog"
       :title="text('OPEN')"
-      :busy="busy"
+      width="2xl"
+      contained
+      overflow-y-auto
+      :use-form="false"
+      :show-confirm-button="false"
+      :show-cancel-button="false"
+      show-close-button
+      :dismissible="!busy"
+      :close-on-click-outside="false"
       @close="close"
     >
       <div class="min-w-0 space-y-3" data-recording-relationship-editor>
@@ -401,6 +412,6 @@ onBeforeUnmount(close);
           {{ t('JRC_CONTACT_CENTER.RECORDINGS.CONTEXT.RETRY') }}
         </button>
       </div>
-    </OpsModal>
+    </Dialog>
   </div>
 </template>

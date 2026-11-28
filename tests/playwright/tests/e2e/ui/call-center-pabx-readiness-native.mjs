@@ -56,7 +56,7 @@ export async function verifyNativePabxReadiness(page, info, session) {
     })
   ).toBeVisible();
   await expect(root.locator('[data-native-pabx-configured]')).toHaveText(
-    'A conexão PABX ainda não está configurada nesta conta.'
+    'Conexão PABX não configurada nesta conta.'
   );
   expect(admin.provider.configured).toBe(false);
   expect(admin.native_links.pabx_settings).toBe(false);

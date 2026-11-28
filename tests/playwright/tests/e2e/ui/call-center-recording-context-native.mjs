@@ -48,7 +48,23 @@ export async function verifyNativeRecordingContext(
   expect(contrast.ratio).toBeGreaterThanOrEqual(4.5);
   await panel.scrollIntoViewIfNeeded();
   await capture(page, 'native-call-context');
+  const contactPath = `/api/v1/accounts/${target.account_id}/customers/contacts/${context.item.contact_id}`;
+  const masterReads = Promise.all(
+    [contactPath, `${contactPath}/overview`].map(path =>
+      page.waitForResponse(
+        item =>
+          item.request().method() === 'GET' &&
+          new URL(item.url()).pathname === path
+      )
+    )
+  );
   await panel.locator('[data-open-linked-master]').click();
+  const [contactResponse, overviewResponse] = await masterReads;
+  expect(contactResponse.status()).toBe(200);
+  expect(overviewResponse.status()).toBe(200);
+  expect((await contactResponse.json()).payload.name).toBe(
+    'SYNTHETIC linked recording customer'
+  );
   const master = page.getByRole('dialog').last();
   await expect(
     master.getByRole('heading', {

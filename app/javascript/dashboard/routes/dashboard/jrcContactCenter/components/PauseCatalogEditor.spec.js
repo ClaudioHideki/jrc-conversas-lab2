@@ -403,3 +403,53 @@ describe('native pause catalog editor', () => {
     ).not.toHaveProperty('justification_required');
   });
 });
+
+it('keeps the legacy alert checked but does not inject a flag into an ordinary edit', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await button(wrapper, 'EDIT').trigger('click');
+  expect(wrapper.get('[data-pause-time-alert]').element.checked).toBe(true);
+  await field(wrapper, 'NAME').setValue('SYNTHETIC reviewed legacy name');
+  await wrapper.get('[data-confirm]').trigger('click');
+  await flushPromises();
+  const saved = API.updatePauseCatalog.mock.calls[0][1].entries[0];
+  expect(saved).not.toHaveProperty('time_alert_enabled');
+  expect(saved.maximum_minutes).toBe(60);
+  expect(definition).not.toHaveProperty('time_alert_enabled');
+});
+it('persists an explicitly disabled alert without changing limits, scopes or enforcement', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await button(wrapper, 'EDIT').trigger('click');
+  await wrapper.get('[data-pause-time-alert]').setValue(false);
+  await wrapper.get('[data-confirm]').trigger('click');
+  await flushPromises();
+  expect(API.updatePauseCatalog.mock.calls[0][1]).toEqual({
+    enforced: false,
+    entries: [{ ...definition, time_alert_enabled: false }],
+  });
+  expect(API.updatePauseCatalog).toHaveBeenCalledTimes(1);
+});
+it('retains the selected alert policy after an upload-free API failure and retries only on an explicit save', async () => {
+  API.updatePauseCatalog.mockRejectedValueOnce({ response: { status: 500 } });
+  const wrapper = render();
+  await flushPromises();
+  await button(wrapper, 'EDIT').trigger('click');
+  await wrapper.get('[data-pause-time-alert]').setValue(false);
+  await field(wrapper, 'NAME').setValue('SYNTHETIC retained alert draft');
+  await wrapper.get('[data-confirm]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[role="dialog"]').exists()).toBe(true);
+  expect(wrapper.get('[data-pause-time-alert]').element.checked).toBe(false);
+  expect(field(wrapper, 'NAME').element.value).toBe(
+    'SYNTHETIC retained alert draft'
+  );
+  expect(API.updatePauseCatalog).toHaveBeenCalledTimes(1);
+  await wrapper.get('[data-pause-time-alert]').setValue(true);
+  await wrapper.get('[data-confirm]').trigger('click');
+  await flushPromises();
+  expect(API.updatePauseCatalog).toHaveBeenCalledTimes(2);
+  expect(
+    API.updatePauseCatalog.mock.calls[1][1].entries[0].time_alert_enabled
+  ).toBe(true);
+});

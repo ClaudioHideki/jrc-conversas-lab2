@@ -1,0 +1,25 @@
+{
+  "source_parent": "63d27d5af43af45090c3d5fdb82e7ec3a82af6d9",
+  "failed_run": 46160117363,
+  "failed_job": 141025365320,
+  "failed_run_conclusion": "cancelled",
+  "Chrome_results_JSON_present": false,
+  "actual_assertion_failure_headings": 21,
+  "distinct_failure_families": 6,
+  "causes": {
+    "relationship_modal": "Plain teleported modal was below the parent native dialog top layer; use the existing native Dialog without changing form/API/authority/idempotency.",
+    "settings_refresh": "Synchronous child read started during parent scope revocation before child teardown; queue child read before its own render and preserve synchronous parent revocation.",
+    "PABX_status": "Align exact assertion to canonical ADMIN.CONNECTION_MISSING. Protected settings and non-root denials remain asserted.",
+    "capture_close": "Align exact close action to the existing native Fechar footer. Preserve no microphone/upload/persistence on opening.",
+    "command_inventory": "Use the native bounded items DTO, explicitly requiring an empty exclusive synthetic inventory before/after. No pagination metadata exists.",
+    "customer_master": "Cause remains unconfirmed. Require real contact and overview GET status/data, capture actual child errors/source-map frames before cleanup. Keep original heading/history checks."
+  },
+  "two_new_Vue_cases": "Actual native parent+SettingsPage lifecycle, actor and membership changes; exactly six fresh reads and no obsolete batch.",
+  "Chrome_success_requires_all_304": true,
+  "failure_stops_remaining_cases_instead_of_repeating_three_minute_timeouts": true,
+  "no_skips_retries_force_clicks_new_grants_or_provider_operations": true,
+  "native_and_Chrome_acceptance": false,
+  "expected_main_Vue": 2452,
+  "expected_main_Rails": 3646,
+  "pause_warning_scope": "Only pause warnings; ACW unchanged"
+}

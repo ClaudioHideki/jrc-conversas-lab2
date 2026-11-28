@@ -107,7 +107,8 @@ const load = async () => {
     if (version === generation) loading.value = false;
   }
 };
-watch(contextKey, load, { immediate: true, flush: 'sync' });
+// Let the parent revoke and unmount this scope before starting a replacement read.
+watch(contextKey, load, { immediate: true, flush: 'pre' });
 onBeforeUnmount(() => {
   generation += 1;
   context.value = null;

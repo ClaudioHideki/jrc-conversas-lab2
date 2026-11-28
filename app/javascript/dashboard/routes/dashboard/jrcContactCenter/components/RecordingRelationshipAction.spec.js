@@ -24,21 +24,36 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
     createRecordingRelationshipActivity: vi.fn(),
   },
 }));
-const OpsModal = defineComponent({
+const Dialog = defineComponent({
   props: {
     title: { type: String, required: true },
-    busy: { type: Boolean, default: false },
+    dismissible: { type: Boolean, default: true },
+    useForm: { type: Boolean, default: true },
+    showConfirmButton: { type: Boolean, default: true },
+    showCancelButton: { type: Boolean, default: true },
+    closeOnClickOutside: { type: Boolean, default: true },
   },
   emits: ['close'],
-  setup(props, { emit }) {
+  setup(props, { emit, expose }) {
+    const visible = ref(false);
+    expose({
+      open: () => {
+        visible.value = true;
+      },
+    });
     return {
+      visible,
+      formMode: computed(() => props.useForm),
+      confirmVisible: computed(() => props.showConfirmButton),
+      cancelVisible: computed(() => props.showCancelButton),
+      outsideEnabled: computed(() => props.closeOnClickOutside),
       heading: computed(() => props.title),
-      blocked: computed(() => props.busy),
+      blocked: computed(() => !props.dismissible),
       close: () => emit('close'),
     };
   },
   template:
-    '<section role="dialog" :aria-label="heading"><slot /><button data-close-intake :disabled="blocked" @click="close"></button></section>',
+    '<section v-if="visible" role="dialog" :aria-label="heading" :data-use-form="formMode" :data-confirm="confirmVisible" :data-cancel="cancelVisible" :data-close-outside="outsideEnabled"><slot /><button data-close-intake :disabled="blocked" @click="close"></button></section>',
 });
 const preview = (extra = {}) => ({
   contract_version: 1,
@@ -76,7 +91,7 @@ const setup = (props = {}) =>
       enabled: true,
       ...props,
     },
-    global: { stubs: { OpsModal, RouterLink: RouterLinkStub } },
+    global: { stubs: { Dialog, RouterLink: RouterLinkStub } },
   });
 const open = async wrapper => {
   await wrapper.get('[data-open-recording-relationship]').trigger('click');
@@ -134,6 +149,13 @@ describe('native recording to existing Relationship activity intake', () => {
     expect(
       wrapper.get('[data-recording-relationship-portfolio]').element.value
     ).toBe('');
+    expect(wrapper.getComponent(Dialog).props()).toMatchObject({
+      useForm: false,
+      showConfirmButton: false,
+      showCancelButton: false,
+      closeOnClickOutside: false,
+      dismissible: true,
+    });
     expect(wrapper.text()).toContain('SYNTHETIC second native page');
     expect(wrapper.text()).not.toContain('SYNTHETIC permitted portfolio');
     expect(API.createRecordingRelationshipActivity).not.toHaveBeenCalled();

@@ -2198,6 +2198,8 @@
       "HISTORY": "Histórico do catálogo",
       "JUSTIFICATION_REQUIRED": "Exigir justificativa para este motivo",
       "JUSTIFICATION_POLICY": "Obrigatória somente após a ativação explícita do catálogo na conta. Não exige aprovação formal nem publica no PABX.",
+      "TIME_ALERT_ENABLED": "Exibir alerta de tempo excedido",
+      "TIME_ALERT_POLICY": "A configuração vale para novas pausas. A medição do tempo e os limites cadastrados são preservados; desativar este aviso não encerra a pausa nem autoriza retorno automático à distribuição.",
       "JUSTIFICATION": "Justificativa da pausa",
       "JUSTIFICATION_PRIVATE": "Até 1.000 caracteres. Conteúdo privado do próprio operador; evite dados sensíveis.",
       "JUSTIFICATION_ERROR": "Informe uma justificativa válida de até 1.000 caracteres. O conteúdo preenchido foi preservado.",
@@ -3109,7 +3111,10 @@
         "INITIAL_STATUS_REQUIRED": "A unidade precisa ter uma situação inicial ativa no Service Desk. Configure-a no módulo de origem e revise os dados antes de continuar."
       },
       "DESTINATION_AVAILABLE": "Configure os parâmetros autorizados deste destino. Salvar não executa a ação; a habilitação e as permissões serão verificadas na execução.",
-      "DESTINATION_UNAVAILABLE": "Configuração indisponível no contexto ou nas permissões atuais. Os parâmetros históricos são preservados."
+      "DESTINATION_UNAVAILABLE": "Configuração indisponível no contexto ou nas permissões atuais. Os parâmetros históricos são preservados.",
+      "LIST_DESTINATIONS": "Destinos configurados",
+      "LIST_NO_DESTINATIONS": "Nenhum destino configurado",
+      "LIST_NO_CONDITIONS": "Sem restrição por código de resultado"
     },
     "ENDING_ACTIVATION": {
       "TITLE": "Habilitação operacional da regra",

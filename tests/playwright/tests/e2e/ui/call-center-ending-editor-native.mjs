@@ -190,6 +190,28 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   await expect(editor.locator('[data-ending-rule-entry]')).toContainText(
     'SYNTHETIC reviewed browser automation'
   );
+  const listSummary = editor.locator('[data-ending-rule-summary]');
+  await expect(listSummary).toBeVisible();
+  await expect(
+    listSummary.locator('[data-ending-rule-summary-destination="project_task"]')
+  ).toHaveText('Tarefas de Projetos');
+  await expect(
+    listSummary.locator('[data-ending-rule-summary-mode]')
+  ).toHaveText('Exigir confirmação do agente antes de executar');
+  await expect(listSummary).not.toContainText(
+    'SYNTHETIC private persisted title'
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  const [listSummaryContrast] = await listSummary
+    .locator('[data-ending-rule-summary-destination="project_task"]')
+    .evaluate(measureTextContrast);
+  expect(listSummaryContrast.ratio).toBeGreaterThanOrEqual(4.5);
+  const listSummaryScreenshot = `.codex/call-center-native-e2e/${info.project.name}-ending-rule-list-summary.png`;
+  await page.screenshot({ path: listSummaryScreenshot, fullPage: true });
   await editor.locator('[data-ending-rule-edit]').click();
   await expect(editor.locator('[data-ending-execution-mode]')).toHaveValue(
     'agent_confirmation'
@@ -307,6 +329,10 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
       account_id: String(target.account_id),
       initial_save: 200,
       persisted_mode: 'agent_confirmation',
+      native_authorized_rule_list_summary_visible: true,
+      private_parameters_not_rendered_in_list: true,
+      list_summary_screenshot: listSummaryScreenshot,
+      list_summary_contrast: listSummaryContrast,
       native_project_assignee_selected_and_reloaded: true,
       native_project_assignee_id: target.automation_assignee_id,
       stale_status: 409,

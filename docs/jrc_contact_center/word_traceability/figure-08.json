@@ -1047,5 +1047,13 @@
     "sha256": "99f21ef149728c5e1116ae602d3565039d813eb5664ab6f9f65f056daa3eb59b",
     "native_or_browser_accepted": false
   },
-  "whole_figure_accepted": false
+  "whole_figure_accepted": false,
+  "prepared_pause_warning_configuration_not_acceptance": {
+    "marker": "docs/jrc_contact_center/native_pause_time_alert_candidate_20261128.json",
+    "decision": "docs/adr/20261128-configurable-pause-warnings.md",
+    "explicit_user_clarification": "Only pause warnings; ACW unchanged",
+    "legacy_and_original_event_snapshots": "preserved",
+    "native_or_Chrome_acceptance": false,
+    "requirements_remain_at_their_existing_status": true
+  }
 }

@@ -1178,3 +1178,24 @@ O rascunho não publica configuração no PABX, não altera gravações e não e
 - Agrupar a correção medida de alinhamento do seed com esse incremento. Preservar todos os dados do seed, gates anteriores e 304 cenários Chrome; reutilizar a mesma massa nativa de 5000 chamadas para testar o bloqueio de limite.
 - Testes novos preparados: 22 Rails e 24 Vue; execução nativa/Chrome e aceite ainda pendentes. Testes direcionados antes da regressão. Nenhuma publicação, merge, deploy, comando PABX ou alteração de usuários reais.
 - Documento: `docs/jrc_contact_center/native_recording_report_export_candidate_20261128.json`. O requisito composto D2-P0348-C05 permanece parcial; compartilhamento e dependências externas continuam separados.
+
+
+### Control Desk Parte1 — resumo operacional das regras existentes
+
+- Implementação candidata: mostrar motivo, destinos configurados, modo de execução e condições na lista autorizada da figura10, sem expor parâmetros privados nem inventar indicadores operacionais.
+- Reutiliza a consulta, permissões, paginação, editor e destinos nativos. Cinco testes Vue e extensão dos quatro modos Chrome preparados; aceite depende da CI e das capturas reais. D2-P0223-C01 permanece parcial.
+- Incremento do mesmo bloco de entrega funcional; não reinicia prazo nem atribui horas não medidas. Sem operação externa, merge, imagem ou deploy.
+- Aceleração diretamente ligada ao ciclo de entrega: analisar todos os candidatos Ruby em um processo RuboCop, conservando verificações históricas por stdin, comparação e cobertura integral; 19 testes leves do controle aprovados (11 anteriores e oito novos). Equivalência nativa com o relatório do pai ainda obrigatória.
+
+
+### Pause-only configurable exceeded warnings — prepared, native validation pending
+
+- User clarification: only pause warnings; ACW behavior is unchanged.
+- Reuse the existing pause catalog, original event snapshot, agent view and supervisor view. Missing flags retain the legacy warning; existing pauses are not restamped.
+- Native 14 and Vue 7 new cases plus four extended Chrome duration cases await the exclusive isolated CI. No acceptance or production configuration is asserted.
+
+### Grouped pause-only warning and native Chrome integration repairs — candidate, not accepted
+
+- Parent63d: 3632 Rails and 2438 Vue passed; native lint850 clean. Chrome had six real failure families and the run timed out; no full acceptance.
+- Preserve ACW warning behavior; keep original active-pause snapshots. Native Dialog top-layer and parent scope teardown repairs, two new lifecycle Vue cases, strict native DTO checks and child-page diagnostics await exclusive CI.
+- All304 Chrome scenarios remain mandatory; stop on the first failure without accepting the unexecuted remainder. No notification activation, provider operation, image publication or deployment.

@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import SettingsPage from './SettingsPage.vue';
+import ContactCenterLayout from '../ContactCenterLayout.vue';
 
 const mocks = vi.hoisted(() => ({ route: null, user: null }));
 vi.mock('vue-router', () => ({ useRoute: () => mocks.route }));
@@ -12,6 +13,7 @@ vi.mock('dashboard/composables/store', () => ({
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: {
+    context: vi.fn(),
     units: vi.fn(),
     queues: vi.fn(),
     queueMemberships: vi.fn(),
@@ -255,4 +257,61 @@ describe('native legacy settings global ACW authority', () => {
     );
     expect(wrapper.get('[data-global-acw-denied]').exists()).toBe(true);
   });
+});
+
+describe('settings reads after native parent scope revocation', () => {
+  it.each(['actor', 'membership'])(
+    'does not start an obsolete six-endpoint batch on %s change',
+    async change => {
+      API.context
+        .mockReset()
+        .mockResolvedValue({ data: { capabilities: { configure: true } } });
+      mocks.route.name = 'jrc_contact_center_settings';
+      const wrapper = mount(ContactCenterLayout, {
+        global: {
+          mocks: { $t: key => key },
+          stubs: {
+            Icon: true,
+            RouterLink: true,
+            RouterView: {
+              components: { SettingsPage },
+              template: '<SettingsPage />',
+            },
+            VisualMetricCard: true,
+            VisualStatusBadge: true,
+            VisualSectionCard: { template: '<section><slot /></section>' },
+            StructureEditor: true,
+            AcwPolicyEditor: true,
+          },
+        },
+      });
+      await flushPromises();
+      const endpoints = [
+        API.units,
+        API.queues,
+        API.queueMemberships,
+        API.routingRules,
+        API.integrationCapabilities,
+        API.administration,
+      ];
+      endpoints.forEach(endpoint => expect(endpoint).toHaveBeenCalledTimes(1));
+      let release;
+      API.context.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            release = resolve;
+          })
+      );
+      if (change === 'actor') mocks.user.value.id = 8;
+      else mocks.user.value.accounts[0].permissions = [];
+      await flushPromises();
+      expect(wrapper.findComponent(SettingsPage).exists()).toBe(false);
+      endpoints.forEach(endpoint => expect(endpoint).toHaveBeenCalledTimes(1));
+      release({ data: { capabilities: { configure: true } } });
+      await flushPromises();
+      expect(wrapper.findComponent(SettingsPage).exists()).toBe(true);
+      endpoints.forEach(endpoint => expect(endpoint).toHaveBeenCalledTimes(2));
+      expect(API.context).toHaveBeenCalledTimes(2);
+    }
+  );
 });

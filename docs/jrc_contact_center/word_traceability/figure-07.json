@@ -1972,5 +1972,13 @@
       "Full per-reason withdrawal/remuneration flags and external return/distribution remain separately pending."
     ],
     "whole_figure_or_Part1_accepted": false
+  },
+  "prepared_pause_warning_configuration_not_acceptance": {
+    "marker": "docs/jrc_contact_center/native_pause_time_alert_candidate_20261128.json",
+    "decision": "docs/adr/20261128-configurable-pause-warnings.md",
+    "explicit_user_clarification": "Only pause warnings; ACW unchanged",
+    "legacy_and_original_event_snapshots": "preserved",
+    "native_or_Chrome_acceptance": false,
+    "requirements_remain_at_their_existing_status": true
   }
 }

@@ -70,6 +70,12 @@ class IncrementalLintProgressTest(unittest.TestCase):
             if command[0] == 'git':
                 self.assertEqual(command[:2], ['git', 'show'])
                 return SimpleNamespace(returncode=0, stdout=baseline_source)
+            if '--stdin' not in command:
+                self.assertEqual(command[:7], ['bundle', 'exec', 'rubocop', '--format', 'json', '--cache', 'false'])
+                self.assertEqual(command[7:], ['one.rb', 'two.rb'])
+                files = [{'path': name, 'offenses': candidate} for name in command[7:]]
+                return SimpleNamespace(returncode=0, stdout=json.dumps({
+                    'files': files, 'summary': {'inspected_file_count': 2, 'offense_count': 2 * len(candidate)}}))
             self.assertEqual(command[:4], ['bundle', 'exec', 'rubocop', '--stdin'])
             self.assertEqual(command[-2:], ['--format', 'json'])
             offenses = baseline if options['input'] == baseline_source else candidate
@@ -110,6 +116,56 @@ class IncrementalLintProgressTest(unittest.TestCase):
     def test_runtime_failure_remains_an_error_instead_of_a_lint_success(self):
         with self.assertRaisesRegex(RuntimeError, 'RuboCop did not complete: one.rb baseline'):
             self.run_procedure(returncode=2)
+
+
+class CandidateBatchIdentityTest(unittest.TestCase):
+    """Simulated CLI envelopes test coverage guards, not native Ruby findings."""
+
+    def invoke(self, files, inspected=2, offenses=0, returncode=0):
+        import json
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        import jrc_call_center_lint as lint
+        reply = {'files': files, 'summary': {'inspected_file_count': inspected, 'offense_count': offenses}}
+        with patch.object(lint.subprocess, 'run', return_value=SimpleNamespace(returncode=returncode, stdout=json.dumps(reply))) as run:
+            result = lint.candidate_reports(['one.rb', 'two.rb'])
+        self.assertEqual(run.call_args.args[0], ['bundle', 'exec', 'rubocop', '--format', 'json', '--cache', 'false', 'one.rb', 'two.rb'])
+        self.assertNotIn('input', run.call_args.kwargs)
+        return result
+
+    def test_out_of_order_complete_report_keeps_both_native_findings(self):
+        row = finding('Layout/TrailingWhitespace', 'Trailing whitespace detected.')
+        value = self.invoke([{'path': './two.rb', 'offenses': [row]}, {'path': 'one.rb', 'offenses': []}], offenses=1, returncode=1)
+        self.assertEqual(value, {'one.rb': [], 'two.rb': [row]})
+
+    def test_missing_file_is_not_a_successful_partial_lint(self):
+        with self.assertRaisesRegex(RuntimeError, 'file identity mismatch'):
+            self.invoke([{'path': 'one.rb', 'offenses': []}])
+
+    def test_duplicated_file_is_not_coverage_of_the_second_file(self):
+        with self.assertRaisesRegex(RuntimeError, 'file identity mismatch'):
+            self.invoke([{'path': 'one.rb', 'offenses': []}, {'path': 'one.rb', 'offenses': []}])
+
+    def test_foreign_file_does_not_replace_an_expected_candidate(self):
+        with self.assertRaisesRegex(RuntimeError, 'file identity mismatch'):
+            self.invoke([{'path': 'one.rb', 'offenses': []}, {'path': 'other.rb', 'offenses': []}])
+
+    def test_inconsistent_inspected_count_is_rejected(self):
+        with self.assertRaisesRegex(RuntimeError, 'inspected count mismatch'):
+            self.invoke([{'path': 'one.rb', 'offenses': []}, {'path': 'two.rb', 'offenses': []}], inspected=1)
+
+    def test_missing_offenses_are_not_assumed_to_be_zero(self):
+        with self.assertRaisesRegex(RuntimeError, 'offenses missing'):
+            self.invoke([{'path': 'one.rb', 'offenses': None}, {'path': 'two.rb', 'offenses': []}])
+
+    def test_inconsistent_offense_count_is_rejected(self):
+        row = finding('Layout/TrailingWhitespace', 'Trailing whitespace detected.')
+        with self.assertRaisesRegex(RuntimeError, 'offense count mismatch'):
+            self.invoke([{'path': 'one.rb', 'offenses': [row]}, {'path': 'two.rb', 'offenses': []}])
+
+    def test_native_runtime_failure_is_not_an_empty_success(self):
+        with self.assertRaisesRegex(RuntimeError, 'Candidate RuboCop did not complete'):
+            self.invoke([], returncode=2)
 
 
 if __name__ == '__main__':

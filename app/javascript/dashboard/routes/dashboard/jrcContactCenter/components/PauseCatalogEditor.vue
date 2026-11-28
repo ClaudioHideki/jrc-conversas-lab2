@@ -64,6 +64,8 @@ const copy = computed(() => ({
   INVALID_FIELD: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.INVALID_FIELD'),
   TIME_PLACEHOLDER: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.TIME_PLACEHOLDER'),
   SAVE_FAILED: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.SAVE_FAILED'),
+  TIME_ALERT_ENABLED: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.TIME_ALERT_ENABLED'),
+  TIME_ALERT_POLICY: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.TIME_ALERT_POLICY'),
   JUSTIFICATION_REQUIRED: t(
     'JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION_REQUIRED'
   ),
@@ -109,6 +111,13 @@ const entry = computed(() => ({
     times.map(field => [field, parseMinutes(input.value[field])])
   ),
 }));
+// Absence retains the native legacy alert; opening/saving a legacy reason adds no flag.
+const timeAlertEnabled = computed({
+  get: () => input.value.time_alert_enabled !== false,
+  set: value => {
+    input.value.time_alert_enabled = value;
+  },
+});
 const draft = computed(() => {
   const entries = (record.value?.entries || []).map(row => ({ ...row }));
   if (mode.value === 'entry') {
@@ -628,6 +637,22 @@ onBeforeUnmount(() => {
               <span class="block">{{ text('APPROVAL_REQUIRED') }}</span>
               <span class="block text-xs text-n-slate-10">{{
                 text('APPROVAL_POLICY')
+              }}</span>
+            </span>
+          </label>
+          <label
+            class="flex items-start gap-2 text-sm text-n-slate-12 sm:col-span-2"
+          >
+            <input
+              v-model="timeAlertEnabled"
+              type="checkbox"
+              :disabled="saving"
+              data-pause-time-alert
+            />
+            <span class="space-y-1">
+              <span class="block">{{ text('TIME_ALERT_ENABLED') }}</span>
+              <span class="block text-xs text-n-slate-11">{{
+                text('TIME_ALERT_POLICY')
               }}</span>
             </span>
           </label>

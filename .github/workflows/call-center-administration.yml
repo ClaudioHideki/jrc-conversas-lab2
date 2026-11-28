@@ -111,6 +111,14 @@ jobs:
       - name: Native recording metadata CSV and exact seed source lint
         run: |
           bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/reports_controller.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_report_exports_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb spec/integration/jrc_contact_center/owned_recording_report_access.rb script/jrc_call_center_recording_report_access.rb script/jrc_call_center_e2e_seed.rb --format json --out /tmp/call-center-recording-export-lint.json
+      - name: Exact old-input native parity of the batched lint transport
+        run: python3 -B script/jrc_call_center_lint_reference.py
+      - name: Incremental Ruby lint without suppressing new offenses
+        id: ruby_lint
+        if: success() && steps.ruby_runtime.outcome == 'success'
+        run: |
+          python3 -B script/jrc_call_center_lint_test.py
+          python3 -B script/jrc_call_center_lint.py
       - name: Frontend lint of changed sources
         id: frontend_lint
         run: |
@@ -150,11 +158,11 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-ending-sd-public-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 119
+          assert report['numTotalTests'] == report['numPassedTests'] == 124
           assert report['numFailedTests'] == report['numPendingTests'] == 0
           assert len(report['testResults']) == 5
           assert all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useEndingAutomationEditor.spec.js': 27, 'AudioAssetLibrary.spec.js': 60, 'AudioLibraryPreview.spec.js': 10, 'EndingAutomationEditor.spec.js': 10, 'EndingServiceDeskConfiguration.spec.js': 12}
+          expected = {'useEndingAutomationEditor.spec.js': 27, 'AudioAssetLibrary.spec.js': 60, 'AudioLibraryPreview.spec.js': 10, 'EndingAutomationEditor.spec.js': 15, 'EndingServiceDeskConfiguration.spec.js': 12}
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           PY
@@ -233,11 +241,11 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 415
+          assert report['numTotalTests'] == report['numPassedTests'] == 417
           assert report['numFailedTests'] == report['numPendingTests'] == 0
           assert len(report['testResults']) == 31 and all(row['status'] == 'passed' for row in report['testResults'])
           expected = {'RecordingReportExport.spec.js': 17, 'jrcContactCenterRecordingExport.spec.js': 2, 'useScopedRecordings.spec.js': 38, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 18, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 14, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 14, 'RecordingCustomerLink.spec.js': 19, 'RecordingCustomerRecords.spec.js': 13, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 12}
-          expected.update({'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9, 'SupervisorPage.spec.js': 26, 'LinkedContactMaster.spec.js': 10, 'ContactDetailsDialog.spec.js': 3, 'Contact360Panel.spec.js': 7})
+          expected.update({'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9, 'SupervisorPage.spec.js': 28, 'LinkedContactMaster.spec.js': 10, 'ContactDetailsDialog.spec.js': 3, 'Contact360Panel.spec.js': 7})
           expected.update({'RecordingLinkedTickets.spec.js': 14, 'RecordingTicketAction.spec.js': 12, 'useRecordingTicketContext.spec.js': 13, 'recordingTicketSource.spec.js': 13, 'RecordingTicketForm.spec.js': 7, 'serviceDeskOperationsRecording.spec.js': 12})
           expected.update({'recordingQualitySummary.spec.js': 20})
           expected.update({'RecordingRelationshipAction.spec.js': 20, 'RelationshipActivityForm.spec.js': 4})
@@ -404,6 +412,21 @@ jobs:
           assert all(row['status'] == 'passed' for row in report['examples'])
           assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == expected
           PY
+      - name: Native pause-only configurable warning preserves legacy and original event policy
+        run: |
+          bundle exec rspec spec/services/jrc_contact_center/pause_reason_time_alert_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb --format progress --format json --out /tmp/call-center-pause-time-alert-rspec.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-pause-time-alert-rspec.json').read_text())
+          examples = report['examples']
+          assert report['summary']['example_count'] == len(examples) and len(examples) > 14
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert len({row['id'] for row in examples}) == len(examples) and all(row['status'] == 'passed' for row in examples)
+          paths = {row['file_path'].removeprefix('./') for row in examples}
+          assert paths == {'spec/services/jrc_contact_center/pause_reason_time_alert_spec.rb', 'spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb'}
+          assert sum(row['file_path'].endswith('/pause_reason_time_alert_spec.rb') for row in examples) == 11
+          PY
       - name: Native recording metadata CSV permissions query integrity and failure controls
         run: |
           bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recording_report_exports_spec.rb --format progress --format json --out /tmp/call-center-recording-export-rspec.json
@@ -431,12 +454,6 @@ jobs:
               rows = [row for row in report['examples'] if row['file_path'].removeprefix('./') == name]
               assert len(rows) == count and len({row['id'] for row in rows}) == count and all(row['status'] == 'passed' for row in rows)
           PY
-      - name: Incremental Ruby lint without suppressing new offenses
-        id: ruby_lint
-        if: success() && steps.ruby_runtime.outcome == 'success'
-        run: |
-          python3 -B script/jrc_call_center_lint_test.py
-          python3 -B script/jrc_call_center_lint.py
       - name: Native customer lists timeline and fixture ownership before broad regressions
         id: customer_records_preflight
         run: |
@@ -1778,7 +1795,7 @@ jobs:
         run: node tests/playwright/fixtures/call-center-native/probe.mjs
       - name: Chrome desktop and mobile, real CSS and PostgreSQL persistence
         run: |
-          node tests/playwright/node_modules/@playwright/test/cli.js test --config tests/playwright/call-center-native.config.ts
+          node tests/playwright/node_modules/@playwright/test/cli.js test --config tests/playwright/call-center-native.config.ts --max-failures=1
           python3 -B - <<'PY'
           import hashlib
           import json
@@ -2149,7 +2166,7 @@ jobs:
           assert len(history_navigation) == 1 and len(history_navigation[0]['assertionResults']) == 9
           assert all(row['status'] == 'passed' for row in history_navigation[0]['assertionResults'])
           vue = json.loads(Path('/tmp/call-center-vitest.json').read_text())
-          assert vue['numPassedTests'] == vue['numTotalTests'] > 0
+          assert vue['numPassedTests'] == vue['numTotalTests'] == 2452
           assert vue['numFailedTests'] == vue['numPendingTests'] == 0
           selected_vue = [row for row in vue['testResults'] if row['name'].replace('\\', '/').endswith('/app/javascript/dashboard/routes/dashboard/inbox/usePendingEndingRun.spec.js')]
           assert len(selected_vue) == 1 and selected_vue[0]['status'] == 'passed'

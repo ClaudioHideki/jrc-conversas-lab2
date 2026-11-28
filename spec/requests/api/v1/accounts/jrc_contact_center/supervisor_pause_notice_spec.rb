@@ -215,4 +215,48 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
       end
     end
   end
+
+  context 'with an explicitly disabled time alert on the original local pause' do
+    let(:reason) { super().merge('time_alert_enabled' => false) }
+
+    it 'keeps factual elapsed time and the exceeded measurement without ending the pause or revealing private fields' do
+      previous = event.attributes.deep_dup
+      travel_to(Time.zone.at((event.started_at + 61.seconds).to_f.ceil)) do
+        get endpoint, headers: observer.create_new_auth_token
+        expect(response).to have_http_status(:ok)
+        data = response.parsed_body.fetch('agents').sole
+        expect(data.fetch('pause_notice')).to eq('elapsed_seconds' => 61, 'exceeded' => true, 'time_alert_enabled' => false)
+        expect(data.fetch('state')).to eq('paused')
+        expect(event.reload.attributes).to eq(previous)
+        expect(member.reload.availability).to eq('busy')
+        expect(data).not_to have_key('pause_definition')
+      end
+    end
+
+    it 'retains the original disabled policy after a later catalog edit enables alerts for new pauses' do
+      previous = event.attributes.deep_dup
+      catalog.update!({ 'enforced' => true, 'entries' => [reason.merge('time_alert_enabled' => true)] }, expected_revision: catalog.revision)
+      travel_to(Time.zone.at((event.started_at + 61.seconds).to_f.ceil)) do
+        get endpoint, headers: observer.create_new_auth_token
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body.fetch('agents').sole.dig('pause_notice', 'time_alert_enabled')).to be(false)
+        expect(event.reload.attributes).to eq(previous)
+        expect(catalog.call.fetch('entries').sole.fetch('time_alert_enabled')).to be(true)
+      end
+    end
+  end
+
+  context 'with an explicitly enabled time alert' do
+    let(:reason) { super().merge('time_alert_enabled' => true) }
+
+    it 'reports the observed threshold and enabled flag while preserving the paused state' do
+      travel_to(Time.zone.at((event.started_at + 61.seconds).to_f.ceil)) do
+        get endpoint, headers: observer.create_new_auth_token
+        expect(response).to have_http_status(:ok)
+        data = response.parsed_body.fetch('agents').sole
+        expect(data.fetch('pause_notice')).to eq('elapsed_seconds' => 61, 'exceeded' => true, 'time_alert_enabled' => true)
+        expect(data.fetch('state')).to eq('paused')
+      end
+    end
+  end
 end

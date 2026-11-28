@@ -77,6 +77,7 @@ const pauseExceeded = computed(() => {
   const maximum = state.value?.pause_definition?.maximum_minutes;
   return (
     state.value?.state === 'paused' &&
+    state.value?.pause_definition?.time_alert_enabled !== false &&
     Number.isInteger(maximum) &&
     maximum >= 0 &&
     now.value - new Date(state.value.started_at).getTime() > maximum * 60000

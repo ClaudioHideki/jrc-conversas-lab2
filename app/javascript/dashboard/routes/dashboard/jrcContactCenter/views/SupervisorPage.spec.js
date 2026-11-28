@@ -281,6 +281,44 @@ describe('native supervisor observed data', () => {
     expect(JrcContactCenterAPI.supervisor.mock.calls.length).toBe(count);
   });
 
+  it.each([false, true])(
+    'keeps observed pause duration while applying the original alert policy %s',
+    async enabled => {
+      JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+        data: {
+          agents: [
+            {
+              account_user_id: '42',
+              name: 'SYNTHETIC operator',
+              state: 'paused',
+              eligible: false,
+              pause_notice: {
+                elapsed_seconds: 61,
+                exceeded: true,
+                time_alert_enabled: enabled,
+              },
+            },
+          ],
+          queues: [],
+        },
+      });
+      wrapper = shallowMount(SupervisorPage, {
+        global: {
+          stubs: {
+            VisualSectionCard: { template: '<section><slot /></section>' },
+          },
+        },
+      });
+      await flushPromises();
+      const notice = wrapper.get('[data-supervisor-pause-notice]');
+      expect(notice.text()).toContain('Tempo em pausa: 01:01');
+      expect(notice.find('[role="status"]').exists()).toBe(enabled);
+      expect(wrapper.find('[data-own-pause-justification]').exists()).toBe(
+        false
+      );
+    }
+  );
+
   it('shows the authorized observed pause duration and exceeded notice without exposing operator metadata', async () => {
     JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
       data: {

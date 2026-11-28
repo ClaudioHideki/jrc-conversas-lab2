@@ -275,3 +275,93 @@ describe('current native destination guidance', () => {
     expect(state.editor.save).not.toHaveBeenCalled();
   });
 });
+
+// Interaction tests of authorized data, not a substitute for native Chrome.
+describe('authorized ending-rule list summaries', () => {
+  const list = () => {
+    const row = JSON.parse(JSON.stringify(state.editor.draft.value));
+    state.editor.items.value = [row];
+    state.editor.draft.value = null;
+    state.editor.edit = vi.fn();
+    return row;
+  };
+  it('shows reason, configured destinations and explicit mode without opening or saving', () => {
+    const row = list();
+    row.actions.push(
+      { kind: 'crm', parameters: {} },
+      { kind: 'service_desk', parameters: {} }
+    );
+    const wrapper = create();
+    expect(wrapper.get('[data-ending-rule-summary-reason]').text()).toBe(
+      'SYNTHETIC reason'
+    );
+    expect(
+      wrapper
+        .findAll('[data-ending-rule-summary-destination]')
+        .map(value => value.attributes('data-ending-rule-summary-destination'))
+    ).toEqual(['project_task', 'crm', 'service_desk']);
+    expect(wrapper.get('[data-ending-rule-summary-mode]').text()).toBe(
+      'JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.MODES.agent_confirmation'
+    );
+    expect(state.editor.save).not.toHaveBeenCalled();
+    expect(state.editor.edit).not.toHaveBeenCalled();
+  });
+  it('keeps exact outcome restrictions and the historical reason code without inventing a label', () => {
+    const row = list();
+    row.conditions.outcome_codes = ['SYNTHETIC_NO_ANSWER', 'SYNTHETIC_RETURN'];
+    row.reason_code = 'SYNTHETIC_HISTORICAL';
+    const wrapper = create();
+    expect(wrapper.get('[data-ending-rule-summary-conditions]').text()).toBe(
+      'SYNTHETIC_NO_ANSWER, SYNTHETIC_RETURN'
+    );
+    expect(wrapper.get('[data-ending-rule-summary-reason]').text()).toBe(
+      'SYNTHETIC_HISTORICAL'
+    );
+    expect(state.editor.save).not.toHaveBeenCalled();
+  });
+  it('distinguishes empty configuration and unrestricted final outcomes from execution success', () => {
+    const row = list();
+    row.actions = [];
+    row.execution_mode = '';
+    const wrapper = create();
+    expect(wrapper.get('[data-ending-rule-summary-destinations]').text()).toBe(
+      'JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.LIST_NO_DESTINATIONS'
+    );
+    expect(wrapper.get('[data-ending-rule-summary-conditions]').text()).toBe(
+      'JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.LIST_NO_CONDITIONS'
+    );
+    expect(wrapper.find('[data-ending-rule-summary-mode]').exists()).toBe(
+      false
+    );
+    expect(
+      wrapper.findAll('[data-ending-rule-summary-destination]')
+    ).toHaveLength(0);
+    expect(state.editor.save).not.toHaveBeenCalled();
+  });
+  it('omits all private parameters and clears summaries when native authority withdraws rows', async () => {
+    const row = list();
+    row.actions[0].parameters = {
+      private_project_name: 'SYNTHETIC PRIVATE PROJECT',
+      project_id: '9007199254740990',
+      token: 'SYNTHETIC PRIVATE TOKEN',
+    };
+    const wrapper = create();
+    expect(wrapper.text()).not.toMatch(
+      /SYNTHETIC PRIVATE PROJECT|9007199254740990|SYNTHETIC PRIVATE TOKEN/
+    );
+    state.editor.items.value = [];
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('[data-ending-rule-summary]').exists()).toBe(false);
+    expect(state.editor.save).not.toHaveBeenCalled();
+  });
+  it('opens the exact native row without changing parameters or saving on selection', async () => {
+    const row = list();
+    const original = JSON.stringify(row);
+    const wrapper = create();
+    await wrapper.get('[data-ending-rule-edit]').trigger('click');
+    expect(state.editor.edit).toHaveBeenCalledTimes(1);
+    expect(state.editor.edit).toHaveBeenCalledWith(row);
+    expect(JSON.stringify(row)).toBe(original);
+    expect(state.editor.save).not.toHaveBeenCalled();
+  });
+});

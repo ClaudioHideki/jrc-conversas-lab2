@@ -1,0 +1,29 @@
+{
+  "prepared_on_source": "63d27d5af43af45090c3d5fdb82e7ec3a82af6d9",
+  "follows_prepared_ending_list_summary": true,
+  "Word_requirements": [
+    "D1-P0113-C01",
+    "D1-P0119-C01",
+    "D2-P0179-C02",
+    "D2-P0189-C01"
+  ],
+  "business_rule": {
+    "user_approved": "Configurar o aviso de pausa excedida por motivo",
+    "user_clarification": "Somente os avisos de pausa",
+    "ACW": "No change",
+    "legacy_missing_flag": "enabled; opening/saving without a choice adds no flag",
+    "existing_active_pause": "Exact stored event policy retained; later catalog edit affects new pauses only"
+  },
+  "changes": [
+    "Optional strict boolean time_alert_enabled in existing revisioned pause catalog",
+    "Existing agent and supervisor warnings honor original local pause snapshot",
+    "Factual elapsed/exceeded measurements, pause state, permissions and distribution remain unchanged"
+  ],
+  "native_examples_prepared_not_executed": 14,
+  "Vue_examples_prepared_not_executed": 7,
+  "four_existing_Chrome_case_bodies_retained_and_extended": true,
+  "additional_actual_PNG_required": 20,
+  "new_migrations_models_permissions_provider_calls": false,
+  "whole_figures_or_Part1_accepted": false,
+  "native_and_Chrome_acceptance": false
+}

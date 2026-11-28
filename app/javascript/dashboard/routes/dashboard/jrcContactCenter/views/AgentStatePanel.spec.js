@@ -266,6 +266,38 @@ describe('AgentStatePanel', () => {
     expect(reasons.find('option[value="coffee"]').exists()).toBe(true);
   });
 
+  it.each([false, true])(
+    'honors explicit alert policy %s without changing the observed pause clock or issuing a state write',
+    async enabled => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-11-18T12:10:00Z'));
+      const calls = JrcContactCenterAPI.updateAgentState.mock.calls.length;
+      JrcContactCenterAPI.agentState.mockResolvedValue({
+        data: {
+          item: {
+            ...initialState,
+            state: 'paused',
+            started_at: '2026-11-18T12:00:00Z',
+            pause_definition: {
+              name: 'SYNTHETIC original alert policy',
+              maximum_minutes: 5,
+              time_alert_enabled: enabled,
+            },
+          },
+        },
+      });
+      const wrapper = mount(AgentStatePanel, {
+        props: { accountId: '1', canOperate: true },
+      });
+      await flushPromises();
+      expect(wrapper.find('[data-pause-exceeded]').exists()).toBe(enabled);
+      expect(wrapper.get('[role="timer"]').text()).toContain('00:10:00');
+      expect(JrcContactCenterAPI.updateAgentState.mock.calls.length).toBe(
+        calls
+      );
+    }
+  );
+
   it('shows the immutable local reason and a maximum-time notice without automatically resuming distribution', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-11-18T12:10:00Z'));

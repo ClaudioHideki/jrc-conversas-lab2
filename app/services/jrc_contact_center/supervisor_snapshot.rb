@@ -77,7 +77,9 @@ class JrcContactCenter::SupervisorSnapshot
     return unless maximum.is_a?(Integer)
 
     elapsed = [Time.current - event.started_at, 0].max.floor
-    { elapsed_seconds: elapsed, exceeded: elapsed > maximum * 60 }
+    notice = { elapsed_seconds: elapsed, exceeded: elapsed > maximum * 60 }
+    notice[:time_alert_enabled] = definition['time_alert_enabled'] if definition.key?('time_alert_enabled')
+    notice
   end
 
   def visible_current_pause?(data, event, permitted)

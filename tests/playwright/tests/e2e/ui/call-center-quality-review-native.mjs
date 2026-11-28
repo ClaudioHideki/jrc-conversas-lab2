@@ -1,5 +1,9 @@
 import { verifyNativeRecordingTicket } from './call-center-recording-ticket-native.mjs';
 import { verifyNativeManualRecordingTask } from './call-center-recording-manual-task-native.mjs';
+import {
+  observeNativeChild,
+  preserveNativeChildFailure,
+} from './call-center-native-child-failure.mjs';
 import { expect } from '@playwright/test';
 import { verifyNativeRecordingActions } from './call-center-recording-actions-native.mjs';
 import fs from 'node:fs';
@@ -37,6 +41,7 @@ export async function verifyNativeQualityReview(parent, info, target) {
   const open = async auth => {
     const page = await parent.context().newPage();
     pages.push(page);
+    observeNativeChild(page);
     page.on('pageerror', error => errors.push(error.message));
     await page.route('**/*', route => {
       const request = route.request();
@@ -514,6 +519,9 @@ export async function verifyNativeQualityReview(parent, info, target) {
         2
       )
     );
+  } catch (failure) {
+    await preserveNativeChildFailure(info, 'quality', pages).catch(() => null);
+    throw failure;
   } finally {
     await Promise.all(pages.map(page => page.close()));
   }
