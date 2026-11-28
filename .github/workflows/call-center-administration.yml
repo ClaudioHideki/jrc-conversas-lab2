@@ -139,16 +139,16 @@ jobs:
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' for row in report['testResults'] for case in row['assertionResults'])
           PY
-          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/PabxNativePage.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.spec.js \
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/PabxNativePage.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseOperationalWorkspace.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile=/tmp/call-center-pabx-native-vitest.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-pabx-native-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 57
+          assert report['numTotalTests'] == report['numPassedTests'] == 67
           assert report['numFailedTests'] == report['numPendingTests'] == 0
-          assert len(report['testResults']) == 2 and all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'PabxNativePage.spec.js': 21, 'AdministrationSection.spec.js': 36}
+          assert len(report['testResults']) == 3 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'PabxNativePage.spec.js': 21, 'AdministrationSection.spec.js': 36, 'PauseOperationalWorkspace.spec.js': 10}
           assert {Path(row['name']).name: len(row['assertionResults']) for row in report['testResults']} == expected
           assert all(case['status'] == 'passed' and not case.get('failureMessages') for row in report['testResults'] for case in row['assertionResults'])
           PY
@@ -540,7 +540,7 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-quality-review-preflight.json').read_text())
-          expected = {'spec/models/jrc_contact_center/quality_review_revision_spec.rb': 5, 'spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb': 16, 'spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb': 5, 'spec/services/jrc_contact_center/quality_review_source_spec.rb': 10, 'spec/services/jrc_contact_center/quality_review_write_spec.rb': 8, 'spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb': 4, 'spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb': 4, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb': 9, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb': 6, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_ending_contexts_spec.rb': 9, 'spec/services/jrc_customers/timeline_spec.rb': 5, 'spec/services/jrc_contact_center/synthetic_quality_persistence_failure_spec.rb': 2}
+          expected = {'spec/models/jrc_contact_center/quality_review_revision_spec.rb': 5, 'spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb': 16, 'spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb': 5, 'spec/services/jrc_contact_center/quality_review_source_spec.rb': 12, 'spec/services/jrc_contact_center/quality_review_write_spec.rb': 8, 'spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb': 4, 'spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb': 6, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb': 9, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb': 6, 'spec/requests/api/v1/accounts/jrc_contact_center/recording_ending_contexts_spec.rb': 9, 'spec/services/jrc_customers/timeline_spec.rb': 5, 'spec/services/jrc_contact_center/synthetic_quality_persistence_failure_spec.rb': 2}
           assert report['summary']['example_count'] == len(report['examples']) == sum(expected.values())
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           actual, identities = {}, set()
@@ -2230,6 +2230,21 @@ jobs:
           from pathlib import Path
           modes = {'desktop-light', 'desktop-dark', 'mobile-light', 'mobile-dark'}
           root = Path('.codex/call-center-native-e2e')
+
+          pause_workspaces = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-pause-workspace.json')]
+          assert len(pause_workspaces) == 4
+          assert {row['project'] for row in pause_workspaces} == {'desktop-light', 'desktop-dark', 'mobile-light', 'mobile-dark'}
+          for row in pause_workspaces:
+              assert row['sha'] == os.environ['GITHUB_SHA'] and row['synthetic'] is True
+              assert row['four_native_destinations_reused'] is row['availability_URL_reload'] is True
+              assert row['writes'] == row['errors'] == [] and row['provider_operation'] is False
+              assert row['whole_figure_or_Part1_accepted'] is False
+              assert len(row['native_reads']) == 5 and all(len(value['sha256']) == 64 for value in row['native_reads'])
+              assert [value['path'] for value in row['native_reads']] == ['routing_rules', 'supervisor', 'supervisor', 'agent_state_histories', 'pause_catalog']
+              assert row['denied'] == [{'path': name, 'status': 401} for name in ['routing_rules', 'supervisor', 'agent_state_histories']]
+              assert len(row['contrast']) == 4 and all(value['ratio'] >= 4.5 for value in row['contrast'])
+              assert len(row['screenshots']) == 3 and len(set(row['screenshots'])) == 3
+              assert all(Path(name).is_file() for name in row['screenshots'])
           flows = [json.loads(path.read_text()) for path in root.glob('*-recording-quality-report.json')]
           assert len(flows) == 4 and {row['project'] for row in flows} == modes
           for row in flows:

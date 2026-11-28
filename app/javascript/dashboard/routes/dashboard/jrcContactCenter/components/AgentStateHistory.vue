@@ -78,6 +78,7 @@ const open = () => {
   opened.value = true;
   dialog.value.open();
 };
+defineExpose({ open });
 watch(
   () => [String(props.accountId), props.context],
   () => {

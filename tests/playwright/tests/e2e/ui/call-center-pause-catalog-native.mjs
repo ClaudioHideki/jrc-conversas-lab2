@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
 import { isBrowserApiResponse } from './call-center-browser-api.mjs';
+import { verifyNativePauseWorkspace } from './call-center-pause-workspace-native.mjs';
 
 // Same existing scenario, extracted to retain the reviewed native suite size bound. No product change.
 export async function verifyNativePauseCatalogEditor(
@@ -47,6 +48,7 @@ export async function verifyNativePauseCatalogEditor(
     })
   ).toBeVisible();
   await expect(catalog.locator('article')).toHaveCount(20);
+  await verifyNativePauseWorkspace(page, info, target);
   await expect(page.locator('html')).toHaveClass(
     info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
   );

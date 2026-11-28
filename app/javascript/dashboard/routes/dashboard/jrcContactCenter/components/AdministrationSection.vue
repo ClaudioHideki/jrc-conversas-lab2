@@ -10,7 +10,7 @@ import { useMapGetter } from 'dashboard/composables/store';
 import NativeRoleEditor from './NativeRoleEditor.vue';
 import AuthorityAssignments from './AuthorityAssignments.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
-import PauseCatalogEditor from './PauseCatalogEditor.vue';
+import PauseOperationalWorkspace from './PauseOperationalWorkspace.vue';
 import AcwRulesEditor from './AcwRulesEditor.vue';
 import AcwFormLibrary from './AcwFormLibrary.vue';
 import EndingReasonCatalog from './EndingReasonCatalog.vue';
@@ -636,7 +636,7 @@ onBeforeUnmount(() => {
       :account-id="accountId"
       :context="context"
     />
-    <PauseCatalogEditor
+    <PauseOperationalWorkspace
       v-if="key === 'pauses'"
       :account-id="accountId"
       :context="context"

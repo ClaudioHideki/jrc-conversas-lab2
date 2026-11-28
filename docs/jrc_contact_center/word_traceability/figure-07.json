@@ -1942,5 +1942,35 @@
   ],
   "previous_matrix_is_historical_not_acceptance": true,
   "complete_figure_accepted": false,
-  "tests_candidate_not_validated": []
+  "tests_candidate_not_validated": [],
+  "native_pause_operational_workspace_candidate": {
+    "status": "prepared_not_staged_not_accepted",
+    "literal_requirements": [
+      "D1-P0114-C01",
+      "D2-P0177-C01"
+    ],
+    "existing_components_reused": [
+      "PauseCatalogEditor.vue",
+      "RoutingDraftWorkspace.vue",
+      "SupervisorPage.vue",
+      "AgentStateHistory.vue"
+    ],
+    "delivery": "Four authorized tabs reuse the native catalog, routing workspace and observed supervisor; selecting History opens the existing scoped state-history dialog. Catalog URL filters remain preserved.",
+    "permission_mapping": {
+      "motives": "configure",
+      "distribution": "configure",
+      "availability": "supervise",
+      "history": "control"
+    },
+    "new_Vue_cases_prepared": 10,
+    "reused_Chrome_cases_extended_four_modes": 4,
+    "new_capture_count_prepared": 12,
+    "new_model_migration_API_permission_or_provider_operation": false,
+    "divergences_remaining": [
+      "History preserves its existing native dialog rather than creating a second history list.",
+      "Internal routing drafts do not prove provider distribution has been applied or acknowledged.",
+      "Full per-reason withdrawal/remuneration flags and external return/distribution remain separately pending."
+    ],
+    "whole_figure_or_Part1_accepted": false
+  }
 }

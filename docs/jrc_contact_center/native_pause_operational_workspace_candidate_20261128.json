@@ -1,0 +1,38 @@
+{
+  "parent": "ff321abc6e907d71cf170bae39543294132193c6",
+  "literal_requirements": [
+    "D1-P0114-C01",
+    "D2-P0177-C01"
+  ],
+  "source_Word_figure_7_image_sha256": "120e8c408f9e50310440930c7fa0c46c7b9e9668e8a4c9429597550a1f45d487",
+  "flow": "Four authorized tabs reuse existing native readers/editors; no parallel registry or executor. History opens its existing scoped dialog.",
+  "reused_native_components": [
+    "PauseCatalogEditor",
+    "RoutingDraftWorkspace",
+    "SupervisorPage",
+    "AgentStateHistory"
+  ],
+  "current_permissions": {
+    "motives": "configure",
+    "distribution": "configure",
+    "availability": "supervise",
+    "history": "control"
+  },
+  "account_unit_corporate_profile_changes_remount_current_reader": true,
+  "only_one_native_reader_mounted_at_a_time": true,
+  "new_Vue_cases_prepared": 10,
+  "new_Chrome_cases": 0,
+  "existing_four_mode_Chrome_case_extended": true,
+  "expected_extra_actual_PNG": 12,
+  "same_owned_fixtures_and_original_catalog_case_assertions_preserved": true,
+  "old_98_workflow_steps_and_all_gates_retained": true,
+  "quality_review_inventory_fix": "83 preserved + four added authenticated actor/owned boundary regressions = 87; exact file/identity/positive guards retained.",
+  "new_backend_API_model_migration_dependency_or_provider_operation": false,
+  "history_popup_preserved": true,
+  "external_dependencies": [
+    "PABX application/ACK of distribution rules",
+    "Per-reason withdrawal/remuneration controls and real automatic return remain separate requirements"
+  ],
+  "whole_figure_or_Part1_accepted": false,
+  "native_or_Chrome_accepted": false
+}

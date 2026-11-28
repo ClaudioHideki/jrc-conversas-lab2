@@ -571,5 +571,29 @@
     "no_new_catalogs_permissions_or_infrastructure": true,
     "cadence_preserved": "Report each 24 effective working hours with usable functions, literal Word IDs, source/evidence, remaining effort and external dependencies; continue between checkpoints.",
     "effective_hours_not_invented": true
+  },
+  "latest_grouped_functional_candidate": {
+    "source_parent": "ff321abc6e907d71cf170bae39543294132193c6",
+    "figures": [
+      7,
+      8,
+      11,
+      19
+    ],
+    "user_deliveries": [
+      "Read the complete authorized period of original sentiment analyses separately from page and segment.",
+      "Navigate native pause catalog, internal routing, observed team availability and state history in four authorized tabs."
+    ],
+    "new_pause_workspace_native_or_Chrome_accepted": false,
+    "preserved_partial_native_proof": {
+      "run": 46101063110,
+      "quality_metric_preflight_passed": 76,
+      "existing_quality_review_passed": 87,
+      "inventory_old_83_preserved": true,
+      "proof_sha256": "a3a3623e06b40f50af13f2205527627e0676582333f6c8c2f6cb687e9bbc952c"
+    },
+    "report_at_24_effective_work_hours": true,
+    "effective_hours_not_measured_not_fabricated": true,
+    "provider_commands_and_whole_Part1_acceptance": false
   }
 }

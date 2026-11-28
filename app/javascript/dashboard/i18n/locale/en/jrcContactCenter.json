@@ -3584,6 +3584,14 @@
       "CONFIRMATION": "Confirmação do PABX registrada no JRC",
       "REJECTED": "Rejeitado",
       "UNKNOWN": "Estado desconhecido"
+    },
+    "PAUSE_WORKSPACE": {
+      "TITLE": "Pausas e disponibilidade",
+      "MOTIVES": "Motivos de pausa",
+      "DISTRIBUTION": "Regras de distribuição",
+      "AVAILABILITY": "Disponibilidade da equipe",
+      "HISTORY": "Histórico",
+      "DENIED": "Nenhuma seção está disponível com suas permissões atuais."
     }
   }
 }
