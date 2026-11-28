@@ -305,6 +305,36 @@ jobs:
       - name: Exclusive public browser worker and guarded fixtures lint
         run: |
           bundle exec rubocop script/jrc_call_center_ending_service_desk_seed.rb script/jrc_call_center_ending_service_desk_evidence.rb script/jrc_call_center_ending_public_evidence.rb script/jrc_call_center_ending_public_queue_control.rb script/jrc_call_center_ending_public_release_fault.rb script/jrc_call_center_ending_public_seed.rb spec/integration/jrc_contact_center/owned_public_ending_adapter.rb spec/integration/jrc_contact_center/owned_public_ending_queue.rb spec/integration/jrc_contact_center/owned_public_ending_server.ru spec/integration/jrc_contact_center/owned_public_ending_worker_boot.rb app/services/jrc_contact_center/ending_actions/service_desk_rule_parameters.rb spec/services/jrc_contact_center/ending_actions/service_desk_rule_parameters_spec.rb --format json --out /tmp/call-center-ending-public-browser-lint.json
+      - name: Native Supabase transport retains full lint baseline without new offenses
+        run: |
+          python3 -B - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          import subprocess
+          import sys
+          sys.path.insert(0, 'script')
+          from jrc_call_center_lint import BASE, classify
+          assert BASE == 'a24adc6dd8bb660f955b76cce0172ae1638deee2'
+          name = 'app/services/jrc_voice_quality/supabase_client.rb'
+          old = subprocess.check_output(['git', 'show', f'{BASE}:{name}'], text=True)
+          assert hashlib.sha256(old.encode()).hexdigest() == 'ef251570f4f6522916c6c520756800121e8c3c385b40395e6464416a3681035c'
+          current = Path(name).read_text()
+          reports = []
+          for content in [old, current]:
+              result = subprocess.run(['bundle', 'exec', 'rubocop', '--stdin', name, '--format', 'json'], input=content, capture_output=True, text=True)
+              assert result.returncode in [0, 1]
+              report = json.loads(result.stdout)
+              assert report['summary']['inspected_file_count'] == len(report['files']) == 1
+              assert report['files'][0]['path'].removeprefix('./') == name
+              reports.append(report['files'][0]['offenses'])
+          added, improved = classify(reports[0], reports[1], old, current)
+          receipt = {'path': name, 'baseline_revision': BASE, 'baseline_sha256': hashlib.sha256(old.encode()).hexdigest(),
+                     'candidate_sha256': hashlib.sha256(current.encode()).hexdigest(), 'baseline': reports[0], 'candidate': reports[1],
+                     'new_offenses': added, 'improved_metrics': improved, 'complete_native_cops_and_configuration': True}
+          Path('/tmp/call-center-quality-transport-incremental-lint.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          assert added == []
+          PY
       - name: Native recording Relationship source and owned witness lint
         id: recording_relationship_lint
         run: |
@@ -313,7 +343,7 @@ jobs:
         id: quality_review_lint
         run: |
           bundle exec rubocop app/services/jrc_contact_center/recorded_calls.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_filter_shapes_spec.rb --format json --out /tmp/call-center-recording-filter-shapes-lint.json
-          bundle exec rubocop app/services/jrc_voice_quality/analysis_metric_reader.rb app/services/jrc_contact_center/recording_quality_metrics.rb app/services/jrc_contact_center/recording_quality_report.rb app/controllers/api/v1/accounts/jrc_contact_center/recording_quality_reports_controller.rb spec/services/jrc_contact_center/recording_quality_metrics_spec.rb spec/services/jrc_voice_quality/analysis_metric_reader_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb spec/support/contact_center_quality_scale_statistics.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_report_concurrency_spec.rb spec/integration/jrc_contact_center/owned_quality_source.rb spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb app/services/jrc_contact_center/quality_review_source.rb spec/services/jrc_contact_center/quality_review_source_spec.rb spec/support/contact_center_quality_review.rb app/services/jrc_voice_quality/supabase_client.rb spec/services/jrc_voice_quality/supabase_transport_options_spec.rb --format json --out /tmp/call-center-quality-summary-lint.json
+          bundle exec rubocop app/services/jrc_voice_quality/analysis_metric_reader.rb app/services/jrc_contact_center/recording_quality_metrics.rb app/services/jrc_contact_center/recording_quality_report.rb app/controllers/api/v1/accounts/jrc_contact_center/recording_quality_reports_controller.rb spec/services/jrc_contact_center/recording_quality_metrics_spec.rb spec/services/jrc_voice_quality/analysis_metric_reader_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb spec/support/contact_center_quality_scale_statistics.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_report_concurrency_spec.rb spec/integration/jrc_contact_center/owned_quality_source.rb spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb app/services/jrc_contact_center/quality_review_source.rb spec/services/jrc_contact_center/quality_review_source_spec.rb spec/support/contact_center_quality_review.rb spec/services/jrc_voice_quality/supabase_client_request_spec.rb --format json --out /tmp/call-center-quality-summary-lint.json
           bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/quality_reviews_controller.rb app/models/jrc_contact_center/quality_review_revision.rb app/services/jrc_contact_center/quality_review_presentation.rb app/services/jrc_contact_center/quality_review_scope.rb app/services/jrc_contact_center/quality_review_source.rb app/services/jrc_contact_center/quality_review_write.rb config/initializers/contact_center_quality_review_privacy.rb db/migrate/20261126193000_create_contact_center_quality_reviews.rb lib/jrc_contact_center/quality_review_schema_receipt.rb script/jrc_call_center_quality_review_evidence.rb script/jrc_call_center_quality_review_upgrade.rb script/jrc_call_center_quality_schema_probe.rb script/jrc_call_center_recordings_seed.rb spec/integration/jrc_contact_center/owned_public_ending_server.ru spec/integration/jrc_contact_center/owned_quality_evidence.rb spec/integration/jrc_contact_center/owned_quality_source.rb spec/models/jrc_contact_center/quality_review_revision_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/quality_review_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/quality_reviews_spec.rb spec/services/jrc_contact_center/create_contact_center_quality_reviews_spec.rb spec/services/jrc_contact_center/quality_review_source_spec.rb spec/services/jrc_contact_center/quality_review_write_spec.rb spec/services/jrc_contact_center/synthetic_quality_review_upgrade_spec.rb spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb spec/support/contact_center_quality_review.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_transcripts_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_native_context_spec.rb app/controllers/api/v1/accounts/jrc_contact_center/recording_ending_contexts_controller.rb app/services/jrc_contact_center/recording_ending_context.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_ending_contexts_spec.rb script/jrc_call_center_recording_actions_evidence.rb spec/integration/jrc_contact_center/owned_quality_persistence_failure.rb script/jrc_call_center_quality_persistence_failure.rb spec/services/jrc_contact_center/synthetic_quality_persistence_failure_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/quality_review_persistence_failure_spec.rb --format json --out /tmp/call-center-quality-review-lint.json
           bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/recording_ticket_intakes_controller.rb app/services/jrc_contact_center/recording_ticket_intake.rb spec/support/contact_center_recording_tickets.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_ticket_intake_concurrency_spec.rb spec/services/jrc_contact_center/synthetic_recording_ticket_seed_spec.rb script/jrc_call_center_recording_ticket_seed.rb spec/integration/jrc_contact_center/owned_recording_ticket_evidence.rb script/jrc_call_center_recording_ticket_evidence.rb app/services/jrc_contact_center/recording_ticket_list.rb app/controllers/api/v1/accounts/jrc_contact_center/recording_tickets_controller.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_tickets_spec.rb --format json --out /tmp/call-center-recording-ticket-lint.json
       - name: Incremental Ruby lint without suppressing new offenses
@@ -506,14 +536,14 @@ jobs:
           PY
           POSTGRES_DATABASE=jrc_sd_bc_portal_concurrency_20261025_test JRC_CC_COMMITTED_RECORDING_FIXTURE=false bundle exec rails runner 'config = ApplicationRecord.connection_db_config; actual = ApplicationRecord.connection.current_database; owned = Rails.env.test? && ENV["GITHUB_ACTIONS"] == "true" && ENV["RUNNER_ENVIRONMENT"] == "github-hosted" && config.configuration_hash[:host] == "127.0.0.1" && actual == "jrc_sd_bc_portal_concurrency_20261025_test"; raise "Owned shared database required" unless owned; raise "Committed fixtures polluted native role regressions" unless CustomRole.count.zero?; File.write("/tmp/call-center-recording-fixture-isolation.json", JSON.generate({sha: ENV.fetch("GITHUB_SHA"), synthetic: true, native_main_database: actual, preserved_custom_role_count: 0, no_cleanup_or_permission_change: true}))'
 
-          bundle exec rspec spec/services/jrc_contact_center/recording_quality_metrics_spec.rb spec/services/jrc_voice_quality/analysis_metric_reader_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb spec/services/jrc_contact_center/quality_review_source_spec.rb --tag '~cc_owned_quality_scale' spec/services/jrc_voice_quality/supabase_transport_options_spec.rb --format progress --format json --out /tmp/call-center-quality-summary-preflight.json
+          bundle exec rspec spec/services/jrc_contact_center/recording_quality_metrics_spec.rb spec/services/jrc_voice_quality/analysis_metric_reader_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb spec/services/jrc_contact_center/quality_review_source_spec.rb --tag '~cc_owned_quality_scale' spec/services/jrc_voice_quality/supabase_client_request_spec.rb --format progress --format json --out /tmp/call-center-quality-summary-preflight.json
           python3 -B - <<'PY'
           import json
           from collections import Counter
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-quality-summary-preflight.json').read_text())
           expected = {"spec/services/jrc_contact_center/recording_quality_metrics_spec.rb":16,"spec/services/jrc_voice_quality/analysis_metric_reader_spec.rb":22,"spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb":20,"spec/services/jrc_contact_center/synthetic_recorded_call_quality_spec.rb":6,"spec/services/jrc_contact_center/quality_review_source_spec.rb":12}
-          expected['spec/services/jrc_voice_quality/supabase_transport_options_spec.rb'] = 3
+          expected['spec/services/jrc_voice_quality/supabase_client_request_spec.rb'] = 3
           assert report['summary']['example_count'] == len(report['examples']) == sum(expected.values())
           assert all(type(report['summary'][key]) is int and report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert len({row['id'] for row in report['examples']}) == len(report['examples'])

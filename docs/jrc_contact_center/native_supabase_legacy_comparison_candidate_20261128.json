@@ -1,0 +1,86 @@
+{
+  "source_parent": "c37d45de1bb0820012884c32925da6b7638d8ca2",
+  "failed_run": 46133601132,
+  "failed_job": 140943930035,
+  "artifact_id": 15258846635,
+  "artifact_sha256": "e2d045eb5761ba1f27e36120786c450f427ad5b9d8b7f1e9e2002d3b7e4db3a2",
+  "relationship_21_path_strict_lint": {
+    "offenses": 0,
+    "report_sha256": "3f694302ab779625485b3630ac0402ecbe325cddf2979b788d1624e7f8acd3a1"
+  },
+  "exact_diagnosis": {
+    "strict_quality_files": 16,
+    "offenses": 10,
+    "unchanged_legacy_client_offenses": 6,
+    "new_transport_spec_offenses": 4,
+    "client_unchanged_relative_to_last_runtime_correction": true
+  },
+  "evidence_backed_cop_comparison": {
+    "baseline": "a24adc6dd8bb660f955b76cce0172ae1638deee2",
+    "before_native_artifact": 15256785072,
+    "after_native_artifact": 15258846635,
+    "new_offenses": [],
+    "improved_metrics": [
+      {
+        "context": [
+          "Metrics/ClassLength",
+          "JrcVoiceQuality::SupabaseClient"
+        ],
+        "before": [
+          309.0
+        ],
+        "after": [
+          300.0
+        ]
+      },
+      {
+        "context": [
+          "Metrics/AbcSize",
+          "save_analysis!"
+        ],
+        "before": [
+          1.0,
+          71.0,
+          1.0,
+          71.01
+        ],
+        "after": [
+          1.0,
+          39.0,
+          1.0,
+          39.03
+        ]
+      },
+      {
+        "context": [
+          "Metrics/MethodLength",
+          "save_analysis!"
+        ],
+        "before": [
+          56.0
+        ],
+        "after": [
+          34.0
+        ]
+      }
+    ],
+    "not_a_new_native_execution_or_full_candidate_acceptance": true
+  },
+  "minimal_gate_repair": [
+    "Keep all original14 quality files under zero-offense strict lint.",
+    "Keep the new three-case transport spec under full strict lint and correct its model/method path.",
+    "Inspect the complete legacy client with every cop using the existing native classifier and its exact pinned global BASE; fail for every introduced or worsened offense.",
+    "Keep the complete existing global incremental Ruby gate unchanged.",
+    "Do not refactor legacy persistence/summary methods or change transport behavior."
+  ],
+  "reviewed_rename": {
+    "old": "spec/services/jrc_voice_quality/supabase_transport_options_spec.rb",
+    "old_sha256": "f2dbdee960c4a586cacfbc1c6bfceac1c4b1a068284114e3ff555bfede7fc9a3",
+    "new": "spec/services/jrc_voice_quality/supabase_client_request_spec.rb",
+    "new_sha256": "d5d69f7b020ee7c2ae1414a61b8b89a703e0eb06724ac0d67f15d58c42ea45d3"
+  },
+  "all_three_transport_assertions_and_cases_retained": true,
+  "all_102_existing_steps_retained_with_one_additional_full_baseline_comparison": true,
+  "no_rule_threshold_config_exclusion_permission_migration_or_runtime_changed": true,
+  "native_or_Chrome_accepted": false
+}

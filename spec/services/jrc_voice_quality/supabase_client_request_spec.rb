@@ -4,7 +4,7 @@ require 'rails_helper'
 
 # Exercise the actual private transport. Only HTTP I/O is replaced; no vendor
 # request, token, account policy or database is involved in these regressions.
-RSpec.describe JrcVoiceQuality::SupabaseClient, 'transport keyword compatibility' do
+RSpec.describe JrcVoiceQuality::SupabaseClient, '#request', :pabx do
   let(:client) { described_class.new }
   let(:reply) { instance_double(HTTParty::Response, success?: true, body: '[]') }
 
@@ -28,10 +28,13 @@ RSpec.describe JrcVoiceQuality::SupabaseClient, 'transport keyword compatibility
 
   it 'preserves scoped query, JSON body, custom headers and the original bounded analysis timeout' do
     query = { account_id: 'eq.42', call_id: 'eq.SYNTHETIC-call' }
-    client.send(:request, :patch, '/SYNTHETIC-resource', query: query, body: { status: 'SYNTHETIC' },
-                                                     headers: { 'Prefer' => 'return=minimal' }, timeout: 1.25)
+    client.send(
+      :request, :patch, '/SYNTHETIC-resource',
+      query: query, body: { status: 'SYNTHETIC' }, headers: { 'Prefer' => 'return=minimal' }, timeout: 1.25
+    )
     expect(HTTParty).to have_received(:public_send).with(
-      :patch, 'https://supabase.example.test/rest/v1/SYNTHETIC-resource', query: query, body: { status: 'SYNTHETIC' }.to_json,
+      :patch, 'https://supabase.example.test/rest/v1/SYNTHETIC-resource',
+      query: query, body: { status: 'SYNTHETIC' }.to_json,
       headers: hash_including('Prefer' => 'return=minimal', 'apikey' => 'SYNTHETIC-transport-only'), timeout: 1.25
     )
   end
