@@ -55,6 +55,18 @@ class BuildAdmissionTest(unittest.TestCase):
                 with self.assertRaises(RuntimeError):
                     authorize({**candidate, key: value}, self.sha)
 
+    def test_receipt_projection_requires_exact_manual_candidate_and_sha(self):
+        ref = 'refs/heads/codex/projecao-recibos-20261128'
+        candidate = {**self.env, 'GITHUB_REF': ref}
+        with patch('jrc_ag_guarded_frontend_build.sys.platform', 'linux'):
+            authorize(candidate, self.sha)
+            for key, value in [('GITHUB_EVENT_NAME', 'push'), ('GITHUB_EVENT_NAME', 'pull_request'),
+                               ('GITHUB_REF', ref + '-other'), ('GITHUB_REF', ref.replace('heads/', 'tags/')),
+                               ('GITHUB_RUN_ATTEMPT', '2'), ('RUNNER_ENVIRONMENT', 'self-hosted'),
+                               ('GITHUB_SHA', 'b' * 40), ('JRC_AG_AUTHORIZED_BUILD_SHA', 'b' * 40)]:
+                with self.subTest(key=key, value=value), self.assertRaises(RuntimeError):
+                    authorize({**candidate, key: value}, self.sha)
+
     def test_delivery_admission_retains_eight_gib_of_available_ram(self):
         self.assertGreaterEqual(START_RAM, 8 * 1024 ** 3)
 
