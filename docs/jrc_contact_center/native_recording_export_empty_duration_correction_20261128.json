@@ -1,0 +1,18 @@
+{
+  "parent": "4c4ba2e031a417f53421ccb8f8be240dd57417dd",
+  "failed_run": 46159343197,
+  "artifact": 15269296912,
+  "artifact_sha256": "95fc1c2f5101b88071bf154975a8558872e4f718aecec8a8fb7cbed9741fa6e2",
+  "native_CSV_observed": {
+    "examples": 22,
+    "passed": 21,
+    "failed": 1,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "cause": "Existing OperationalCsv.cell serializes nil to a quoted empty string, which Ruby CSV parses as an empty string, not nil. Preserve exact absence-versus-zero behavior.",
+  "change": "One expectation: missing duration is empty string; native numeric zero remains the exact string 0. All no-provider assertions and22 cases retained.",
+  "runtime_code_changed": false,
+  "workflow_or_criteria_weakened": false,
+  "new_native_or_Chrome_acceptance": false
+}

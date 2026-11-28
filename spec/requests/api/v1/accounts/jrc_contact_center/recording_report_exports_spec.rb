@@ -110,7 +110,7 @@ RSpec.describe 'Native recording metadata CSV with current authority and unchang
       record.update!(duration_seconds: duration)
       get path, headers: headers
       expect(response).to have_http_status(:ok)
-      expect(rows.fetch(1).last).to eq(duration.nil? ? nil : '0')
+      expect(rows.fetch(1).last).to eq(duration.nil? ? '' : '0')
       expect(Pabx::Provider).not_to have_received(:new)
       expect(JrcVoiceQuality::SupabaseClient).not_to have_received(:new)
     end
