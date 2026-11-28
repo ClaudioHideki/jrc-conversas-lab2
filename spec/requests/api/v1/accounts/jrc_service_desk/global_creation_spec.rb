@@ -17,6 +17,22 @@ RSpec.describe 'Service Desk creation in every enabled Account', type: :request 
     sd_foreign_account.enable_features!('jrc_service_desk')
   end
 
+  it 'loads initial states for all visible units with one scoped lookup' do
+    states = [sd_unit, sd_other_unit, create(:jrc_sd_unit, operator_company: sd_operator)].map { |unit| create(:jrc_sd_status, unit: unit) }
+    foreign = create(:jrc_sd_status, unit: sd_foreign_unit)
+    statements = []
+    listener = lambda do |*event|
+      sql = event.last[:sql]
+      statements << sql if sql.match?(/FROM "jrc_service_desk_ticket_statuses"/i) && sql.include?('"initial"')
+    end
+    ActiveSupport::Notifications.subscribed(listener, 'sql.active_record') { get "#{base}/ui_context", headers: headers }
+    expect(response).to have_http_status(:ok)
+    ids = response.parsed_body.fetch('units').filter_map { |unit| unit.dig('initial_status', 'id') }
+    expect(ids).to include(*states.map { |status| status.id.to_s })
+    expect(ids).not_to include(foreign.id.to_s)
+    expect(statements.length).to eq(1)
+  end
+
   it 'creates, rereads, lists and edits using the native administrator without activating an agent grant' do
     post "#{base}/tickets", params: request_data, headers: headers, as: :json
     expect(response).to have_http_status(:created)

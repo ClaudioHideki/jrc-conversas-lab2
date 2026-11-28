@@ -51,7 +51,7 @@ class JrcNico::Notice < ApplicationRecord
   def visible_to?(access)
     return false unless account_id == access.account.id && user_id == access.user.id
     return false if conversation && !access.policy(conversation).show?
-    available = JrcNico::ToolCatalog.new(access).available.map { |item| item[:name] }
+    available = block_given? ? yield : JrcNico::ToolCatalog.new(access).available.pluck(:name).to_set
     authorized_tools = commands.all? do |command|
       ([command.tool] + Array(command.execution_context['source_tools'])).all? { |tool| tool.blank? || available.include?(tool) }
     end
@@ -59,7 +59,7 @@ class JrcNico::Notice < ApplicationRecord
     # Old synthesized replies have no recoverable source manifest; do not expose them after upgrading.
     return false if commands.any? { |command| command.status == 'succeeded' && command.tool.blank? && !command.execution_context.key?('resources') }
     tool = metadata['tool']
-    return false if tool && JrcNico::ToolCatalog.new(access).available.none? { |item| item[:name] == tool }
+    return false if tool && !available.include?(tool)
     commands.each do |command|
       ids = Array(command.execution_context['conversation_ids'])
       ids += Array(command.result['conversation_ids']) if command.result.is_a?(Hash)
@@ -93,9 +93,10 @@ class JrcNico::Notice < ApplicationRecord
   end
 
   def snapshot
+    ids = commands.loaded? ? commands.map(&:id).sort : commands.order(:id).pluck(:id)
     { id: id, kind: kind, status: status, body: body, request: request, unread: read_at.nil?,
       conversation_id: conversation&.display_id, contact_name: conversation&.contact&.name,
-      command_ids: commands.order(:id).pluck(:id), updated_at: updated_at, metadata: metadata.slice('route_name', 'tool') }
+      command_ids: ids, updated_at: updated_at, metadata: metadata.slice('route_name', 'tool') }
   end
 
   def self.command_changed!(command)

@@ -12,6 +12,28 @@ RSpec.describe 'NICO customer actions and notices', type: :request do
       event_key: 'test-action', kind: 'action', request: 'Atualize meu email para marina@example.test', body: 'Cliente pediu atualização de cadastro')
   end
 
+  it 'resolves the current tool catalog once for the list and still hides a tool absent from this account' do
+    notice
+    %w[visible unknown].each do |name|
+      JrcNico::Notice.publish!(account: account, user: admin, conversation: create(:conversation, account: account),
+                               event_key: "performance-#{name}", kind: 'action', body: 'Fixture',
+                               metadata: name == 'unknown' ? { 'tool' => 'unavailable_fixture' } : {})
+    end
+    expect(JrcNico::ToolCatalog).to receive(:new).once.and_call_original
+    contact_loads = []
+    command_plucks = []
+    listener = lambda do |*event|
+      contact_loads << 1 if event.last[:name] == 'Contact Load'
+      command_plucks << 1 if event.last[:name] == 'JrcNico::Command Pluck'
+    end
+    ActiveSupport::Notifications.subscribed(listener, 'sql.active_record') { get "#{base}/notices", headers: headers }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('notices').length).to eq(2)
+    expect(response.parsed_body.fetch('unread_count')).to eq(2)
+    expect(contact_loads.size).to eq(1)
+    expect(command_plucks).to be_empty
+  end
+
   it 'prepares a customer action without cancelling the operator task, then notifies its real result' do
     post "#{base}/prepare", params: { request_id: SecureRandom.uuid, message: 'Outro trabalho', tool: 'create_contact',
       arguments: { name: 'Outro cliente', email: 'outro@example.test' } }, headers: headers, as: :json

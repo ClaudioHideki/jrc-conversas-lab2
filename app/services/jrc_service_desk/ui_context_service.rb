@@ -8,7 +8,12 @@ class JrcServiceDesk::UiContextService
 
   def call
     Pundit.authorize(@context.to_h, :service_desk, :show?, policy_class: JrcServiceDesk::ModulePolicy)
-    units = @context.view_unit_scope.includes(:operator_company).order(:name, :id).map { |unit| unit_payload(unit) }
+    visible = @context.view_unit_scope.includes(:operator_company).order(:name, :id).to_a
+    ids = visible.map(&:id)
+    initial = initial_statuses(ids)
+    operational = @context.unit_scope.where(id: ids).pluck(:id).to_set
+    assignable = assignable_unit_ids(ids)
+    units = visible.map { |unit| unit_payload(unit, initial[unit.id], operational.include?(unit.id), assignable.include?(unit.id)) }
     capabilities = JrcServiceDesk::UiCapabilityProjection.new(@context).call
     effective_permissions = @context.effective_capabilities.map { |key| "#{JrcServiceDesk::Capabilities::PREFIX}#{key}" }
     { contract_version: 1, account_id: @context.account.id.to_s, user_id: @context.user.id.to_s,
@@ -17,31 +22,30 @@ class JrcServiceDesk::UiContextService
 
   private
 
-  def initial_status(unit)
-    @context.capability?(:lookups_view) && JrcServiceDesk::TicketStatus.find_by(account_id: @context.account.id, unit_id: unit.id,
-                                                                                initial: true, active: true, phase: 'open')
+  def initial_statuses(ids)
+    return {} if ids.empty? || !@context.capability?(:lookups_view)
+
+    JrcServiceDesk::TicketStatus.where(account_id: @context.account.id, unit_id: ids, initial: true, active: true, phase: 'open').index_by(&:unit_id)
   end
 
-  def unit_payload(unit)
-    initial = initial_status(unit)
-    permissions = unit_permissions(unit)
+  def assignable_unit_ids(ids)
+    return Set.new if ids.empty? || !@context.capability?(:tickets_assign)
+
+    @context.active_memberships.operational.where(unit_id: ids, manual_assignment_enabled: true).distinct.pluck(:unit_id).to_set
+  end
+
+  def unit_payload(unit, initial, operational, assignable)
+    permissions = unit_permissions(unit, operational)
     { id: unit.id.to_s, account_id: @context.account.id.to_s, name: unit.name, active: true,
       operator_company: { id: unit.operator_company.id.to_s, account_id: unit.account_id.to_s, name: unit.operator_company.name },
       initial_status: initial ? { id: initial.id.to_s, name: initial.name } : nil, permissions: permissions,
       internal_intake: permissions[:create_ticket] ? JrcServiceDesk::InternalIntake.presentation(unit, @context) : nil,
-      self_assignee: self_assignee(unit), employee_only: JrcServiceDesk::EmployeeAccess.restricted?(@context) }
+      self_assignee: assignable ? { id: @context.account_user.id.to_s, name: @context.user.name } : nil,
+      employee_only: JrcServiceDesk::EmployeeAccess.restricted?(@context) }
   end
 
-  def self_assignee(unit)
-    return unless @context.capability?(:tickets_assign)
-
-    member = @context.active_memberships.operational.where(unit_id: unit.id, manual_assignment_enabled: true).first
-    { id: member.account_user_id.to_s, name: @context.user.name } if member
-  end
-
-  def unit_permissions(unit)
+  def unit_permissions(unit, operational)
     candidate = JrcServiceDesk::Ticket.new(account: @context.account, unit: unit)
-    operational = @context.unit_scope.exists?(id: unit.id)
     { create_ticket: Pundit.policy!(@context.to_h, candidate).create?,
       assign_ticket: operational && @context.capability?(:tickets_assign),
       link_conversation: operational && @context.capability?(:conversations_link),

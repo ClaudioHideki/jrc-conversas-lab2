@@ -28,8 +28,11 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
   end
 
   def notices
-    records = JrcNico::Notice.where(account: Current.account, user: Current.user).includes(:conversation, :commands)
-                            .order(updated_at: :desc).limit(60).select { |notice| notice.visible_to?(@operator.access) }
+    available_tools = nil
+    records = JrcNico::Notice.where(account: Current.account, user: Current.user).includes(:commands, conversation: :contact)
+                            .order(updated_at: :desc).limit(60).select do |notice|
+      notice.visible_to?(@operator.access) { available_tools ||= JrcNico::ToolCatalog.new(@operator.access).available.pluck(:name).to_set }
+    end
     render json: { notices: records.map(&:snapshot), unread_count: records.count { |notice| notice.read_at.nil? } }
   end
 
