@@ -42,7 +42,7 @@ class JrcContactCenter::RecordedCalls
   # or invalid durations remain unknown; a recorded zero is a real measurement.
   def period_summary(relation, total:)
     measured = relation.reorder(nil).where('duration_seconds >= 0')
-    count, seconds = measured.pick(Arel.sql('COUNT(*)'), Arel.sql('SUM(duration_seconds)'))
+    count, seconds = measured.pick(Arel.sql('COUNT(*)'), Arel.sql('SUM(duration_seconds)')) || [0, nil]
     { total: total, duration_measured_count: count, duration_missing_count: total - count,
       duration_seconds: count.positive? ? seconds : nil, duration_unit: 'seconds' }
   end

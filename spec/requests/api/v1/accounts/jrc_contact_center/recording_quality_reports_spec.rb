@@ -124,6 +124,9 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     expect(response.parsed_body.dig('quality_summary', 'universe')).to eq(0)
     expect(metric_reader).to have_received(:call).with(account_id: account.id, call_ids: [], observed_before: a_kind_of(Time))
     expect(response.parsed_body.fetch('items')).to be_empty
+    expect(response.parsed_body.fetch('summary')).to eq(
+      'total' => 0, 'duration_measured_count' => 0, 'duration_missing_count' => 0, 'duration_seconds' => nil, 'duration_unit' => 'seconds'
+    )
   end
 
   it 'requires current independent recording-listen authority without an administrator fallback' do
