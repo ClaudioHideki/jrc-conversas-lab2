@@ -118,7 +118,8 @@ module JrcCrm
       return false unless identity && identity.contact_id == contact_id
       return true if identity.company_id == company_id
 
-      identity.company_id.nil? && identity.contact_id.present? && contact&.account_id == account_id && contact.company_id == company_id
+      identity.company_id.nil? && identity.contact_id.present? &&
+        contact&.slice('account_id', 'company_id') == { 'account_id' => account_id, 'company_id' => company_id }
     end
 
     def associations_belong_to_account

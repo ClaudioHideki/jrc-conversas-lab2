@@ -1,0 +1,21 @@
+{
+  "source_parent": "b1a95c03eb67d8e1c81bdabefd3d01d86952940c",
+  "failed_run": 46134936747,
+  "failed_job": 140947999105,
+  "artifact_id": 15259353755,
+  "artifact_sha256": "f7e8c491c777f399fc8252f1ab5b661bc97a1e70b0334bff6134341a24045e09",
+  "global_lint": {
+    "files": 840,
+    "new_offenses": 1,
+    "cop": "Metrics/CyclomaticComplexity",
+    "method": "relationship_identity_matches?",
+    "value": 8,
+    "maximum": 7
+  },
+  "minimal_correction": "Compare the same two native ActiveRecord attributes together. Keep the exact contact identity, historical exact tuple, nil-company portfolio guard and same-account/current-company requirements. Preserve the same short-circuit order before accessing the contact.",
+  "existing_native_model_cases": 6,
+  "existing_native_attendance_regressions": 11,
+  "rules_thresholds_cases_or_authorization_changed": false,
+  "new_dependencies_or_architecture": false,
+  "native_or_Chrome_accepted": false
+}
