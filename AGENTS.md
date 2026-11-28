@@ -138,6 +138,8 @@ Esta adição organiza o contexto e não revoga instruções anteriores. Não co
 
 ## Regressões de atendimento e entrega
 
+- **Anexos desapareciam após falha de consulta.** A ação Vue gravava uma lista vazia no bloco de finalização até em queda de rede. Preserve o último sucesso durante falhas transitórias, revogue o acesso em 401/403/404 e permita nova tentativa na primeira carga. Testes: `accessRevocation.spec.js` e `InboxConversationTools.spec.js`.
+
 Registre cada bug confirmado com o sintoma, a causa demonstrada, a mudança, o teste de regressão reproduzível e os resultados de CI e implantação. Preserve os casos nas atualizações do mesmo fluxo. Use dados sintéticos. Registre separadamente o aceite observado na caixa ou no aparelho.
 
 - **Callback de saída sem número público de conversa, corrigido em `91ca7ca0`.** Ao criar a conversa, a associação Rails podia ainda ter `display_id` vazio. A obrigação de envio lê o número público persistido. Execute `bundle exec rspec spec/models/jrc_broker_webhook_obligation_spec.rb`. A auditoria de 26/11 confirmou o SHA nos processos Rails e Sidekiq e o aceite de quatro callbacks em duas caixas. [Imagem e CI](https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/45858920091)

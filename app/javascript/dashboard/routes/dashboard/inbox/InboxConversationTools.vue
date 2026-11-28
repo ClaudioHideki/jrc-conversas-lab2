@@ -135,8 +135,13 @@ const prepare = async () => {
       tasks
         .filter(([key]) => !prepared.has(key))
         .map(async ([key, action, payload]) => {
-          await store.dispatch(action, payload);
-          if (version === generation) prepared.add(key);
+          const result = await store.dispatch(action, payload);
+          if (version !== generation) return;
+          if (action === 'fetchAllAttachments' && result === false) {
+            failed.value = true;
+            return;
+          }
+          prepared.add(key);
         })
     );
   } catch {

@@ -9,6 +9,44 @@ import contactConversations from '../../contactConversations';
 import conversationMetadata from '../../conversationMetadata';
 import conversationSearch from '../../conversationSearch';
 
+it('preserves loaded attachments through a failed refresh and accepts a later empty response', async () => {
+  const cached = [{ id: 53 }];
+  const state = { attachments: { 11: cached } };
+  const context = {
+    state,
+    commit: (type, payload) => mutations[type](state, payload),
+    rootGetters: { getCurrentAccountId: 1 },
+  };
+  const request = vi.spyOn(ConversationApi, 'getAllAttachments');
+  try {
+    request.mockRejectedValueOnce(new Error('network disconnected'));
+    await actions.fetchAllAttachments(context, 11);
+    expect(state.attachments[11]).toEqual(cached);
+
+    request.mockResolvedValueOnce({ data: { payload: [] } });
+    await actions.fetchAllAttachments(context, 11);
+    expect(state.attachments[11]).toEqual([]);
+  } finally {
+    request.mockRestore();
+  }
+});
+
+it('revokes cached conversation access when an attachment refresh is denied', async () => {
+  const request = vi
+    .spyOn(ConversationApi, 'getAllAttachments')
+    .mockRejectedValue({ response: { status: 403 } });
+  const dispatch = vi.fn();
+  try {
+    await actions.fetchAllAttachments(
+      { state: {}, commit: vi.fn(), dispatch },
+      11
+    );
+    expect(dispatch).toHaveBeenCalledWith('revokeConversationAccess', 11);
+  } finally {
+    request.mockRestore();
+  }
+});
+
 it('purges the selected conversation and its private cached data after access revocation', () => {
   const state = {
     allConversations: [
