@@ -1,0 +1,25 @@
+{
+  "parent": "65b82b24bac00b47f9be0224b42ae8c6fde5da86",
+  "failed_run": 46176164891,
+  "artifact_id": 15276430592,
+  "artifact_sha256": "857109b8ed386bf3ee15f2d298b641c8425ac35c57f69fdfc8a416476ccf4088",
+  "native_reference_parity": {
+    "files": 850,
+    "exact_baseline_findings_and_metric_deltas_preserved": true,
+    "report_sha256": "3f1fe0adb9c9946761b0d3b1048b4aee9dc40461eca0576bbe8d87789a17ccaf"
+  },
+  "native_candidate": {
+    "files": 851,
+    "new_offenses": 1,
+    "cop": "RSpec/SpecFilePathFormat",
+    "report_sha256": "3b3f228a76827be382fe8eeff0bf8a02931853ab4f325e4e09a42dd90033d233"
+  },
+  "rename": {
+    "old": "spec/services/jrc_contact_center/pause_reason_time_alert_spec.rb",
+    "new": "spec/services/jrc_contact_center/pause_reason_definition_time_alert_spec.rb",
+    "exact_content_sha256": "c23f97dd8d3f820da726753974ddbe8a44b7c209899c377c12772e072ac195e9"
+  },
+  "all_11_examples_and_all_existing_assertions_unchanged": true,
+  "runtime_unchanged_and_no_cop_disabled": true,
+  "native_or_Chrome_accepted": false
+}

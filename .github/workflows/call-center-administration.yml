@@ -414,7 +414,7 @@ jobs:
           PY
       - name: Native pause-only configurable warning preserves legacy and original event policy
         run: |
-          bundle exec rspec spec/services/jrc_contact_center/pause_reason_time_alert_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb --format progress --format json --out /tmp/call-center-pause-time-alert-rspec.json
+          bundle exec rspec spec/services/jrc_contact_center/pause_reason_definition_time_alert_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb --format progress --format json --out /tmp/call-center-pause-time-alert-rspec.json
           python3 -B - <<'PY'
           import json
           from pathlib import Path
@@ -424,8 +424,8 @@ jobs:
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert len({row['id'] for row in examples}) == len(examples) and all(row['status'] == 'passed' for row in examples)
           paths = {row['file_path'].removeprefix('./') for row in examples}
-          assert paths == {'spec/services/jrc_contact_center/pause_reason_time_alert_spec.rb', 'spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb'}
-          assert sum(row['file_path'].endswith('/pause_reason_time_alert_spec.rb') for row in examples) == 11
+          assert paths == {'spec/services/jrc_contact_center/pause_reason_definition_time_alert_spec.rb', 'spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb'}
+          assert sum(row['file_path'].endswith('/pause_reason_definition_time_alert_spec.rb') for row in examples) == 11
           PY
       - name: Native recording metadata CSV permissions query integrity and failure controls
         run: |

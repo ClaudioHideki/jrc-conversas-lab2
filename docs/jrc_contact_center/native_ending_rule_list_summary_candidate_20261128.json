@@ -822,7 +822,7 @@
     "spec/services/jrc_contact_center/pause_approval_source_access_spec.rb",
     "spec/services/jrc_contact_center/pause_catalog_spec.rb",
     "spec/services/jrc_contact_center/pause_reason_definition_approval_compatibility_spec.rb",
-    "spec/services/jrc_contact_center/pause_reason_time_alert_spec.rb",
+    "spec/services/jrc_contact_center/pause_reason_definition_time_alert_spec.rb",
     "spec/services/jrc_contact_center/permission_sources_spec.rb",
     "spec/services/jrc_contact_center/qualification_concurrency_spec.rb",
     "spec/services/jrc_contact_center/qualification_draft_spec.rb",
