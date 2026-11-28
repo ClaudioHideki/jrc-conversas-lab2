@@ -1,0 +1,17 @@
+{
+  "parent": "731ae1284890e43d887e9c486497147d7db3fcca",
+  "failed_run": 46150385212,
+  "artifact": 15265671284,
+  "artifact_sha256": "55aa9ff45b740d37f8847273eaecfd4863f723c0a928973290937246f99a5fde",
+  "actual_Vue_summary": {
+    "total": 59,
+    "passed": 38,
+    "failed": 21,
+    "pending": 0
+  },
+  "cause": "The functional Button replacement in the test receives a null render context from Vue Test Utils 2.4.6; destructuring attrs throws before every new popup scenario.",
+  "correction": "Remove the replacement and mount the production Button already imported by the editor. Keep the controllable Dialog only.",
+  "all_21_policy_test_bodies_and_assertions_unchanged": true,
+  "production_code_and_workflow_changed": false,
+  "native_or_Chrome_accepted": false
+}

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent, h, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import RecordingPolicyDraftEditor from './RecordingPolicyDraftEditor.vue';
@@ -34,13 +34,6 @@ const Dialog = defineComponent({
   template:
     '<form v-if="visible" @submit.prevent="confirm"><slot /><slot name="footer" /></form>',
 });
-const Button = (props, { attrs }) =>
-  h(
-    'button',
-    { ...attrs, type: props.type || 'button', disabled: props.disabled },
-    props.label
-  );
-Button.props = ['label', 'disabled', 'type'];
 const policy = () => ({
   scope_snapshot: {
     account_id: '1',
@@ -75,7 +68,7 @@ const context = () => ({
 const mountEditor = values =>
   mount(RecordingPolicyDraftEditor, {
     props: { accountId: '1', context: context(), ...values },
-    global: { stubs: { Dialog, Button } },
+    global: { stubs: { Dialog } },
   });
 const open = async wrapper => {
   await wrapper.get('[data-open-recording-policy-draft]').trigger('click');
