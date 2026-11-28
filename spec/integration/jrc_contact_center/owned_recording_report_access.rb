@@ -15,15 +15,20 @@ module SyntheticRecordingReportAccess
     raise 'Explicit owned CSV authority action required' unless %w[grant restore].include?(operation)
 
     account.with_lock do
-      member = account.account_users.find(member_id)
-      role = member.custom_role
-      raise 'Exact synthetic recording agent role required' unless member.agent? && role && role.account_id == account.id
+      proof = change_role!(account, member_id, operation, original)
+      proof.merge(source_sha: ENV.fetch('GITHUB_SHA'), account_id: account.id.to_s,
+                  operation: operation, synthetic: true, external_operations: false)
+    end
+  end
 
-      role.with_lock do
-        proof = operation == 'grant' ? grant!(role) : restore!(role, original)
-        proof.merge(source_sha: ENV.fetch('GITHUB_SHA'), account_id: account.id.to_s, member_id: member.id.to_s,
-                    role_id: role.id.to_s, actor_id: member.user_id.to_s, operation: operation, synthetic: true, external_operations: false)
-      end
+  def self.change_role!(account, member_id, operation, original)
+    member = account.account_users.find(member_id)
+    role = member.custom_role
+    raise 'Exact synthetic recording agent role required' unless member.agent? && role && role.account_id == account.id
+
+    role.with_lock do
+      proof = operation == 'grant' ? grant!(role) : restore!(role, original)
+      proof.merge(member_id: member.id.to_s, role_id: role.id.to_s, actor_id: member.user_id.to_s)
     end
   end
 
@@ -36,7 +41,7 @@ module SyntheticRecordingReportAccess
   end
 
   def self.restore!(role, original)
-    valid = original.is_a?(Array) && original.all? { |value| value.is_a?(String) }
+    valid = original.is_a?(Array) && original.all?(String)
     raise 'Exact original synthetic role permissions required' unless valid
     raise 'Preserve concurrent synthetic role changes' unless role.permissions.sort == (original + [RIGHT]).sort
 

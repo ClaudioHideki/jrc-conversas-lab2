@@ -1,0 +1,22 @@
+{
+  "parent": "f021b1e7aee6680b7bc427dba08ccc48c20cb393",
+  "failed_run": 46158156722,
+  "artifact": 15268461795,
+  "artifact_sha256": "2e41aebcaef893c40fcf3d48f9a82436d3607013b607f4da300918aaa82109e7",
+  "strict_lint": {
+    "files": 6,
+    "offenses": 6,
+    "seed_offenses": 0,
+    "production_controller_offenses": 0
+  },
+  "changes": [
+    "Move both no-provider mock assertions from the setup hook to every example body; keep fail-fast transport stubs, zero-call checks and all22 scenarios.",
+    "Keep every header, record identity, actor, audit, correlation and no-business-write condition; group equivalent tuples to respect seven-expectation limit.",
+    "Format the audit expectation with aligned explicit hash arguments.",
+    "Factor only the QA role/member lock-and-guard block out of the QA coordinator; keep exact account ownership, physical database, source, nonce, permission-delta and lock order.",
+    "Use the equivalent native all?(String) predicate."
+  ],
+  "runtime_code_changed": false,
+  "workflow_or_cop_rules_changed": false,
+  "new_native_or_Chrome_acceptance": false
+}
