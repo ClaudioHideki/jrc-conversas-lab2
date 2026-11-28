@@ -215,11 +215,9 @@ it('links to the existing authorized recording page and quality query rather tha
   );
   const wrapper = render();
   await flushPromises();
-  const target = wrapper
-    .findAllComponents({ name: 'RouterLink' })
-    .find(
-      link => link.attributes('data-contact-center-destination') === 'quality'
-    );
+  const target = wrapper.getComponent(
+    '[data-contact-center-destination="quality"]'
+  );
   expect(target.props('to')).toEqual({
     name: 'jrc_contact_center_recordings',
     params: { accountId: '1' },

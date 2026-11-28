@@ -1,0 +1,42 @@
+{
+  "parent": "dae02b0cf50bd45e1c902865f3acdd284cc32722",
+  "failed_run": 46114073074,
+  "artifact": 15250983388,
+  "artifact_sha256": "a21d9a81522530ca3ac0e004a74a6ae8d2d376679dbb7195ec86bb4118ff1a9d",
+  "reports": {
+    "call-center-ending-sd-public-vitest.json": {
+      "sha256": "f4432636ecf601314d970d6523329980fae229818c8d29e0327e143fbca8e00c",
+      "total": 119,
+      "passed": 119,
+      "failed": 0,
+      "pending": 0
+    },
+    "call-center-native-lead-vitest.json": {
+      "sha256": "e0d8b03d8559d03d1de0d78a94fca91d700472a58bb87db123d912f06c0b5706",
+      "total": 37,
+      "passed": 37,
+      "failed": 0,
+      "pending": 0
+    },
+    "call-center-navigation-authority-vitest.json": {
+      "sha256": "28b6e8370c6df156e4c4651836ec30a5b55d56e1be4d1c3f06f3e0ca0bf3623d",
+      "total": 35,
+      "passed": 34,
+      "failed": 1,
+      "pending": 0
+    },
+    "call-center-pabx-native-vitest.json": {
+      "sha256": "b033bbec9e4ce78900867b50e2b8738755e27887bb6312a3d8b37fc488c8a884",
+      "total": 67,
+      "passed": 67,
+      "failed": 0,
+      "pending": 0
+    }
+  },
+  "cause": "The existing RouterLink stub is anonymous. findAllComponents({name: RouterLink}) returns no component, although the rendered authorized shortcut is present.",
+  "minimal_test_correction": "Select the unique Vue component by its explicit destination attribute; retain the exact props.to account, route and query assertion.",
+  "all_existing_assertions_and_case_counts_preserved": true,
+  "runtime_code_or_test_fixture_behavior_changed": false,
+  "native_5000_and_new_filter_execution_not_reached_not_accepted": true,
+  "Chrome_or_whole_Part1_accepted": false
+}
