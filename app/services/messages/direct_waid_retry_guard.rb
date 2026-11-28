@@ -27,11 +27,11 @@ class Messages::DirectWaidRetryGuard
                         setting['origin'] == ENV['FRONTEND_URL'].to_s.delete_suffix('/')
 
     url = channel.webhook_url
-    return false unless url.present? && Digest::SHA256.hexdigest(url) == setting['webhook_url_sha256']
+    return false unless url.present? && !url.match?(/[[:cntrl:]]/) && Digest::SHA256.hexdigest(url) == setting['webhook_url_sha256']
 
     uri = URI.parse(url)
     uri.is_a?(URI::HTTPS) && uri.host.present? && !uri.userinfo && !uri.query && !uri.fragment &&
-      uri.path.match?(%r{\A/chatwoot/webhook/[A-Za-z0-9_-]+\z})
+      uri.path.match?(%r{\A/chatwoot/webhook/(?:[A-Za-z0-9_()-]|%2[89])+\z})
   rescue URI::InvalidURIError
     false
   end

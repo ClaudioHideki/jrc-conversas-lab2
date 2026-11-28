@@ -40,4 +40,29 @@ RSpec.describe 'Scoped direct Evolution WAID retry protection', type: :request d
       expect(Messages::DirectWaidRetryGuard.applies?(message.reload)).to be(false)
     end
   end
+
+  it 'accepts literal or percent-encoded parentheses only with the exact configured URL digest' do
+    raw = 'https://evolution.example.test/chatwoot/webhook/Erik_Machado-(logistica)'
+    encoded = raw.gsub('(', '%28').gsub(')', '%29')
+    [raw, encoded].each do |endpoint|
+      channel.update_columns(webhook_url: endpoint, additional_attributes: {
+        Messages::DirectWaidRetryGuard::SETTING => setting.merge('webhook_url_sha256' => Digest::SHA256.hexdigest(endpoint))
+      })
+      post path, headers: { api_access_token: admin.access_token.token }, as: :json
+      expect(response).to have_http_status(:conflict)
+      expect(response.parsed_body['error']).to eq('JRC_DIRECT_WAID_RETRY_REQUIRES_RECONCILIATION')
+    end
+    channel.update_columns(webhook_url: raw)
+    expect(Messages::DirectWaidRetryGuard.configured?(inbox.reload)).to be(false)
+  end
+
+  it 'rejects extra segments, controls, nested or malformed escapes even with a matching digest' do
+    ['part/extra', 'part%2Fextra', 'part%5cextra', 'part%2528', 'part%0A', 'part%00', "part\n", 'part%2', 'part%zz', 'part%'].each do |segment|
+      endpoint = "https://evolution.example.test/chatwoot/webhook/#{segment}"
+      channel.update_columns(webhook_url: endpoint, additional_attributes: {
+        Messages::DirectWaidRetryGuard::SETTING => setting.merge('webhook_url_sha256' => Digest::SHA256.hexdigest(endpoint))
+      })
+      expect(Messages::DirectWaidRetryGuard.configured?(inbox.reload)).to be(false), segment.inspect
+    end
+  end
 end
