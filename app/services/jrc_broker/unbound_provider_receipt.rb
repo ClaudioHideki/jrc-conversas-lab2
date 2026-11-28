@@ -15,7 +15,9 @@ class JrcBroker::UnboundProviderReceipt
                JrcBrokerWebhookObligation.exists?(message_id: @message.id)
     attrs = @message.content_attributes.to_h
     extra = @message.additional_attributes.to_h
-    reject! unless @message.sender_type == 'User' && @message.sender_id.present? && (@message.sent? || @message.failed?) &&
+    eligible_status = @message.sent? || @message.failed? ||
+                      ((@message.delivered? || @message.read?) && Messages::DirectWaidRetryGuard.configured?(@inbox))
+    reject! unless @message.sender_type == 'User' && @message.sender_id.present? && eligible_status &&
                    @message.text? && !@message.attachments.exists? && @message.content.is_a?(String) && @message.content.present?
     reject! if [attrs,extra].any? { |data| %w[jrc_broker_outbound jrc_broker_message_id jrc_broker_historical external_echo deleted automation_rule_id
                                               campaign_id jrc_campaign_evolution jrc_campaign_broker].any? { |k| data[k].present? } }
@@ -33,6 +35,7 @@ class JrcBroker::UnboundProviderReceipt
                    negative['connections'] == 0 && negative['jobs'] == 0 && negative['linked_messages'] == 0
     provider = @input.fetch('provider')
     key = provider.fetch('key_id')
+    reject! if Message.where(account_id: @message.account_id, inbox_id: @inbox.id, source_id: @message.source_id).where.not(id: @message.id).exists?
     state = ACKS[provider['ack']]
     remote = provider['remote_jid']
     reject! unless remote == @peer || (remote.to_s.match?(/\A\d{1,30}@lid\z/) && provider['remote_jid_alt'] == @peer)

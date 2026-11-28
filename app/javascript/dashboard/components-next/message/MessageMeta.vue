@@ -147,6 +147,11 @@ const statusToShow = computed(() => {
     ['DELIVERED', 'READ'].includes(projection.state)
   )
     return projection.state.toLowerCase();
+  if (
+    isAPIInbox.value &&
+    contentAttributes.value?.jrcDirectIndividualReceiptRequired
+  )
+    return MESSAGE_STATUS.PROGRESS;
   if (isAPIInbox.value && contentAttributes.value?.jrcBrokerLegacyUnconfirmed)
     return MESSAGE_STATUS.PROGRESS;
 
@@ -177,6 +182,11 @@ const statusToShow = computed(() => {
 
 const statusLabel = computed(() => {
   if (['read', 'delivered'].includes(statusToShow.value)) return '';
+  if (
+    isAPIInbox.value &&
+    contentAttributes.value?.jrcDirectIndividualReceiptRequired
+  )
+    return t('CHAT_LIST.BROKER_UNKNOWN');
   if (isAPIInbox.value && contentAttributes.value?.jrcBrokerLegacyUnconfirmed)
     return t('CHAT_LIST.BROKER_UNKNOWN');
 

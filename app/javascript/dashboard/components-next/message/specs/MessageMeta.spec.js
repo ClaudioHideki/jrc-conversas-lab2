@@ -185,4 +185,21 @@ describe('Broker outbound delivery evidence', () => {
       shallowMount(MessageMeta).findComponent(MessageStatus).props('status')
     ).toBe('sent');
   });
+
+  it('requires an individual receipt for a direct original marked read by a cursor', () => {
+    const ctx = useMessageContext();
+    ctx.status.value = 'read';
+    ctx.contentAttributes.value = { jrcDirectIndividualReceiptRequired: true };
+    const indicator = () =>
+      shallowMount(MessageMeta).findComponent(MessageStatus).props('status');
+    expect(indicator()).toBe('progress');
+    ctx.contentAttributes.value = {
+      ...ctx.contentAttributes.value,
+      jrcDeliveryProjection: {
+        kind: 'DIRECT_EVOLUTION_UNBOUND_V1',
+        state: 'DELIVERED',
+      },
+    };
+    expect(indicator()).toBe('delivered');
+  });
 });

@@ -10,6 +10,9 @@ class Conversations::UpdateMessageStatusJob < ApplicationJob
     conversation = Conversation.find_by(id: conversation_id)
 
     return unless conversation
+    # The direct Evolution adapter posts a conversation cursor for a single READ
+    # without carrying its message ID. Only a per-original receipt may advance it.
+    return if Messages::DirectWaidRetryGuard.configured?(conversation.inbox)
 
     # Mark every message created before the user's viewing time read or delivered
     conversation.messages.where(status: %w[sent delivered])

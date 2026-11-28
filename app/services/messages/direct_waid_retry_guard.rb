@@ -1,7 +1,7 @@
 require 'digest'
 require 'uri'
 
-# This guard limits retry only. A WAID never establishes delivery or read state.
+# Identifies opted-in direct routes. A WAID never establishes delivery or read state.
 class Messages::DirectWaidRetryGuard
   SETTING = 'jrc_direct_waid_retry_guard'.freeze
   DISPLAY = 'jrc_direct_waid_retry_blocked'.freeze

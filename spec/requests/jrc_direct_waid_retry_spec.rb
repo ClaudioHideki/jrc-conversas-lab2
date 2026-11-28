@@ -28,6 +28,24 @@ RSpec.describe 'Scoped direct Evolution WAID retry protection', type: :request d
     expect(message.source_id).to eq('WAID:fixture-key')
   end
 
+  [true, false].each do |opted_in|
+    it "retains the public contact cursor with direct receipt protection #{opted_in}" do
+      channel.update!(additional_attributes: {Messages::DirectWaidRetryGuard::SETTING => setting}) if opted_in
+      thread = create(:conversation, account: account, inbox: inbox)
+      other = create(:conversation, account: account, inbox: inbox)
+      originals = [thread, thread, other].each_with_index.map do |target, index|
+        create(:message, account: account, inbox: inbox, conversation: target, sender: admin, message_type: :outgoing,
+                         status: :sent, source_id: "WAID:cursor-#{index}", created_at: 2.minutes.ago)
+      end
+      endpoint = "/public/api/v1/inboxes/#{channel.identifier}/contacts/#{thread.contact_inbox.source_id}/conversations/#{thread.display_id}/update_last_seen"
+      perform_enqueued_jobs(only: Conversations::UpdateMessageStatusJob) { post endpoint, as: :json }
+      expect(response).to have_http_status(:ok)
+      expect(thread.reload.contact_last_seen_at).to be_present
+      expect(other.reload.contact_last_seen_at).to be_nil
+      expect(originals.map { |row| row.reload.status }).to eq(opted_in ? %w[sent sent sent] : %w[read read sent])
+    end
+  end
+
   it 'preserves ordinary retry when this direct route has no opt-in, even with a client-supplied display flag' do
     message.update_columns(content_attributes: {Messages::DirectWaidRetryGuard::DISPLAY=>true})
     expect(message.reload.display_content_attributes).not_to include(Messages::DirectWaidRetryGuard::DISPLAY)

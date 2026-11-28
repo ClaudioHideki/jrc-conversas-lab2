@@ -214,8 +214,12 @@ class Message < ApplicationRecord
   end
 
   def display_content_attributes
-    attributes = content_attributes.to_h.except('jrc_broker_legacy_unconfirmed', JrcBroker::ProjectionReceipt::DISPLAY, Messages::DirectWaidRetryGuard::DISPLAY)
+    attributes = content_attributes.to_h.except('jrc_broker_legacy_unconfirmed', JrcBroker::ProjectionReceipt::DISPLAY,
+                                               Messages::DirectWaidRetryGuard::DISPLAY, 'jrc_direct_individual_receipt_required')
     attributes[Messages::DirectWaidRetryGuard::DISPLAY] = true if failed? && Messages::DirectWaidRetryGuard.applies?(self)
+    if (delivered? || read?) && outgoing? && !private? && sender_type == 'User' && sender_id && Messages::DirectWaidRetryGuard.configured?(inbox)
+      attributes['jrc_direct_individual_receipt_required'] = true
+    end
     projection = JrcBroker::ProjectionReceipt.current(self, attributes)
     attributes.delete(JrcBroker::ProjectionReceipt::POINTER)
     attributes[JrcBroker::ProjectionReceipt::DISPLAY] = projection.slice('kind', 'state') if projection

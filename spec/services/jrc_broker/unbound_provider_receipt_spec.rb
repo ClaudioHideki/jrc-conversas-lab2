@@ -51,4 +51,29 @@ RSpec.describe JrcBroker::UnboundProviderReceipt do
     end
     expect(message.reload.content_attributes).not_to have_key(JrcBroker::ProjectionReceipt::POINTER)
   end
+
+  it 'accepts an exact delivered receipt on a previously cursor-promoted original only in its configured route' do
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with('FRONTEND_URL').and_return(origin)
+    neighbor = create(:message, account: account, inbox: inbox, conversation: conversation, message_type: :outgoing,
+                                sender: user, content: message.content, source_id: 'WAID:neighbor', status: :read)
+    message.update_columns(status: :read)
+    proof = input.deep_dup
+    proof['provider']['ack'] = 'DELIVERY_ACK'
+    project = JrcBroker::ProjectionReceipt.new(proof, digest)
+    expect { project.perform }.to raise_error(ArgumentError, /JRC_DIRECT_RECEIPT_NOT_PROVEN/)
+    channel.update!(additional_attributes: {Messages::DirectWaidRetryGuard::SETTING => {
+      'version' => 1, 'origin' => origin, 'account_id' => account.id, 'inbox_id' => inbox.id,
+      'webhook_url_sha256' => Digest::SHA256.hexdigest(channel.webhook_url)
+    }})
+    expect { expect(project.perform(apply: true)).to eq(:recorded) }.not_to have_enqueued_job
+    expect(message.reload.display_content_attributes[JrcBroker::ProjectionReceipt::DISPLAY]['state']).to eq('DELIVERED')
+    expect(neighbor.reload.display_content_attributes).to include('jrc_direct_individual_receipt_required' => true)
+    expect(neighbor.display_content_attributes).not_to include(JrcBroker::ProjectionReceipt::DISPLAY)
+  end
+
+  it 'rejects a source ID shared by two local originals on the route' do
+    create(:message, account: account, inbox: inbox, conversation: conversation, source_id: message.source_id)
+    expect { JrcBroker::ProjectionReceipt.new(input, digest).perform }.to raise_error(ArgumentError, /JRC_DIRECT_RECEIPT_NOT_PROVEN/)
+  end
 end
