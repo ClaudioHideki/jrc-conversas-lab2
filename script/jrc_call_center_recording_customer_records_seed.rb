@@ -28,7 +28,7 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
 
   def self.relationship_portfolios!(values, viewer, contact)
     selected = JrcRelationship::Assignment.create!(**values, contact: contact)
-    20.times { JrcRelationship::Assignment.create!(**values, company: contact.company) }
+    20.times { JrcRelationship::Assignment.create!(**values, company_id: contact.company_id) }
     hidden = JrcRelationship::Assignment.create!(**values, owner: viewer.user, contact: contact)
     { assignment_id: selected.id.to_s, private_assignment_id: hidden.id.to_s, authorized_count: 21,
       contact_id: contact.id.to_s, company_id: contact.company_id.to_s, business_unit_id: values.fetch(:business_unit).id.to_s }

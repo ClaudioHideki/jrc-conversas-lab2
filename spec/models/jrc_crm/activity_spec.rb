@@ -18,6 +18,7 @@ RSpec.describe JrcCrm::Activity, :pabx do
     it 'accepts the exact contact and company inferred by the native master-link callback without changing the portfolio XOR' do
       native_activity.save!
       expect(native_activity.reload).to have_attributes(contact_id: caller_contact.id, company_id: customer.id)
+      expect(caller_contact.reload.company).to have_attributes(id: customer.id, account_id: account.id)
       expect(direct_portfolio.reload).to have_attributes(contact_id: caller_contact.id, company_id: nil)
     end
 
@@ -27,14 +28,14 @@ RSpec.describe JrcCrm::Activity, :pabx do
       activity = described_class.create!(account: account, contact: person, user: actor, activity_type: 'call',
                                          title: 'SYNTHETIC historical call', due_at: Time.current,
                                          metadata: { 'relationship_assignment_id' => portfolio.id })
-      person.update!(company: customer)
+      person.update!(company_id: customer.id)
       activity.reload.update!(title: 'SYNTHETIC reviewed historical call')
       expect(activity.reload).to have_attributes(contact_id: person.id, company_id: nil)
       expect(portfolio.reload.company_id).to be_nil
     end
 
     it 'rejects a different contact even when that contact belongs to the same current company' do
-      native_activity.contact = create(:contact, account: account, company: customer)
+      native_activity.contact = create(:contact, account: account, company_id: customer.id)
       expect(native_activity).not_to be_valid
       expect(native_activity.errors[:base]).to include('Relationship identity mismatch')
     end

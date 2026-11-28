@@ -143,7 +143,7 @@ RSpec.describe 'Native reviewed Relationship activity from a recording', :pabx, 
 
   it 'refuses a current customer change after preview instead of redirecting the old recording' do
     input = relationship_input.deep_dup
-    caller_contact.update!(company: account.master_companies.create!(name: 'SYNTHETIC changed customer'))
+    caller_contact.update!(company_id: account.master_companies.create!(name: 'SYNTHETIC changed customer').id)
     write_relationship(input)
     expect(response).to have_http_status(:unauthorized)
     expect(activities).to be_empty

@@ -5,7 +5,7 @@ RSpec.shared_context 'with native recording Relationship intake' do
   include_context 'with native authorized quality review source'
 
   let(:customer) { account.master_companies.create!(name: 'SYNTHETIC Relationship recording customer') }
-  let(:caller_contact) { create(:contact, account: account, company: customer, name: 'SYNTHETIC linked recording caller') }
+  let(:caller_contact) { create(:contact, account: account, company_id: customer.id, name: 'SYNTHETIC linked recording caller') }
   let(:assignment) do
     JrcRelationship::Assignment.create!(account: account, company: customer, owner: actor, business_unit: business, status: 'active')
   end

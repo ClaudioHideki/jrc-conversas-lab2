@@ -1,0 +1,29 @@
+{
+  "parent": "02c9afa477547366ea4640ea73a6a4f3ff7ba872",
+  "CI": 46136520088,
+  "job": 140952934301,
+  "artifact": 15259399377,
+  "artifact_sha256": "755ae7cd3be69d5d3e85bdcaff1c6b5926ee1707a4ee9614e7fd89d61bd4eaad",
+  "actual_RSpec": {
+    "examples": 51,
+    "failures": 40,
+    "passed": 11,
+    "pending": 0,
+    "outside_errors": 0,
+    "single_exception_class": "ActiveRecord::AssociationTypeMismatch"
+  },
+  "root_cause": "Contact Enterprise association uses Company; native master adapter JrcCustomers::Company points to the same companies table and IDs. Passing one Ruby adapter instance to the other typed association fails before the test operation. The browser portfolio seed had the inverse typed-object mismatch.",
+  "smallest_correction": "Use the existing company_id foreign key at the synthetic setup boundary, exactly as native CompanyContactWriter/CrmMasterLink do. No row copying, type stubbing, new company, runtime callback or account bypass. Existing model test additionally resolves the real Contact company association and verifies the same ID/account.",
+  "native_references": [
+    "enterprise/app/models/company.rb",
+    "app/models/jrc_customers/company.rb",
+    "app/services/jrc_customers/company_contact_writer.rb",
+    "app/models/concerns/jrc_customers/crm_master_link.rb"
+  ],
+  "all_34_request_6_model_11_legacy_cases_and_3_real_concurrency_cases_preserved": true,
+  "new_application_test_examples": 0,
+  "new_assertions": 1,
+  "runtime_code_changed": false,
+  "permissions_migrations_gates_or_scope_changed": false,
+  "native_or_Chrome_accepted": false
+}
