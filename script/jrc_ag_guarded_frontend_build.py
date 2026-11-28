@@ -23,9 +23,9 @@ STOP_RAM = 750 * 1024 ** 2
 BRANCH = 'refs/heads/codex/lab2-ag-consolidada-20261110'
 APPROVED_BRANCHES = {BRANCH, 'refs/heads/codex/whatsapp-history-order-20261111',
                      'refs/heads/codex/projecao-recibos-20261128',
-                     'refs/heads/codex/recibo-direto-sem-vinculo-20261128',
+                     'refs/heads/codex/recibo-direto-sem-vinculo-20261128'}
+DELIVERY_BRANCHES = {'refs/heads/codex/whatsapp-delivery-reliability-20261116',
                      'refs/heads/codex/obrigacao-terminal-e-contexto-20261128'}
-DELIVERY_BRANCH = 'refs/heads/codex/whatsapp-delivery-reliability-20261116'
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -59,7 +59,7 @@ def vite_output_environment(output):
 
 def authorize(env, expected):
     branch_event = ((env.get('GITHUB_REF') in APPROVED_BRANCHES and env.get('GITHUB_EVENT_NAME') == 'workflow_dispatch') or
-                    (env.get('GITHUB_REF') == DELIVERY_BRANCH and env.get('GITHUB_EVENT_NAME') in {'push', 'workflow_dispatch'}))
+                    (env.get('GITHUB_REF') in DELIVERY_BRANCHES and env.get('GITHUB_EVENT_NAME') in {'push', 'workflow_dispatch'}))
     allowed = (sys.platform == 'linux' and env.get('GITHUB_ACTIONS') == 'true' and
                env.get('RUNNER_ENVIRONMENT') == 'github-hosted' and branch_event and env.get('GITHUB_RUN_ATTEMPT') == '1')
     if not allowed:

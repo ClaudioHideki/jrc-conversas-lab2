@@ -2,7 +2,7 @@ name: Broker delivery reliability - disposable candidate
 
 on:
   push:
-    branches: [codex/whatsapp-delivery-reliability-20261116]
+    branches: [codex/whatsapp-delivery-reliability-20261116, codex/obrigacao-terminal-e-contexto-20261128]
   workflow_dispatch:
 
 permissions:

@@ -56,10 +56,21 @@ class BuildAdmissionTest(unittest.TestCase):
                     authorize({**candidate, key: value}, self.sha)
 
     def test_receipt_projection_requires_exact_manual_candidate_and_sha(self):
-        for ref in ['refs/heads/codex/projecao-recibos-20261128', 'refs/heads/codex/recibo-direto-sem-vinculo-20261128',
-                    'refs/heads/codex/obrigacao-terminal-e-contexto-20261128']:
+        for ref in ['refs/heads/codex/projecao-recibos-20261128', 'refs/heads/codex/recibo-direto-sem-vinculo-20261128']:
             with self.subTest(ref=ref):
                 self.check_receipt_projection_manual_only(ref)
+
+    def test_terminal_push_requires_exact_branch_sha_and_hosted_first_attempt(self):
+        ref = 'refs/heads/codex/obrigacao-terminal-e-contexto-20261128'
+        candidate = {**self.env, 'GITHUB_REF': ref, 'GITHUB_EVENT_NAME': 'push'}
+        with patch('jrc_ag_guarded_frontend_build.sys.platform', 'linux'):
+            authorize(candidate, self.sha)
+            for key, value in [('GITHUB_EVENT_NAME', 'pull_request'), ('GITHUB_RUN_ATTEMPT', '2'),
+                               ('GITHUB_REF', ref + '-other'), ('GITHUB_REF', ref.replace('heads/', 'tags/')),
+                               ('RUNNER_ENVIRONMENT', 'self-hosted'), ('GITHUB_SHA', 'b' * 40),
+                               ('JRC_AG_AUTHORIZED_BUILD_SHA', 'b' * 40)]:
+                with self.subTest(key=key, value=value), self.assertRaises(RuntimeError):
+                    authorize({**candidate, key: value}, self.sha)
 
     def check_receipt_projection_manual_only(self, ref):
         candidate = {**self.env, 'GITHUB_REF': ref}
