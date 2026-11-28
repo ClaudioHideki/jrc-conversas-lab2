@@ -1,0 +1,20 @@
+{
+  "source_parent": "1e2ad6613e5bcdd0825af902f8ee621fc0bc86ae",
+  "failed_run": 46130066498,
+  "failed_job": 140933036065,
+  "sanitized_log_sha256": "21a911f25f8d501f8293ffbc89a8fd4091774a9098d50c266b985925ae734304",
+  "verified_artifact": {
+    "id": 15257219041,
+    "sha256": "4c007b11618855cf8b57298b27d9271f143dc4c4e775a5d12d52033e142ac6be"
+  },
+  "focused_Vue_actual": {
+    "passed": 391,
+    "failed": 0,
+    "total": 391,
+    "pending": 0
+  },
+  "cause": "Layout/MultilineMethodCallIndentation in the synthetic browser seed chained merge.",
+  "correction": "Only align the second .merge with the existing first .merge; token stream, fixture guards and values stay unchanged.",
+  "only_one_line_indentation_changed": true,
+  "native_or_Chrome_accepted": false
+}

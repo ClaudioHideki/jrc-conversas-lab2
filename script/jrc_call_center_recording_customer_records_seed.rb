@@ -11,7 +11,7 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
     call = JrcContactCenter::CallSession.find_by!(account: account, external_session_id: record.external_unique_id)
     contact = account.contacts.find(call.contact_id)
     commercial!(account, operator, viewer, contact).merge(projects!(account, operator, contact))
-      .merge(relationship_context: relationship!(account, operator, viewer, contact, call))
+                                                   .merge(relationship_context: relationship!(account, operator, viewer, contact, call))
   end
 
   # Additional explicit synthetic rights apply only after the existing owned!
