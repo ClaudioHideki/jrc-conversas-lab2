@@ -12,11 +12,14 @@ RSpec.describe 'Control Desk strict optional recording filter shapes', :pabx, ty
     allow(JrcVoiceQuality::AnalysisMetricReader).to receive(:new).and_return(metric_reader)
   end
 
+  invalid_filters = [
+    { unit_id: false }, { unit_id: [] }, { queue_id: false }, { queue_id: {} },
+    { from: false }, { from: [] }, { to: false }, { to: {} }
+  ]
+  empty_filters = [{}, { unit_id: '', queue_id: '', from: '', to: '' }]
+
   %w[recordings recordings/quality_report].each do |endpoint|
-    [
-      { unit_id: false }, { unit_id: [] }, { queue_id: false }, { queue_id: {} },
-      { from: false }, { from: [] }, { to: false }, { to: {} }
-    ].each do |criteria|
+    invalid_filters.each do |criteria|
       it "rejects supplied malformed #{criteria.inspect} on #{endpoint} without returning an unfiltered page" do
         get "/api/v1/accounts/#{account.id}/jrc_contact_center/#{endpoint}", headers: headers, params: criteria, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
@@ -28,7 +31,7 @@ RSpec.describe 'Control Desk strict optional recording filter shapes', :pabx, ty
       end
     end
 
-    [{}, { unit_id: '', queue_id: '', from: '', to: '' }].each do |criteria|
+    empty_filters.each do |criteria|
       it "preserves the native empty-filter defaults #{criteria.inspect} on #{endpoint}" do
         get "/api/v1/accounts/#{account.id}/jrc_contact_center/#{endpoint}", headers: headers, params: criteria, as: :json
         expect(response).to have_http_status(:ok)

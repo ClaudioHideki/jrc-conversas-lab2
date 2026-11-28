@@ -1,0 +1,18 @@
+{
+  "parent": "31c75ac2c1b18e15747951b45babb2b50a7bed77",
+  "failed_run": 46114574451,
+  "artifact": 15250333848,
+  "artifact_sha256": "dcb3ab931db669ec11ed1a5a4e4f0e15fb623dce1d6389926a269334c0744527",
+  "lint_report_sha256": "ae619e7566333d16df437f6fcf71a6008ab50cce18f1c087c353a231087e8a9a",
+  "two_collection_literals_moved_before_the_endpoint_loop": true,
+  "same_20_scenarios_and_all_assertions_preserved": true,
+  "no_functional_code_migration_scope_permission_or_test_configuration_change": true,
+  "focused_UI_passed_before_lint": {
+    "SD_audio": 119,
+    "navigation": 35,
+    "PABX": 67,
+    "recordings": 367,
+    "native_Lead": 37
+  },
+  "backend_or_Chrome_not_accepted_by_this_report": true
+}
