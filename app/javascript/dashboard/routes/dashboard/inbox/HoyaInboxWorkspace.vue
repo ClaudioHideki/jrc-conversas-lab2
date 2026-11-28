@@ -108,11 +108,14 @@ const voicePolicyDialog = ref(null);
 const tab = ref('CONVERSATION');
 const voiceSection = ref('journey');
 const listOpen = ref(false);
+const workspaceElement = ref(null);
 const layoutElement = ref(null);
-const { width: workspaceWidth, height: workspaceHeight } =
-  useElementSize(layoutElement);
+const { width: workspaceWidth } = useElementSize(layoutElement);
+const { height: workspaceHeight } = useElementSize(workspaceElement);
+// The full workspace includes the regular toolbar (56px) and padding (24px).
+// Measuring its inner panel would feed density changes back into this decision.
 const compactWorkspace = computed(
-  () => workspaceHeight.value > 0 && workspaceHeight.value < 620
+  () => workspaceHeight.value > 0 && workspaceHeight.value < 700
 );
 const conversationFocus = ref(false);
 const listElement = ref(null);
@@ -854,6 +857,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section
+    ref="workspaceElement"
     class="relative flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-n-background"
     data-testid="hoya-inbox-workspace"
   >

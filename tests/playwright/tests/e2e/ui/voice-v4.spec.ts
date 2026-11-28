@@ -1,5 +1,45 @@
 import { test, expect } from '@playwright/test';
 const fixture = '/tests/playwright/fixtures/voice-v4/index.html';
+test('mantém os painéis estáveis no limite de altura com conversa aberta', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop');
+  await page.goto(fixture);
+  await page.locator('[data-fixture-whatsapp]').click();
+  await expect(page.locator('[data-whatsapp-fixture]')).toBeVisible();
+  const workspace = page.getByTestId('hoya-inbox-workspace');
+  for (const height of [800, 690, 600, 800]) {
+    // Fix the space supplied by the dashboard shell, as on an idle desktop.
+    await workspace.evaluate((el, px) => {
+      el.style.flex = 'none';
+      el.style.height = `${px}px`;
+    }, height);
+    const positions = await workspace.evaluate(async el => {
+      const list = el.querySelector('[data-testid="inbox-list"]')!;
+      const panel = el.querySelector('[data-testid="interaction-workspace"]')!;
+      const samples = [];
+      for (let frame = 0; frame < 24; frame++) {
+        await new Promise(requestAnimationFrame);
+        if (frame < 4) continue;
+        samples.push(
+          [list, panel]
+            .map(node => {
+              const { x, y, width, height: h } = node.getBoundingClientRect();
+              return [x, y, width, h].join(',');
+            })
+            .join('/')
+        );
+      }
+      return [...new Set(samples)];
+    });
+    expect(positions, `altura disponível de ${height}px`).toHaveLength(1);
+    if (height !== 690) {
+      await expect(workspace.locator(':scope > header')).toHaveClass(
+        height === 600 ? /min-h-11/ : /min-h-14/
+      );
+    }
+  }
+});
 test.beforeEach(async ({ page, baseURL }) => {
   let errors = 0;
   page.on('pageerror', error => {
