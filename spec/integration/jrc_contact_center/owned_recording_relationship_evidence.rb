@@ -23,12 +23,16 @@ class JrcContactCenter::SyntheticRecordingRelationshipEvidence
     raise 'Exact owned recording Relationship origin required' unless valid
 
     action = JrcRelationship::Action.where(account_id: activity.account_id).find_by!(activity_id: activity.id)
-    { id: activity.id.to_s, title: activity.title, status: activity.status, activity_type: activity.activity_type,
-      user_id: activity.user_id.to_s, company_id: activity.company_id&.to_s, contact_id: activity.contact_id&.to_s,
-      business_unit_id: activity.business_unit_id&.to_s, due_at: activity.due_at.iso8601,
+    activity_details(activity).merge(
       action_id: action.id.to_s, assignment_id: action.assignment_id.to_s,
       origin: origin, source_manifest: action.metadata.fetch('_source_ids'),
-      request_sha256: action.metadata.fetch('control_desk_request_sha256') }
+      request_sha256: action.metadata.fetch('control_desk_request_sha256')
+    )
   end
-  private_class_method :present
+  def self.activity_details(activity)
+    { id: activity.id.to_s, title: activity.title, status: activity.status, activity_type: activity.activity_type,
+      user_id: activity.user_id.to_s, company_id: activity.company_id&.to_s, contact_id: activity.contact_id&.to_s,
+      business_unit_id: activity.business_unit_id&.to_s, due_at: activity.due_at.iso8601 }
+  end
+  private_class_method :present, :activity_details
 end

@@ -48,7 +48,7 @@ RSpec.describe 'Native reviewed Relationship activity from a recording', :pabx, 
     expect(response).to have_http_status(:created)
     activity = activities.sole
     expect(response.parsed_body).to include('activity_id' => activity.id.to_s, 'replayed' => false,
-                                           'target' => { 'kind' => 'crm_activity', 'id' => activity.id.to_s })
+                                            'target' => { 'kind' => 'crm_activity', 'id' => activity.id.to_s })
     audit = JrcCrm::AuditEvent.where(account: account, event_type: 'relationship_updated').order(:id).last
     expect(audit.metadata).to include('action' => 'control_desk_activity_created')
     expect(audit.to_json).not_to include('recording_reference', 'synthetic-password', 'texto_transcrito')
@@ -87,7 +87,7 @@ RSpec.describe 'Native reviewed Relationship activity from a recording', :pabx, 
   it 'uses the existing contact portfolio without creating a company portfolio or losing native company linkage' do
     caller_contact.update!(name: nil)
     direct = JrcRelationship::Assignment.create!(account: account, contact: caller_contact, owner: actor,
-                                                business_unit: business, status: 'active')
+                                                 business_unit: business, status: 'active')
     get path, headers: actor.create_new_auth_token
     expect(response.parsed_body.fetch('items').find { |item| item.fetch('id') == direct.id.to_s }).to include('label' => '')
     write_relationship(relationship_input.merge('assignment_id' => direct.id.to_s))
@@ -103,7 +103,7 @@ RSpec.describe 'Native reviewed Relationship activity from a recording', :pabx, 
     assignment.update!(company: nil, contact: caller_contact)
     20.times { assignment.dup.save! }
     unrelated = JrcRelationship::Assignment.create!(account: account, contact: create(:contact, account: account),
-                                                   owner: actor, business_unit: business, status: 'active')
+                                                    owner: actor, business_unit: business, status: 'active')
     get path, headers: actor.create_new_auth_token, params: { page: 2 }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('meta')).to eq('page' => 2, 'per_page' => 20, 'total' => 21, 'pages' => 2)

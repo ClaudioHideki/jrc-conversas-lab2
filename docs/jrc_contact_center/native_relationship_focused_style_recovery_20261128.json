@@ -1,0 +1,31 @@
+{
+  "source_parent": "605a2a17cd8e70d9dba2905d2a206497207484ea",
+  "failed_run": 46131866839,
+  "failed_job": 140938591162,
+  "artifact_id": 15258397561,
+  "artifact_sha256": "1b385696a25ca263c427a5dc63568ac141b3bee79d4e2192307810b7e6d8078a",
+  "sanitized_log_sha256": "d87f9301b73de98d3ae605a78369c17df158cf98661f960946eff7cc28c12f6a",
+  "actual_lint": {
+    "files": 21,
+    "offenses": 16,
+    "affected_files": 5
+  },
+  "actual_native_Activity_Vue": {
+    "passed": 30,
+    "failed": 0,
+    "pending": 0,
+    "report_sha256": "a66889a8a60a48cefa9745aec309f66d519178cd6d633ffc24aa91f4036c678d"
+  },
+  "minimal_corrections": [
+    "Separate scoped portfolio choices from the same native source preview payload; unchanged source, customer and portfolio authorization.",
+    "Move the same fingerprint expression into persist to retain five arguments and reduce the caller complexity, without moving it past a write.",
+    "Validate the same UUID and origin revision together, keeping envelope/title/deadline checks and their order.",
+    "Align only the three multiline request expectations and fixtures; all assertion tokens retained.",
+    "Describe the cross-model native CRM/Relationship identity behavior accurately, referencing JrcCrm::Activity explicitly instead of labelling a descriptive sentence as a class method. Preserve all six case names and assertions.",
+    "Present the same read-only witness fields separately from its unchanged strict origin checks."
+  ],
+  "new_architecture_dependency_migration_permission_or_runtime_capability": false,
+  "workflow_case_counts_gates_and_thresholds_changed": false,
+  "all_existing_native_case_names_and_assertions_retained": true,
+  "native_or_Chrome_accepted": false
+}

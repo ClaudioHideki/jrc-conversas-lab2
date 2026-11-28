@@ -2,14 +2,14 @@
 
 require 'rails_helper'
 
-RSpec.describe JrcCrm::Activity, 'native Relationship identity compatibility', :pabx do
+RSpec.describe 'Native CRM activity and Relationship portfolio identity compatibility', :pabx do
   include_context 'with native recording Relationship intake'
 
   let(:direct_portfolio) do
     JrcRelationship::Assignment.create!(account: account, contact: caller_contact, owner: actor, business_unit: business, status: 'active')
   end
   let(:native_activity) do
-    described_class.new(account: account, contact: caller_contact, user: actor, activity_type: 'call',
+    JrcCrm::Activity.new(account: account, contact: caller_contact, user: actor, activity_type: 'call',
                         title: 'SYNTHETIC native linked identity', due_at: Time.current,
                         metadata: { 'relationship_assignment_id' => direct_portfolio.id })
   end
@@ -23,7 +23,7 @@ RSpec.describe JrcCrm::Activity, 'native Relationship identity compatibility', :
   it 'preserves a persisted contact-only historical activity after the contact joins a company' do
     person = create(:contact, account: account)
     portfolio = JrcRelationship::Assignment.create!(account: account, contact: person, owner: actor, status: 'active')
-    activity = described_class.create!(account: account, contact: person, user: actor, activity_type: 'call',
+    activity = JrcCrm::Activity.create!(account: account, contact: person, user: actor, activity_type: 'call',
                                        title: 'SYNTHETIC historical call', due_at: Time.current,
                                        metadata: { 'relationship_assignment_id' => portfolio.id })
     person.update!(company: customer)

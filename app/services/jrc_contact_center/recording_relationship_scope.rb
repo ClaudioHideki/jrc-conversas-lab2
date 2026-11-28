@@ -46,14 +46,9 @@ class JrcContactCenter::RecordingRelationshipScope
     with_origin(recording_id) do |record, call, contact, context|
       rows = assignments(context, call, contact)
       total = rows.count
-      choices = rows.order(:id).offset((number - 1) * 20).limit(20).map do |row|
-        { id: row.id.to_s, label: row.label.to_s, can_work: JrcRelationship::AssignmentPolicy.new(context.to_h, row).update? }
-      end
-      { contract_version: 1, account_id: @account.id.to_s, user_id: @member.user_id.to_s, recording_id: record.id.to_s,
-        call_session_id: call.id.to_s, call_id: call.external_session_id, contact_id: contact.id.to_s,
-        origin_revision: Digest::SHA256.hexdigest(origin(record, call, contact, context).to_json),
-        time_zone: context.formatting.fetch(:timeZone),
-        items: choices, meta: { page: number, per_page: 20, total: total, pages: (total / 20.0).ceil } }
+      preview_identity(record, call, contact, context).merge(
+        items: assignment_choices(context, rows, number), meta: { page: number, per_page: 20, total: total, pages: (total / 20.0).ceil }
+      )
     end
   end
 
@@ -69,6 +64,19 @@ class JrcContactCenter::RecordingRelationshipScope
   end
 
   private
+
+  def preview_identity(record, call, contact, context)
+    { contract_version: 1, account_id: @account.id.to_s, user_id: @member.user_id.to_s, recording_id: record.id.to_s,
+      call_session_id: call.id.to_s, call_id: call.external_session_id, contact_id: contact.id.to_s,
+      origin_revision: Digest::SHA256.hexdigest(origin(record, call, contact, context).to_json),
+      time_zone: context.formatting.fetch(:timeZone) }
+  end
+
+  def assignment_choices(context, rows, number)
+    rows.order(:id).offset((number - 1) * 20).limit(20).map do |row|
+      { id: row.id.to_s, label: row.label.to_s, can_work: JrcRelationship::AssignmentPolicy.new(context.to_h, row).update? }
+    end
+  end
 
   def relationship_context!
     context = JrcRelationship::Context.new(@member)

@@ -30,8 +30,7 @@ class JrcContactCenter::RecordingRelationshipWrite
       origin = @scope.origin(record, call, contact, context)
       verify_origin_revision!(origin, input.fetch(:origin_revision))
       key = "control-desk-recording:#{@member.id}:#{input.fetch(:request_id)}"
-      fingerprint = Digest::SHA256.hexdigest([assignment.id, origin, input.except(:request_id)].to_json)
-      activity, replayed = persist(context, assignment, input, origin, key, fingerprint)
+      activity, replayed = persist(context, assignment, input, origin, key)
       context.audit!(activity, after: origin, action: replayed ? 'control_desk_activity_reused' : 'control_desk_activity_created')
       { recording_id: record.id.to_s, call_session_id: call.id.to_s, activity_id: activity.id.to_s,
         assignment_id: assignment.id.to_s, replayed: replayed, target: readable_target(activity) }
@@ -42,6 +41,16 @@ class JrcContactCenter::RecordingRelationshipWrite
     valid = values.is_a?(Hash) && values.keys.sort == %w[assignment_id due_at origin_revision request_id title]
     raise ArgumentError, 'Solicitação de registro inválida.' unless valid
 
+    key, revision = request_identity!(values)
+
+    title = values.fetch('title')
+    raise ArgumentError, 'Informe um título de até 250 caracteres.' unless title.is_a?(String) && title.strip.length.between?(1, 250)
+
+    { assignment_id: JrcServiceDesk::Input.id(values['assignment_id']), request_id: key, origin_revision: revision, title: title.strip,
+      due_at: deadline(values.fetch('due_at')) }
+  end
+
+  def request_identity!(values)
     key = values.fetch('request_id')
     valid_key = key.is_a?(String) && key.match?(/\A[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\z/)
     raise ArgumentError, 'Identificação da solicitação inválida.' unless valid_key
@@ -49,11 +58,7 @@ class JrcContactCenter::RecordingRelationshipWrite
     revision = values.fetch('origin_revision')
     raise ArgumentError, 'Revisão da origem inválida.' unless revision.is_a?(String) && revision.match?(/\A[0-9a-f]{64}\z/)
 
-    title = values.fetch('title')
-    raise ArgumentError, 'Informe um título de até 250 caracteres.' unless title.is_a?(String) && title.strip.length.between?(1, 250)
-
-    { assignment_id: JrcServiceDesk::Input.id(values['assignment_id']), request_id: key, origin_revision: revision, title: title.strip,
-      due_at: deadline(values.fetch('due_at')) }
+    [key, revision]
   end
 
   def deadline(value)
@@ -70,14 +75,15 @@ class JrcContactCenter::RecordingRelationshipWrite
     raise JrcContactCenter::OperationError.new('recording_relationship_source_changed', status: :conflict)
   end
 
-  def persist(context, assignment, input, origin, key, fingerprint)
+  def persist(context, assignment, input, origin, key)
+    fingerprint = Digest::SHA256.hexdigest([assignment.id, origin, input.except(:request_id)].to_json)
     # The account-only lookup can reject an actor's reused key in another
     # portfolio; it never grants access or discloses that portfolio's content.
     existing = JrcRelationship::Action.where(account: @account, source_key: "activity:#{key}").first
     return [replay(context, assignment, existing, fingerprint), true] if existing
 
     activity = JrcRelationship::Workflow.new(context).activity!(assignment: assignment, title: input.fetch(:title),
-                                                               due_at: input.fetch(:due_at), request_id: key, kind: 'call')
+                                                                due_at: input.fetch(:due_at), request_id: key, kind: 'call')
     raise ArgumentError, 'O fluxo nativo não gerou a atividade.' unless activity
 
     action = assignment.actions.find_by!(activity: activity)
