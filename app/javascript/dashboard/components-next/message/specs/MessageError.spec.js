@@ -20,6 +20,18 @@ beforeEach(() => {
 });
 
 describe('WhatsApp failure explanation', () => {
+  it('blocks a scoped direct WAID retry while its delivery is still unconfirmed', () => {
+    useMessageContext().contentAttributes.value = {
+      jrcDirectWaidRetryBlocked: true,
+    };
+    const wrapper = mount(MessageError, {
+      props: { error: 'SYNTHETIC_LEGACY_ERROR' },
+    });
+    expect(wrapper.text()).toContain('WhatsApp send not confirmed');
+    expect(wrapper.text()).toContain('SYNTHETIC_LEGACY_ERROR');
+    expect(wrapper.text()).not.toContain('Delivered on WhatsApp');
+    expect(wrapper.find('button').exists()).toBe(false);
+  });
   it('displays the verified direct channel receipt and retains the earlier diagnostic without a retry', () => {
     useMessageContext().contentAttributes.value = {
       jrcDeliveryProjection: {

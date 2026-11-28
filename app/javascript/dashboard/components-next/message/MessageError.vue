@@ -35,6 +35,9 @@ const brokerOutbound = computed(
 const legacyUnconfirmed = computed(
   () => contentAttributes?.value?.jrcBrokerLegacyUnconfirmed === true
 );
+const directWaidBlocked = computed(
+  () => contentAttributes?.value?.jrcDirectWaidRetryBlocked === true
+);
 const mirrorMedia = computed(() => {
   const marker = contentAttributes?.value?.jrcBrokerMessageId;
   return (
@@ -101,6 +104,7 @@ const policyCode = computed(() =>
 
 const canRetry = computed(() => {
   if (
+    directWaidBlocked.value ||
     directConfirmed.value ||
     mirrorMedia.value ||
     attempt.value ||
@@ -145,7 +149,11 @@ const canRetry = computed(() => {
     <span v-else-if="attempt" role="status" class="select-text">
       {{ attemptLabel }}
     </span>
-    <span v-else-if="brokerUnconfirmed" role="status" class="select-text">
+    <span
+      v-else-if="brokerUnconfirmed || directWaidBlocked"
+      role="status"
+      class="select-text"
+    >
       {{ t('CHAT_LIST.BROKER_UNKNOWN') }}
     </span>
     <span v-else>{{ t('CHAT_LIST.FAILED_TO_SEND') }}</span>

@@ -44,10 +44,17 @@ class Api::V1::Accounts::Conversations::MessagesController < Api::V1::Accounts::
     return render_whatsapp_retry if @conversation.inbox.channel_type == 'Channel::Whatsapp' &&
                                            @conversation.inbox.channel.provider == 'whatsapp_cloud'
 
-    service = Messages::StatusUpdateService.new(message, 'sent')
-    service.perform
-    message.update!(content_attributes: {})
-    ::SendReplyJob.perform_later(message.id)
+    return retry_generic_message unless Messages::DirectWaidRetryGuard.configured?(message.inbox)
+
+    message.with_lock do
+      if Messages::DirectWaidRetryGuard.applies?(message)
+        render json: { error: 'JRC_DIRECT_WAID_RETRY_REQUIRES_RECONCILIATION' }, status: :conflict
+      elsif JrcBroker::ProjectionReceipt.current(message, message.content_attributes.to_h)
+        render json: { error: 'JRC_BROKER_RETRY_REQUIRES_RECONCILIATION' }, status: :conflict
+      else
+        retry_generic_message
+      end
+    end
   rescue StandardError => e
     render_could_not_create_error(e.message)
   end
@@ -74,6 +81,12 @@ class Api::V1::Accounts::Conversations::MessagesController < Api::V1::Accounts::
   end
 
   private
+
+  def retry_generic_message
+    Messages::StatusUpdateService.new(message, 'sent').perform
+    message.update!(content_attributes: {})
+    ::SendReplyJob.perform_later(message.id)
+  end
 
   def render_whatsapp_retry
     result = Messages::WhatsappRetryService.new(message: message, actor: Current.user).perform
