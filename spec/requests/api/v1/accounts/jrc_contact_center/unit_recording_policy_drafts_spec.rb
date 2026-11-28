@@ -18,11 +18,11 @@ RSpec.describe 'Native unit recording policy drafts retain authorization, revisi
     end
   end
   let(:unit) { units.first }
-  let(:queue) { JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'SYNTHETIC-Q', name: 'SYNTHETIC queue') }
   let(:key) { JrcContactCenter::RecordingPolicyDraft::KEY }
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center/unit_recording_policy_drafts" }
   let(:path) { "#{base}/#{unit.id}" }
   let(:definition) do
+    queue = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'SYNTHETIC-Q', name: 'SYNTHETIC queue')
     { 'mode' => 'on_demand', 'queue_scope' => 'selected_queues', 'queue_ids' => [queue.id.to_s],
       'notice' => 'SYNTHETIC private customer notice', 'retention_days' => nil }
   end
@@ -152,8 +152,10 @@ RSpec.describe 'Native unit recording policy drafts retain authorization, revisi
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/units", headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.body).not_to include(definition.fetch('notice'), key)
-    patch "/api/v1/accounts/#{account.id}/jrc_contact_center/units/#{unit.id}", headers: headers,
-          params: { unit: { settings: { key => definition } } }, as: :json
+    patch(
+      "/api/v1/accounts/#{account.id}/jrc_contact_center/units/#{unit.id}",
+      headers: headers, params: { unit: { settings: { key => definition } } }, as: :json
+    )
     expect(response).to have_http_status(:unprocessable_entity)
     expect(unit.reload.settings.fetch(key)).to eq(stored)
   end

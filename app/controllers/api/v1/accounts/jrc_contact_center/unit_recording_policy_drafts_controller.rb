@@ -31,9 +31,7 @@ class Api::V1::Accounts::JrcContactCenter::UnitRecordingPolicyDraftsController <
 
   def presentation(unit)
     definition = JrcContactCenter::RecordingPolicyDraft.stored(unit)
-    if definition
-      JrcContactCenter::RecordingPolicyDraft.authorize_queues!(unit: unit, definition: definition, scope: contact_center_access.queues)
-    end
+    JrcContactCenter::RecordingPolicyDraft.authorize_queues!(unit: unit, definition: definition, scope: contact_center_access.queues) if definition
     base_payload.merge(unit_id: unit.id.to_s, unit_name: unit.name, time_zone: unit.timezone,
                        revision: JrcContactCenter::ConfigurationRevision.token(unit), draft: definition,
                        applied: false, provider_state: 'not_verified')

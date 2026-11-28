@@ -32,8 +32,7 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
     permitted = params.require(:unit).permit(:code, :name, :kind, :status, :timezone, :parent_unit_id, settings: {})
     contact_center_access.units.find(permitted[:parent_unit_id]) if permitted[:parent_unit_id].present?
     settings = permitted[:settings].to_h
-    validate_calendar_settings!(settings)
-    validate_recording_policy_settings!(settings)
+    validate_typed_settings!(settings)
     settings = contact_center_access.units.find(params[:id]).settings.merge(settings) if action_name == 'update'
     JrcContactCenter::OrganizationalScope.new(account: Current.account, account_user: Current.account_user).authorize_links!(settings)
     permitted[:settings] = settings
@@ -47,15 +46,10 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
                'revision' => JrcContactCenter::ConfigurationRevision.token(unit))
   end
 
-  def validate_recording_policy_settings!(settings)
-    return unless settings.key?(JrcContactCenter::RecordingPolicyDraft::KEY)
+  def validate_typed_settings!(settings)
+    raise JrcContactCenter::OperationError, 'calendar_requires_typed_configuration' if settings.key?(JrcContactCenter::CalendarCatalogState::KEY)
 
-    raise JrcContactCenter::OperationError, 'recording_policy_requires_typed_configuration'
-  end
-
-  def validate_calendar_settings!(settings)
-    return unless settings.key?(JrcContactCenter::CalendarCatalogState::KEY)
-
-    raise JrcContactCenter::OperationError, 'calendar_requires_typed_configuration'
+    key = JrcContactCenter::RecordingPolicyDraft::KEY
+    raise JrcContactCenter::OperationError, 'recording_policy_requires_typed_configuration' if settings.key?(key)
   end
 end

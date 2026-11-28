@@ -1,0 +1,24 @@
+{
+  "parent": "36cfa9a9fcbd77024d8fddea25dcd6bd5e49ccc1",
+  "failed_run": 46152100617,
+  "artifact": 15265453938,
+  "artifact_sha256": "e7edd21e7ba308dd3f78346566e9192d644853e32eefac3e034d5dae69b5178f",
+  "complete_focused_Ruby_report": {
+    "files": 10,
+    "offenses": 5,
+    "cops": [
+      "Style/IfUnlessModifier",
+      "Metrics/AbcSize",
+      "RSpec/MultipleMemoizedHelpers",
+      "Layout/HashAlignment"
+    ]
+  },
+  "corrections": [
+    "Two equivalent modifier conditionals",
+    "Combine the two existing generic-unit typed-setting guards; retain exact error messages and calendar-first order",
+    "Use the native Queue as a local fixture inside its only consuming definition, retaining all16 request examples",
+    "Equivalent multiline PATCH argument formatting"
+  ],
+  "no_rules_exclusions_or_assertions_removed": true,
+  "native_or_Chrome_accepted": false
+}
