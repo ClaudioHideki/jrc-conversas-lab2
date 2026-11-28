@@ -420,7 +420,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-pause-time-alert-rspec.json').read_text())
           examples = report['examples']
-          assert report['summary']['example_count'] == len(examples) and len(examples) > 14
+          assert report['summary']['example_count'] == len(examples) == 28
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert len({row['id'] for row in examples}) == len(examples) and all(row['status'] == 'passed' for row in examples)
           paths = {row['file_path'].removeprefix('./') for row in examples}
@@ -557,10 +557,11 @@ jobs:
           assert lint['summary']['offense_count'] == 0 and len(lint['files']) == 2
           assert {row['path'].removeprefix('./') for row in lint['files']} == {'app/services/jrc_contact_center/supervisor_snapshot.rb', 'spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb'}
           report = json.loads(Path('/tmp/call-center-supervisor-state-preflight.json').read_text())
-          assert report['summary']['example_count'] == len(report['examples']) == 14
+          assert report['summary']['example_count'] == len(report['examples']) == 17
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert all(row['status'] == 'passed' and row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb' for row in report['examples'])
-          assert len({row['id'] for row in report['examples']}) == 14
+          assert len({row['id'] for row in report['examples']}) == 17
+          assert {'./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:11]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:7]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:13:2]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:5]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:10]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:3]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:1]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:13:1]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:6]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:2]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:8]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:4]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:12]', './spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:9]'} <= {row['id'] for row in report['examples']}
           PY
           bundle exec rubocop app/services/jrc_contact_center/audio_asset_filters.rb app/controllers/api/v1/accounts/jrc_contact_center/audio_assets_controller.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_filters_spec.rb --format json --out /tmp/call-center-audio-purpose-lint.json
           bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_filters_spec.rb --format progress --format json --out /tmp/call-center-audio-purpose-preflight.json

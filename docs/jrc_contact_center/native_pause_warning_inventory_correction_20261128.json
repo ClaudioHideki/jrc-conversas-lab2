@@ -1,0 +1,57 @@
+{
+  "parent": "ddb07a533acf967f2d6846ee54d2d9983a4ea5b6",
+  "failed_run": 46177529949,
+  "artifact_id": 15277240200,
+  "artifact_sha256": "d1a40b80064dcf3e6f08fe45ab0d2d4965724dab4ab1a86b7c587fe800909242",
+  "cause": "The old supervisor gate still required14 although the approved grouped increment added3 real native cases. All17 passed before the stale assertion.",
+  "previous_14": {
+    "report_sha256": "a0739b99288ce701a6036080e7bf903788bcfdd393b1f62ee3ad33589597d819",
+    "ids": [
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:10]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:11]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:12]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:13:1]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:13:2]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:1]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:2]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:3]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:4]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:5]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:6]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:7]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:8]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:9]"
+    ]
+  },
+  "current_17": {
+    "report_sha256": "58a0d9e2767e0064db027dcf6a04e05c0cf8d38c64cd9428ee61ac68f53c1888",
+    "ids": [
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:10]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:11]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:12]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:13:1]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:13:2]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:14:1]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:14:2]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:15:1]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:1]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:2]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:3]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:4]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:5]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:6]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:7]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:8]",
+      "./spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb[1:9]"
+    ],
+    "all_previous_id_description_path_identities_preserved": true
+  },
+  "new_pause_focused_28": {
+    "report_sha256": "90d0ce394d869629215ea0ddea4dccd0b3592c28ad81b213307c6835418d7a9e",
+    "all17_supervisor_ids_included": true
+  },
+  "all851_native_lint_paths_zero_new_offenses": true,
+  "source_tests_and_runtime_unchanged": true,
+  "zero_failure_pending_outside_error_checks_retained": true,
+  "native_or_Chrome_whole_CI_accepted": false
+}
