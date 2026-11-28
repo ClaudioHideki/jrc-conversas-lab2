@@ -6,15 +6,20 @@ import CompaniesPage from './CompaniesPage.vue';
 const mocks = vi.hoisted(() => ({
   state: null,
   companies: vi.fn(),
+  deleteCompany: vi.fn(),
   metadata: vi.fn(),
   taxonomy: vi.fn(),
   taxonomies: vi.fn(),
 }));
 vi.mock('dashboard/api/jrcCustomers', () => ({ default: mocks }));
+vi.mock('dashboard/composables/usePolicy', () => ({
+  usePolicy: () => ({ checkPermissions: () => true }),
+}));
 vi.mock('./useCustomerMaster', () => ({
   useCustomerMaster: () => ({
     accountId: computed(() => mocks.state.accountId),
     identity: computed(() => `${mocks.state.accountId}:${mocks.state.viewer}`),
+    canAdmin: computed(() => mocks.state.viewer.startsWith('admin')),
     accountScopedRoute: (name, params = {}, query = {}) => ({
       name,
       params: { accountId: mocks.state.accountId, ...params },
@@ -26,6 +31,7 @@ const row = {
   id: 101,
   name: 'MOCK — Alpha',
   relationship_type: 'customer',
+  revision: '2026-11-28T15:00:00.000000Z',
   contact_count: 1,
   active: true,
 };
@@ -36,6 +42,11 @@ const render = async (
   router = createRouter({
     history: createMemoryHistory(),
     routes: [
+      {
+        name: 'jrc_customer_imports',
+        path: '/app/accounts/:accountId/customers/imports',
+        component: { template: '<div />' },
+      },
       {
         name: 'jrc_customer_companies',
         path: '/app/accounts/:accountId/customers/companies',
@@ -51,7 +62,15 @@ const render = async (
   return mount(CompaniesPage, {
     global: {
       plugins: [router],
-      stubs: { CompanyDetailsDialog: true, CompanyEditorDialog: true },
+      stubs: {
+        CompanyDetailsDialog: true,
+        CompanyEditorDialog: true,
+        Dialog: {
+          name: 'Dialog',
+          template: '<div><slot /></div>',
+          methods: { open() {}, close() {} },
+        },
+      },
     },
   });
 };
@@ -106,6 +125,34 @@ it('omits the segment selector and preserves existing URL filters through the se
     expect.objectContaining({ taxonomy_id: '7', q: 'Alpha', page: 1 }),
     expect.any(Object)
   );
+  wrapper.unmount();
+});
+
+it('opens the existing editor from the edit action', async () => {
+  const wrapper = await render();
+  await flushPromises();
+  await wrapper.get('[aria-label="Editar empresa"]').trigger('click');
+  expect(
+    wrapper.getComponent({ name: 'CompanyEditorDialog' }).props('company')
+  ).toMatchObject({ id: row.id, revision: row.revision });
+  wrapper.unmount();
+});
+
+it('gates removal by administrator access and sends the row revision only after confirmation', async () => {
+  const wrapper = await render({ page: '1' });
+  await flushPromises();
+  expect(wrapper.find('[aria-label="Delete company"]').exists()).toBe(false);
+  mocks.state.viewer = 'admin:1';
+  mocks.deleteCompany.mockResolvedValue({ status: 204 });
+  await flushPromises();
+  await wrapper.get('[aria-label="Delete company"]').trigger('click');
+  expect(mocks.deleteCompany).not.toHaveBeenCalled();
+  wrapper.getComponent({ name: 'Dialog' }).vm.$emit('confirm');
+  await flushPromises();
+  expect(mocks.deleteCompany).toHaveBeenCalledWith(row.id, row.revision, {
+    accountId: '1',
+  });
+  expect(wrapper.findComponent({ name: 'Dialog' }).exists()).toBe(false);
   wrapper.unmount();
 });
 

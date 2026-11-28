@@ -62,6 +62,40 @@ RSpec.describe 'CRM leads API', type: :request do
     expect(response.parsed_body.dig('deal', 'id')).to eq(first_deal_id)
   end
 
+  it 'creates a contact and preserves qualification and activities when turning the lead into a deal' do
+    headers = agent.create_new_auth_token
+    post base_url, params: {
+      lead: {
+        name: 'Mariana Teste', email: 'mariana@example.test', status: 'qualified', notes: 'Validar escopo',
+        qualification: { product_interest: 'Atendimento', quantity: 10,
+                         fields: [{ label: 'Unidade', value: 'Centro' }] }
+      },
+      next_activity: { title: 'Demonstrar solução', activity_type: 'demonstration', due_at: 2.days.from_now.iso8601 }
+    }, headers: headers, as: :json
+
+    expect(response).to have_http_status(:created)
+    lead_id = response.parsed_body.fetch('id')
+    contact_id = response.parsed_body.fetch('contact_id')
+    expect(account.contacts.find(contact_id).email).to eq('mariana@example.test')
+
+    post "#{base_url}/#{lead_id}/convert", params: {
+      next_activity: { title: 'Preparar proposta', activity_type: 'proposal', due_at: 3.days.from_now.iso8601 }
+    }, headers: headers, as: :json
+
+    expect(response).to have_http_status(:ok)
+    deal_id = response.parsed_body.dig('deal', 'id')
+    deal = account.jrc_crm_deals.find(deal_id)
+    expect(deal.contact_id).to eq(contact_id)
+    expect(deal.custom_attributes).to include('quantity' => 10, 'fields' => [{ 'label' => 'Unidade', 'value' => 'Centro' }])
+    expect(deal.activities.pluck(:title)).to contain_exactly('Demonstrar solução', 'Preparar proposta')
+    expect(deal.lead.activities.sole.deal_id).to eq(deal.id)
+
+    get "/api/v1/accounts/#{account.id}/crm/deals/#{deal_id}", headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['description']).to eq('Validar escopo')
+    expect(response.parsed_body.fetch('history').pluck('event_type')).to include('lead_created', 'lead_converted')
+  end
+
   it 'persists and returns contact, owner and stage throughout lead conversion' do
     contact = create(:contact, account: account, name: 'Cliente Teste 01')
     conversation = create(:conversation, account: account, contact: contact, assignee: agent)

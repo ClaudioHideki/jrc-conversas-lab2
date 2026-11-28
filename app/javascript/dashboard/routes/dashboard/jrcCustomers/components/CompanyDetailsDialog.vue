@@ -7,6 +7,7 @@ import { useCustomerMaster } from '../useCustomerMaster';
 
 const props = defineProps({
   companyId: { type: [Number, String], required: true },
+  initialTab: { type: String, default: 'overview' },
 });
 const emit = defineEmits(['close', 'updated']);
 const { t } = useI18n();
@@ -37,6 +38,7 @@ onMounted(() => dialog.value.open());
     </RouterLink>
     <CompanyPage
       :subject-id="selection"
+      :initial-tab="initialTab"
       embedded
       @navigate-company="selection = $event"
       @updated="emit('updated', $event)"

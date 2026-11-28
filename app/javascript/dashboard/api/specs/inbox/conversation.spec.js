@@ -57,7 +57,12 @@ describe('#ConversationAPI', () => {
           page: 1,
           labels: [],
           updated_within: 20,
+          conversation_type: undefined,
+          inbox_scope: undefined,
+          include_participating: undefined,
+          sort_by: undefined,
         },
+        timeout: 30_000,
       });
     });
 
@@ -231,6 +236,12 @@ describe('#ConversationAPI', () => {
       conversationAPI.getAllAttachments(1);
       expect(axiosMock.get).toHaveBeenCalledWith(
         '/api/v1/conversations/1/attachments'
+      );
+
+      conversationAPI.getAllAttachments(1, 2);
+      expect(axiosMock.get).toHaveBeenLastCalledWith(
+        '/api/v1/conversations/1/attachments',
+        { params: { page: 2 } }
       );
     });
   });

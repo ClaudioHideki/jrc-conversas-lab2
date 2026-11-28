@@ -7,8 +7,7 @@ const CrmDashboardView = () => import('./views/dashboard/CrmDashboardView.vue');
 const ReportsView = () => import('./views/reports/ReportsView.vue');
 const LeadsIndex = () => import('./views/leads/LeadsIndex.vue');
 const DealsIndex = () => import('./views/deals/DealsIndex.vue');
-const DealsFunnelKanban = () =>
-  import('./components/kanban/DealsFunnelKanban.vue');
+const FunnelView = () => import('./views/funnel/FunnelView.vue');
 const WalletView = () => import('./views/wallet/WalletView.vue');
 const ActivitiesIndex = () => import('./views/activities/ActivitiesIndex.vue');
 const CalendarView = () => import('./views/calendar/CalendarView.vue');
@@ -87,7 +86,7 @@ export default {
         {
           path: 'funnel',
           name: 'crm_funnel',
-          component: DealsFunnelKanban,
+          component: FunnelView,
           meta,
         },
         { path: 'wallet', name: 'crm_wallet', component: WalletView, meta },

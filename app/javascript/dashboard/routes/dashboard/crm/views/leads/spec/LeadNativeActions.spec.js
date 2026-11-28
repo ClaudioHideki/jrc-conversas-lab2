@@ -208,7 +208,7 @@ it('closes the old conversion popup after authority changes and ignores its late
   await render();
   await wrapper
     .findAll('button')
-    .find(button => button.text() === 'Converter em negócio')
+    .find(button => button.text() === 'Convert to deal')
     .trigger('click');
   const modal = wrapper.getComponent({ name: 'LeadConversionModal' });
   modal.vm.$emit('submit', { pipeline_id: 1, stage_id: 10 });
@@ -266,7 +266,7 @@ it('does not restore older private product options after a role-change refresh',
   await flushPromises();
   await wrapper
     .findAll('button')
-    .find(button => button.text() === 'Converter em negócio')
+    .find(button => button.text() === 'Convert to deal')
     .trigger('click');
   expect(
     wrapper.getComponent({ name: 'LeadConversionModal' }).props('products')

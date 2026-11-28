@@ -29,6 +29,7 @@ import {
 const props = defineProps({
   subjectId: { type: [Number, String], default: null },
   embedded: { type: Boolean, default: false },
+  initialTab: { type: String, default: 'overview' },
 });
 const emit = defineEmits(['updated', 'denied', 'navigateCompany']);
 const route = useRoute();
@@ -268,6 +269,7 @@ watch(
     overview.value = null;
     section.value = 'overview';
     tab.value = 'overview';
+    selectRelationKind(props.initialTab);
     editing.value = false;
     load();
   },

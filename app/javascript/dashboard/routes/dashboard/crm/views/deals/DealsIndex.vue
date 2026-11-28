@@ -15,6 +15,7 @@ const { enabled: hasCustomerMaster } = useCustomerMaster();
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import {
   computed,
+  nextTick,
   onMounted,
   onBeforeUnmount,
   reactive,
@@ -36,11 +37,18 @@ import {
 } from 'dashboard/api/crm';
 import { useAlert } from 'dashboard/composables';
 import CrmStatusBadge from '../../components/shared/CrmStatusBadge.vue';
+import CrmBadge from '../../components/shared/CrmBadge.vue';
+import CrmListingHeader from '../../components/shared/CrmListingHeader.vue';
+import Avatar from 'dashboard/components-next/avatar/Avatar.vue';
+import PaginationFooter from 'dashboard/components-next/pagination/PaginationFooter.vue';
+import { useCommercialLabels } from '../../composables/useCommercialLabels';
 import CrmValueDisplay from '../../components/shared/CrmValueDisplay.vue';
-import { formatCrmDateTime } from '../../utils/dateTime';
+import DealWorkspaceDialog from './DealWorkspaceDialog.vue';
+import InitialActivityFields from '../../components/shared/InitialActivityFields.vue';
 
 const { projectText } = useProjects();
 const { t } = useI18n();
+const { statusLabel } = useCommercialLabels();
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
@@ -79,9 +87,55 @@ watch(showForm, visible => {
   if (props.creationOnly && !visible) emit('close');
 });
 const showContactForm = ref(false);
+const creationForm = ref(null);
+const creationTab = ref(0);
+const creationTabs = [
+  {
+    id: 'information',
+    label: 'DEAL_DATA',
+    icon: 'i-lucide-info',
+  },
+  {
+    id: 'products',
+    label: 'PRODUCTS_VALUES',
+    icon: 'i-lucide-package',
+  },
+  {
+    id: 'next-action',
+    label: 'NEXT_ACTION',
+    icon: 'i-lucide-file-text',
+  },
+];
+const lastCreationTab = creationTabs.length - 1;
+const switchCreationTab = async index => {
+  creationTab.value = index;
+  await nextTick();
+  const element = creationForm.value;
+  if (!element) return;
+  element.scrollTop = 0;
+  element.querySelector(`#deal-tab-${creationTabs[index].id}`)?.focus();
+};
+const navigateCreationTabs = event => {
+  const destinations = {
+    ArrowLeft: (creationTab.value + lastCreationTab) % creationTabs.length,
+    ArrowRight: (creationTab.value + 1) % creationTabs.length,
+    Home: 0,
+    End: lastCreationTab,
+  };
+  const index = destinations[event.key];
+  if (typeof index !== 'number') return;
+  event.preventDefault();
+  switchCreationTab(index);
+};
+const openProposal = id =>
+  router.push({
+    name: 'crm_proposals',
+    params: { accountId: route.params.accountId },
+    query: { new: '1', dealId: id },
+  });
 const saving = ref(false);
 const closeForm = () => {
-  if (!saving.value) showForm.value = false;
+  if (!saving.value && !showContactForm.value) showForm.value = false;
 };
 const pipelines = ref([]);
 const stages = ref([]);
@@ -107,10 +161,16 @@ const form = reactive({
   expected_close_at: '',
   probability: 30,
   description: '',
-  next_activity_type: 'call',
-  next_activity_at: '',
-  next_activity_title: '',
+  schedule: false,
+  owner_id: '',
 });
+const newActivity = () => ({
+  activity_type: 'proposal',
+  due_at: '',
+  title: '',
+  description: '',
+});
+const activity = ref(newActivity());
 const productForm = reactive({
   product_id: '',
   quantity: 1,
@@ -147,6 +207,140 @@ const sourceOptions = [
 ];
 
 const deals = computed(() => store.getters['jrcCrm/deals/allDeals'] || []);
+const listFilters = reactive({
+  search: '',
+  stage: '',
+  owner: '',
+  status: '',
+  pipeline: '',
+  source: '',
+});
+const moreFilters = ref(false);
+const listPage = ref(1);
+const perPage = 15;
+const visibleStages = computed(() =>
+  [
+    ...new Map(
+      deals.value.map(deal => [
+        deal.stage_id || deal.stage?.id,
+        deal.stage?.name || deal.stage_name,
+      ])
+    ).entries(),
+  ].filter(([id, name]) => id && name)
+);
+const visibleOwners = computed(() =>
+  [
+    ...new Map(
+      deals.value.map(deal => [
+        deal.owner_id || deal.owner?.id,
+        deal.owner?.name || deal.owner_name,
+      ])
+    ).entries(),
+  ]
+    .filter(([id, name]) => id && name)
+    .sort((a, b) => a[1].localeCompare(b[1]))
+);
+const availableStatuses = computed(() => [
+  ...new Set(deals.value.map(deal => deal.status).filter(Boolean)),
+]);
+const availableSources = computed(() =>
+  [...new Set(deals.value.map(deal => deal.source).filter(Boolean))].sort()
+);
+const searchKey = value =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+const filteredDeals = computed(() => {
+  const { search, stage, owner, status, pipeline, source } = listFilters;
+  const term = searchKey(search.trim());
+  return deals.value.filter(
+    deal =>
+      (!stage || String(deal.stage_id || deal.stage?.id) === stage) &&
+      (!owner || String(deal.owner_id || deal.owner?.id) === owner) &&
+      (!status || deal.status === status) &&
+      (!pipeline ||
+        String(deal.pipeline_id || deal.pipeline?.id) === pipeline) &&
+      (!source || deal.source === source) &&
+      (!term ||
+        [deal.title, deal.company_name, deal.contact?.name].some(value =>
+          searchKey(value).includes(term)
+        ))
+  );
+});
+const pagedDeals = computed(() =>
+  filteredDeals.value.slice(
+    (listPage.value - 1) * perPage,
+    listPage.value * perPage
+  )
+);
+watch(listFilters, () => {
+  listPage.value = 1;
+});
+watch(
+  () => filteredDeals.value.length,
+  total => {
+    listPage.value = Math.min(
+      listPage.value,
+      Math.max(1, Math.ceil(total / perPage))
+    );
+  }
+);
+const stageName = deal => deal.stage?.name || deal.stage_name;
+const isNegotiation = deal =>
+  /negocia|negotiat/.test(searchKey(stageName(deal)));
+const stageTone = deal => {
+  if (deal.status === 'won') return 'green';
+  if (deal.status === 'lost') return 'red';
+  if (isNegotiation(deal)) return 'yellow';
+  if (/proposta|proposal/.test(searchKey(stageName(deal)))) return 'purple';
+  if (/qualifica|qualify/.test(searchKey(stageName(deal)))) return 'green';
+  return 'blue';
+};
+const openDeal = deal =>
+  router.push({ query: { ...route.query, dealId: deal.id } });
+const dealSummary = computed(() => {
+  const opened = deals.value.filter(deal => deal.status === 'open');
+  const now = new Date();
+  const wonThisMonth = deals.value.filter(deal => {
+    if (deal.status !== 'won' || !deal.won_at) return false;
+    const date = new Date(deal.won_at);
+    return (
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth()
+    );
+  }).length;
+  return [
+    {
+      label: t('CRM.LIST_LAYOUT.OPEN_DEALS'),
+      value: opened.length,
+      icon: 'i-lucide-folder-open',
+      tone: 'text-n-blue-11',
+    },
+    {
+      label: t('CRM.LIST_LAYOUT.NEGOTIATING'),
+      value: opened.filter(isNegotiation).length,
+      icon: 'i-lucide-handshake',
+      tone: 'text-n-amber-11',
+    },
+    {
+      label: t('CRM.LIST_LAYOUT.WON_THIS_MONTH'),
+      value: wonThisMonth,
+      icon: 'i-lucide-trophy',
+      tone: 'text-n-teal-11',
+    },
+    {
+      label: t('CRM.LIST_LAYOUT.OPEN_VALUE'),
+      value: opened.reduce(
+        (sum, deal) => sum + Number(deal.value_cents || 0),
+        0
+      ),
+      money: true,
+      icon: 'i-lucide-coins',
+      tone: 'text-n-blue-11',
+    },
+  ];
+});
 const loading = computed(() => store.getters['jrcCrm/deals/isLoading']);
 const error = computed(() => store.getters['jrcCrm/deals/error']);
 const detailLoading = ref(false);
@@ -285,9 +479,11 @@ const loadStages = async () => {
       String(pipelineId) !== String(form.pipeline_id)
     )
       return;
-    stages.value = data;
+    stages.value = data.filter(
+      stage => stage.active !== false && !stage.is_terminal
+    );
     if (!stages.value.some(stage => String(stage.id) === String(form.stage_id)))
-      form.stage_id = data[0]?.id || '';
+      form.stage_id = stages.value[0]?.id || '';
   } catch {
     if (isCurrentContext(context) && request === stageGeneration)
       stageError.value = t('CRM.DEAL_CREATION.LOAD_ERROR');
@@ -310,9 +506,8 @@ const resetForm = () => {
   form.description = '';
   form.expected_close_at = '';
   form.probability = 30;
-  form.next_activity_type = 'call';
-  form.next_activity_at = '';
-  form.next_activity_title = '';
+  form.schedule = false;
+  form.owner_id = '';
   form.pipeline_id = pipelines.value[0]?.id || '';
   form.stage_id = '';
   dealItems.value = [];
@@ -321,6 +516,7 @@ const dealDraft = useFormDraft('crm:new_deal', {
   active: showForm,
   snapshot: () => ({
     form: { ...form },
+    activity: { ...activity.value },
     items: dealItems.value.map(item => ({
       product_id: item.product_id,
       product: { id: item.product_id, name: item.product?.name },
@@ -332,11 +528,27 @@ const dealDraft = useFormDraft('crm:new_deal', {
   }),
   restore: draft => {
     Object.assign(form, draft.form || {});
+    const previousForm = draft.form || {};
+    const previousActivity =
+      previousForm.next_activity_at && previousForm.next_activity_title;
+    if (previousActivity) form.schedule = true;
+    activity.value = {
+      ...newActivity(),
+      ...(previousActivity
+        ? {
+            activity_type: previousForm.next_activity_type,
+            due_at: previousForm.next_activity_at,
+            title: previousForm.next_activity_title,
+          }
+        : draft.activity),
+    };
     dealItems.value = draft.items || [];
     Object.assign(productForm, draft.product || {});
   },
   reset: () => {
     resetForm();
+    activity.value = newActivity();
+    creationTab.value = 0;
     Object.assign(productForm, {
       product_id: '',
       quantity: 1,
@@ -376,12 +588,25 @@ const addProductDraft = () => {
     item => String(item.id) === String(productForm.product_id)
   );
   if (!product) return;
+  const quantity = Number(productForm.quantity);
+  const price = centsFromInput(productForm.unit_price);
+  const discount = centsFromInput(productForm.discount);
+  if (
+    !Number.isSafeInteger(quantity) ||
+    quantity < 1 ||
+    price < 0 ||
+    discount < 0 ||
+    discount > price * quantity
+  ) {
+    useAlert(t('CRM.SALES_FLOW.INVALID_PRODUCT'));
+    return;
+  }
   dealItems.value.push({
     product_id: product.id,
     product,
-    quantity: Number(productForm.quantity || 1),
-    unit_price_cents: centsFromInput(productForm.unit_price),
-    discount_cents: centsFromInput(productForm.discount),
+    quantity,
+    unit_price_cents: price,
+    discount_cents: discount,
   });
   productForm.product_id = '';
   productForm.quantity = 1;
@@ -595,7 +820,7 @@ const removeDetailsProduct = async item => {
   }
 };
 
-const save = async () => {
+const save = async event => {
   if (
     !showForm.value ||
     saving.value ||
@@ -606,13 +831,30 @@ const save = async () => {
     stageError.value
   )
     return;
+  if (creationTab.value !== lastCreationTab) {
+    switchCreationTab(creationTab.value + 1);
+    return;
+  }
+  const invalidField = creationForm.value?.querySelector(
+    'input:invalid, select:invalid, textarea:invalid'
+  );
+  if (invalidField) {
+    await switchCreationTab(
+      Number(invalidField.closest('[role="tabpanel"]').dataset.tabIndex)
+    );
+    invalidField.reportValidity();
+    return;
+  }
   const context = captureContext();
   const savingDraftKey = dealDraft.key.value;
   saving.value = true;
   try {
-    await dealsAPI.create({
+    const { data } = await dealsAPI.create({
       deal: {
         title: form.title,
+        ...(store.getters.getCurrentRole === 'administrator' && form.owner_id
+          ? { owner_id: form.owner_id }
+          : {}),
         ...(hasCustomerMaster.value ? { company_id: form.company_id } : {}),
         contact_id: form.contact_id || null,
         conversation_id: form.conversation_id || null,
@@ -632,24 +874,24 @@ const save = async () => {
         unit_price_cents: item.unit_price_cents,
         discount_cents: item.discount_cents,
       })),
-      ...(form.next_activity_at && form.next_activity_title.trim()
-        ? {
-            next_activity: {
-              activity_type: form.next_activity_type,
-              title: form.next_activity_title.trim(),
-              due_at: form.next_activity_at,
-            },
-          }
-        : {}),
+      ...(form.schedule ? { next_activity: { ...activity.value } } : {}),
     });
     if (!isCurrentContext(context) || !dealDraft.complete(savingDraftKey))
       return;
     showForm.value = false;
-    await Promise.all([
-      loadDeals(),
-      store.dispatch('jrcCrm/activities/fetchActivities'),
-    ]);
-    if (isCurrentContext(context)) useAlert('Negócio criado com sucesso.');
+    useAlert(t('CRM.SALES_FLOW.DEAL_CREATED'));
+    if (event?.submitter?.value === 'proposal') {
+      openProposal(data.id);
+    } else if (props.creationOnly) {
+      router.push({
+        name: 'crm_deals',
+        params: { accountId: route.params.accountId },
+        query: { dealId: data.id },
+      });
+    } else {
+      openDeal(data);
+      loadDeals();
+    }
   } catch (requestError) {
     if (!isCurrentContext(context)) return;
     useAlert(
@@ -676,14 +918,15 @@ const initialize = async () => {
       pipelinesAPI.list(),
       loadContacts(context),
       loadProducts(context),
-      ...(props.creationOnly
-        ? []
-        : [
+      ...(!props.creationOnly ||
+      store.getters.getCurrentRole === 'administrator'
+        ? [
             AgentsAPI.get().then(({ data }) => {
               if (isCurrentMetadata(context)) agents.value = data || [];
             }),
-            loadDeals(),
-          ]),
+          ]
+        : []),
+      ...(!props.creationOnly ? [loadDeals()] : []),
     ]);
     if (!isCurrentMetadata(context)) return;
     pipelines.value = pipelinesResponse.data;
@@ -712,6 +955,14 @@ watch(viewIdentity, () => {
   products.value = [];
   agents.value = [];
   stages.value = [];
+  Object.assign(listFilters, {
+    search: '',
+    stage: '',
+    owner: '',
+    status: '',
+    pipeline: '',
+    source: '',
+  });
   metadataError.value = '';
   stageError.value = '';
   metadataLoading.value = false;
@@ -759,7 +1010,7 @@ onMounted(() => {
     :class="
       props.creationOnly
         ? 'contents'
-        : 'flex h-full flex-col bg-n-surface-1 p-6'
+        : 'flex min-h-full min-w-0 flex-col gap-3 bg-gradient-to-b from-n-blue-2 to-n-surface-1 p-3 sm:px-6'
     "
   >
     <template v-if="!props.creationOnly">
@@ -775,113 +1026,268 @@ onMounted(() => {
           </button>
         </div>
       </div>
-      <div class="mb-6 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <span
-            class="flex size-11 items-center justify-center rounded-2xl bg-n-blue-3 text-n-blue-11"
-            ><i class="i-lucide-handshake size-5"
-          /></span>
-          <div>
-            <h2 class="text-2xl font-bold text-n-slate-12">Negócios</h2>
-            <p class="text-sm text-n-slate-9">
-              Oportunidades comerciais em andamento
-            </p>
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <RouterLink
-            :to="{ name: 'crm_funnel' }"
-            class="rounded-xl border border-n-weak bg-n-solid-2 px-4 py-2.5 text-sm font-semibold text-n-slate-12 shadow-sm"
-            >Ver Funil</RouterLink
-          ><button
-            type="button"
-            class="rounded-xl bg-n-brand px-4 py-2.5 text-sm font-semibold text-white shadow-md"
-            @click="openForm"
-          >
-            Novo Negócio
-          </button>
-        </div>
-      </div>
-      <div
-        class="flex-1 overflow-auto rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm"
+      <CrmListingHeader :title="t('CRM.NAV.DEALS')">
+        <RouterLink
+          :to="{ name: 'crm_funnel' }"
+          class="inline-flex items-center rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2 text-sm font-semibold text-n-slate-12 shadow-sm"
+        >
+          {{ t('CRM.LIST_LAYOUT.VIEW_FUNNEL') }}
+        </RouterLink>
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg bg-n-brand px-4 py-2 text-sm font-semibold text-white shadow-sm"
+          @click="openForm"
+        >
+          <span class="i-lucide-plus size-4" aria-hidden="true" />
+          {{ t('CRM.LIST_LAYOUT.NEW_DEAL') }}
+        </button>
+      </CrmListingHeader>
+      <section
+        class="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-n-blue-5 bg-n-blue-5 lg:grid-cols-4"
       >
-        <table class="min-w-full table-fixed divide-y divide-n-weak text-sm">
-          <thead
-            class="bg-n-alpha-2 text-left text-xs uppercase text-n-slate-10"
+        <div
+          v-for="metric in dealSummary"
+          :key="metric.label"
+          class="flex min-w-0 items-center gap-2 bg-n-blue-3 px-3 py-2.5"
+          :class="metric.tone"
+        >
+          <span
+            :class="metric.icon"
+            class="size-4 shrink-0"
+            aria-hidden="true"
+          />
+          <span class="min-w-0 flex-1 text-xs font-semibold">{{
+            metric.label
+          }}</span>
+          <strong class="text-sm tabular-nums">
+            <CrmValueDisplay v-if="metric.money" :cents="metric.value" />
+            <template v-else>{{ metric.value }}</template>
+          </strong>
+        </div>
+      </section>
+      <div
+        class="flex flex-wrap items-center gap-2 rounded-xl border border-n-weak bg-n-solid-2 p-2 shadow-sm"
+      >
+        <label class="relative min-w-[min(100%,15rem)] flex-1">
+          <span
+            class="i-lucide-search pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-n-slate-11"
+            aria-hidden="true"
+          />
+          <input
+            v-model="listFilters.search"
+            type="search"
+            :placeholder="t('CRM.LIST_LAYOUT.DEALS_SEARCH')"
+            :aria-label="t('CRM.LIST_LAYOUT.DEALS_SEARCH')"
+            class="reset-base m-0 h-9 w-full rounded-lg border border-n-weak bg-n-solid-1 pe-3 ps-9 text-sm"
+          />
+        </label>
+        <select
+          v-model="listFilters.stage"
+          :aria-label="t('CRM.LIST_LAYOUT.STAGE')"
+          class="!mb-0 h-9 w-auto min-w-28 max-w-full !appearance-auto rounded-lg border border-n-weak bg-n-solid-1 !bg-none px-2 text-sm"
+        >
+          <option value="">{{ t('CRM.LIST_LAYOUT.STAGE') }}</option>
+          <option
+            v-for="[id, name] in visibleStages"
+            :key="id"
+            :value="String(id)"
           >
-            <tr>
-              <th class="w-[38%] px-4 py-3">Negócio / Cliente</th>
-              <th class="w-[17%] px-3 py-3">Etapa</th>
-              <th class="w-[14%] px-3 py-3">Valor</th>
-              <th class="w-[16%] px-3 py-3">Responsável</th>
-              <th class="w-[10%] px-3 py-3">Status</th>
-              <th class="w-[5%] px-3 py-3 text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-n-weak">
-            <tr v-if="loading">
-              <td colspan="6" class="px-5 py-12 text-center text-n-slate-10">
-                Carregando negócios…
-              </td>
-            </tr>
-            <tr v-else-if="error">
-              <td colspan="6" class="px-5 py-12 text-center text-n-ruby-11">
-                {{ error }}
-              </td>
-            </tr>
-            <tr v-else-if="!deals.length">
-              <td colspan="6" class="px-5 py-12 text-center text-n-slate-10">
-                Nenhum negócio encontrado.
-              </td>
-            </tr>
-            <tr
-              v-for="deal in deals"
-              :key="deal.id"
-              class="cursor-pointer hover:bg-n-alpha-2"
-              @click="
-                router.push({ query: { ...route.query, dealId: deal.id } })
-              "
+            {{ name }}
+          </option>
+        </select>
+        <select
+          v-model="listFilters.owner"
+          :aria-label="t('CRM.LIST_LAYOUT.OWNER')"
+          class="!mb-0 h-9 w-auto min-w-32 max-w-full !appearance-auto rounded-lg border border-n-weak bg-n-solid-1 !bg-none px-2 text-sm"
+        >
+          <option value="">{{ t('CRM.LIST_LAYOUT.OWNER') }}</option>
+          <option
+            v-for="[id, name] in visibleOwners"
+            :key="id"
+            :value="String(id)"
+          >
+            {{ name }}
+          </option>
+        </select>
+        <select
+          v-model="listFilters.status"
+          :aria-label="t('CRM.LIST_LAYOUT.STATUS')"
+          class="!mb-0 h-9 w-auto min-w-28 !appearance-auto rounded-lg border border-n-weak bg-n-solid-1 !bg-none px-2 text-sm"
+        >
+          <option value="">{{ t('CRM.LIST_LAYOUT.STATUS') }}</option>
+          <option
+            v-for="status in availableStatuses"
+            :key="status"
+            :value="status"
+          >
+            {{ statusLabel(status) }}
+          </option>
+        </select>
+        <button
+          type="button"
+          :aria-expanded="moreFilters"
+          class="inline-flex h-9 items-center gap-2 rounded-lg border border-n-weak px-3 text-xs font-semibold text-n-blue-11"
+          @click="moreFilters = !moreFilters"
+        >
+          <span class="i-lucide-list-filter size-4" aria-hidden="true" />
+          {{ t('CRM.DIRECTORY.MORE_FILTERS') }}
+        </button>
+        <div
+          v-if="moreFilters"
+          class="flex w-full flex-wrap gap-2 border-t border-n-weak pt-2"
+        >
+          <select
+            v-model="listFilters.pipeline"
+            :aria-label="t('CRM.LIST_LAYOUT.PIPELINE')"
+            class="!mb-0 h-9 w-auto min-w-28 max-w-full !appearance-auto rounded-lg border border-n-weak bg-n-solid-1 !bg-none px-2 text-sm"
+          >
+            <option value="">{{ t('CRM.LIST_LAYOUT.PIPELINE') }}</option>
+            <option
+              v-for="pipeline in pipelines"
+              :key="pipeline.id"
+              :value="String(pipeline.id)"
             >
-              <td class="px-4 py-3">
-                <p
-                  class="truncate font-semibold text-n-slate-12"
-                  :title="deal.title"
-                >
-                  {{ deal.title }}
-                </p>
-                <p
-                  class="truncate text-xs text-n-slate-10"
-                  :title="deal.contact?.name"
-                >
-                  {{ deal.contact?.name || 'Sem contato vinculado' }}
-                </p>
-              </td>
-              <td class="px-3 py-3 text-n-slate-11">
-                {{ deal.stage?.name || deal.stage_name || '-' }}
-              </td>
-              <td class="px-3 py-3 font-semibold">
-                <CrmValueDisplay :cents="deal.value_cents" />
-              </td>
-              <td class="truncate px-3 py-3 text-n-slate-11">
-                {{ deal.owner?.name || deal.owner_name || '-' }}
-              </td>
-              <td class="px-3 py-3"><CrmStatusBadge :value="deal.status" /></td>
-              <td class="px-3 py-3 text-right">
-                <button
-                  type="button"
-                  class="inline-flex size-8 items-center justify-center rounded-lg border border-n-weak text-n-slate-11 hover:bg-n-alpha-3"
-                  title="Abrir negócio"
-                  @click.stop="
-                    router.push({ query: { ...route.query, dealId: deal.id } })
-                  "
-                >
-                  <i class="i-lucide-chevron-right size-4" />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              {{ pipeline.name }}
+            </option>
+          </select>
+          <select
+            v-model="listFilters.source"
+            :aria-label="t('CRM.LIST_LAYOUT.SOURCE')"
+            class="!mb-0 h-9 w-auto min-w-28 !appearance-auto rounded-lg border border-n-weak bg-n-solid-1 !bg-none px-2 text-sm"
+          >
+            <option value="">{{ t('CRM.LIST_LAYOUT.SOURCE') }}</option>
+            <option
+              v-for="source in availableSources"
+              :key="source"
+              :value="source"
+            >
+              {{ source }}
+            </option>
+          </select>
+        </div>
       </div>
+      <section
+        class="min-w-0 overflow-hidden rounded-xl border border-n-weak bg-n-solid-2 shadow-sm"
+      >
+        <div class="relative overflow-x-auto">
+          <table
+            class="w-full min-w-[780px] text-sm"
+            :aria-label="t('CRM.LIST_LAYOUT.DEALS_LIST')"
+          >
+            <thead
+              class="bg-n-slate-3 text-left text-[11px] uppercase tracking-wide text-n-slate-11"
+            >
+              <tr>
+                <th scope="col" class="px-4 py-2">
+                  {{ t('CRM.LIST_LAYOUT.DEAL_NAME') }}
+                </th>
+                <th scope="col" class="px-3 py-2">
+                  {{ t('CRM.LIST_LAYOUT.STAGE') }}
+                </th>
+                <th scope="col" class="px-3 py-2">
+                  {{ t('CRM.LIST_LAYOUT.VALUE') }}
+                </th>
+                <th scope="col" class="px-3 py-2">
+                  {{ t('CRM.LIST_LAYOUT.OWNER') }}
+                </th>
+                <th scope="col" class="px-3 py-2">
+                  {{ t('CRM.LIST_LAYOUT.STATUS') }}
+                </th>
+                <th scope="col" class="px-4 py-2 text-right">
+                  {{ t('CRM.CONTACT_LEAD.UI.ACTIONS') }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-n-weak">
+              <tr v-if="loading">
+                <td colspan="6" class="px-5 py-10 text-center text-n-slate-11">
+                  {{ t('CRM.LIST_LAYOUT.LOADING_DEALS') }}
+                </td>
+              </tr>
+              <tr v-else-if="error">
+                <td colspan="6" class="px-5 py-10 text-center text-n-ruby-11">
+                  {{ error }}
+                </td>
+              </tr>
+              <tr v-else-if="!pagedDeals.length">
+                <td colspan="6" class="px-5 py-10 text-center text-n-slate-11">
+                  {{ t('CRM.LIST_LAYOUT.NO_DEALS') }}
+                </td>
+              </tr>
+              <tr
+                v-for="deal in pagedDeals"
+                :key="deal.id"
+                class="cursor-pointer hover:bg-n-blue-2"
+                @click="openDeal(deal)"
+              >
+                <td class="min-w-48 px-4 py-1.5">
+                  <p class="m-0 font-semibold leading-tight text-n-slate-12">
+                    {{ deal.title }}
+                  </p>
+                  <p class="m-0 text-xs text-n-slate-11">
+                    {{
+                      deal.company_name ||
+                      deal.contact?.name ||
+                      t('CRM.LIST_LAYOUT.NO_CONTACT')
+                    }}
+                  </p>
+                </td>
+                <td class="px-3 py-1.5">
+                  <CrmBadge v-if="stageName(deal)" :color="stageTone(deal)">{{
+                    stageName(deal)
+                  }}</CrmBadge>
+                  <span v-else>{{ '—' }}</span>
+                </td>
+                <td
+                  class="whitespace-nowrap px-3 py-1.5 font-semibold tabular-nums"
+                >
+                  <CrmValueDisplay :cents="deal.value_cents" />
+                </td>
+                <td class="px-3 py-1.5 text-xs text-n-slate-11">
+                  <div
+                    v-if="deal.owner?.name || deal.owner_name"
+                    class="flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <Avatar
+                      :name="deal.owner?.name || deal.owner_name"
+                      :size="24"
+                      rounded-full
+                    />
+                    {{ deal.owner?.name || deal.owner_name }}
+                  </div>
+                  <span v-else>{{ t('CRM.LIST_LAYOUT.UNASSIGNED') }}</span>
+                </td>
+                <td class="px-3 py-1.5">
+                  <CrmStatusBadge :value="deal.status" />
+                </td>
+                <td class="px-4 py-1.5 text-right">
+                  <button
+                    type="button"
+                    :title="t('CRM.LIST_LAYOUT.OPEN_DEAL')"
+                    class="inline-flex h-7 items-center gap-1 rounded-md border border-n-blue-6 bg-n-blue-2 px-2 text-xs font-semibold text-n-blue-11"
+                    @click.stop="openDeal(deal)"
+                  >
+                    <span
+                      class="i-lucide-external-link size-3.5"
+                      aria-hidden="true"
+                    />
+                    {{ t('CRM.LIST_LAYOUT.OPEN') }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <PaginationFooter
+          v-if="filteredDeals.length"
+          :current-page="listPage"
+          :items-per-page="perPage"
+          :total-items="filteredDeals.length"
+          current-page-info="CRM.LIST_LAYOUT.SHOWING_DEALS"
+          numbered
+          @update:current-page="listPage = $event"
+        />
+      </section>
     </template>
     <Teleport to="body">
       <div
@@ -924,9 +1330,11 @@ onMounted(() => {
         @keydown.esc="closeForm"
       >
         <form
+          ref="creationForm"
           role="dialog"
           aria-modal="true"
           aria-labelledby="deal-create-title"
+          novalidate
           class="max-h-[94vh] w-full max-w-4xl overflow-auto rounded-2xl bg-n-solid-2 p-6 shadow-2xl"
           @submit.prevent="save"
         >
@@ -938,8 +1346,11 @@ onMounted(() => {
                   ><i class="i-lucide-briefcase-business size-5"
                 /></span>
                 <div>
-                  <h3 class="text-xl font-bold text-n-slate-12">
-                    Novo negócio
+                  <h3
+                    id="deal-create-title"
+                    class="text-xl font-bold text-n-slate-12"
+                  >
+                    {{ t('CRM.SALES_FLOW.NEW_DEAL_TITLE') }}
                   </h3>
                   <p class="text-xs text-n-slate-9">
                     Registre uma nova oportunidade comercial
@@ -960,25 +1371,33 @@ onMounted(() => {
               @click="closeForm"
             />
           </div>
-          <div class="my-5 grid grid-cols-3 gap-3 text-xs font-semibold">
-            <div class="rounded-xl bg-blue-50 p-3 text-blue-700">
-              <span
-                class="mr-2 inline-grid size-6 place-content-center rounded-full bg-blue-600 text-white"
-                >1</span
-              >Informações
-            </div>
-            <div class="rounded-xl bg-violet-50 p-3 text-violet-700">
-              <span
-                class="mr-2 inline-grid size-6 place-content-center rounded-full bg-violet-600 text-white"
-                >2</span
-              >Produtos e valores
-            </div>
-            <div class="rounded-xl bg-emerald-50 p-3 text-emerald-700">
-              <span
-                class="mr-2 inline-grid size-6 place-content-center rounded-full bg-emerald-600 text-white"
-                >3</span
-              >Próxima ação
-            </div>
+          <div
+            role="tablist"
+            class="my-5 grid gap-2 text-sm font-semibold sm:grid-cols-3"
+            :aria-label="t('CRM.SALES_FLOW.DEAL_DATA')"
+            @keydown="navigateCreationTabs"
+          >
+            <button
+              v-for="(tab, index) in creationTabs"
+              :id="`deal-tab-${tab.id}`"
+              :key="tab.id"
+              type="button"
+              role="tab"
+              :aria-selected="creationTab === index"
+              :aria-controls="`deal-panel-${tab.id}`"
+              :tabindex="creationTab === index ? 0 : -1"
+              :class="
+                creationTab === index
+                  ? 'border-n-brand bg-n-brand text-white'
+                  : 'border-n-weak bg-n-solid-2 text-n-slate-11 hover:bg-n-slate-3'
+              "
+              class="flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left"
+              :disabled="saving"
+              @click="switchCreationTab(index)"
+            >
+              <i :class="tab.icon" class="size-4" />
+              {{ t(`CRM.SALES_FLOW.${tab.label}`) }}
+            </button>
           </div>
           <div
             v-if="metadataError || stageError"
@@ -990,7 +1409,15 @@ onMounted(() => {
               {{ t('CRM.DEAL_CREATION.RETRY') }}
             </button>
           </div>
-          <section class="rounded-2xl border border-n-weak p-4">
+          <section
+            v-show="creationTab === 0"
+            id="deal-panel-information"
+            role="tabpanel"
+            aria-labelledby="deal-tab-information"
+            data-tab-index="0"
+            tabindex="0"
+            class="rounded-2xl border border-n-weak p-4"
+          >
             <h4
               class="mb-3 flex items-center gap-2 font-semibold text-n-slate-12"
             >
@@ -1008,12 +1435,20 @@ onMounted(() => {
                 v-if="hasCustomerMaster"
                 v-model="form.company_id"
                 class="col-span-full"
+                @selected="form.contact_id = ''"
               />
               <div class="text-xs font-semibold">
                 <span>{{ t('CRM.CREATION.CONTACT') }}</span>
                 <ContactPicker
                   v-model="form.contact_id"
                   :company-id="hasCustomerMaster ? form.company_id : null"
+                  browse-company
+                  @selected="
+                    person => {
+                      if (!form.company_id && person?.company_id)
+                        form.company_id = person.company_id;
+                    }
+                  "
                 />
                 <button
                   type="button"
@@ -1066,6 +1501,26 @@ onMounted(() => {
                     {{ source[1] }}
                   </option>
                 </select></label
+              ><label
+                v-if="store.getters.getCurrentRole === 'administrator'"
+                class="text-xs font-semibold"
+              >
+                <span>{{ t('CRM.SALES_FLOW.OWNER') }}</span>
+                <select
+                  v-model="form.owner_id"
+                  class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+                >
+                  <option value="">
+                    {{ t('CRM.SALES_FLOW.CURRENT_USER') }}
+                  </option>
+                  <option
+                    v-for="agent in agents"
+                    :key="agent.id"
+                    :value="agent.id"
+                  >
+                    {{ agent.name || agent.email }}
+                  </option>
+                </select> </label
               ><label class="text-xs font-semibold"
                 >Probabilidade<select
                   v-model.number="form.probability"
@@ -1094,7 +1549,15 @@ onMounted(() => {
               </label>
             </div>
           </section>
-          <section class="mt-4 rounded-2xl border border-n-weak p-4">
+          <section
+            v-show="creationTab === 1"
+            id="deal-panel-products"
+            role="tabpanel"
+            aria-labelledby="deal-tab-products"
+            data-tab-index="1"
+            tabindex="0"
+            class="mt-4 rounded-2xl border border-n-weak p-4"
+          >
             <h4
               class="mb-3 flex items-center gap-2 font-semibold text-n-slate-12"
             >
@@ -1219,54 +1682,66 @@ onMounted(() => {
               class="mt-3 w-full rounded-lg border border-n-weak px-3 py-2"
             />
           </section>
-          <section class="mt-4 rounded-2xl border border-n-weak p-4">
-            <h4
-              class="mb-3 flex items-center gap-2 font-semibold text-n-slate-12"
-            >
-              <i
-                class="i-lucide-calendar-plus size-4 text-emerald-600"
-              />Próxima ação
+          <section
+            v-show="creationTab === 2"
+            id="deal-panel-next-action"
+            role="tabpanel"
+            aria-labelledby="deal-tab-next-action"
+            data-tab-index="2"
+            tabindex="0"
+            class="mt-4 space-y-3 rounded-2xl border border-n-teal-5 bg-n-teal-2 p-4"
+          >
+            <h4 class="flex items-center gap-2 font-semibold text-n-slate-12">
+              <i class="i-lucide-file-text size-4 text-n-teal-11" />{{
+                t('CRM.SALES_FLOW.NEXT_ACTION')
+              }}
             </h4>
-            <div class="grid gap-3 md:grid-cols-3">
-              <label class="text-xs font-semibold"
-                >Tipo<select
-                  v-model="form.next_activity_type"
-                  class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
-                >
-                  <option value="call">Ligação</option>
-                  <option value="meeting">Reunião</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="email">E-mail</option>
-                  <option value="follow_up">Acompanhamento</option>
-                </select></label
-              ><label class="text-xs font-semibold"
-                >Data e hora<input
-                  v-model="form.next_activity_at"
-                  type="datetime-local"
-                  class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" /></label
-              ><label class="text-xs font-semibold"
-                >Título<input
-                  v-model="form.next_activity_title"
-                  class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
-                  placeholder="Ex.: Ligação de retorno"
-              /></label>
-            </div>
+            <p class="text-sm text-n-slate-11">
+              {{ t('CRM.SALES_FLOW.PROPOSAL_HINT') }}
+            </p>
+            <label class="flex items-center gap-2 text-sm font-semibold">
+              <input v-model="form.schedule" type="checkbox" />{{
+                t('CRM.SALES_FLOW.SCHEDULE')
+              }}
+            </label>
+            <InitialActivityFields v-if="form.schedule" v-model="activity" />
           </section>
-          <div class="mt-5 flex justify-end gap-2">
+          <div class="mt-5 flex flex-wrap justify-end gap-2">
             <button
               type="button"
-              class="mr-auto rounded-xl border border-n-weak px-4 py-2.5 text-sm"
+              class="mr-auto rounded-lg border border-n-weak px-3 py-2 text-sm"
               :disabled="saving"
               @click="dealDraft.discard"
             >
-              {{ t('CRM.CREATION.DISCARD') }}</button
-            ><button
+              {{ t('CRM.CREATION.DISCARD') }}
+            </button>
+            <button
               type="button"
-              class="rounded-xl border border-n-weak px-4 py-2.5 text-sm font-semibold"
+              class="rounded-lg border border-n-weak px-3 py-2 text-sm"
+              :disabled="saving"
               @click="closeForm"
             >
-              Cancelar</button
-            ><button
+              {{ t('CRM.CANCEL') }}
+            </button>
+            <button
+              v-if="creationTab > 0"
+              type="button"
+              class="rounded-lg border border-n-weak px-3 py-2 text-sm font-semibold"
+              :disabled="saving"
+              @click="switchCreationTab(creationTab - 1)"
+            >
+              {{ t('CRM.SALES_FLOW.BACK_TAB') }}
+            </button>
+            <button
+              v-if="creationTab < lastCreationTab"
+              type="button"
+              class="rounded-lg bg-n-brand px-4 py-2 text-sm font-semibold text-white"
+              @click="switchCreationTab(creationTab + 1)"
+            >
+              {{ t('CRM.SALES_FLOW.NEXT_TAB') }}
+            </button>
+            <button
+              v-if="creationTab === lastCreationTab"
               type="submit"
               :disabled="
                 saving ||
@@ -1274,47 +1749,41 @@ onMounted(() => {
                 stageLoading ||
                 Boolean(metadataError || stageError)
               "
-              class="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-md disabled:opacity-50"
+              class="rounded-lg border border-n-blue-8 px-3 py-2 text-sm font-semibold text-n-blue-11 disabled:opacity-50"
             >
-              <i class="i-lucide-check mr-1 size-4" /> Criar negócio
+              {{ t('CRM.SALES_FLOW.CREATE_AND_OPEN') }}
+            </button>
+            <button
+              v-if="creationTab === lastCreationTab"
+              type="submit"
+              value="proposal"
+              :disabled="
+                saving ||
+                metadataLoading ||
+                stageLoading ||
+                Boolean(metadataError || stageError)
+              "
+              class="rounded-lg bg-n-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {{ t('CRM.SALES_FLOW.CREATE_AND_PROPOSE') }}
             </button>
           </div>
         </form>
       </div>
 
-      <div
+      <DealWorkspaceDialog
         v-if="selectedDeal"
-        class="fixed inset-0 z-[80] flex justify-end bg-black/40"
-        @click.self="closeDetails"
+        :key="selectedDeal.id"
+        :deal="selectedDeal"
+        :editing="editingDetails"
+        :editing-busy="detailsHydrating || detailsSaving || itemWorking"
+        @close="closeDetails"
+        @edit="toggleDetailsEdit"
+        @refresh="loadDetails"
+        @proposal="openProposal(selectedDeal.id)"
+        @conversation="openConversation(selectedDeal.conversation)"
       >
-        <aside
-          class="h-full w-full max-w-2xl overflow-auto bg-n-solid-2 p-6 shadow-2xl"
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <p class="text-xs font-semibold uppercase text-n-slate-10">
-                Negócio
-              </p>
-              <h3 class="mt-1 text-xl font-bold text-n-slate-12">
-                {{ selectedDeal.title }}
-              </h3>
-            </div>
-            <div class="flex gap-2">
-              <button
-                type="button"
-                class="rounded-lg border border-n-weak px-3 py-2 text-sm font-semibold"
-                :disabled="detailsHydrating || detailsSaving || itemWorking"
-                @click="toggleDetailsEdit"
-              >
-                <i class="i-lucide-pencil mr-1" />
-                {{ editingDetails ? 'Cancelar edição' : 'Editar' }}</button
-              ><button
-                type="button"
-                class="i-lucide-x size-5"
-                @click="closeDetails"
-              />
-            </div>
-          </div>
+        <template #editor>
           <p
             v-if="detailsEditError"
             role="alert"
@@ -1405,87 +1874,8 @@ onMounted(() => {
               </button>
             </div>
           </form>
-          <dl
-            v-else
-            class="mt-6 grid grid-cols-2 gap-4 rounded-xl border border-n-weak p-4 text-sm"
-          >
-            <div>
-              <dt class="text-n-slate-10">Valor</dt>
-              <dd class="mt-1 font-semibold">
-                <CrmValueDisplay :cents="selectedDeal.value_cents" />
-              </dd>
-            </div>
-            <div>
-              <dt class="text-n-slate-10">Status</dt>
-              <dd class="mt-1">
-                <CrmStatusBadge :value="selectedDeal.status" />
-              </dd>
-            </div>
-            <div>
-              <dt class="text-n-slate-10">
-                Etapa <i class="i-lucide-pencil ml-1 size-3" />
-              </dt>
-              <dd class="mt-1 font-medium">
-                {{ selectedDeal.stage?.name || '-' }}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-n-slate-10">
-                Responsável <i class="i-lucide-pencil ml-1 size-3" />
-              </dt>
-              <dd class="mt-1 font-medium">
-                {{ selectedDeal.owner?.name || '-' }}
-              </dd>
-            </div>
-            <div class="col-span-2">
-              <dt class="text-n-slate-10">
-                Cliente <i class="i-lucide-pencil ml-1 size-3" />
-              </dt>
-              <dd class="mt-1 font-medium">
-                {{ selectedDeal.contact?.name || 'Sem contato vinculado' }}
-              </dd>
-              <p
-                v-if="selectedDeal.contact?.phone_number"
-                class="text-xs text-n-slate-10"
-              >
-                {{ selectedDeal.contact.phone_number }}
-              </p>
-              <p
-                v-if="selectedDeal.contact?.email"
-                class="text-xs text-n-slate-10"
-              >
-                {{ selectedDeal.contact.email }}
-              </p>
-            </div>
-            <div>
-              <dt class="text-n-slate-10">
-                Origem <i class="i-lucide-pencil ml-1 size-3" />
-              </dt>
-              <dd class="mt-1 font-medium">
-                {{
-                  sourceOptions.find(
-                    source => source[0] === selectedDeal.source
-                  )?.[1] ||
-                  selectedDeal.source ||
-                  '-'
-                }}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-n-slate-10">Próxima atividade</dt>
-              <dd class="mt-1 font-medium">
-                {{ selectedDeal.next_activity?.title || 'Sem próxima atividade'
-                }}<span
-                  v-if="selectedDeal.next_activity?.due_at"
-                  class="block text-xs text-n-slate-10"
-                  >{{
-                    selectedDeal.next_activity.due_at_display ||
-                    formatCrmDateTime(selectedDeal.next_activity.due_at)
-                  }}</span
-                >
-              </dd>
-            </div>
-          </dl>
+        </template>
+        <template #products>
           <section class="mt-5 rounded-xl border border-n-weak p-4">
             <div class="flex items-center justify-between">
               <div>
@@ -1643,16 +2033,8 @@ onMounted(() => {
             :title="selectedDeal.title"
             compact
           />
-          <button
-            v-if="selectedDeal.conversation"
-            type="button"
-            class="mt-5 w-full rounded-lg bg-n-brand px-4 py-2 font-semibold text-white"
-            @click="openConversation(selectedDeal.conversation)"
-          >
-            Voltar à conversa vinculada
-          </button>
-        </aside>
-      </div>
+        </template>
+      </DealWorkspaceDialog>
     </Teleport>
   </div>
   <ContactCreateModal

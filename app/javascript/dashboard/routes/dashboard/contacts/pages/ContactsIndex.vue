@@ -20,6 +20,8 @@ import { dateFormat } from 'shared/helpers/timeHelper';
 import ContactListHeaderWrapper from 'dashboard/components-next/Contacts/ContactsHeader/ContactListHeaderWrapper.vue';
 import ContactsActiveFiltersPreview from 'dashboard/components-next/Contacts/ContactsHeader/components/ContactsActiveFiltersPreview.vue';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
+import PaginationFooter from 'dashboard/components-next/pagination/PaginationFooter.vue';
+import DirectoryMetrics from '../../jrcCustomers/components/DirectoryMetrics.vue';
 import ContactsBulkActionBar from '../components/ContactsBulkActionBar.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import TabBar from 'dashboard/components-next/tabbar/TabBar.vue';
@@ -43,13 +45,18 @@ const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { canAccess: canUseCustomerMaster, identity: masterIdentity } =
-  useCustomerMaster();
+const {
+  canAccess: canUseCustomerMaster,
+  identity: masterIdentity,
+  date: directoryDate,
+} = useCustomerMaster();
 const contactDialogId = ref(null);
 const companyDialogId = ref(null);
 const contactToDelete = ref(null);
 const singleDeleteDialog = ref(null);
 const whatsappComposer = ref(null);
+const contactComposer = ref(null);
+const directoryFilters = reactive({ ownerId: '', inboxId: '' });
 const openingWhatsapp = ref(null);
 onBeforeUnmount(() => {
   openingWhatsapp.value = null;
@@ -82,6 +89,10 @@ const customViewsUiFlags = useMapGetter('customViews/getUIFlags');
 const segments = useMapGetter('customViews/getContactCustomViews');
 const appliedFilters = useMapGetter('contacts/getAppliedContactFilters');
 const meta = useMapGetter('contacts/getMeta');
+const contactOwners = computed(() => store.getters['agents/getAgents'] || []);
+const contactInboxes = computed(
+  () => store.getters['inboxes/getInboxes'] || []
+);
 
 const searchQuery = computed(() => route.query?.search);
 const searchValue = ref(searchQuery.value || '');
@@ -117,9 +128,6 @@ const currentPage = computed(() => Number(meta.value?.currentPage));
 const totalItems = computed(() => meta.value?.count);
 const hasMore = computed(() => meta.value?.hasMore ?? false);
 const isSearchView = computed(() => !!searchQuery.value);
-const hasNextPage = computed(
-  () => currentPage.value * 15 < Number(totalItems.value || 0)
-);
 const canUseCrm = computed(() =>
   store.getters['accounts/isFeatureEnabledonAccount'](
     Number(route.params.accountId),
@@ -141,6 +149,7 @@ watch([masterIdentity, canUseCustomerMaster], () => {
   contactToDelete.value = null;
   singleDeleteDialog.value?.close?.();
   openingWhatsapp.value = null;
+  Object.assign(directoryFilters, { ownerId: '', inboxId: '' });
 });
 const relationshipDialog = ref(null);
 const relationshipDialogTab = ref(0);
@@ -185,9 +194,50 @@ const tabDisabled = tab =>
   isFetchingList.value ||
   (!['all', 'people'].includes(tab) && !canUseCustomerMaster.value);
 
-const totalContactsMetric = computed(() =>
-  Number(totalItems.value || contacts.value.length || 0)
+const cards = computed(() => [
+  {
+    label: t('CRM.CONTACT_LEAD.UI.TOTAL_CONTACTS'),
+    value: meta.value?.directory?.total,
+    icon: 'i-lucide-users-round',
+  },
+  {
+    label: t('CRM.CONTACT_LEAD.UI.NEW_THIS_MONTH'),
+    value: meta.value?.directory?.new_this_month,
+    icon: 'i-lucide-user-round-plus',
+  },
+  {
+    label: t('CRM.DIRECTORY.INACTIVE_CONTACTS'),
+    value: meta.value?.directory?.inactive,
+    icon: 'i-lucide-calendar-clock',
+  },
+  {
+    label: t('CRM.DIRECTORY.LINKED_CONTACTS'),
+    value: meta.value?.directory?.linked,
+    icon: 'i-lucide-building-2',
+  },
+]);
+const hasWhatsapp = contact =>
+  (contact.directory?.inbox_ids || []).some(id =>
+    isWhatsAppInbox(
+      contactInboxes.value.find(inbox => Number(inbox.id) === Number(id))
+    )
+  );
+const hasEmail = contact => Boolean(contact.email);
+const selectedMessageContact = computed(() =>
+  selectedCount.value === 1
+    ? contacts.value.find(contact => contact.id === selectedContactIds.value[0])
+    : null
 );
+const openContactComposer = contact => {
+  if (canConverse.value && contact)
+    contactComposer.value?.openForContact(contact);
+};
+const contactColors = [
+  'bg-n-teal-3 text-n-teal-11',
+  'bg-n-blue-3 text-n-blue-11',
+  'bg-n-amber-3 text-n-amber-11',
+  'bg-n-violet-3 text-n-violet-11',
+];
 
 const selectedRelationshipContact = computed(() =>
   crmSelectedContact.value
@@ -209,6 +259,7 @@ const dialableContactNumber = contact => {
 const canCallContact = contact =>
   canUseSoftphone.value && !!dialableContactNumber(contact);
 const contactCompany = contact =>
+  contact?.directory?.company_name ||
   contact?.company?.name ||
   contact?.companyName ||
   contact?.additionalAttributes?.company_name ||
@@ -234,9 +285,9 @@ const contactInitials = contact => {
     .toUpperCase();
 };
 
-const openSelectedContact = async contact => {
+const openSelectedContact = async (contact, tab = 0) => {
   crmSelectedContact.value = contact;
-  relationshipDialogTab.value = 0;
+  relationshipDialogTab.value = tab;
   await nextTick();
   relationshipDialog.value?.open();
 };
@@ -296,6 +347,10 @@ const openContactWhatsapp = async contact => {
   } finally {
     if (openingWhatsapp.value === request) openingWhatsapp.value = null;
   }
+};
+const converse = contact => {
+  if (hasWhatsapp(contact)) openContactWhatsapp(contact);
+  else openContactComposer(contact);
 };
 const callContact = contact => {
   if (!canCallContact(contact)) return;
@@ -436,6 +491,10 @@ const getCommonFetchParams = (page = 1) => ({
   page,
   sortAttr: buildSortAttr(),
   label: activeLabel.value,
+  directory: {
+    ownerId: canUseCustomerMaster.value ? directoryFilters.ownerId : '',
+    inboxId: directoryFilters.inboxId,
+  },
   ...(relationshipTab.value !== 'all'
     ? { directoryView: relationshipTab.value }
     : {}),
@@ -763,6 +822,8 @@ watch(searchQuery, value => {
 });
 
 onMounted(async () => {
+  if (canUseCustomerMaster.value && !contactOwners.value.length)
+    store.dispatch('agents/get');
   if (!activeSegmentId.value) {
     if (searchQuery.value) {
       await searchContacts(searchQuery.value, pageNumber.value, false, {
@@ -789,18 +850,17 @@ onMounted(async () => {
     role="region"
     :aria-label="t('CRM.CONTACT_LEAD.LIST')"
     tabindex="0"
-    class="flex h-full min-h-0 flex-col overflow-auto bg-n-surface-1 focus-visible:outline-n-blue-8"
+    class="flex h-full min-h-0 flex-col overflow-auto bg-gradient-to-b from-n-blue-2 to-n-surface-1 focus-visible:outline-n-blue-8"
   >
-    <section
-      class="shrink-0 border-b border-n-weak bg-gradient-to-r from-n-blue-2 via-n-background to-n-violet-2 px-6 py-5"
-    >
-      <div class="mx-auto max-w-[1500px]">
+    <section class="shrink-0 px-3 pt-4 sm:px-5 sm:pt-5">
+      <div class="mx-auto max-w-[1600px]">
         <ContactListHeaderWrapper
           ref="contactHeaderRef"
+          directory
           :header-title="
             isActiveView || activeSegmentId || activeLabel || searchQuery
               ? headerTitle
-              : t('CRM.CONTACT_LEAD.CENTER_TITLE')
+              : t('CRM.DIRECTORY.CONTACTS')
           "
           :show-search="!activeSegmentId && !isActiveView"
           :search-value="searchValue"
@@ -815,75 +875,68 @@ onMounted(async () => {
           @update:sort="handleSort"
           @apply-filter="payload => fetchSavedOrAppliedFilteredContact(payload)"
           @clear-filters="fetchContacts()"
-        />
-        <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div
-            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
-          >
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-medium text-n-slate-11">{{
-                t('CRM.CONTACT_LEAD.UI.TOTAL_CONTACTS')
-              }}</span
-              ><span class="i-lucide-users size-5 text-teal-500" />
-            </div>
-            <strong class="mt-2 block text-2xl text-n-slate-12">{{
-              totalContactsMetric
-            }}</strong>
-            <small class="text-n-slate-11">{{
-              t('CRM.CONTACT_LEAD.UI.ALL_RECORDS')
-            }}</small>
-          </div>
-          <div
-            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
-          >
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-medium text-n-slate-11">{{
-                t('CRM.CONTACT_LEAD.UI.NEW_THIS_MONTH')
-              }}</span
-              ><span class="i-lucide-user-round-plus size-5 text-blue-500" />
-            </div>
-            <strong class="mt-2 block text-2xl text-n-slate-12">—</strong>
-            <small class="text-n-teal-11">{{
-              t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE')
-            }}</small>
-          </div>
-          <div
-            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
-          >
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-medium text-n-slate-11">{{
-                t('CRM.CONTACT_LEAD.UI.NO_INTERACTION')
-              }}</span
-              ><span class="i-lucide-clock-3 size-5 text-amber-500" />
-            </div>
-            <strong class="mt-2 block text-2xl text-n-slate-12">—</strong>
-            <small class="text-n-slate-11">{{
-              t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE')
-            }}</small>
-          </div>
-          <div
-            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
-          >
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-medium text-n-slate-11">{{
-                t('CRM.CONTACT_LEAD.UI.ACTIVE_CUSTOMERS')
-              }}</span
-              ><span class="i-lucide-building-2 size-5 text-violet-500" />
-            </div>
-            <strong class="mt-2 block text-2xl text-n-slate-12">—</strong>
-            <small class="text-n-slate-11">{{
-              t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE')
-            }}</small>
-          </div>
-        </div>
+        >
+          <template #metrics><DirectoryMetrics :cards="cards" /></template>
+          <template #quick-filters>
+            <label
+              v-if="canUseCustomerMaster"
+              class="relative min-w-32 flex-1 xl:max-w-44"
+            >
+              <select
+                v-model="directoryFilters.ownerId"
+                :aria-label="t('CRM.CONTACT_LEAD.UI.OWNER')"
+                class="!mb-0 h-9 w-full rounded-lg border border-n-weak bg-n-solid-1 !bg-none pe-7 ps-3 text-sm text-n-slate-12 disabled:opacity-60"
+                :disabled="isFetchingList"
+                @change="fetchContactsBasedOnContext(1)"
+              >
+                <option value="">{{ t('CRM.CONTACT_LEAD.UI.OWNER') }}</option>
+                <option
+                  v-for="owner in contactOwners"
+                  :key="owner.id"
+                  :value="owner.id"
+                >
+                  {{ owner.name }}
+                </option>
+              </select>
+              <span
+                class="pointer-events-none absolute end-2.5 top-1/2 size-3.5 -translate-y-1/2 i-lucide-chevron-down text-n-slate-10"
+                aria-hidden="true"
+              />
+            </label>
+            <label class="relative min-w-28 flex-1 xl:max-w-44">
+              <select
+                v-model="directoryFilters.inboxId"
+                :aria-label="t('CRM.DIRECTORY.CHANNEL')"
+                class="!mb-0 h-9 w-full rounded-lg border border-n-weak bg-n-solid-1 !bg-none pe-7 ps-3 text-sm text-n-slate-12 disabled:opacity-60"
+                :disabled="isFetchingList"
+                @change="fetchContactsBasedOnContext(1)"
+              >
+                <option value="">{{ t('CRM.DIRECTORY.CHANNEL') }}</option>
+                <option
+                  v-for="inbox in contactInboxes"
+                  :key="inbox.id"
+                  :value="inbox.id"
+                >
+                  {{ inbox.name }}
+                </option>
+              </select>
+              <span
+                class="pointer-events-none absolute end-2.5 top-1/2 size-3.5 -translate-y-1/2 i-lucide-chevron-down text-n-slate-10"
+                aria-hidden="true"
+              />
+            </label>
+          </template>
+        </ContactListHeaderWrapper>
       </div>
     </section>
 
-    <div class="mx-auto w-full min-w-0 shrink-0 p-4">
+    <div
+      class="mx-auto w-full min-w-0 max-w-[1640px] shrink-0 px-3 pb-4 pt-2 sm:px-5"
+    >
       <main
         class="min-w-0 overflow-hidden rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm"
       >
-        <div class="border-b border-n-weak px-4 pt-3">
+        <div class="border-b border-n-weak px-3 sm:px-4">
           <div class="flex gap-1 overflow-x-auto">
             <button
               v-for="tab in relationshipTabs"
@@ -897,10 +950,10 @@ onMounted(async () => {
               "
               :aria-pressed="relationshipTab === tab"
               :data-contact-view="tab"
-              class="whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+              class="whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
               :class="
                 relationshipTab === tab
-                  ? 'border-blue-500 text-n-blue-11'
+                  ? 'border-n-brand text-n-blue-11'
                   : 'border-transparent text-n-slate-11'
               "
               @click="selectRelationshipTab(tab)"
@@ -908,7 +961,12 @@ onMounted(async () => {
               {{ relationshipLabels[tab] }}
             </button>
           </div>
-          <p class="mt-2 text-xs text-n-slate-11">{{ relationshipHint }}</p>
+          <p
+            v-if="relationshipTab !== 'all'"
+            class="pb-2 text-xs text-n-slate-11"
+          >
+            {{ relationshipHint }}
+          </p>
         </div>
 
         <ContactsBulkActionBar
@@ -921,7 +979,20 @@ onMounted(async () => {
           @assign-labels="assignLabels"
           @remove-labels="removeLabels"
           @delete-selected="openBulkDeleteDialog"
-        />
+        >
+          <template #directory-actions>
+            <button
+              v-if="canConverse && selectedMessageContact"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-lg bg-n-brand px-3 py-1.5 text-xs font-semibold text-white"
+              @click="openContactComposer(selectedMessageContact)"
+            >
+              <span class="i-lucide-send size-4" aria-hidden="true" />{{
+                t('CONTACTS_LAYOUT.HEADER.MESSAGE_BUTTON')
+              }}
+            </button>
+          </template>
+        </ContactsBulkActionBar>
         <ContactsActiveFiltersPreview
           v-if="
             (hasAppliedFilters || activeSegmentId) &&
@@ -946,12 +1017,12 @@ onMounted(async () => {
           {{ emptyStateMessage }}
         </div>
         <div v-else class="overflow-x-auto">
-          <table class="w-full min-w-[900px] text-left text-sm">
+          <table class="w-full min-w-[760px] text-left text-sm">
             <thead
-              class="bg-n-alpha-2 text-[11px] uppercase tracking-wide text-n-slate-11"
+              class="bg-n-blue-2 text-[11px] uppercase tracking-wide text-n-slate-11"
             >
               <tr>
-                <th class="px-3 py-3">
+                <th class="px-3 py-2">
                   <input
                     type="checkbox"
                     :aria-label="
@@ -969,26 +1040,20 @@ onMounted(async () => {
                     @change="toggleSelectAll($event.target.checked)"
                   />
                 </th>
-                <th class="px-4 py-3">
+                <th class="px-4 py-2">
                   {{ t('CRM.CONTACT_LEAD.UI.CONTACT') }}
                 </th>
-                <th class="px-3 py-3">
+                <th class="px-3 py-2">
                   {{ t('CRM.CONTACT_LEAD.UI.COMPANY') }}
                 </th>
-                <th class="px-3 py-3">
-                  {{ t('CRM.CONTACT_LEAD.UI.CHANNELS') }}
-                </th>
-                <th class="px-3 py-3">{{ t('CRM.CONTACT_LEAD.UI.OWNER') }}</th>
-                <th class="px-3 py-3">
+                <th class="px-3 py-2">{{ t('CRM.CONTACT_LEAD.UI.OWNER') }}</th>
+                <th class="px-3 py-2">
                   {{ t('CRM.CONTACT_LEAD.UI.LAST_INTERACTION') }}
                 </th>
-                <th class="px-3 py-3">
+                <th class="px-3 py-2">
                   {{ t('CRM.CONTACT_LEAD.UI.NEXT_ACTION') }}
                 </th>
-                <th class="px-3 py-3">
-                  {{ t('CRM.CONTACT_LEAD.AVAILABILITY') }}
-                </th>
-                <th class="px-3 py-3">
+                <th class="px-3 py-2">
                   {{ t('CRM.CONTACT_LEAD.UI.ACTIONS') }}
                 </th>
               </tr>
@@ -999,13 +1064,14 @@ onMounted(async () => {
                 :key="contact.id"
                 class="cursor-pointer transition hover:bg-blue-500/5"
                 :class="
+                  selectedContactIds.includes(contact.id) ||
                   selectedRelationshipContact?.id === contact.id
-                    ? 'bg-blue-500/5'
+                    ? 'bg-n-blue-3'
                     : ''
                 "
                 @click="openSelectedContact(contact)"
               >
-                <td class="px-3 py-3" @click.stop>
+                <td class="px-3 py-2" @click.stop>
                   <input
                     type="checkbox"
                     :aria-label="
@@ -1023,10 +1089,11 @@ onMounted(async () => {
                     "
                   />
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-4 py-2">
                   <div class="flex items-center gap-3">
                     <span
-                      class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-n-teal-3 font-semibold text-n-teal-11"
+                      :class="contactColors[contact.id % contactColors.length]"
+                      class="grid size-8 shrink-0 place-items-center rounded-full text-xs font-semibold"
                       >{{ contactInitials(contact) }}</span
                     >
                     <div>
@@ -1037,13 +1104,13 @@ onMounted(async () => {
                       >
                         {{ contact.name || contact.id }}
                       </button>
-                      <p class="text-xs text-n-slate-11">
-                        {{ contactPhone(contact) }}
+                      <p class="m-0 text-xs text-n-slate-11">
+                        {{ contact.email || contactPhone(contact) }}
                       </p>
                     </div>
                   </div>
                 </td>
-                <td class="px-3 py-3 text-n-slate-11">
+                <td class="px-3 py-2 text-n-slate-11">
                   <button
                     v-if="
                       canUseCustomerMaster &&
@@ -1064,73 +1131,89 @@ onMounted(async () => {
                   </button>
                   <span v-else>{{ contactCompany(contact) }}</span>
                 </td>
-                <td class="px-3 py-3">
-                  <div class="flex gap-1">
+                <td class="px-3 py-2 text-n-slate-11">
+                  <span
+                    v-if="contact.directory?.owner_name"
+                    class="inline-flex items-center gap-2"
+                  >
                     <span
-                      class="flex size-8 items-center justify-center rounded-lg bg-n-teal-3 text-n-teal-11"
-                      ><span class="i-ri-whatsapp-fill size-4" /></span
-                    ><span
-                      class="flex size-8 items-center justify-center rounded-lg bg-n-blue-3 text-n-blue-11"
-                      ><span class="i-lucide-phone size-4" /></span
-                    ><span
-                      class="flex size-8 items-center justify-center rounded-lg bg-n-amber-3 text-n-amber-11"
-                      ><span class="i-lucide-mail size-4"
-                    /></span>
-                  </div>
+                      class="grid size-7 shrink-0 place-items-center rounded-full bg-n-violet-3 text-[10px] font-semibold text-n-violet-11"
+                      aria-hidden="true"
+                      >{{
+                        contactInitials({ name: contact.directory.owner_name })
+                      }}</span
+                    >
+                    {{ contact.directory.owner_name }}
+                  </span>
+                  <span v-else>—</span>
                 </td>
-                <td class="px-3 py-3 text-n-slate-11">—</td>
-                <td class="px-3 py-3 text-n-slate-11">
+                <td class="px-3 py-2 text-n-slate-11 tabular-nums">
                   {{ contactLastActivity(contact) }}
                 </td>
-                <td class="px-3 py-3 font-medium text-n-blue-11">—</td>
-                <td class="px-3 py-3">
-                  <span
-                    class="rounded-full bg-n-teal-3 px-2.5 py-1 text-xs font-semibold text-n-teal-11"
-                    >{{ contactStatus(contact) }}</span
+                <td class="px-3 py-2 text-n-slate-11">
+                  <div
+                    v-if="contact.directory?.next_action"
+                    class="flex items-center gap-2"
                   >
+                    <span
+                      class="i-lucide-calendar-days size-4 shrink-0 text-n-blue-11"
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <p
+                        v-if="contact.directory.next_action.due_at"
+                        class="m-0 whitespace-nowrap text-xs font-medium tabular-nums"
+                      >
+                        {{
+                          directoryDate(contact.directory.next_action.due_at)
+                        }}
+                      </p>
+                      <p class="m-0 line-clamp-2 text-xs">
+                        {{ contact.directory.next_action.title }}
+                      </p>
+                    </div>
+                  </div>
+                  <span v-else>—</span>
                 </td>
-                <td class="px-3 py-3" @click.stop>
-                  <div class="flex gap-1">
+                <td class="px-3 py-2" @click.stop>
+                  <div class="flex items-center gap-1">
+                    <button
+                      v-if="canConverse"
+                      type="button"
+                      :disabled="!!openingWhatsapp"
+                      class="inline-flex items-center gap-1.5 rounded-lg border border-n-blue-6 bg-n-blue-2 px-2 py-1.5 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-3 disabled:opacity-60"
+                      @click="converse(contact)"
+                    >
+                      <span
+                        class="i-lucide-message-circle size-4"
+                        aria-hidden="true"
+                      />
+                      {{ t('CRM.DIRECTORY.CONVERSE') }}
+                    </button>
                     <button
                       type="button"
-                      :disabled="!canConverse || !!openingWhatsapp"
-                      :title="t('CRM.CONTACT_LEAD.OPEN_WHATSAPP')"
-                      :aria-label="t('CRM.CONTACT_LEAD.OPEN_WHATSAPP')"
-                      class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-teal-3 text-n-teal-11 hover:bg-n-teal-4 disabled:opacity-50"
-                      data-contact-whatsapp
-                      @click="openContactWhatsapp(contact)"
+                      data-contact-edit
+                      class="grid size-8 place-items-center rounded-lg bg-n-blue-3 text-n-blue-11 hover:bg-n-blue-4"
+                      :title="t('EDIT_CONTACT.TITLE')"
+                      :aria-label="t('EDIT_CONTACT.TITLE')"
+                      @click="openSelectedContact(contact, 1)"
                     >
-                      <span class="i-ri-whatsapp-fill size-4" /></button
-                    ><button
-                      type="button"
-                      class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-blue-3 text-n-blue-11 hover:bg-n-blue-4 disabled:opacity-50"
-                      :title="t('CRM.CONTACT_LEAD.CALL_SOFTPHONE')"
-                      :aria-label="t('CRM.CONTACT_LEAD.CALL_SOFTPHONE')"
-                      :disabled="!canCallContact(contact)"
-                      data-contact-call
-                      @click="callContact(contact)"
-                    >
-                      <span class="i-lucide-phone size-4" /></button
-                    ><button
-                      type="button"
-                      class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-violet-3 text-n-violet-11 hover:bg-n-violet-4"
-                      :title="t('CRM.CONTACT_LEAD.VIEW_PROFILE')"
-                      :aria-label="t('CRM.CONTACT_LEAD.VIEW_PROFILE')"
-                      @click="openSelectedContact(contact)"
-                    >
-                      <span class="i-lucide-user-round size-4" />
+                      <span class="i-lucide-pencil size-4" aria-hidden="true" />
                     </button>
                     <button
                       v-if="canDeleteContact"
                       type="button"
-                      class="grid size-8 shrink-0 place-items-center rounded-lg bg-n-ruby-3 text-n-ruby-11 hover:bg-n-ruby-4 disabled:opacity-50"
-                      :disabled="isBulkActionLoading"
+                      data-contact-delete
+                      class="grid size-8 place-items-center rounded-lg bg-n-ruby-3 text-n-ruby-11 hover:bg-n-ruby-4 disabled:opacity-50"
                       :title="t('CRM.CONTACT_LEAD.DELETE_CONTACT')"
                       :aria-label="t('CRM.CONTACT_LEAD.DELETE_CONTACT')"
-                      data-contact-delete
+                      :disabled="isBulkActionLoading"
                       @click="openContactDelete(contact)"
                     >
-                      <span class="i-lucide-trash-2 size-4" />
+                      <span
+                        class="i-lucide-trash-2 size-4"
+                        aria-hidden="true"
+                      />
                     </button>
                   </div>
                 </td>
@@ -1139,40 +1222,15 @@ onMounted(async () => {
           </table>
         </div>
 
-        <div
+        <PaginationFooter
           v-if="!isFetchingList && hasContacts && !isSearchView"
-          class="flex items-center justify-between border-t border-n-weak px-4 py-3 text-xs text-n-slate-11"
-        >
-          <span>
-            {{
-              t('CRM.CONTACT_LEAD.PAGE_SUMMARY', {
-                count: contacts.length,
-                total: totalContactsMetric,
-              })
-            }}
-          </span>
-          <div class="flex items-center gap-2">
-            <button
-              class="rounded-lg border border-n-weak px-3 py-1.5"
-              :disabled="currentPage <= 1"
-              @click="onPageChange(currentPage - 1)"
-            >
-              {{ t('CRM.CONTACT_LEAD.PREVIOUS') }}
-            </button>
-            <span
-              class="rounded-lg bg-n-brand px-3 py-1.5 font-semibold text-white"
-            >
-              {{ currentPage || 1 }}
-            </span>
-            <button
-              class="rounded-lg border border-n-weak px-3 py-1.5"
-              :disabled="!hasNextPage"
-              @click="onPageChange((currentPage || 1) + 1)"
-            >
-              {{ t('CRM.CONTACT_LEAD.NEXT') }}
-            </button>
-          </div>
-        </div>
+          :current-page="currentPage || pageNumber"
+          :items-per-page="15"
+          :total-items="Number(totalItems || 0)"
+          current-page-info="CRM.DIRECTORY.SHOWING_CONTACTS"
+          numbered
+          @update:current-page="onPageChange"
+        />
         <button
           v-if="!isFetchingList && isSearchView && hasMore"
           type="button"
@@ -1226,6 +1284,7 @@ onMounted(async () => {
         <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <button
             type="button"
+            data-contact-whatsapp
             :disabled="!canConverse || !!openingWhatsapp"
             :title="t('CRM.CONTACT_LEAD.OPEN_WHATSAPP')"
             class="rounded-lg bg-n-teal-3 px-2 py-2 text-xs font-semibold text-n-teal-11 hover:bg-n-teal-4 disabled:opacity-50"
@@ -1237,22 +1296,37 @@ onMounted(async () => {
           ><button
             type="button"
             class="rounded-lg bg-n-blue-3 px-2 py-2 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-4 disabled:opacity-50"
+            data-contact-call
             :disabled="!canCallContact(selectedRelationshipContact)"
             :title="t('CRM.CONTACT_LEAD.CALL_SOFTPHONE')"
             @click="callContact(selectedRelationshipContact)"
           >
             <span
               class="i-lucide-phone me-1 inline-block size-4 align-text-bottom"
-            />{{ t('VOICE_V4.CALL') }}</button
-          ><button
+            />{{ t('VOICE_V4.CALL') }}
+          </button>
+          <a
+            v-if="hasEmail(selectedRelationshipContact)"
+            :href="`mailto:${encodeURIComponent(selectedRelationshipContact.email)}`"
+            class="rounded-lg bg-n-amber-3 px-2 py-2 text-center text-xs font-semibold text-n-amber-11 hover:bg-n-amber-4"
+          >
+            <span
+              class="i-lucide-mail me-1 inline-block size-4 align-text-bottom"
+              aria-hidden="true"
+            />{{ t('CRM.CONTACT_LEAD.UI.EMAIL') }}
+          </a>
+          <button
+            v-else
             disabled
             :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
             class="rounded-lg bg-n-slate-3 px-2 py-2 text-xs font-semibold text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
           >
             <span
               class="i-lucide-mail me-1 inline-block size-4 align-text-bottom"
-            />{{ t('CRM.CONTACT_LEAD.UI.EMAIL') }}</button
-          ><button
+              aria-hidden="true"
+            />{{ t('CRM.CONTACT_LEAD.UI.EMAIL') }}
+          </button>
+          <button
             disabled
             :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
             class="rounded-lg bg-n-slate-3 px-2 py-2 text-xs font-semibold text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
@@ -1277,7 +1351,10 @@ onMounted(async () => {
             <span class="i-lucide-user-round size-4" />{{
               t('CRM.CONTACT_LEAD.UI.OWNER_LABEL')
             }}
-            {{ t('CRM.CONTACT_LEAD.UNKNOWN') }}
+            {{
+              selectedRelationshipContact.directory?.owner_name ||
+              t('CRM.CONTACT_LEAD.UNKNOWN')
+            }}
           </p>
         </div>
         <div class="mt-5 border-t border-n-weak pt-4">
@@ -1383,6 +1460,12 @@ onMounted(async () => {
       :disable-confirm-button="!canDeleteContact || !contactToDelete"
       @confirm="deleteContact"
       @close="contactToDelete = null"
+    />
+    <ComposeConversation
+      v-if="canConverse"
+      :key="`${masterIdentity}:generic`"
+      ref="contactComposer"
+      native-dialog
     />
     <ComposeConversation
       v-if="canConverse"

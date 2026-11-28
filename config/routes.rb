@@ -475,7 +475,7 @@ Rails.application.routes.draw do
                 get :errors
               end
             end
-            resources :companies, only: [:index, :show, :create, :update] do
+            resources :companies, only: [:index, :show, :create, :update, :destroy] do
               get :duplicates, on: :collection
               member do
                 get :overview
@@ -772,6 +772,7 @@ Rails.application.routes.draw do
           end
           namespace :crm do
             resource :dashboard, only: :show, controller: :dashboards
+            resource :funnel, only: :show, controller: :funnels
             resources :reports, only: :index
             resources :leads, only: [:index, :show, :create, :update, :destroy] do
               get :for_contact, on: :collection

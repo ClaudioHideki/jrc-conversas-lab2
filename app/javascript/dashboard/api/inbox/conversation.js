@@ -146,8 +146,9 @@ class ConversationApi extends ApiClient {
     });
   }
 
-  getAllAttachments(conversationId) {
-    return axios.get(`${this.url}/${conversationId}/attachments`);
+  getAllAttachments(conversationId, page) {
+    const url = `${this.url}/${conversationId}/attachments`;
+    return page ? axios.get(url, { params: { page } }) : axios.get(url);
   }
 
   getInboxAssistant(conversationId) {

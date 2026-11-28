@@ -17,6 +17,14 @@ class JrcCustomers::OperationalContacts
     paginate(relation, filters, signals, days)
   end
 
+  def next_actions(ids)
+    contacts = JrcCustomers::ContactDirectory.new(account: @account, actor: @actor).scope.where(id: ids)
+    membership = @account.account_users.find_by!(user_id: @actor.id)
+    signals = JrcCustomers::OperationalSources.new(account: @account, actor: @actor, membership: membership, contact_scope: contacts).sql
+    select = "SELECT DISTINCT ON (contact_id) * FROM (#{signals}) sources WHERE pending ORDER BY contact_id, due_at ASC NULLS LAST, record_id"
+    ApplicationRecord.connection.select_all(select).to_h { |row| [row['contact_id'], row.slice('due_at', 'title')] }
+  end
+
   private
 
   def authorized_sources

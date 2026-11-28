@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, provide } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -8,6 +8,13 @@ import { crmControlClasses } from './crmControlClasses';
 const route = useRoute();
 const store = useStore();
 const { t } = useI18n();
+const listingTitle = computed(() => {
+  if (route.name === 'crm_leads') return t('CRM.NAV.LEADS');
+  if (route.name === 'crm_deals') return t('CRM.NAV.DEALS');
+  if (route.name === 'crm_funnel') return t('CRM.SALES_FUNNEL.TITLE');
+  return '';
+});
+provide('crmListingHeader', true);
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 const navigation = [
   {
@@ -117,7 +124,12 @@ const visibleNavigation = computed(() =>
       store.getters.getCurrentRole === 'administrator'
   )
 );
-const entry = item => ({ ...item, key: item.name, to: { name: item.name } });
+const entry = item => ({
+  ...item,
+  key: item.name,
+  to: { name: item.name },
+  tone: route.name === item.name && listingTitle.value ? 'blue' : item.tone,
+});
 const primary = computed(() =>
   visibleNavigation.value
     .filter(item => primaryKeys.includes(item.name))
@@ -175,18 +187,21 @@ const activeKey = computed(
     :class="crmControlClasses"
   >
     <header
-      class="jrc-crm-top relative shrink-0 border-b border-n-weak bg-n-solid-2 px-4 pt-4 sm:px-6"
+      class="jrc-crm-top relative shrink-0 border-b border-n-weak bg-n-solid-2 px-4 sm:px-6"
+      :class="listingTitle ? 'pt-2.5' : 'pt-4'"
     >
       <div
         aria-hidden="true"
         class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_-20%,rgba(139,92,246,.13),transparent_38%),radial-gradient(circle_at_45%_-30%,rgba(8,124,240,.12),transparent_35%)]"
       />
       <div
-        class="relative mb-4 flex flex-wrap items-center justify-between gap-4"
+        class="relative flex flex-wrap items-center justify-between gap-2"
+        :class="listingTitle ? 'mb-2' : 'mb-4'"
       >
         <div class="flex min-w-0 items-center gap-3">
           <span
-            class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0d8cff] to-[#075fc8] text-white shadow-[0_10px_28px_rgba(8,124,240,0.28)]"
+            class="flex shrink-0 items-center justify-center bg-gradient-to-br from-[#0d8cff] to-[#075fc8] text-white shadow-[0_10px_28px_rgba(8,124,240,0.28)]"
+            :class="listingTitle ? 'size-9 rounded-xl' : 'size-11 rounded-2xl'"
           >
             <i class="i-lucide-chart-no-axes-combined size-5" />
           </span>
@@ -194,14 +209,22 @@ const activeKey = computed(
             <h1
               class="truncate text-xl font-bold tracking-tight text-n-slate-12"
             >
-              CRM Comercial
+              CRM Comercial<span v-if="listingTitle">
+                / {{ listingTitle }}</span
+              >
             </h1>
-            <p class="truncate text-xs text-n-slate-11">
+            <p v-if="!listingTitle" class="truncate text-xs text-n-slate-11">
               Conversas, oportunidades e relacionamento em um só lugar
             </p>
           </div>
         </div>
+        <div
+          v-if="listingTitle"
+          id="crm-listing-actions"
+          class="flex flex-wrap gap-2"
+        />
         <RouterLink
+          v-else
           :to="{ name: 'crm_leads', query: { new: '1' } }"
           class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-n-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-n-blue-8"
         >

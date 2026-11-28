@@ -189,6 +189,12 @@ class CustomerAPI extends ApiClient {
       : axios.post(`${this.url}/companies`, { company });
   }
 
+  deleteCompany(id, revision, { accountId }) {
+    return axios.delete(`${this.urlForAccount(accountId)}/companies/${id}`, {
+      data: { confirm: true, revision },
+    });
+  }
+
   overview(id, options = {}) {
     const { accountId, ...requestOptions } = options;
     const url =

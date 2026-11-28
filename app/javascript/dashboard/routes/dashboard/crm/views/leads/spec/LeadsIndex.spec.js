@@ -101,7 +101,7 @@ describe('Leads layout preserves its operational flows', () => {
       lead: { status: 'qualified' },
     });
     expect(navigation.router.replace).not.toHaveBeenCalled();
-    expect(wrapper.get('tbody tr').text()).toContain('Converter em negócio');
+    expect(wrapper.get('tbody tr').text()).toContain('Convert to deal');
   });
 
   it('keeps detail navigation in both list and Kanban', async () => {
@@ -123,7 +123,7 @@ describe('Leads layout preserves its operational flows', () => {
     });
     await wrapper
       .findAll('button')
-      .find(button => button.text() === 'Lista')
+      .find(button => button.text() === 'List')
       .trigger('click');
     expect(wrapper.findAll('tbody tr')).toHaveLength(5);
   });
@@ -144,7 +144,7 @@ describe('Leads layout preserves its operational flows', () => {
   it('opens the existing creation modal and navigates to the returned lead', async () => {
     await wrapper
       .findAll('button')
-      .find(button => button.text().includes('Novo lead'))
+      .find(button => button.text().includes('New lead'))
       .trigger('click');
     const modal = wrapper.getComponent({ name: 'LeadCreateModal' });
     modal.vm.$emit('created', { id: 91 });

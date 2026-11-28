@@ -141,7 +141,7 @@ onMounted(() => store.dispatch('jrcCrm/dashboard/fetchMetrics'));
                 <h3 class="text-lg font-bold text-n-slate-12">Funil de vendas</h3>
                 <p class="mt-1 text-xs text-n-slate-11">Quantidade e valor por etapa do pipeline.</p>
               </div>
-              <RouterLink :to="{ name: 'crm_funnel' }" class="text-sm font-semibold text-[#087cf0]">Ver Kanban →</RouterLink>
+              <RouterLink :to="{ name: 'crm_funnel', query: { view: 'kanban' } }" class="text-sm font-semibold text-[#087cf0]">Ver Kanban →</RouterLink>
             </div>
 
             <div v-if="stages.length" class="space-y-2.5">

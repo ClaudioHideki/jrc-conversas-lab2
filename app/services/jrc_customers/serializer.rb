@@ -14,8 +14,9 @@ class JrcCustomers::Serializer
     counts = @account.contacts.where(company_id: ids).group(:company_id).count
     user_ids = records.flat_map { |record| [record.owner_id, safe_attribute(record, :created_by_id), safe_attribute(record, :updated_by_id)] }.compact.uniq
     users = @account.users.where(id: user_ids).pluck(:id, :name).to_h
-    cities = JrcCustomers::Address.where(account_id: @account.id, company_id: ids).order(:id).pluck(:company_id, :city).each_with_object({}) do |(id, city), result|
-      result[id] ||= city if city.present?
+    locations = JrcCustomers::Address.where(account_id: @account.id, company_id: ids).order(:id)
+                                     .pluck(:company_id, :city, :state).each_with_object({}) do |(id, city, state), result|
+      result[id] ||= [city, state] if city.present?
     end
     records.map do |company|
       row = company.attributes.slice(*COMPANY_FIELDS)
@@ -27,7 +28,8 @@ class JrcCustomers::Serializer
         'owner_name' => users[company.owner_id],
         'created_by_name' => users[safe_attribute(company, :created_by_id)],
         'updated_by_name' => users[safe_attribute(company, :updated_by_id)],
-        'city' => cities[company.id]
+        'city' => locations[company.id]&.first,
+        'state' => locations[company.id]&.last
       )
     end
   end

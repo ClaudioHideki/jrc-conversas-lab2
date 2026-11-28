@@ -49,8 +49,10 @@ module Api
           def create
             authorize crm_scope.jrc_crm_leads.new, :create?
             attributes = lead_params.to_h
+            next_activity = initial_activity_params
             attributes['status'] = normalized_write_status(attributes['status']) if attributes['status'].present?
-            result = JrcCrm::LeadCreationService.new(account: crm_scope, actor: Current.user, attributes: attributes).call do |contact|
+            result = JrcCrm::LeadCreationService.new(account: crm_scope, actor: Current.user, attributes: attributes,
+                                                    next_activity: next_activity).call do |contact|
               authorize contact, contact.persisted? ? :show? : :create?
             end
             lead = result[:lead]
@@ -148,16 +150,33 @@ module Api
                        :temperature, :notes]
             allowed << :identifier if action_name == 'create'
             allowed << :owner_id if crm_admin?
-            params.require(:lead).permit(*allowed)
+            lead = params.require(:lead)
+            attributes = lead.permit(*allowed)
+            if action_name == 'create'
+              qualification = lead.permit(qualification: [
+                :product_id, :product_interest, :quantity, :budget_cents, :deadline, :segment, :city, { fields: [:label, :value] }
+              ])[:qualification]
+              attributes[:custom_attributes] = qualification if qualification.present?
+            end
+            attributes
           end
 
           def conversion_params
             allowed = [:deal_title, :company_id, :company_name, :product_id, :product_name, :value_cents, :pipeline_id,
-                       :stage_id, :probability, :expected_close_at, :team_id, :notes]
+                       :stage_id, :probability, :expected_close_at, :team_id, :notes, :quantity]
             allowed << :identifier if action_name == 'create'
             allowed << :owner_id if crm_admin?
             attributes = params.permit(*allowed)
             attributes[:expected_close_at] = parse_crm_time(attributes[:expected_close_at]) if attributes[:expected_close_at].present?
+            attributes[:next_activity] = initial_activity_params
+            attributes
+          end
+
+          def initial_activity_params
+            attributes = params.permit(next_activity: [:title, :activity_type, :due_at, :description])[:next_activity]
+            return if attributes.blank?
+
+            attributes[:due_at] = parse_crm_time(attributes.require(:due_at))
             attributes
           end
 

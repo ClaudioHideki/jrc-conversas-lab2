@@ -9,6 +9,7 @@ import ComposeConversation from 'dashboard/components-next/NewConversation/Compo
 import { usePolicy } from 'dashboard/composables/usePolicy';
 
 defineProps({
+  directory: { type: Boolean, default: false },
   showSearch: { type: Boolean, default: true },
   searchValue: { type: String, default: '' },
   headerTitle: { type: String, required: true },
@@ -39,7 +40,124 @@ const canManageContacts = computed(() =>
 </script>
 
 <template>
+  <div v-if="directory" class="flex flex-col gap-4">
+    <header class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex min-w-0 items-center gap-3">
+        <span
+          class="grid size-11 shrink-0 place-items-center rounded-xl bg-n-blue-3 text-n-blue-11"
+          aria-hidden="true"
+        >
+          <span class="i-lucide-users-round size-6" />
+        </span>
+        <div>
+          <h1
+            class="text-2xl font-bold tracking-tight text-n-slate-12 sm:text-3xl"
+          >
+            {{ headerTitle }}
+          </h1>
+          <p class="text-sm text-n-slate-11">
+            {{ $t('CRM.DIRECTORY.CONTACTS_HELP') }}
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <Button
+          v-if="canManageContacts"
+          color="slate"
+          variant="outline"
+          size="sm"
+          icon="i-lucide-upload"
+          :label="$t('CRM.DIRECTORY.IMPORT')"
+          @click="emit('import')"
+        />
+        <Button
+          v-if="canManageContacts"
+          color="slate"
+          variant="outline"
+          size="sm"
+          icon="i-lucide-download"
+          :label="$t('CRM.DIRECTORY.EXPORT')"
+          @click="emit('export')"
+        />
+        <Button
+          color="blue"
+          icon="i-lucide-plus"
+          size="sm"
+          :label="
+            $t('CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.ADD_CONTACT')
+          "
+          @click="emit('add')"
+        />
+      </div>
+    </header>
+
+    <slot name="metrics" />
+
+    <div
+      class="flex flex-wrap items-center gap-2 rounded-2xl border border-n-weak bg-n-solid-2 p-3 shadow-sm"
+    >
+      <label v-if="showSearch" class="relative min-w-[min(100%,14rem)] flex-1">
+        <Icon
+          icon="i-lucide-search"
+          class="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-n-slate-11"
+          aria-hidden="true"
+        />
+        <input
+          :value="searchValue"
+          type="search"
+          :aria-label="$t('CRM.DIRECTORY.SEARCH_CONTACTS')"
+          :placeholder="$t('CRM.DIRECTORY.SEARCH_CONTACTS')"
+          class="reset-base m-0 h-9 w-full rounded-lg border border-n-weak bg-n-solid-1 pe-3 ps-9 text-sm text-n-slate-12"
+          @input="emit('search', $event.target.value)"
+        />
+      </label>
+      <slot name="quick-filters" />
+      <ContactSortMenu
+        :active-sort="activeSort"
+        :active-ordering="activeOrdering"
+        @update:sort="emit('update:sort', $event)"
+      />
+      <div v-if="!isLabelView && !isActiveView" class="relative">
+        <Button
+          id="toggleContactsFilterButton"
+          icon="i-lucide-list-filter"
+          :label="$t('CRM.DIRECTORY.MORE_FILTERS')"
+          color="blue"
+          size="sm"
+          :variant="hasActiveFilters ? 'faded' : 'outline'"
+          @click="emit('filter')"
+        />
+        <slot name="filter" />
+      </div>
+      <Button
+        v-if="
+          hasActiveFilters && !isSegmentsView && !isLabelView && !isActiveView
+        "
+        :aria-label="
+          $t('CONTACTS_LAYOUT.HEADER.ACTIONS.FILTERS.CREATE_SEGMENT.CONFIRM')
+        "
+        icon="i-lucide-save"
+        color="slate"
+        size="sm"
+        variant="ghost"
+        @click="emit('createSegment')"
+      />
+      <Button
+        v-if="isSegmentsView && !isLabelView && !isActiveView"
+        :aria-label="
+          $t('CONTACTS_LAYOUT.HEADER.ACTIONS.FILTERS.DELETE_SEGMENT.CONFIRM')
+        "
+        icon="i-lucide-trash"
+        color="ruby"
+        size="sm"
+        variant="ghost"
+        @click="emit('deleteSegment')"
+      />
+    </div>
+  </div>
+
   <header
+    v-else
     class="sticky top-0 z-20 border-b border-n-weak bg-n-surface-1 px-6"
   >
     <div
@@ -101,7 +219,11 @@ const canManageContacts = computed(() =>
                 !isLabelView &&
                 !isActiveView
               "
-              v-tooltip.top="$t('CONTACTS_LAYOUT.HEADER.ACTIONS.FILTERS.CREATE_SEGMENT.CONFIRM')"
+              v-tooltip.top="
+                $t(
+                  'CONTACTS_LAYOUT.HEADER.ACTIONS.FILTERS.CREATE_SEGMENT.CONFIRM'
+                )
+              "
               icon="i-lucide-save"
               color="slate"
               size="sm"
@@ -110,7 +232,11 @@ const canManageContacts = computed(() =>
             />
             <Button
               v-if="isSegmentsView && !isLabelView && !isActiveView"
-              v-tooltip.top="$t('CONTACTS_LAYOUT.HEADER.ACTIONS.FILTERS.DELETE_SEGMENT.CONFIRM')"
+              v-tooltip.top="
+                $t(
+                  'CONTACTS_LAYOUT.HEADER.ACTIONS.FILTERS.DELETE_SEGMENT.CONFIRM'
+                )
+              "
               icon="i-lucide-trash"
               color="slate"
               size="sm"
@@ -130,7 +256,11 @@ const canManageContacts = computed(() =>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <Button
-              :label="$t('CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.ADD_CONTACT')"
+              :label="
+                $t(
+                  'CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.ADD_CONTACT'
+                )
+              "
               icon="i-lucide-plus"
               color="teal"
               size="sm"
@@ -139,7 +269,11 @@ const canManageContacts = computed(() =>
             />
             <Button
               v-if="canManageContacts"
-              :label="$t('CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.IMPORT_CONTACT')"
+              :label="
+                $t(
+                  'CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.IMPORT_CONTACT'
+                )
+              "
               icon="i-lucide-download"
               color="blue"
               variant="faded"
@@ -148,7 +282,11 @@ const canManageContacts = computed(() =>
             />
             <Button
               v-if="canManageContacts"
-              :label="$t('CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.EXPORT_CONTACT')"
+              :label="
+                $t(
+                  'CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.EXPORT_CONTACT'
+                )
+              "
               icon="i-lucide-upload"
               color="slate"
               variant="outline"

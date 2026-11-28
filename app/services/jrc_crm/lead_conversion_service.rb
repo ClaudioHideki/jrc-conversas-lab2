@@ -28,6 +28,8 @@
           end
           deal = create_deal(contact, company)
           attach_product(deal)
+          @lead.activities.where(account_id: @account.id, deal_id: nil).update_all(deal_id: deal.id)
+          JrcCrm::InitialActivity.create!(deal, @params[:next_activity], actor: @actor)
           @lead.update!(status: 'converted', converted_at: Time.current, contact: contact)
           log_conversion(deal, contact, company)
           success(deal, true, contact, company&.dig(:record))
@@ -104,7 +106,7 @@
       probability: @params[:probability].presence || stage.probability, expected_close_at: @params[:expected_close_at],
       description: @params[:notes].presence || @lead.notes, status: 'open', source: @lead.source,
       product_name: @params[:product_name].presence || @lead.custom_attributes&.dig('product_interest'),
-      custom_attributes: { source_conversation_id: @lead.conversation_id }.compact
+      custom_attributes: (@lead.custom_attributes || {}).merge('source_conversation_id' => @lead.conversation_id).compact
     ).tap { |deal| deal.link_conversation!(@lead.conversation, @actor) if @lead.conversation }
   end
 
@@ -130,7 +132,8 @@
     return if @params[:product_id].blank?
 
     product = @account.jrc_crm_products.active.find(@params[:product_id])
-    deal.deal_products.create!(product: product, quantity: 1, unit_price_cents: product.unit_price_cents,
+    quantity = @params[:quantity].presence || @lead.custom_attributes&.dig('quantity') || 1
+    deal.deal_products.create!(product: product, quantity: quantity, unit_price_cents: product.unit_price_cents,
                                discount_cents: 0)
   end
 

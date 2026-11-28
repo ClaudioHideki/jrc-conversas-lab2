@@ -6,6 +6,7 @@ import { errorMessage } from './copy';
 
 const fields = [
   'q',
+  'sort',
   'relationship_type',
   'segment',
   'owner_id',
@@ -51,7 +52,10 @@ export function useCompanyDirectory() {
     );
     try {
       const [result, directory] = await Promise.all([
-        API.companies({ ...applied, page: page.value }, options),
+        API.companies(
+          { ...applied, page: page.value, directory: true },
+          options
+        ),
         API.metadata(options),
       ]);
       if (token !== generation) return false;

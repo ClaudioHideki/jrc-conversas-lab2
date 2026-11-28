@@ -174,7 +174,7 @@ const render = async (query = {}, props = {}) => {
 const openCreation = async () => {
   await wrapper
     .findAll('button')
-    .find(button => button.text() === 'Novo Negócio')
+    .find(button => button.text() === 'New deal')
     .trigger('click');
   await flushPromises();
   const form = wrapper.get('form[role="dialog"]');
@@ -228,7 +228,7 @@ it('keeps the selected pipelines current stages when older stage responses arriv
   await render();
   await wrapper
     .findAll('button')
-    .find(button => button.text() === 'Novo Negócio')
+    .find(button => button.text() === 'New deal')
     .trigger('click');
   const form = wrapper.get('form[role="dialog"]');
   const pipeline = form
@@ -260,6 +260,7 @@ it('does not clear an owner draft or continue an old creation receipt after gran
   );
   await render();
   const form = await openCreation();
+  await form.get('#deal-tab-next-action').trigger('click');
   await form.trigger('submit');
   authority.grant = 2;
   await flushPromises();
@@ -281,6 +282,7 @@ it('does not report an unmounted native creation as success or clear its preserv
   );
   await render();
   const form = await openCreation();
+  await form.get('#deal-tab-next-action').trigger('click');
   await form.trigger('submit');
   wrapper.unmount();
   finish({ data: { id: 3 } });
@@ -299,11 +301,13 @@ it('does not let a previous detail update reload or notify a newly selected deal
   );
   await render({ dealId: '1' });
   await wrapper
-    .findAll('aside button')
-    .find(button => button.text() === 'Editar')
+    .findAll('dialog[aria-labelledby="deal-workspace-title"] button')
+    .find(button => button.text() === 'Edit')
     .trigger('click');
   await flushPromises();
-  await wrapper.get('aside form').trigger('submit');
+  await wrapper
+    .get('dialog[aria-labelledby="deal-workspace-title"] form')
+    .trigger('submit');
   navigation.route.query.dealId = '2';
   await flushPromises();
   const requests = dealsAPI.show.mock.calls.length;
@@ -311,7 +315,9 @@ it('does not let a previous detail update reload or notify a newly selected deal
   await flushPromises();
   expect(dealsAPI.show).toHaveBeenCalledTimes(requests);
   expect(useAlert).not.toHaveBeenCalled();
-  expect(wrapper.get('aside').text()).toContain('Synthetic deal 2');
+  expect(
+    wrapper.get('dialog[aria-labelledby="deal-workspace-title"]').text()
+  ).toContain('Synthetic deal 2');
 });
 
 it('does not let an obsolete inline product removal reload a replacement detail', async () => {
@@ -324,11 +330,15 @@ it('does not let an obsolete inline product removal reload a replacement detail'
   );
   await render({ dealId: '1' });
   await wrapper
-    .findAll('aside button')
-    .find(button => button.text() === 'Editar')
+    .findAll('dialog[aria-labelledby="deal-workspace-title"] button')
+    .find(button => button.text() === 'Edit')
     .trigger('click');
   await flushPromises();
-  await wrapper.get('aside button.i-lucide-trash-2').trigger('click');
+  await wrapper
+    .get(
+      'dialog[aria-labelledby="deal-workspace-title"] button.i-lucide-trash-2'
+    )
+    .trigger('click');
   navigation.route.query.dealId = '2';
   await flushPromises();
   const requests = dealsAPI.show.mock.calls.length;
@@ -342,11 +352,15 @@ it('does not leave an unsaved inline quantity masquerading as the persisted reco
   dealsAPI.updateProduct.mockRejectedValue({ response: { status: 403 } });
   await render({ dealId: '1' });
   await wrapper
-    .findAll('aside button')
-    .find(button => button.text() === 'Editar')
+    .findAll('dialog[aria-labelledby="deal-workspace-title"] button')
+    .find(button => button.text() === 'Edit')
     .trigger('click');
   await flushPromises();
-  await wrapper.get('aside table tbody input[type="number"]').setValue(5);
+  await wrapper
+    .get(
+      'dialog[aria-labelledby="deal-workspace-title"] table tbody input[type="number"]'
+    )
+    .setValue(5);
   await flushPromises();
   expect(
     store.getters['jrcCrm/deals/currentDeal'].deal_products[0].quantity
@@ -358,8 +372,8 @@ it('renders a single native company editor for the selected deal', async () => {
   authority.master = true;
   await render({ dealId: '1' });
   await wrapper
-    .findAll('aside button')
-    .find(button => button.text() === 'Editar')
+    .findAll('dialog[aria-labelledby="deal-workspace-title"] button')
+    .find(button => button.text() === 'Edit')
     .trigger('click');
   await flushPromises();
   expect(wrapper.findAllComponents({ name: 'CompanyPicker' })).toHaveLength(1);
@@ -413,20 +427,20 @@ it('preserves the native inline product creation payload and blocks a repeated p
   );
   await render({ dealId: '1' });
   await wrapper
-    .findAll('aside button')
-    .find(button => button.text() === 'Editar')
+    .findAll('dialog[aria-labelledby="deal-workspace-title"] button')
+    .find(button => button.text() === 'Edit')
     .trigger('click');
   await flushPromises();
   const product = wrapper
-    .findAll('aside select')
+    .findAll('dialog[aria-labelledby="deal-workspace-title"] select')
     .find(select => select.text().includes('Synthetic scoped product'));
   await product.setValue('3');
   await wrapper
-    .findAll('aside button')
+    .findAll('dialog[aria-labelledby="deal-workspace-title"] button')
     .find(button => button.text() === 'Adicionar')
     .trigger('click');
   await wrapper
-    .findAll('aside button')
+    .findAll('dialog[aria-labelledby="deal-workspace-title"] button')
     .find(button => button.text() === 'Adicionar')
     .trigger('click');
   expect(dealsAPI.createProduct).toHaveBeenCalledTimes(1);
@@ -446,8 +460,8 @@ it('preserves the native inline product creation payload and blocks a repeated p
 it('reloads the current native product and totals after a successful inline update', async () => {
   await render({ dealId: '1' });
   await wrapper
-    .findAll('aside button')
-    .find(button => button.text() === 'Editar')
+    .findAll('dialog[aria-labelledby="deal-workspace-title"] button')
+    .find(button => button.text() === 'Edit')
     .trigger('click');
   await flushPromises();
   dealsAPI.show.mockResolvedValueOnce({
@@ -459,7 +473,11 @@ it('reloads the current native product and totals after a successful inline upda
       ],
     },
   });
-  await wrapper.get('aside table tbody input[type="number"]').setValue(3);
+  await wrapper
+    .get(
+      'dialog[aria-labelledby="deal-workspace-title"] table tbody input[type="number"]'
+    )
+    .setValue(3);
   await flushPromises();
   expect(dealsAPI.updateProduct).toHaveBeenCalledWith(1, 101, {
     item: { quantity: 3, unit_price_cents: 5000, discount_cents: 0 },
@@ -470,11 +488,43 @@ it('reloads the current native product and totals after a successful inline upda
   ).toBe(3);
 });
 
+it('keeps draft fields when switching between the deal creation tabs', async () => {
+  await render();
+  await openCreation();
+  const dialog = () => wrapper.get('form[role="dialog"]');
+  const value = () =>
+    dialog().get('input[placeholder="Valor do negócio (R$)"]');
+  expect(
+    dialog()
+      .findAll('[role="tabpanel"]')
+      .filter(panel => panel.isVisible())
+  ).toHaveLength(1);
+
+  await dialog().get('#deal-tab-products').trigger('click');
+  expect(value().isVisible()).toBe(true);
+  await value().setValue('125.50');
+
+  await dialog().get('#deal-tab-next-action').trigger('click');
+  expect(value().isVisible()).toBe(false);
+  expect(dialog().get('button[value="proposal"]').isVisible()).toBe(true);
+
+  await dialog().get('#deal-tab-information').trigger('click');
+  expect(
+    dialog().get('input[placeholder="Ex.: STIR/SHAKEN"]').element.value
+  ).toBe('Synthetic owner draft');
+  expect(dialog().find('button[value="proposal"]').exists()).toBe(false);
+
+  await dialog().get('#deal-tab-products').trigger('click');
+  expect(value().element.valueAsNumber).toBe(125.5);
+});
+
 it('explains denied creation options, blocks provisional writes and retains the draft through retry', async () => {
   productsAPI.list.mockRejectedValueOnce({ response: { status: 403 } });
   await render();
   await openCreation();
   let form = wrapper.get('form[role="dialog"]');
+  await form.get('#deal-tab-next-action').trigger('click');
+  form = wrapper.get('form[role="dialog"]');
   expect(form.find('[role="alert"]').exists()).toBe(true);
   expect(form.get('[type="submit"]').attributes('disabled')).toBeDefined();
   await form.trigger('submit');

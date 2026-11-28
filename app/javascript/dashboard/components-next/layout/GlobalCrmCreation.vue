@@ -14,7 +14,11 @@ const DealsIndex = defineAsyncComponent(
   <LeadCreateModal
     v-if="props.kind === 'LEAD'"
     @close="emit('close')"
-    @created="emit('close')"
+    @created="
+      (_, options) => {
+        if (!options?.keepOpen) emit('close');
+      }
+    "
   />
   <DealsIndex v-else creation-only @close="emit('close')" />
 </template>

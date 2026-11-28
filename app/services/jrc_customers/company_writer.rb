@@ -43,6 +43,21 @@ class JrcCustomers::CompanyWriter
     end
   end
 
+  def destroy!(company:, expected_revision:)
+    raise ActiveRecord::RecordNotFound unless company.account_id == @account.id
+
+    @account.with_lock do
+      company.reload
+      @coverage.authorize_company_write!(company)
+      if company.updated_at.iso8601(6) != expected_revision
+        raise StaleRevision, 'This company changed since it was opened. Reload before deleting.'
+      end
+
+      Companies::DeleteJob.perform_now(company_id: company.id)
+      JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: company, event_type: 'customer_company_deleted')
+    end
+  end
+
   private
 
   def assign_customer_code!(company)

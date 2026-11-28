@@ -55,7 +55,7 @@ module Api
           end
 
           def show
-            render json: JrcCrm::DealSerializer.new(@deal).as_json
+            render json: JrcCrm::DealSerializer.new(@deal).as_json(details: true)
           end
 
           def create
@@ -83,7 +83,7 @@ module Api
             JrcCrm::Deal.transaction do
               deal.save!
               create_initial_products!(deal)
-              create_initial_activity!(deal)
+              JrcCrm::InitialActivity.create!(deal, initial_activity_params, actor: Current.user)
 
               link_conversation!(deal, conversation_id) if conversation_id.present?
             end
@@ -238,13 +238,12 @@ module Api
             deal.update!(value_cents: deal.deal_products.sum(:total_cents)) if items.any?
           end
 
-          def create_initial_activity!(deal)
+          def initial_activity_params
             return unless params[:next_activity].present?
-            attrs = params.require(:next_activity).permit(:title, :activity_type, :due_at)
+
+            attrs = params.require(:next_activity).permit(:title, :activity_type, :due_at, :description)
             attrs[:due_at] = parse_crm_time(attrs[:due_at]) if attrs[:due_at].present?
-            activity = crm_scope.jrc_crm_activities.new(attrs.merge(deal: deal, user: Current.user))
-            result = JrcCrm::ActivityDispatchService.new(activity: activity, actor: Current.user).call
-            raise ActiveRecord::RecordInvalid, activity unless result[:success]
+            attrs
           end
 
           def source_from_conversation(conversation)

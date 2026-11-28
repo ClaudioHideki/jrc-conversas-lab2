@@ -52,22 +52,25 @@ export const handleContactOperationErrors = error => {
   }
 };
 
+const directoryArgs = (view, options) => {
+  if (options) return [view || '', options];
+  return view ? [view] : [];
+};
+
 export const actions = {
   search: async (
     { commit },
-    { search, page, sortAttr, label, append = false, directoryView }
+    { search, page, sortAttr, label, append = false, directoryView, directory }
   ) => {
     commit(types.SET_CONTACT_UI_FLAG, { isFetching: true });
+    const options =
+      directoryView || directory
+        ? [{ directoryView, ...(directory && { directory }) }]
+        : [];
     try {
       const {
         data: { payload, meta },
-      } = await ContactAPI.search(
-        search,
-        page,
-        sortAttr,
-        label,
-        ...(directoryView ? [{ directoryView }] : [])
-      );
+      } = await ContactAPI.search(search, page, sortAttr, label, ...options);
       if (!append) {
         commit(types.CLEAR_CONTACTS);
       }
@@ -83,7 +86,7 @@ export const actions = {
 
   get: async (
     { commit },
-    { page = 1, sortAttr, label, directoryView } = {}
+    { page = 1, sortAttr, label, directoryView, directory } = {}
   ) => {
     commit(types.SET_CONTACT_UI_FLAG, { isFetching: true });
     try {
@@ -93,7 +96,7 @@ export const actions = {
         page,
         sortAttr,
         label,
-        ...(directoryView ? [directoryView] : [])
+        ...directoryArgs(directoryView, directory)
       );
       commit(types.CLEAR_CONTACTS);
       commit(types.SET_CONTACTS, payload);
@@ -104,7 +107,10 @@ export const actions = {
     }
   },
 
-  active: async ({ commit }, { page = 1, sortAttr, directoryView } = {}) => {
+  active: async (
+    { commit },
+    { page = 1, sortAttr, directoryView, directory } = {}
+  ) => {
     commit(types.SET_CONTACT_UI_FLAG, { isFetching: true });
     try {
       const {
@@ -112,7 +118,7 @@ export const actions = {
       } = await ContactAPI.active(
         page,
         sortAttr,
-        ...(directoryView ? [directoryView] : [])
+        ...directoryArgs(directoryView, directory)
       );
       commit(types.CLEAR_CONTACTS);
       commit(types.SET_CONTACTS, payload);
@@ -321,7 +327,14 @@ export const actions = {
 
   filter: async (
     { commit },
-    { page = 1, sortAttr, queryPayload, resetState = true, directoryView } = {}
+    {
+      page = 1,
+      sortAttr,
+      queryPayload,
+      resetState = true,
+      directoryView,
+      directory,
+    } = {}
   ) => {
     commit(types.SET_CONTACT_UI_FLAG, { isFetching: true });
     try {
@@ -331,7 +344,7 @@ export const actions = {
         page,
         sortAttr,
         queryPayload,
-        ...(directoryView ? [directoryView] : [])
+        ...directoryArgs(directoryView, directory)
       );
       if (resetState) {
         commit(types.CLEAR_CONTACTS);

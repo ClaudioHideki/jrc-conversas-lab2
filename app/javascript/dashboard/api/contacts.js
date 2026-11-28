@@ -6,7 +6,8 @@ export const buildContactParams = (
   sortAttr,
   label,
   search,
-  directoryView
+  directoryView,
+  directory
 ) => {
   let params = `include_contact_inboxes=false&page=${page}&sort=${sortAttr}`;
   if (search) {
@@ -18,6 +19,12 @@ export const buildContactParams = (
   if (directoryView) {
     params = `${params}&directory_view=${encodeURIComponent(directoryView)}`;
   }
+  if (directory) {
+    const options = new URLSearchParams({ directory: 'true' });
+    if (directory.ownerId) options.set('directory_owner_id', directory.ownerId);
+    if (directory.inboxId) options.set('directory_inbox_id', directory.inboxId);
+    params = `${params}&${options}`;
+  }
   return params;
 };
 
@@ -26,13 +33,20 @@ class ContactAPI extends ApiClient {
     super('contacts', { accountScoped: true });
   }
 
-  get(page, sortAttr = 'name', label = '', directoryView = '') {
+  get(
+    page,
+    sortAttr = 'name',
+    label = '',
+    directoryView = '',
+    directory = undefined
+  ) {
     let requestURL = `${this.url}?${buildContactParams(
       page,
       sortAttr,
       label,
       '',
-      directoryView
+      directoryView,
+      directory
     )}`;
     return axios.get(requestURL);
   }
@@ -81,19 +95,32 @@ class ContactAPI extends ApiClient {
       sortAttr,
       label,
       search,
-      options.directoryView
+      options.directoryView,
+      options.directory
     )}`;
     return axios.get(requestURL, { signal: options.signal });
   }
 
-  active(page = 1, sortAttr = 'name', directoryView = '') {
-    let requestURL = `${this.url}/active?${buildContactParams(page, sortAttr, '', '', directoryView)}`;
+  active(
+    page = 1,
+    sortAttr = 'name',
+    directoryView = '',
+    directory = undefined
+  ) {
+    let requestURL = `${this.url}/active?${buildContactParams(page, sortAttr, '', '', directoryView, directory)}`;
     return axios.get(requestURL);
   }
 
-  // eslint-disable-next-line default-param-last
-  filter(page = 1, sortAttr = 'name', queryPayload, directoryView = '') {
-    let requestURL = `${this.url}/filter?${buildContactParams(page, sortAttr, '', '', directoryView)}`;
+  filter(
+    // eslint-disable-next-line default-param-last
+    page = 1,
+    // eslint-disable-next-line default-param-last
+    sortAttr = 'name',
+    queryPayload,
+    directoryView = '',
+    directory = undefined
+  ) {
+    let requestURL = `${this.url}/filter?${buildContactParams(page, sortAttr, '', '', directoryView, directory)}`;
     return axios.post(requestURL, queryPayload);
   }
 

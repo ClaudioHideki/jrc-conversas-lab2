@@ -7,6 +7,9 @@ import { createStore } from 'vuex';
 import { routeLocationKey } from 'vue-router';
 
 vi.mock('dashboard/api/crm', () => ({ leadsAPI: { create: vi.fn() } }));
+vi.mock('dashboard/api/crm/products', () => ({
+  default: { list: async () => ({ data: [] }) },
+}));
 vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
 vi.mock('dashboard/api/jrcCustomers', () => ({
   default: { contact: vi.fn(), contacts: vi.fn() },
@@ -92,6 +95,7 @@ describe('Shared lead creation form', () => {
     });
     const wrapper = mountForm();
     await wrapper.get('[name="name"]').setValue('Não perder');
+    await wrapper.get('[name="email"]').setValue('valido@example.test');
     await wrapper.get('form').trigger('submit');
     await flushPromises();
     expect(wrapper.get('[role="alert"]').text()).toBe(
@@ -112,6 +116,8 @@ describe('Shared lead creation form', () => {
         })
     );
     const wrapper = mountForm();
+    await wrapper.get('[name="name"]').setValue('Pessoa nova');
+    await wrapper.get('[name="email"]').setValue('valido@example.test');
     await wrapper.get('form').trigger('submit');
     await wrapper.get('form').trigger('submit');
     expect(leadsAPI.create).toHaveBeenCalledTimes(1);
@@ -162,11 +168,13 @@ describe('Shared lead creation form', () => {
   });
 
   it('discards an old search when the company changes and keeps the form open on an outside release', async () => {
-    let finishFirstSearch;
+    sessionStorage.clear();
+    CustomersAPI.contacts.mockClear();
+    const pendingSearches = [];
     CustomersAPI.contacts.mockImplementation(({ company_id: companyId }) =>
       companyId === 42
         ? new Promise(resolve => {
-            finishFirstSearch = resolve;
+            pendingSearches.push(resolve);
           })
         : Promise.resolve({ data: { payload: [] } })
     );
@@ -180,12 +188,16 @@ describe('Shared lead creation form', () => {
     };
     await switchCompany(42);
     await switchCompany(43);
-    expect(
-      CustomersAPI.contacts.mock.calls.map(([params]) => params.company_id)
-    ).toEqual([42, 43]);
-    finishFirstSearch({
-      data: { payload: [{ id: 88, name: 'Pessoa da empresa anterior' }] },
-    });
+    const companyScopes = CustomersAPI.contacts.mock.calls.map(
+      ([params]) => params.company_id
+    );
+    expect([...new Set(companyScopes)]).toEqual([42, 43]);
+    expect(companyScopes.at(-1)).toBe(43);
+    pendingSearches.forEach(resolve =>
+      resolve({
+        data: { payload: [{ id: 88, name: 'Pessoa da empresa anterior' }] },
+      })
+    );
     await flushPromises();
     expect(wrapper.text()).not.toContain('Pessoa da empresa anterior');
     await wrapper.get('[name="name"]').setValue('Nome para copiar');

@@ -32,6 +32,7 @@ onBeforeUnmount(() => {
   >
     <CompanyEditor
       :company="company"
+      embedded
       @saved="saved"
       @cancel="emit('close')"
     />

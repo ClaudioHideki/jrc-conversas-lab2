@@ -53,10 +53,23 @@ module JrcCrm
         custom_attributes: @deal.custom_attributes,
         created_at: @deal.created_at,
         created_at_display: format_datetime(@deal.created_at)
-      }
+      }.merge(options[:details] ? detail_attributes : {})
     end
 
     private
+
+    def detail_attributes
+      events = @deal.audit_events.where(account_id: @deal.account_id)
+      lead_events = AuditEvent.where(account_id: @deal.account_id, resource_type: 'JrcCrm::Lead', resource_id: @deal.lead_id)
+      history = AuditEvent.where(id: events.select(:id)).or(AuditEvent.where(id: lead_events.select(:id)))
+      {
+        description: @deal.description,
+        product_name: @deal.product_name,
+        history: history.recent.limit(50).map do |event|
+          { id: event.id, event_type: event.event_type, created_at: event.created_at }
+        end
+      }
+    end
 
     def format_currency(cents, currency)
       # simplified currency formatting

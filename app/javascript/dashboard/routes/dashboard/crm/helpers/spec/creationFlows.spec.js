@@ -47,7 +47,7 @@ const page = async (component, full = false, props = {}) => {
   store.commit = vi.fn();
   const wrapper = (full ? mount : shallowMount)(component, {
     props, global: { plugins: [store], stubs: {
-      Teleport: true, RouterLink: true,
+      Teleport: true, RouterLink: true, CrmListingHeader: false,
       CrmPageHeader: { template: '<header><slot /><slot name="actions" /></header>' },
     } },
   });
@@ -77,7 +77,7 @@ afterEach(() => {
 
 it('DRAFT-01 restores all deal fields and selected products after closing with X', async () => {
   const wrapper = await page(DealsIndex);
-  await button(wrapper, 'Novo Negócio').trigger('click');
+  await button(wrapper, 'New deal').trigger('click');
   await flushPromises();
   await input(wrapper, 'Título do negócio').setValue('Nexora completo');
   await input(wrapper, 'Observações').setValue('Notas que devem permanecer');
@@ -89,7 +89,7 @@ it('DRAFT-01 restores all deal fields and selected products after closing with X
   await button(wrapper, '+ Adicionar').trigger('click');
   await wrapper.get('button[aria-label="Fechar"]').trigger('click');
   expect(readDraft(key('crm:new_deal')).items).toHaveLength(1);
-  await button(wrapper, 'Novo Negócio').trigger('click');
+  await button(wrapper, 'New deal').trigger('click');
   await flushPromises();
   expect(input(wrapper, 'Título do negócio').element.value).toBe('Nexora completo');
   expect(input(wrapper, 'Observações').element.value).toBe('Notas que devem permanecer');
@@ -100,7 +100,7 @@ it('DRAFT-01 restores all deal fields and selected products after closing with X
 
 it('DRAFT-02 clears only after a successful atomic save and preserves on an API failure', async () => {
   const wrapper = await page(DealsIndex);
-  await button(wrapper, 'Novo Negócio').trigger('click');
+  await button(wrapper, 'New deal').trigger('click');
   await flushPromises();
   await input(wrapper, 'Título do negócio').setValue('Não perder');
   dealsAPI.create.mockRejectedValueOnce({ response: { data: { errors: ['Falha'] } } });
@@ -108,7 +108,7 @@ it('DRAFT-02 clears only after a successful atomic save and preserves on an API 
   await flushPromises();
   await wrapper.get('button[aria-label="Fechar"]').trigger('click');
   expect(readDraft(key('crm:new_deal')).form.title).toBe('Não perder');
-  await button(wrapper, 'Novo Negócio').trigger('click');
+  await button(wrapper, 'New deal').trigger('click');
   await flushPromises();
   await wrapper.get('form').trigger('submit');
   await flushPromises();
@@ -120,11 +120,11 @@ it('DRAFT-02 clears only after a successful atomic save and preserves on an API 
 
 it('DRAFT-03 discards explicitly while ESC preserves the current draft', async () => {
   const wrapper = await page(DealsIndex);
-  await button(wrapper, 'Novo Negócio').trigger('click');
+  await button(wrapper, 'New deal').trigger('click');
   await flushPromises();
   await input(wrapper, 'Título do negócio').setValue('Rascunho ESC');
   await wrapper.get('form').trigger('keydown', { key: 'Escape' });
-  await button(wrapper, 'Novo Negócio').trigger('click');
+  await button(wrapper, 'New deal').trigger('click');
   await flushPromises();
   expect(input(wrapper, 'Título do negócio').element.value).toBe('Rascunho ESC');
   await button(wrapper, 'Descartar rascunho').trigger('click');
@@ -134,7 +134,7 @@ it('DRAFT-03 discards explicitly while ESC preserves the current draft', async (
 
 it('DEAL-04 selects an inline native contact while keeping all parent deal fields', async () => {
   const wrapper = await page(DealsIndex);
-  await button(wrapper, 'Novo Negócio').trigger('click');
+  await button(wrapper, 'New deal').trigger('click');
   await flushPromises();
   await input(wrapper, 'Título do negócio').setValue('Negócio já preenchido');
   await input(wrapper, 'Observações').setValue('Escopo');

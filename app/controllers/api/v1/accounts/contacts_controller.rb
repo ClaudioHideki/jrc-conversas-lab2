@@ -16,6 +16,8 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
   before_action :fetch_contact, only: [:show, :update, :destroy, :avatar, :contactable_inboxes, :destroy_custom_attributes]
   before_action :set_include_contact_inboxes, only: [:index, :active, :search, :filter, :show, :update]
 
+  before_action :set_directory_list, only: [:index, :search, :filter, :active]
+
   def index
     @contacts = fetch_contacts(resolved_contacts)
     @contacts_count = @contacts.total_count
@@ -29,6 +31,7 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
       'name ILIKE :search OR email ILIKE :search OR phone_number ILIKE :search OR contacts.identifier LIKE :search',
       search: "%#{search_value}%"
     )
+    contacts = contacts.or(Current.account.contacts.where(company_id: @directory_list.matching_company_ids(search_value))) if @directory_list
     phone_candidates = normalized_phone_candidates(search_value)
     if phone_candidates.any?
       normalized_phone_scope = Current.account.contacts.where(
@@ -138,12 +141,21 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
 
   def directory_contacts(contacts)
     contacts = group_contact_scope(contacts)
+    contacts = @directory_list.filter(contacts, owner: params[:directory_owner_id], inbox_id: params[:directory_inbox_id]) if @directory_list
     return contacts if params[:directory_view].blank?
 
     if params[:directory_view] != 'people'
       authorize :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy
     end
     JrcCustomers::ContactQuery.new(account: Current.account, scope: contacts, query: nil, view: params[:directory_view]).call
+  end
+
+  def set_directory_list
+    return unless params[:directory] == 'true' && Current.user.is_a?(User)
+
+    scope = Current.account.contacts.resolved_contacts(use_crm_v2: Current.account.feature_enabled?('crm_v2'))
+    @directory_list = JrcCustomers::ContactDirectoryList.new(account: Current.account, actor: Current.user,
+                                                          membership: Current.account_user, scope: group_contact_scope(scope))
   end
 
   def normalized_phone_candidates(value)

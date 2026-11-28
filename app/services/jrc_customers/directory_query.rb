@@ -6,7 +6,10 @@ class JrcCustomers::DirectoryQuery
   def call
     scope = @account.master_companies
     %w[relationship_type person_kind segment owner_id parent_company_id economic_group].each do |key|
-      scope = scope.where(key => @filters[key]) if @filters[key].present?
+      next if @filters[key].blank?
+
+      value = key == 'owner_id' && @filters[key] == 'unassigned' ? nil : @filters[key]
+      scope = scope.where(key => value)
     end
     scope = scope.where(active: ActiveModel::Type::Boolean.new.cast(@filters[:active])) if @filters[:active].present?
     if @filters[:city].present?

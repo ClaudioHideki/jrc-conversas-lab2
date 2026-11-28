@@ -9,6 +9,12 @@ import { useAlert } from 'dashboard/composables';
 import { draftKey, readDraft, saveDraft } from '../../../helpers/formDrafts';
 
 vi.mock('dashboard/api/crm', () => ({ leadsAPI: { create: vi.fn() } }));
+vi.mock('dashboard/api/crm/products', () => ({
+  default: { list: async () => ({ data: [] }) },
+}));
+vi.mock('dashboard/api/agents', () => ({
+  default: { get: async () => ({ data: [] }) },
+}));
 vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
 let wrapper;
 let authority;

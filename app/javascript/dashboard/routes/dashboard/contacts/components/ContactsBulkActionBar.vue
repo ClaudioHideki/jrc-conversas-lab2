@@ -80,9 +80,7 @@ const handleRemoveLabels = labels => {
 </script>
 
 <template>
-  <div
-    class="sticky top-0 z-10 bg-gradient-to-b from-n-surface-1 from-90% to-transparent pt-1 pb-2"
-  >
+  <div class="bg-n-blue-2 p-2">
     <BulkSelectBar
       v-model="selectionModel"
       :all-items="allItems"
@@ -101,7 +99,8 @@ const handleRemoveLabels = labels => {
         />
       </template>
       <template #actions>
-        <div class="flex items-center gap-2 ml-auto">
+        <div class="flex flex-wrap items-center gap-2 ml-auto">
+          <slot name="directory-actions" />
           <BulkLabelActions
             type="contact"
             :is-loading="isLoading"

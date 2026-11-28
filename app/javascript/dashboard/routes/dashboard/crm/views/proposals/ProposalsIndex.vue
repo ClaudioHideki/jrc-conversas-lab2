@@ -138,51 +138,65 @@ const proposalForm = reactive({
   follow_up_days: 3,
 });
 const initialProposalForm = { ...proposalForm };
-const creationDraft = useFormDraft('crm:new_proposal', {
-  active: showForm,
-  snapshot: () => ({
-    origin: origin.value,
-    deal_id: dealId.value,
-    company_id: companyId.value,
-    contact_id: contactId.value,
-    business_unit_id: businessUnitId.value,
-    commercial: { ...proposalForm },
-    discount: proposalDiscount.value,
-    items: creationItems.value,
-    pending_item: { ...itemForm },
-  }),
-  restore: draft => {
-    origin.value = draft.origin || 'deal';
-    dealId.value = draft.deal_id || '';
-    companyId.value = draft.company_id || null;
-    contactId.value = draft.contact_id || null;
-    businessUnitId.value = draft.business_unit_id || null;
-    Object.assign(proposalForm, draft.commercial || {});
-    proposalDiscount.value = draft.discount || '';
-    creationItems.value = draft.items || [];
-    Object.assign(itemForm, draft.pending_item || {});
-  },
-  reset: () => {
-    // The creation draft shares these fields with the detail editor. Preserve
-    // the active detail until its own native draft key watcher has saved it.
-    if (selectedProposal.value) return;
-    origin.value = 'deal';
-    dealId.value = '';
-    companyId.value = null;
-    contactId.value = null;
-    businessUnitId.value = null;
-    creationItems.value = [];
-    proposalDiscount.value = '';
-    Object.assign(proposalForm, initialProposalForm);
-    Object.assign(itemForm, {
-      product_id: '',
-      quantity: 1,
-      unit_price: '',
-      discount: '',
-      commercial_gratuity: {},
-    });
-  },
+const requestedDealId = computed(() => {
+  const id = route.query.dealId;
+  return route.query.new === '1' &&
+    typeof id === 'string' &&
+    /^[1-9]\d*$/.test(id)
+    ? id
+    : '';
 });
+const creationDraft = useFormDraft(
+  () =>
+    requestedDealId.value
+      ? `crm:new_proposal:deal:${requestedDealId.value}`
+      : 'crm:new_proposal',
+  {
+    active: showForm,
+    snapshot: () => ({
+      origin: origin.value,
+      deal_id: dealId.value,
+      company_id: companyId.value,
+      contact_id: contactId.value,
+      business_unit_id: businessUnitId.value,
+      commercial: { ...proposalForm },
+      discount: proposalDiscount.value,
+      items: creationItems.value,
+      pending_item: { ...itemForm },
+    }),
+    restore: draft => {
+      origin.value = draft.origin || 'deal';
+      dealId.value = draft.deal_id || '';
+      companyId.value = draft.company_id || null;
+      contactId.value = draft.contact_id || null;
+      businessUnitId.value = draft.business_unit_id || null;
+      Object.assign(proposalForm, draft.commercial || {});
+      proposalDiscount.value = draft.discount || '';
+      creationItems.value = draft.items || [];
+      Object.assign(itemForm, draft.pending_item || {});
+    },
+    reset: () => {
+      // The creation draft shares these fields with the detail editor. Preserve
+      // the active detail until its own native draft key watcher has saved it.
+      if (selectedProposal.value) return;
+      origin.value = 'deal';
+      dealId.value = '';
+      companyId.value = null;
+      contactId.value = null;
+      businessUnitId.value = null;
+      creationItems.value = [];
+      proposalDiscount.value = '';
+      Object.assign(proposalForm, initialProposalForm);
+      Object.assign(itemForm, {
+        product_id: '',
+        quantity: 1,
+        unit_price: '',
+        discount: '',
+        commercial_gratuity: {},
+      });
+    },
+  }
+);
 const formSnapshot = () =>
   JSON.stringify([proposalForm, proposalDiscount.value]);
 const hasUnsavedChanges = computed(
@@ -362,21 +376,32 @@ const openForm = async () => {
   try {
     const { data } = await dealsAPI.list({ status: 'open' });
     if (!currentContext(context)) return;
+    const pinnedDeal = requestedDealId.value;
     const selectedContactId = route.query.contactId;
-    deals.value =
-      typeof selectedContactId === 'string' && /^\d+$/.test(selectedContactId)
-        ? data.filter(
-            deal =>
-              String(deal.contact_id) === selectedContactId ||
-              deal.contacts?.some(
-                contact => String(contact.id) === selectedContactId
-              )
+    let eligible = data;
+    if (pinnedDeal) {
+      eligible = data.filter(deal => String(deal.id) === pinnedDeal);
+    } else if (
+      typeof selectedContactId === 'string' &&
+      /^\d+$/.test(selectedContactId)
+    ) {
+      eligible = data.filter(
+        deal =>
+          String(deal.contact_id) === selectedContactId ||
+          deal.contacts?.some(
+            contact => String(contact.id) === selectedContactId
           )
-        : data;
+      );
+    }
+    deals.value = eligible;
     const restored = creationDraft.open();
-    if (!restored)
+    if (restored) useAlert(t('CRM.CREATION.RECOVERED'));
+    if (pinnedDeal) {
+      origin.value = 'deal';
+      dealId.value = deals.value[0]?.id || '';
+    } else if (!restored) {
       dealId.value = deals.value.length === 1 ? deals.value[0].id : '';
-    else useAlert(t('CRM.CREATION.RECOVERED'));
+    }
     if (proposalsAPI.creationOptions) {
       const options = await proposalsAPI.creationOptions();
       if (!currentContext(context)) return;
@@ -464,7 +489,18 @@ const openProposal = async proposal => {
   }
 };
 
+const returnToDeal = () => {
+  if (saving.value || !requestedDealId.value) return;
+  creationDraft.flush();
+  router.push({
+    name: 'crm_deals',
+    params: { accountId: route.params.accountId },
+    query: { dealId: requestedDealId.value },
+  });
+};
 const createProposal = async () => {
+  if (requestedDealId.value && String(dealId.value) !== requestedDealId.value)
+    return;
   const context = captureContext();
   const savingDraftKey = creationDraft.key.value;
   if (saving.value) return;
@@ -1257,7 +1293,25 @@ onBeforeUnmount(() => {
             <i class="i-lucide-x size-5" />
           </button>
         </div>
-        <fieldset class="mt-4 flex flex-wrap gap-3">
+        <button
+          v-if="requestedDealId"
+          type="button"
+          :disabled="saving"
+          class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-n-blue-11 hover:underline"
+          @click="returnToDeal"
+        >
+          <i class="i-lucide-arrow-left size-4" />{{
+            t('CRM.SALES_FLOW.RESTORE_DEAL')
+          }}
+        </button>
+        <p
+          v-if="requestedDealId && !dealId"
+          role="alert"
+          class="mt-3 rounded-lg bg-n-amber-3 p-3 text-sm text-n-amber-11"
+        >
+          {{ t('CRM.SALES_FLOW.NO_SELECTED_DEAL') }}
+        </p>
+        <fieldset v-if="!requestedDealId" class="mt-4 flex flex-wrap gap-3">
           <legend class="mb-2 text-sm font-semibold">
             {{ t('CRM.CREATION.ORIGIN') }}
           </legend>
@@ -1276,6 +1330,7 @@ onBeforeUnmount(() => {
           >Negócio
           <select
             v-model="dealId"
+            :disabled="!!requestedDealId"
             required
             class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
           >

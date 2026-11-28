@@ -1,4 +1,5 @@
 class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Customers::BaseController
+  before_action :authorize_admin!, only: :destroy
   before_action :set_company, except: [:index, :create, :duplicates]
 
   def index
@@ -11,7 +12,16 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
       members = JrcCustomers::SegmentMembers.new(account: Current.account, actor: Current.user, taxonomy: taxonomy)
       scope = scope.where(id: members.companies.reselect(:id))
     end
-    records, meta = page_scope(corporate_companies(scope))
+    visible = corporate_companies(scope)
+    visible = visible.reorder(name: :desc, id: :desc) if params[:sort] == '-name'
+    records, meta = page_scope(visible)
+    if params[:directory] == 'true'
+      directory = corporate_companies
+      meta[:directory] = {
+        total: directory.count, customers: directory.where(relationship_type: 'customer', active: true).count,
+        prospects: directory.where(relationship_type: 'prospect').count, unassigned: directory.where(owner_id: nil).count
+      }
+    end
     render json: { payload: serializer.companies(records.to_a), meta: meta }
   end
 
@@ -36,6 +46,16 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
       company: @company, attributes: company_params, expected_revision: params.dig(:company, :revision)
     )
     render json: { payload: serializer.company(@company) }
+  end
+
+  def destroy
+    values = params.permit(:confirm, :revision)
+    raise ActionController::BadRequest, 'Confirmation and revision are required' unless values[:confirm] == true && values[:revision].present?
+
+    JrcCustomers::CompanyWriter.new(account: Current.account, actor: Current.user).destroy!(company: @company, expected_revision: values[:revision])
+    head :no_content
+  rescue ActiveRecord::InvalidForeignKey, ActiveRecord::DeleteRestrictionError
+    render json: { code: 'COMPANY_IN_USE' }, status: :conflict
   end
 
   def duplicates

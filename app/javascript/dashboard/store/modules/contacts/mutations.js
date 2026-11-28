@@ -18,6 +18,8 @@ export const mutations = {
     const { count, current_page: currentPage, has_more: hasMore } = data;
     $state.meta.count = count;
     $state.meta.currentPage = currentPage;
+    if (data.directory) $state.meta.directory = data.directory;
+    else if ($state.meta.directory) delete $state.meta.directory;
     if (hasMore !== undefined) {
       $state.meta.hasMore = hasMore;
     }

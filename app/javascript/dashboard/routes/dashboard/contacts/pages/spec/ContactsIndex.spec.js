@@ -59,6 +59,9 @@ describe('Relationship center pagination', () => {
               },
             },
           },
+          PaginationFooter: false,
+          DirectoryMetrics: false,
+          Button: false,
           ...stubs,
         },
         directives: { 'on-clickaway': onClickaway },
@@ -72,7 +75,11 @@ describe('Relationship center pagination', () => {
       },
     });
   const button = label =>
-    wrapper.findAll('button').find(item => item.text() === label);
+    wrapper
+      .findAll('button')
+      .find(
+        item => item.text() === label || item.attributes('aria-label') === label
+      );
   beforeEach(() => {
     BulkActionsAPI.create.mockReset().mockResolvedValue({});
     route = reactive({
@@ -92,6 +99,12 @@ describe('Relationship center pagination', () => {
       getters: reactive({
         'contacts/getContactsList': [{ id: 42, name: 'Cliente' }],
         'contacts/getMeta': { count: 31, currentPage: 1 },
+        'agents/getAgents': [{ id: 7, name: 'Owner' }],
+        'inboxes/getInboxes': [
+          { id: 8, name: 'WhatsApp', channel_type: 'Channel::Whatsapp' },
+        ],
+        'inboxes/getInboxById': id =>
+          id === 8 ? { channel_type: 'Channel::Whatsapp' } : undefined,
         'contacts/getUIFlags': { isFetching: false },
         'customViews/getUIFlags': { isFetching: false },
         'customViews/getContactCustomViews': [],
@@ -151,6 +164,7 @@ describe('Relationship center pagination', () => {
   });
 
   it('opens the authorized WhatsApp conversation for the clicked contact', async () => {
+    store.getters['contacts/getContactsList'][0].directory = { inbox_ids: [8] };
     ContactAPI.getConversations.mockResolvedValue({
       data: {
         payload: [
@@ -161,6 +175,7 @@ describe('Relationship center pagination', () => {
       },
     });
     wrapper = page();
+    await wrapper.get('tbody tr').trigger('click');
     await wrapper.get('button[data-contact-whatsapp]').trigger('click');
     await flushPromises();
     expect(ContactAPI.getConversations).toHaveBeenCalledWith(42);
@@ -175,6 +190,7 @@ describe('Relationship center pagination', () => {
       '+55 (11) 98888-1212';
     openEmbeddedSoftphone.mockReturnValue(true);
     wrapper = page();
+    await wrapper.get('tbody tr').trigger('click');
     await wrapper.get('button[data-contact-call]').trigger('click');
     expect(openEmbeddedSoftphone).toHaveBeenCalledWith(
       1,
@@ -244,7 +260,7 @@ describe('Relationship center pagination', () => {
       expect(
         wrapper.get(`[data-contact-view="${view}"]`).attributes('aria-pressed')
       ).toBe('true');
-      await button('Próxima').trigger('click');
+      await button(crmLocale.CRM.CONTACT_LEAD.NEXT).trigger('click');
       expect(store.dispatch).toHaveBeenCalledWith(
         'contacts/get',
         expect.objectContaining({ page: 2, directoryView: view })
@@ -330,17 +346,21 @@ describe('Relationship center pagination', () => {
   it('uses count for regular pagination, even without has_more', async () => {
     wrapper = page();
     await flushPromises();
-    expect(button('Anterior').element.disabled).toBe(true);
-    expect(button('Próxima').element.disabled).toBe(false);
-    await button('Próxima').trigger('click');
+    expect(button(crmLocale.CRM.CONTACT_LEAD.PREVIOUS).element.disabled).toBe(
+      true
+    );
+    expect(button(crmLocale.CRM.CONTACT_LEAD.NEXT).element.disabled).toBe(
+      false
+    );
+    await button(crmLocale.CRM.CONTACT_LEAD.NEXT).trigger('click');
     expect(store.dispatch).toHaveBeenCalledWith(
       'contacts/get',
       expect.objectContaining({ page: 2 })
     );
     store.getters['contacts/getMeta'].currentPage = 3;
     await flushPromises();
-    expect(button('Próxima').element.disabled).toBe(true);
-    await button('Anterior').trigger('click');
+    expect(button(crmLocale.CRM.CONTACT_LEAD.NEXT).element.disabled).toBe(true);
+    await button(crmLocale.CRM.CONTACT_LEAD.PREVIOUS).trigger('click');
     expect(store.dispatch).toHaveBeenCalledWith(
       'contacts/get',
       expect.objectContaining({ page: 2 })
@@ -358,7 +378,9 @@ describe('Relationship center pagination', () => {
     expect(region.attributes('aria-label')).toBe('Contact list');
     expect(region.findAll('tbody tr')).toHaveLength(15);
     expect(region.findAll('tbody tr').at(-1).text()).toContain('Contact 15');
-    expect(region.element.contains(button('Próxima').element)).toBe(true);
+    expect(
+      region.element.contains(button(crmLocale.CRM.CONTACT_LEAD.NEXT).element)
+    ).toBe(true);
     store.dispatch.mockImplementationOnce(async () => {
       store.getters['contacts/getContactsList'] = [
         { id: 16, name: 'Contact 16' },
@@ -366,12 +388,14 @@ describe('Relationship center pagination', () => {
       store.getters['contacts/getMeta'] = { count: 16, currentPage: 2 };
       return true;
     });
-    await button('Próxima').trigger('click');
+    await button(crmLocale.CRM.CONTACT_LEAD.NEXT).trigger('click');
     await flushPromises();
     expect(region.findAll('tbody tr')).toHaveLength(1);
     expect(region.get('tbody tr').text()).toContain('Contact 16');
-    expect(button('Próxima').element.disabled).toBe(true);
-    expect(button('Anterior').element.disabled).toBe(false);
+    expect(button(crmLocale.CRM.CONTACT_LEAD.NEXT).element.disabled).toBe(true);
+    expect(button(crmLocale.CRM.CONTACT_LEAD.PREVIOUS).element.disabled).toBe(
+      false
+    );
   });
 
   it('does not present availability as commercial status or fabricated monthly metrics', async () => {
@@ -386,11 +410,12 @@ describe('Relationship center pagination', () => {
     wrapper = page();
     await flushPromises();
     const row = wrapper.get('tbody tr');
-    expect(row.text()).toContain('Online');
+    expect(row.text()).not.toContain('Online');
     expect(row.text()).toContain('14/11/2024');
     expect(row.text()).not.toContain('JRC ADM');
     expect(row.text()).not.toContain('Agora');
-    expect(wrapper.text().match(/Metric unavailable/g)).toHaveLength(3);
+    const metrics = wrapper.getComponent({ name: 'ContactListHeaderWrapper' });
+    expect(metrics.props('directory')).toBe(true);
   });
 
   it('retries the same search page on failure and does not skip records', async () => {
@@ -543,18 +568,11 @@ describe('Relationship center pagination', () => {
         'CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.ADD_CONTACT'
       )
     ).trigger('click');
-    await button(
-      wrapper.vm.$t(
-        'CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.IMPORT_CONTACT'
-      )
-    ).trigger('click');
+    await button(wrapper.vm.$t('CRM.DIRECTORY.IMPORT')).trigger('click');
     expect(openCreate).toHaveBeenCalledOnce();
     expect(openImport).toHaveBeenCalledOnce();
-    const more = header.getComponent({ name: 'ContactMoreActions' });
-    await more.get('button').trigger('click');
-    more
-      .getComponent({ name: 'DropdownMenu' })
-      .vm.$emit('action', { action: 'export' });
+    expect(header.props('directory')).toBe(true);
+    await button(wrapper.vm.$t('CRM.DIRECTORY.EXPORT')).trigger('click');
     expect(openExport).toHaveBeenCalledOnce();
     const contact = { name: 'New contact', email: 'new@example.test' };
     wrapper
@@ -601,22 +619,19 @@ describe('Relationship center pagination', () => {
     expect(button(contactLabels.CALENDAR).attributes('title')).toBe(
       'This action is not available in this view.'
     );
-    expect(wrapper.text()).toContain(
-      'Native contacts. Companies and groups use the existing Customer Master directories.'
-    );
+    expect(
+      wrapper.get('[data-contact-view="companies"]').attributes('aria-pressed')
+    ).toBe('false');
   });
 
-  it('opens contact options and edits in one dialog without leaving the list', async () => {
+  it('opens the edit tab directly from the row without leaving the list', async () => {
     wrapper = page();
     await flushPromises();
     expect(wrapper.find('[data-contact-dialog]').exists()).toBe(false);
-    await wrapper.get('tbody tr').trigger('click');
+    await wrapper.get('button[data-contact-edit]').trigger('click');
     expect(
-      wrapper.getComponent({ name: 'ContactLeadAction' }).props('contact')
-    ).toMatchObject({ id: 42, name: 'Cliente' });
-    wrapper
-      .getComponent({ name: 'TabBar' })
-      .vm.$emit('tabChanged', { value: 1 });
+      wrapper.getComponent({ name: 'TabBar' }).props('initialActiveTab')
+    ).toBe(1);
     await flushPromises();
     const editor = wrapper.getComponent({ name: 'ContactDetails' });
     expect(editor.props('selectedContact')).toMatchObject({ id: 42 });

@@ -1,7 +1,8 @@
 class JrcCrm::LeadCreationService
-  def initialize(account:, actor:, attributes:)
+  def initialize(account:, actor:, attributes:, next_activity: nil)
     @account = account
     @actor = actor
+    @next_activity = next_activity
     @attributes = attributes.to_h.symbolize_keys
   end
 
@@ -22,6 +23,7 @@ class JrcCrm::LeadCreationService
       lead.contact = contact
       lead.owner ||= @actor
       lead.save!
+      JrcCrm::InitialActivity.create!(lead, @next_activity, actor: @actor)
       JrcCrm::AuditLoggerService.new(
         account: @account, event_type: 'lead_created', actor: @actor, resource: lead,
         from_value: nil, to_value: lead.public_status, metadata: { source: 'contacts', contact_id: contact.id }

@@ -16,7 +16,10 @@ import {
   errorMessage,
 } from '../copy';
 
-const props = defineProps({ company: { type: Object, default: null } });
+const props = defineProps({
+  company: { type: Object, default: null },
+  embedded: { type: Boolean, default: false },
+});
 const emit = defineEmits(['saved', 'cancel']);
 const { t } = useI18n();
 const section = ref('identity');
@@ -181,7 +184,10 @@ const save = async () => {
   >
     <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h2 class="text-xl font-semibold">
+        <h2
+          v-if="!embedded"
+          class="text-xl font-semibold"
+        >
           {{ company ? T.editCompany : T.newCompany }}
         </h2>
         <p class="mt-1 text-sm text-n-slate-10">{{ T.directoryHelp }}</p>
