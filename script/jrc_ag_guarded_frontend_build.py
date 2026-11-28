@@ -23,7 +23,8 @@ STOP_RAM = 750 * 1024 ** 2
 BRANCH = 'refs/heads/codex/lab2-ag-consolidada-20261110'
 APPROVED_BRANCHES = {BRANCH, 'refs/heads/codex/whatsapp-history-order-20261111',
                      'refs/heads/codex/projecao-recibos-20261128',
-                     'refs/heads/codex/recibo-direto-sem-vinculo-20261128'}
+                     'refs/heads/codex/recibo-direto-sem-vinculo-20261128',
+                     'refs/heads/codex/obrigacao-terminal-e-contexto-20261128'}
 DELIVERY_BRANCH = 'refs/heads/codex/whatsapp-delivery-reliability-20261116'
 ROOT = Path(__file__).resolve().parent.parent
 

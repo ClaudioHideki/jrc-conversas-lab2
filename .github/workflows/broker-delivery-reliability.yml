@@ -187,7 +187,14 @@ jobs:
             spec/configs/schedule_spec.rb \
             --format progress --format json --out /tmp/delivery-history-outbound.json
           python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-history-outbound.json 60
-      - name: Search projection and pagination regressions
+        - name: Terminal obligations, Service Desk unit permissions and NICO notices
+          run: |
+            bundle exec rspec spec/models/jrc_broker_webhook_obligation_spec.rb \
+              spec/requests/api/v1/accounts/jrc_service_desk/{global_creation,unit_access,security}_spec.rb \
+              spec/requests/jrc_nico_notices_spec.rb \
+              --format progress --format json --out /tmp/delivery-terminal-context.json
+            python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-terminal-context.json 32
+        - name: Search projection and pagination regressions
         run: |
           bundle exec rspec spec/services/search_service_spec.rb \
             --format progress --format json --out /tmp/delivery-search.json
