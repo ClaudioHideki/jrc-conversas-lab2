@@ -1,0 +1,14 @@
+{
+  "source_parent": "4ce386fc4df7f43c63c1af7b9a482b2e911d1e4d",
+  "failed_run": 46122620009,
+  "failed_job": 140910215281,
+  "verified_artifact": 15254248428,
+  "artifact_sha256": "5f5bdd04d0ac75e1aeb8126c95631febe301ba2845e9bf12555abd949ed28ccf",
+  "actual_lint_offenses": 1,
+  "cop": "RSpec/InstanceVariable",
+  "line": 68,
+  "fix": "Return the already calculated SQL hash with the EXPLAIN value and use a local variable outside the authority block.",
+  "all_query_text_bindings_native_cases_expectations_and_workflow_steps_preserved": true,
+  "runtime_code_changed": false,
+  "native_or_Chrome_accepted": false
+}

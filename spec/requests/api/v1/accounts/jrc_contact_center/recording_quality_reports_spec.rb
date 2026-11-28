@@ -56,16 +56,16 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
   end
 
   def scale_query_plan
-    raw = JrcContactCenter::AuthorityTransaction.call(account: account, member: member) do
+    raw, query_sha256 = JrcContactCenter::AuthorityTransaction.call(account: account, member: member) do
       reader = JrcContactCenter::RecordedCalls.new(account: account, member: member)
       relation = reader.filtered({ page: 2 }).reorder(:id).limit(JrcContactCenter::RecordingQualityReport::MAX_RECORDS + 1)
       relation = relation.select(:id, :external_unique_id, :updated_at)
       sql = relation.to_sql
-      @scale_query_sha256 = Digest::SHA256.hexdigest(sql)
-      ApplicationRecord.connection.select_value("EXPLAIN (FORMAT JSON) #{sql}")
+      plan = ApplicationRecord.connection.select_value("EXPLAIN (FORMAT JSON) #{sql}")
+      [plan, Digest::SHA256.hexdigest(sql)]
     end
     parsed = raw.is_a?(String) ? JSON.parse(raw) : raw
-    safe_scale_plan_node(parsed.first.fetch('Plan')).merge('sql_sha256' => @scale_query_sha256)
+    safe_scale_plan_node(parsed.first.fetch('Plan')).merge('sql_sha256' => query_sha256)
   rescue StandardError => e
     { diagnostic_error_class: e.class.name }
   end
