@@ -1,1 +1,1983 @@
-{"figure":3,"title":"Equipes, filas e distribuição","status":"parcial","expected_functionality":"Equipes, filas e distribuicao","image":{"sha256":"9fec2a22692722854d3f10acf3d62fbdbfac4ead9ec5dabb16ae98a682541b7a","duplicate_of":null,"actually_visually_read":true,"present_in_both_verified_documents":true},"code":[{"path":"app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.vue","git_blob_at_validated_base":"903a8deca04a9618de35f460170e60041299e7e6","state":"presente_na_base_validada","current_sha256":"39de65ca7587029945091df09c110dc465f0a281a1bb24be94b8f17143ab9ad3"},{"path":"app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/TeamSupervisionEditor.vue","git_blob_at_validated_base":"09b0fc38aa2e6ebbc58e6879f6fd803d24a0057b","state":"presente_na_base_validada","current_sha256":"a28990a0fbab7d0eee574481522fb8686d2c749dc497cfbe349c10297d80e244"},{"path":"app/controllers/api/v1/accounts/jrc_contact_center/queue_memberships_controller.rb","git_blob_at_validated_base":"74f70b8f7bf5276d3881757800ccc077106d5d40","state":"presente_na_base_validada","current_sha256":"ec867e0574cc53b15af3012736dd726e908abb958aaee132fdd5cd2a44e0a1e0"},{"path":"app/services/jrc_contact_center/configured_queue_eligibility.rb","git_blob_at_validated_base":"bbbf3f6f78b1dde9ee5cc59b845c894c161af2e3","state":"presente_na_base_validada","current_sha256":"0c913ba58d27d159a18e59a2a66082fad111f621150913702e297686ce0b1c7b"},{"path":"app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.vue","git_blob_at_validated_base":"94e65a26f62e2cc3e0e8da981266ecd472b42844","state":"presente_na_base_validada","current_sha256":"9c155093317ec4b988ea7e34ff5ac0370893e6af7b2e3c1cd7ead3ddd535bae2"}],"planned_not_present":[],"tests_native_related":[{"path":"spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb","passed_examples":11,"sample_behaviours":["CreateContactCenterTeamSupervisions upgrades a populated native schema without adding memberships, permissions or supervision assignments","CreateContactCenterTeamSupervisions verifies the native fresh or reloaded schema idempotently without changing stored assignments","CreateContactCenterTeamSupervisions rejects an existing schema missing the composite teams account boundary"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/services/jrc_contact_center/queue_membership_spec.rb","passed_examples":1,"sample_behaviours":["JrcContactCenter::QueueMembership rejects a membership linking a queue to a user from another account at the database boundary"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/services/jrc_contact_center/team_roster_preview_spec.rb","passed_examples":21,"sample_behaviours":["JrcContactCenter::TeamRosterPreview reports the real configured queue impact while leaving all native records and caches unchanged","JrcContactCenter::TeamRosterPreview detects lost functional permission even if independent corporate coverage remains","JrcContactCenter::TeamRosterPreview detects lost corporate coverage even if the native profile still permits operation"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/services/jrc_contact_center/team_supervision_input_spec.rb","passed_examples":38,"sample_behaviours":["JrcContactCenter::TeamSupervisionInput preserves explicit primary and additional roles without generating membership or permission attributes","JrcContactCenter::TeamSupervisionInput does not invent a required primary or convert a missing selection into the first additional supervisor","JrcContactCenter::TeamSupervisionInput accepts an empty explicit selection and exact native bigint IDs without Float conversion"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/services/jrc_contact_center/team_supervision_scope_spec.rb","passed_examples":10,"sample_behaviours":["JrcContactCenter::TeamSupervisionScope accepts the exact native unit source without adding the supervisor to that team","JrcContactCenter::TeamSupervisionScope accepts an existing company grant for its unit but does not widen a unit grant to the whole company","JrcContactCenter::TeamSupervisionScope requires explicit group coverage for a group team, without assuming an administrator grant"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/models/jrc_contact_center/team_supervision_constraints_spec.rb","passed_examples":5,"sample_behaviours":["JrcContactCenter::TeamSupervision rejects a foreign native team through its composite account FK even when model validation is bypassed","JrcContactCenter::TeamSupervision rejects a foreign native member through its composite account FK even when model validation is bypassed","JrcContactCenter::TeamSupervision enforces one principal per team in PostgreSQL rather than relying only on a validation race"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/models/jrc_contact_center/team_supervision_spec.rb","passed_examples":11,"sample_behaviours":["JrcContactCenter::TeamSupervision keeps agent metadata separate from native memberships, queue participation and all existing permissions","JrcContactCenter::TeamSupervision keeps administrator metadata separate from native memberships, queue participation and all existing permissions","JrcContactCenter::TeamSupervision does not invent a primary when only an additional supervisor has been explicitly saved"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/membership_enrollment_spec.rb","passed_examples":4,"sample_behaviours":["Call Center queue enrollment eligibility rejects a new link to an inactive queue without persisting a partial enrollment","Call Center queue enrollment eligibility rejects reactivation on an inactive queue and preserves the existing inactive link","Call Center queue enrollment eligibility permits deactivation of an existing link after the queue was inactivated"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/membership_recipient_scope_spec.rb","passed_examples":8,"sample_behaviours":["Call Center queue enrollment preserves recipient corporate coverage does not transfer the administrator GROUP coverage to an eligible recipient","Call Center queue enrollment preserves recipient corporate coverage denies an eligible recipient covered only by another business unit","Call Center queue enrollment preserves recipient corporate coverage permits compatible explicit BUSINESS_UNIT coverage without changing that coverage"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb","passed_examples":10,"sample_behaviours":["Call Center enrollment requires explicit user eligibility marks a pending native user as unavailable without treating online presence as authorization","Call Center enrollment requires explicit user eligibility rejects a new participation assignment to a pending user","Call Center enrollment requires explicit user eligibility rejects supervision without implicitly activating a pending user"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/queue_calendar_removals_spec.rb","passed_examples":37,"sample_behaviours":["Explicit reviewed internal queue calendar removal and durable historical receipts removes only the reviewed internal association and preserves the pinned snapshot in native history","Explicit reviewed internal queue calendar removal and durable historical receipts recovers exactly the same committed removal receipt without a second audit or another write","Explicit reviewed internal queue calendar removal and durable historical receipts never removes a newer association when the old removal request is replayed"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/queue_calendars_spec.rb","passed_examples":31,"sample_behaviours":["Call Center queue calendar drafts pin reviewed snapshots without provider application reads an empty current queue association without creating a default or a provider command","Call Center queue calendar drafts pin reviewed snapshots without provider application pins the exact authorized snapshot and native scope and audits its real persisted association","Call Center queue calendar drafts pin reviewed snapshots without provider application recovers the same reviewed request without another mutation or audit despite the old revision tokens"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/queue_withdrawal_review_spec.rb","passed_examples":20,"sample_behaviours":["Call Center last configured eligible agent withdrawal shows the actual impact and blocks the first withdrawal without changing data or audit","Call Center last configured eligible agent withdrawal accepts an explicitly confirmed signed review and records it in the same native audit","Call Center last configured eligible agent withdrawal does not mistake false for explicit manager confirmation"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/team_roster_identity_spec.rb","passed_examples":6,"sample_behaviours":["Native team roster identity and inherited authority preserves the exact member and current inherited sources on a string-ID no-op replacement","Native team roster identity and inherited authority keeps selected members while adding and removing different members in the same string-ID request","Native team roster identity and inherited authority keeps native additive string-ID requests idempotent without replacing corporate or eligibility records"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/team_roster_withdrawal_spec.rb","passed_examples":26,"sample_behaviours":["Native team removal and last configured eligible queue agent preserves a string-ID no-op roster using the same canonical IDs as the withdrawal review","Native team removal and last configured eligible queue agent does not remove an existing agent when the proposed roster mixes string and numeric IDs for the same user","Native team removal and last configured eligible queue agent blocks unreviewed patch without changing membership, stored grants, queue, audit or cache"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/team_supervisions_spec.rb","passed_examples":20,"sample_behaviours":["Call Center native team supervision metadata reads actual empty metadata without creating a primary, membership or grant","Call Center native team supervision metadata saves and reloads primary/additional native members without adding distribution, recording or Nico rights","Call Center native team supervision metadata changes the principal atomically while preserving the old person as an explicit additional supervisor"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/services/jrc_crm/team_membership_projection_spec.rb","passed_examples":9,"sample_behaviours":["JrcCrm::TeamMembershipProjection withdraws only the proposed team source without changing its stored grant or membership","JrcCrm::TeamMembershipProjection preserves an independent direct grant during a prospective withdrawal","JrcCrm::TeamMembershipProjection preserves a valid independent team source"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"},{"path":"spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb","passed_examples":3,"sample_behaviours":["Native team supervision competing reviewed writes accepts exactly one real concurrent request and refuses the stale revision without duplicate metadata or audit","Native team supervision competing reviewed writes reauthorizes recipient after a real Account lock wait and rejects a previously reviewed selection after revocation","Native team supervision competing reviewed writes reauthorizes actor after a real Account lock wait and rejects a previously reviewed selection after revocation"],"evidence_sha":"8f362263c9b6c337c0bb2052b3c7fe75b9f4012a","level":"Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"}],"tests_vue_related_not_browser_proof":[],"chrome_related_titles_not_complete_figure_acceptance":["corporate boundary denies foreign units and queues for scoped configuration and writes","editing an existing non-voice queue preserves the native channel contract","last eligible queue withdrawal requires actual manager review and preserves native audit and scope","native URA calendar branches preserve the exact attested version across source edits, use explicit time and deny foreign scopes","native access team grants remain separate from eligibility and queue participation","native calendar usage inventory paginates actual current URAs, preserves history and denies foreign scopes","native queue eligibility is rechecked before saving and preserves the reviewed selection","native queue stale revision preserves the draft and requires explicit fresh confirmation","native team popup and member editor persist without granting queue participation","queue membership popup distinguishes supervision from participation and persists deactivation","queue pagination, persisted filtering, navigation and clearing filters","queue popup creates edits and reloads local data without claiming PABX application","registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya","scoped ACW native popup persists queue rules blocks conflicts and keeps scoped viewers denied","team roster last eligible withdrawal uses real native review, persistence and scoped audit","team source last eligible inactivation preserves shared roster and requires manager review","team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes","whole native team deletion preserves generic confirmation requires scoped manager review and records real audit"],"requirements":[{"id":"D1-P0056-C01","expected":"Gerenciar recursos de entrada e distribuição sem comprometer a topologia aprovada do PABX.","sources":[{"document":"doc1","paragraph":56,"clause":1},{"document":"doc2","paragraph":72,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0058-C01","expected":"Números: listar operadora, empresa, número, status, destino de entrada, calendário e URA/fila vinculada.","sources":[{"document":"doc1","paragraph":58,"clause":1},{"document":"doc2","paragraph":74,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0059-C01","expected":"Ramais: listar identificação, usuário, estado de registro, disponibilidade e capacidade do PABX; permitir associar ramal ao colaborador.","sources":[{"document":"doc1","paragraph":59,"clause":1},{"document":"doc2","paragraph":75,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0060-C01","expected":"Filas: listar nome, canal, agentes, supervisores, estratégia DAC, calendário, transbordo e status.","sources":[{"document":"doc1","paragraph":60,"clause":1},{"document":"doc2","paragraph":76,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0061-C01","expected":"Todas as ações de editar/vincular/criar devem abrir popup de dados e validações.","sources":[{"document":"doc1","paragraph":61,"clause":1},{"document":"doc2","paragraph":77,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0063-C01","expected":"Novo número: exclusivamente Super Admin; verificar propriedade/disponibilidade técnica antes de aplicar.","sources":[{"document":"doc1","paragraph":63,"clause":1},{"document":"doc2","paragraph":79,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0064-C01","expected":"Admin cria ramal somente se a infraestrutura autorizar e houver recurso disponível.","sources":[{"document":"doc1","paragraph":64,"clause":1},{"document":"doc2","paragraph":80,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0065-C01","expected":"Vínculo supervisor ≠ inclusão automática na escala de distribuição.","sources":[{"document":"doc1","paragraph":65,"clause":1},{"document":"doc2","paragraph":81,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0066-C01","expected":"Estratégias DAC devem ser configuradas na Gestão de Filas e reutilizadas em demais telas.","sources":[{"document":"doc1","paragraph":66,"clause":1},{"document":"doc2","paragraph":82,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0084-C01","expected":"Calendários reutilizáveis em números, filas e URAs.","sources":[{"document":"doc1","paragraph":84,"clause":1},{"document":"doc2","paragraph":118,"clause":1}],"figures":[3,12],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0086-C01","expected":"Expediente semanal com múltiplos intervalos por dia e fuso horário (padrão operacional America/Sao_Paulo quando aplicável).","sources":[{"document":"doc1","paragraph":86,"clause":1},{"document":"doc2","paragraph":120,"clause":1}],"figures":[3,12],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0087-C01","expected":"Feriados nacionais, estaduais, municipais e internos, fixos e móveis.","sources":[{"document":"doc1","paragraph":87,"clause":1},{"document":"doc2","paragraph":121,"clause":1}],"figures":[3,12],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0088-C01","expected":"Exceções: recessos, plantões, fechamento temporário e horários especiais.","sources":[{"document":"doc1","paragraph":88,"clause":1},{"document":"doc2","paragraph":122,"clause":1}],"figures":[3,12],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0089-C01","expected":"Aba Vínculos informa os componentes afetados e impactos em produção.","sources":[{"document":"doc1","paragraph":89,"clause":1},{"document":"doc2","paragraph":123,"clause":1}],"figures":[3,12],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0091-C01","expected":"Definir precedência explícita de exceções, feriados e horário regular.","sources":[{"document":"doc1","paragraph":91,"clause":1},{"document":"doc2","paragraph":125,"clause":1}],"figures":[3,12],"status":"implementado","verification":"Internal exception > holiday > weekly priority is shown in the editor and proved by persisted native previews in four actual Chrome modes. Thirteen relevant sources are byte-identical to the approved checkpoint.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":[],"candidate_test_reference_ids_not_approval":[],"historical_status_before_literal_acceptance":"parcial","literal_acceptance":{"path":"docs/jrc_contact_center/literal_calendar_precedence_acceptance_20261128.json","source_sha":"62f8f4b1defc467c3f5a14fd4817e36385beaebf","whole_figure_accepted":false},"historical_preacceptance_divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."]},{"id":"D1-P0092-C01","expected":"Identificar conflitos e calendários sobrepostos antes de salvar.","sources":[{"document":"doc1","paragraph":92,"clause":1},{"document":"doc2","paragraph":126,"clause":1}],"figures":[3,12],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D1-P0093-C01","expected":"Atualização que alterar o roteamento em produção requer validação e confirmação do PABX.","sources":[{"document":"doc1","paragraph":93,"clause":1},{"document":"doc2","paragraph":127,"clause":1}],"figures":[3,12],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0086-C01","expected":"Tela de consulta separada em Equipes e Filas de Atendimento, com pesquisa, paginacao, indicadores e acoes por registro.","sources":[{"document":"doc2","paragraph":86,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0087-C01","expected":"Acoes e resultado do clique: Nova Equipe e Nova Fila: abrir popups de cadastro e validar antes de salvar.","sources":[{"document":"doc2","paragraph":87,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0087-C02","expected":"Busca e paginacao: atuar separadamente nas duas tabelas.","sources":[{"document":"doc2","paragraph":87,"clause":2}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0087-C03","expected":"Menu de tres pontos de cada linha: abrir detalhes, editar, desativar ou vincular conforme direito do usuario.","sources":[{"document":"doc2","paragraph":87,"clause":3}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0087-C04","expected":"Atalhos Configurar Regras, Gerenciar Horarios e Configurar Monitoria: encaminhar aos recursos existentes.","sources":[{"document":"doc2","paragraph":87,"clause":4}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0088-C01","expected":"Campos e dados apresentados: Equipes: nome, supervisor, quantidade de agentes, filas vinculadas e status.","sources":[{"document":"doc2","paragraph":88,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0088-C02","expected":"Filas: nome, canal, estrategia de distribuicao, quantidade de participantes e status.","sources":[{"document":"doc2","paragraph":88,"clause":2}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0088-C03","expected":"Indicadores do topo devem derivar de registros reais e escopados; evitar considerar supervisor como agente por padrao.","sources":[{"document":"doc2","paragraph":88,"clause":3}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0089-C01","expected":"Regras e permissoes: Equipe e fila sao conceitos relacionados, nao equivalentes.","sources":[{"document":"doc2","paragraph":89,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0089-C02","expected":"Um agente pode participar de varias filas, com elegibilidade e disponibilidade independentes.","sources":[{"document":"doc2","paragraph":89,"clause":2}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0089-C03","expected":"DAC e transbordo devem ser configurados na Gestao de Filas e nunca recriados em atalhos.","sources":[{"document":"doc2","paragraph":89,"clause":3}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0089-C04","expected":"Somente publicar no PABX apos validar limite e mapeamentos.","sources":[{"document":"doc2","paragraph":89,"clause":4}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0090-C01","expected":"Estados de erro e excecoes: Impedir vinculo de membro inativo, inexistente ou de outra empresa.","sources":[{"document":"doc2","paragraph":90,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0090-C02","expected":"Mudanca que deixe fila sem cobertura deve advertir impacto antes da confirmacao; falha de sincronizacao permanece pendente/erro com auditoria.","sources":[{"document":"doc2","paragraph":90,"clause":2}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0092-C01","expected":"• F03-A: criar equipe e vincular supervisor nao inclui esse usuario automaticamente na distribuicao.","sources":[{"document":"doc2","paragraph":92,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]},{"id":"D2-P0093-C01","expected":"• F03-B: mudar estrategia de uma fila gera validacao tecnica e nao aparece como aplicada sem confirmacao.","sources":[{"document":"doc2","paragraph":93,"clause":1}],"figures":[3],"status":"parcial","verification":"Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.","code_reference_ids":[0,1,2,3,4],"test_reference_ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"reference_granularity":"Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.","divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"candidate_test_reference_ids_not_approval":[]}],"divergences":["Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."],"previous_matrix_is_historical_not_acceptance":true,"complete_figure_accepted":false,"tests_candidate_not_validated":[]}
+{
+  "figure": 3,
+  "title": "Equipes, filas e distribuição",
+  "status": "parcial",
+  "expected_functionality": "Equipes, filas e distribuicao",
+  "image": {
+    "sha256": "9fec2a22692722854d3f10acf3d62fbdbfac4ead9ec5dabb16ae98a682541b7a",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.vue",
+      "git_blob_at_validated_base": "903a8deca04a9618de35f460170e60041299e7e6",
+      "state": "presente_na_base_validada",
+      "current_sha256": "39de65ca7587029945091df09c110dc465f0a281a1bb24be94b8f17143ab9ad3"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/TeamSupervisionEditor.vue",
+      "git_blob_at_validated_base": "09b0fc38aa2e6ebbc58e6879f6fd803d24a0057b",
+      "state": "presente_na_base_validada",
+      "current_sha256": "a28990a0fbab7d0eee574481522fb8686d2c749dc497cfbe349c10297d80e244"
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_contact_center/queue_memberships_controller.rb",
+      "git_blob_at_validated_base": "74f70b8f7bf5276d3881757800ccc077106d5d40",
+      "state": "presente_na_base_validada",
+      "current_sha256": "ec867e0574cc53b15af3012736dd726e908abb958aaee132fdd5cd2a44e0a1e0"
+    },
+    {
+      "path": "app/services/jrc_contact_center/configured_queue_eligibility.rb",
+      "git_blob_at_validated_base": "bbbf3f6f78b1dde9ee5cc59b845c894c161af2e3",
+      "state": "presente_na_base_validada",
+      "current_sha256": "0c913ba58d27d159a18e59a2a66082fad111f621150913702e297686ce0b1c7b"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.vue",
+      "git_blob_at_validated_base": "94e65a26f62e2cc3e0e8da981266ecd472b42844",
+      "state": "presente_na_base_validada",
+      "current_sha256": "9c155093317ec4b988ea7e34ff5ac0370893e6af7b2e3c1cd7ead3ddd535bae2"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb",
+      "passed_examples": 11,
+      "sample_behaviours": [
+        "CreateContactCenterTeamSupervisions upgrades a populated native schema without adding memberships, permissions or supervision assignments",
+        "CreateContactCenterTeamSupervisions verifies the native fresh or reloaded schema idempotently without changing stored assignments",
+        "CreateContactCenterTeamSupervisions rejects an existing schema missing the composite teams account boundary"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/queue_membership_spec.rb",
+      "passed_examples": 1,
+      "sample_behaviours": [
+        "JrcContactCenter::QueueMembership rejects a membership linking a queue to a user from another account at the database boundary"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/team_roster_preview_spec.rb",
+      "passed_examples": 21,
+      "sample_behaviours": [
+        "JrcContactCenter::TeamRosterPreview reports the real configured queue impact while leaving all native records and caches unchanged",
+        "JrcContactCenter::TeamRosterPreview detects lost functional permission even if independent corporate coverage remains",
+        "JrcContactCenter::TeamRosterPreview detects lost corporate coverage even if the native profile still permits operation"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/team_supervision_input_spec.rb",
+      "passed_examples": 38,
+      "sample_behaviours": [
+        "JrcContactCenter::TeamSupervisionInput preserves explicit primary and additional roles without generating membership or permission attributes",
+        "JrcContactCenter::TeamSupervisionInput does not invent a required primary or convert a missing selection into the first additional supervisor",
+        "JrcContactCenter::TeamSupervisionInput accepts an empty explicit selection and exact native bigint IDs without Float conversion"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/team_supervision_scope_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "JrcContactCenter::TeamSupervisionScope accepts the exact native unit source without adding the supervisor to that team",
+        "JrcContactCenter::TeamSupervisionScope accepts an existing company grant for its unit but does not widen a unit grant to the whole company",
+        "JrcContactCenter::TeamSupervisionScope requires explicit group coverage for a group team, without assuming an administrator grant"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/team_supervision_constraints_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "JrcContactCenter::TeamSupervision rejects a foreign native team through its composite account FK even when model validation is bypassed",
+        "JrcContactCenter::TeamSupervision rejects a foreign native member through its composite account FK even when model validation is bypassed",
+        "JrcContactCenter::TeamSupervision enforces one principal per team in PostgreSQL rather than relying only on a validation race"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/team_supervision_spec.rb",
+      "passed_examples": 11,
+      "sample_behaviours": [
+        "JrcContactCenter::TeamSupervision keeps agent metadata separate from native memberships, queue participation and all existing permissions",
+        "JrcContactCenter::TeamSupervision keeps administrator metadata separate from native memberships, queue participation and all existing permissions",
+        "JrcContactCenter::TeamSupervision does not invent a primary when only an additional supervisor has been explicitly saved"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/membership_enrollment_spec.rb",
+      "passed_examples": 4,
+      "sample_behaviours": [
+        "Call Center queue enrollment eligibility rejects a new link to an inactive queue without persisting a partial enrollment",
+        "Call Center queue enrollment eligibility rejects reactivation on an inactive queue and preserves the existing inactive link",
+        "Call Center queue enrollment eligibility permits deactivation of an existing link after the queue was inactivated"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/membership_recipient_scope_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "Call Center queue enrollment preserves recipient corporate coverage does not transfer the administrator GROUP coverage to an eligible recipient",
+        "Call Center queue enrollment preserves recipient corporate coverage denies an eligible recipient covered only by another business unit",
+        "Call Center queue enrollment preserves recipient corporate coverage permits compatible explicit BUSINESS_UNIT coverage without changing that coverage"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Call Center enrollment requires explicit user eligibility marks a pending native user as unavailable without treating online presence as authorization",
+        "Call Center enrollment requires explicit user eligibility rejects a new participation assignment to a pending user",
+        "Call Center enrollment requires explicit user eligibility rejects supervision without implicitly activating a pending user"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendar_removals_spec.rb",
+      "passed_examples": 37,
+      "sample_behaviours": [
+        "Explicit reviewed internal queue calendar removal and durable historical receipts removes only the reviewed internal association and preserves the pinned snapshot in native history",
+        "Explicit reviewed internal queue calendar removal and durable historical receipts recovers exactly the same committed removal receipt without a second audit or another write",
+        "Explicit reviewed internal queue calendar removal and durable historical receipts never removes a newer association when the old removal request is replayed"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendars_spec.rb",
+      "passed_examples": 31,
+      "sample_behaviours": [
+        "Call Center queue calendar drafts pin reviewed snapshots without provider application reads an empty current queue association without creating a default or a provider command",
+        "Call Center queue calendar drafts pin reviewed snapshots without provider application pins the exact authorized snapshot and native scope and audits its real persisted association",
+        "Call Center queue calendar drafts pin reviewed snapshots without provider application recovers the same reviewed request without another mutation or audit despite the old revision tokens"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/queue_withdrawal_review_spec.rb",
+      "passed_examples": 20,
+      "sample_behaviours": [
+        "Call Center last configured eligible agent withdrawal shows the actual impact and blocks the first withdrawal without changing data or audit",
+        "Call Center last configured eligible agent withdrawal accepts an explicitly confirmed signed review and records it in the same native audit",
+        "Call Center last configured eligible agent withdrawal does not mistake false for explicit manager confirmation"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/team_roster_identity_spec.rb",
+      "passed_examples": 6,
+      "sample_behaviours": [
+        "Native team roster identity and inherited authority preserves the exact member and current inherited sources on a string-ID no-op replacement",
+        "Native team roster identity and inherited authority keeps selected members while adding and removing different members in the same string-ID request",
+        "Native team roster identity and inherited authority keeps native additive string-ID requests idempotent without replacing corporate or eligibility records"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/team_roster_withdrawal_spec.rb",
+      "passed_examples": 26,
+      "sample_behaviours": [
+        "Native team removal and last configured eligible queue agent preserves a string-ID no-op roster using the same canonical IDs as the withdrawal review",
+        "Native team removal and last configured eligible queue agent does not remove an existing agent when the proposed roster mixes string and numeric IDs for the same user",
+        "Native team removal and last configured eligible queue agent blocks unreviewed patch without changing membership, stored grants, queue, audit or cache"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/team_supervisions_spec.rb",
+      "passed_examples": 20,
+      "sample_behaviours": [
+        "Call Center native team supervision metadata reads actual empty metadata without creating a primary, membership or grant",
+        "Call Center native team supervision metadata saves and reloads primary/additional native members without adding distribution, recording or Nico rights",
+        "Call Center native team supervision metadata changes the principal atomically while preserving the old person as an explicit additional supervisor"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_crm/team_membership_projection_spec.rb",
+      "passed_examples": 9,
+      "sample_behaviours": [
+        "JrcCrm::TeamMembershipProjection withdraws only the proposed team source without changing its stored grant or membership",
+        "JrcCrm::TeamMembershipProjection preserves an independent direct grant during a prospective withdrawal",
+        "JrcCrm::TeamMembershipProjection preserves a valid independent team source"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb",
+      "passed_examples": 3,
+      "sample_behaviours": [
+        "Native team supervision competing reviewed writes accepts exactly one real concurrent request and refuses the stale revision without duplicate metadata or audit",
+        "Native team supervision competing reviewed writes reauthorizes recipient after a real Account lock wait and rejects a previously reviewed selection after revocation",
+        "Native team supervision competing reviewed writes reauthorizes actor after a real Account lock wait and rejects a previously reviewed selection after revocation"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "corporate boundary denies foreign units and queues for scoped configuration and writes",
+    "editing an existing non-voice queue preserves the native channel contract",
+    "last eligible queue withdrawal requires actual manager review and preserves native audit and scope",
+    "native URA calendar branches preserve the exact attested version across source edits, use explicit time and deny foreign scopes",
+    "native access team grants remain separate from eligibility and queue participation",
+    "native calendar usage inventory paginates actual current URAs, preserves history and denies foreign scopes",
+    "native queue eligibility is rechecked before saving and preserves the reviewed selection",
+    "native queue stale revision preserves the draft and requires explicit fresh confirmation",
+    "native team popup and member editor persist without granting queue participation",
+    "queue membership popup distinguishes supervision from participation and persists deactivation",
+    "queue pagination, persisted filtering, navigation and clearing filters",
+    "queue popup creates edits and reloads local data without claiming PABX application",
+    "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya",
+    "scoped ACW native popup persists queue rules blocks conflicts and keeps scoped viewers denied",
+    "team roster last eligible withdrawal uses real native review, persistence and scoped audit",
+    "team source last eligible inactivation preserves shared roster and requires manager review",
+    "team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes",
+    "whole native team deletion preserves generic confirmation requires scoped manager review and records real audit"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0056-C01",
+      "expected": "Gerenciar recursos de entrada e distribuição sem comprometer a topologia aprovada do PABX.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 56,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 72,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0058-C01",
+      "expected": "Números: listar operadora, empresa, número, status, destino de entrada, calendário e URA/fila vinculada.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 58,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 74,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0059-C01",
+      "expected": "Ramais: listar identificação, usuário, estado de registro, disponibilidade e capacidade do PABX; permitir associar ramal ao colaborador.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 59,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 75,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0060-C01",
+      "expected": "Filas: listar nome, canal, agentes, supervisores, estratégia DAC, calendário, transbordo e status.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 60,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 76,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0061-C01",
+      "expected": "Todas as ações de editar/vincular/criar devem abrir popup de dados e validações.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 61,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 77,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0063-C01",
+      "expected": "Novo número: exclusivamente Super Admin; verificar propriedade/disponibilidade técnica antes de aplicar.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 63,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 79,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0064-C01",
+      "expected": "Admin cria ramal somente se a infraestrutura autorizar e houver recurso disponível.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 64,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 80,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0065-C01",
+      "expected": "Vínculo supervisor ≠ inclusão automática na escala de distribuição.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 65,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 81,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0066-C01",
+      "expected": "Estratégias DAC devem ser configuradas na Gestão de Filas e reutilizadas em demais telas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 66,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 82,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0084-C01",
+      "expected": "Calendários reutilizáveis em números, filas e URAs.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 84,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 118,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0086-C01",
+      "expected": "Expediente semanal com múltiplos intervalos por dia e fuso horário (padrão operacional America/Sao_Paulo quando aplicável).",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 86,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 120,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3,
+        12
+      ],
+      "status": "implementado",
+      "verification": "Aceite literal da configuração interna: expediente por dia com múltiplos intervalos, fuso da unidade revisado e exceções datadas com períodos explícitos ou fechamento. APIs com persistência/recarga, negações e Chrome real nos quatro modos; 49 arquivos revisados continuam idênticos ao checkpoint da prova. Não comprova aplicação no PABX.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_status_before_exact_literal_evidence_reuse": "parcial",
+      "literal_acceptance_evidence": {
+        "document": "docs/jrc_contact_center/calendar_weekly_exception_literal_acceptance_20261128.json",
+        "sha256": "02095568f340be8336861634179d2c731b518bedbb1c22e9b3d0ea36d8ba0c14",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "run": 45984659600,
+        "reused_without_reexecution": true
+      },
+      "historical_divergences_before_literal_acceptance": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ]
+    },
+    {
+      "id": "D1-P0087-C01",
+      "expected": "Feriados nacionais, estaduais, municipais e internos, fixos e móveis.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 87,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 121,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0088-C01",
+      "expected": "Exceções: recessos, plantões, fechamento temporário e horários especiais.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 88,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 122,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3,
+        12
+      ],
+      "status": "implementado",
+      "verification": "Aceite literal da configuração interna: expediente por dia com múltiplos intervalos, fuso da unidade revisado e exceções datadas com períodos explícitos ou fechamento. APIs com persistência/recarga, negações e Chrome real nos quatro modos; 49 arquivos revisados continuam idênticos ao checkpoint da prova. Não comprova aplicação no PABX.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [],
+      "candidate_test_reference_ids_not_approval": [],
+      "previous_status_before_exact_literal_evidence_reuse": "parcial",
+      "literal_acceptance_evidence": {
+        "document": "docs/jrc_contact_center/calendar_weekly_exception_literal_acceptance_20261128.json",
+        "sha256": "02095568f340be8336861634179d2c731b518bedbb1c22e9b3d0ea36d8ba0c14",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "run": 45984659600,
+        "reused_without_reexecution": true
+      },
+      "historical_divergences_before_literal_acceptance": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ]
+    },
+    {
+      "id": "D1-P0089-C01",
+      "expected": "Aba Vínculos informa os componentes afetados e impactos em produção.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 89,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 123,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0091-C01",
+      "expected": "Definir precedência explícita de exceções, feriados e horário regular.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 91,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 125,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3,
+        12
+      ],
+      "status": "implementado",
+      "verification": "Internal exception > holiday > weekly priority is shown in the editor and proved by persisted native previews in four actual Chrome modes. Thirteen relevant sources are byte-identical to the approved checkpoint.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [],
+      "candidate_test_reference_ids_not_approval": [],
+      "historical_status_before_literal_acceptance": "parcial",
+      "literal_acceptance": {
+        "path": "docs/jrc_contact_center/literal_calendar_precedence_acceptance_20261128.json",
+        "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+        "whole_figure_accepted": false
+      },
+      "historical_preacceptance_divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ]
+    },
+    {
+      "id": "D1-P0092-C01",
+      "expected": "Identificar conflitos e calendários sobrepostos antes de salvar.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 92,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 126,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D1-P0093-C01",
+      "expected": "Atualização que alterar o roteamento em produção requer validação e confirmação do PABX.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 93,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 127,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0086-C01",
+      "expected": "Tela de consulta separada em Equipes e Filas de Atendimento, com pesquisa, paginacao, indicadores e acoes por registro.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 86,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0087-C01",
+      "expected": "Acoes e resultado do clique: Nova Equipe e Nova Fila: abrir popups de cadastro e validar antes de salvar.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 87,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0087-C02",
+      "expected": "Busca e paginacao: atuar separadamente nas duas tabelas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 87,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0087-C03",
+      "expected": "Menu de tres pontos de cada linha: abrir detalhes, editar, desativar ou vincular conforme direito do usuario.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 87,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0087-C04",
+      "expected": "Atalhos Configurar Regras, Gerenciar Horarios e Configurar Monitoria: encaminhar aos recursos existentes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 87,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0088-C01",
+      "expected": "Campos e dados apresentados: Equipes: nome, supervisor, quantidade de agentes, filas vinculadas e status.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 88,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0088-C02",
+      "expected": "Filas: nome, canal, estrategia de distribuicao, quantidade de participantes e status.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 88,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0088-C03",
+      "expected": "Indicadores do topo devem derivar de registros reais e escopados; evitar considerar supervisor como agente por padrao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 88,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0089-C01",
+      "expected": "Regras e permissoes: Equipe e fila sao conceitos relacionados, nao equivalentes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 89,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0089-C02",
+      "expected": "Um agente pode participar de varias filas, com elegibilidade e disponibilidade independentes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 89,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0089-C03",
+      "expected": "DAC e transbordo devem ser configurados na Gestao de Filas e nunca recriados em atalhos.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 89,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0089-C04",
+      "expected": "Somente publicar no PABX apos validar limite e mapeamentos.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 89,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0090-C01",
+      "expected": "Estados de erro e excecoes: Impedir vinculo de membro inativo, inexistente ou de outra empresa.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 90,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0090-C02",
+      "expected": "Mudanca que deixe fila sem cobertura deve advertir impacto antes da confirmacao; falha de sincronizacao permanece pendente/erro com auditoria.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 90,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0092-C01",
+      "expected": "• F03-A: criar equipe e vincular supervisor nao inclui esse usuario automaticamente na distribuicao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 92,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    },
+    {
+      "id": "D2-P0093-C01",
+      "expected": "• F03-B: mudar estrategia de uma fila gera validacao tecnica e nao aparece como aplicada sem confirmacao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 93,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        3
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ],
+      "candidate_test_reference_ids_not_approval": []
+    }
+  ],
+  "divergences": [
+    "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": [],
+  "calendar_weekly_and_exception_literal_acceptance": {
+    "ids": [
+      "D1-P0086-C01",
+      "D1-P0088-C01"
+    ],
+    "document": "docs/jrc_contact_center/calendar_weekly_exception_literal_acceptance_20261128.json",
+    "whole_figure_accepted": false,
+    "PABX_homologated": false
+  }
+}

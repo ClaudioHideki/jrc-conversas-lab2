@@ -49,6 +49,23 @@ const completingIds = reactive(new Set());
 const optionsError = ref('');
 const showForm = ref(false);
 const editingActivityId = ref(null);
+// Native links may address an authorized activity outside the current list page.
+// The existing dialog revalidates the record against the current account API.
+const closeActivity = () => {
+  editingActivityId.value = null;
+  if (!Object.hasOwn(route.query, 'activityId')) return;
+  const query = { ...route.query };
+  delete query.activityId;
+  router.replace({ query });
+};
+const openRouteActivity = () => {
+  if (disposed) return;
+  const value = route.query.activityId;
+  const id =
+    typeof value === 'string' && /^[1-9]\d*$/.test(value) ? Number(value) : 0;
+  editingActivityId.value = Number.isSafeInteger(id) && id > 0 ? id : null;
+};
+watch(() => route.query.activityId, openRouteActivity, { immediate: true });
 const agendaRefresh = ref(0);
 const saving = ref(false);
 const deals = ref([]);
@@ -277,7 +294,7 @@ watch(identity, () => {
   generation += 1;
   activityDraft.flush();
   showForm.value = false;
-  editingActivityId.value = null;
+  closeActivity();
   deals.value = [];
   saving.value = false;
   completingIds.clear();
@@ -304,8 +321,9 @@ onMounted(async () => {
       />
       <ActivityEditDialog
         v-if="editingActivityId"
+        :key="`${identity}:${editingActivityId}`"
         :activity-id="editingActivityId"
-        @close="editingActivityId = null"
+        @close="closeActivity"
         @saved="activitySaved"
       />
       <div

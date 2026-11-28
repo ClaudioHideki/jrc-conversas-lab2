@@ -1,0 +1,53 @@
+{
+  "source_parent": "0712ab9e6d501dc878c0f3310963d8fa31a3cd83",
+  "figures": [
+    10,
+    21,
+    22
+  ],
+  "identified_functional_gap": "The existing destination contract creates crm_activities?activityId=ID, but the native ActivitiesIndex ignored that ID and opened only a list. A record outside the first list could not be opened by that shortcut.",
+  "user_delivery": "Open the exact existing authorized ActivityEditDialog from a confirmed native automation or Relationship receipt, reload it, switch explicitly between records, and discard its old private context when membership changes.",
+  "native_reuse": [
+    "Existing CRM activity route, ActivityEditDialog and showInAccount/updateInAccount APIs.",
+    "Existing authorityScope, optimistic edit_version and account-scoped backend policies remain unchanged.",
+    "Native current unit timezone, CalendarDefinition and existing saved calendar previews are reused for two independently proven Word clauses."
+  ],
+  "security": [
+    "A query ID is only an object selector; the native API remains the read/write authority.",
+    "Reject arrays, noncanonical integers and numbers unsafe for the existing numeric dialog prop.",
+    "Profile/account replacement closes and removes the old activity parameter instead of reopening it under new rights.",
+    "Closing consumes only activityId; existing segment and other query filters remain.",
+    "No new model, permission, grant, migration or external operation."
+  ],
+  "ruby_QA_correction": {
+    "failed_run": 46130650400,
+    "failed_job": 140934822751,
+    "sanitized_log_sha256": "f26a53a016986fe51fe12d5de15954773f1f7006d8e7fc5a4299261a2fd1f192",
+    "cause": "Synthetic relationship fixture method ABC31.4 exceeds26; direct keyword is required instead of merging an owner keyword.",
+    "correction": "Separate existing explicit fixture eligibility from the repeated portfolio creation; preserve the same21 authorized portfolios, one excluded portfolio, owned environment guards and private helper visibility.",
+    "early_preflight": "One extra strict RuboCop command inspects the21 distinct native context and Relationship files together before the retained individual gates; every previous command and all101 steps remain intact."
+  },
+  "new_validation_prepared_not_results": {
+    "new_Vue_cases": 10,
+    "preserved_native_CRM_Vue_regressions": 20,
+    "focused_Vue_total": 30,
+    "focused_suites": 4,
+    "main_Vue_expected_unchanged": 2391,
+    "native_RSpec_expected_unchanged": 4194,
+    "Chrome_expected_unchanged": 300,
+    "four_existing_Relationship_Chrome_flows_strengthened": [
+      "Require real200 from exact native CRM show API.",
+      "Open and reload the actual native edit dialog title field.",
+      "Withdraw current profile and verify private editor fields disappear."
+    ],
+    "old_Chrome_assertions_and_screenshot_count_preserved": true
+  },
+  "calendar_literal_acceptance_is_historical_source_compatible_not_new_CI": "docs/jrc_contact_center/calendar_weekly_exception_literal_acceptance_20261128.json",
+  "external_dependencies": [
+    "No PABX write/ACK contract invented.",
+    "No Nico or recording provider homologation inferred.",
+    "Notification recipients requested as a separate functional decision; no new grants inferred."
+  ],
+  "current_native_or_Chrome_accepted": false,
+  "whole_figure_or_Part1_accepted": false
+}

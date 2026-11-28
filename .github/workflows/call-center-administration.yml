@@ -113,6 +113,22 @@ jobs:
         run: |
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD -- app/javascript | grep -E '\.(js|vue)$')
           pnpm exec eslint "${files[@]}"
+      - name: Native activity destination opens the existing authorized dialog
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/crm/views/activities/spec/ActivityDirectNavigation.spec.js app/javascript/dashboard/routes/dashboard/crm/views/activities/spec/ActivitiesIndex.spec.js app/javascript/dashboard/routes/dashboard/crm/views/activities/spec/ActivitiesAuthority.spec.js app/javascript/dashboard/routes/dashboard/crm/components/shared/spec/ActivityEditDialog.spec.js --maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile=/tmp/call-center-native-activity-vitest.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-native-activity-vitest.json').read_text())
+          assert report['numTotalTests'] == report['numPassedTests'] == 30
+          assert report['numFailedTests'] == report['numPendingTests'] == 0
+          assert len(report['testResults']) == 4
+          expected = {'ActivityDirectNavigation.spec.js': 10, 'ActivitiesIndex.spec.js': 2, 'ActivitiesAuthority.spec.js': 10, 'ActivityEditDialog.spec.js': 8}
+          for suite in report['testResults']:
+              assert suite['status'] == 'passed'
+              assert len(suite['assertionResults']) == expected[Path(suite['name']).name]
+              assert all(case['status'] == 'passed' and not case['failureMessages'] for case in suite['assertionResults'])
+          PY
       - name: Native CRM destination navigation and existing Lead workflows
         run: |
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/crm/views/leads/spec/LeadHistoryNavigation.spec.js \
@@ -225,6 +241,7 @@ jobs:
       - name: Native recording customer context fixture lint before broad regressions
         id: customer_records_lint
         run: |
+          bundle exec rubocop script/jrc_call_center_recording_customer_records_seed.rb script/jrc_call_center_recordings_seed.rb spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb app/controllers/api/v1/accounts/jrc_contact_center/recording_customer_links_controller.rb app/services/jrc_contact_center/recording_customer_link.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_links_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_link_concurrency_spec.rb spec/integration/jrc_contact_center/owned_recording_customer_link_evidence.rb script/jrc_call_center_recording_customer_link_evidence.rb app/services/jrc_contact_center/recording_customer_link_audit.rb spec/services/jrc_contact_center/recording_customer_link_audit_spec.rb app/services/jrc_contact_center/configuration_audit_scope.rb app/services/jrc_contact_center/recording_relationship_scope.rb app/services/jrc_contact_center/recording_relationship_write.rb app/controllers/api/v1/accounts/jrc_contact_center/recording_relationship_activities_controller.rb spec/support/contact_center_recording_relationship.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_relationship_activities_spec.rb spec/models/jrc_crm/relationship_activity_identity_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_relationship_concurrency_spec.rb spec/integration/jrc_contact_center/owned_recording_relationship_evidence.rb script/jrc_call_center_recording_relationship_evidence.rb --format progress --format json --out /tmp/call-center-recording-functional-preflight-lint.json
           bundle exec rubocop script/jrc_call_center_recording_customer_records_seed.rb script/jrc_call_center_recordings_seed.rb spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb app/controllers/api/v1/accounts/jrc_contact_center/recording_customer_links_controller.rb app/services/jrc_contact_center/recording_customer_link.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_links_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_link_concurrency_spec.rb spec/integration/jrc_contact_center/owned_recording_customer_link_evidence.rb script/jrc_call_center_recording_customer_link_evidence.rb app/services/jrc_contact_center/recording_customer_link_audit.rb spec/services/jrc_contact_center/recording_customer_link_audit_spec.rb app/services/jrc_contact_center/configuration_audit_scope.rb --format progress --format json --out /tmp/call-center-customer-records-lint.json
           python3 -B - <<'PY'
           import json

@@ -1,0 +1,1124 @@
+{
+  "accepted_source": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+  "current_reference_checked": "0712ab9e6d501dc878c0f3310963d8fa31a3cd83",
+  "trees_complete_not_truncated": true,
+  "selected_paths": 49,
+  "changed": [],
+  "paths": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/base_controller.rb": {
+      "git_blob_at_accepted": "67ce034007da51a4875160cbcf30f855134bc44f",
+      "git_blob_at_current": "67ce034007da51a4875160cbcf30f855134bc44f"
+    },
+    "app/controllers/api/v1/accounts/jrc_contact_center/queue_calendars_controller.rb": {
+      "git_blob_at_accepted": "7c23aabf0033c087664c246f01e70b60e9ede5f8",
+      "git_blob_at_current": "7c23aabf0033c087664c246f01e70b60e9ede5f8"
+    },
+    "app/controllers/api/v1/accounts/jrc_contact_center/unit_calendars_controller.rb": {
+      "git_blob_at_accepted": "3dd7ad64c9b2e9b6e1a2e697c700d543e4df6036",
+      "git_blob_at_current": "3dd7ad64c9b2e9b6e1a2e697c700d543e4df6036"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarDetailsFields.spec.js": {
+      "git_blob_at_accepted": "84695e8d93f08a2501f581cc20be27609fd4a152",
+      "git_blob_at_current": "84695e8d93f08a2501f581cc20be27609fd4a152"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarDetailsFields.vue": {
+      "git_blob_at_accepted": "c9591fddfe582733447dc7520eb270c7ac277573",
+      "git_blob_at_current": "c9591fddfe582733447dc7520eb270c7ac277573"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarEditorDialog.spec.js": {
+      "git_blob_at_accepted": "d4287a9c41547cb1be0ef016b750a11ea62b6989",
+      "git_blob_at_current": "d4287a9c41547cb1be0ef016b750a11ea62b6989"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarEditorDialog.vue": {
+      "git_blob_at_accepted": "3bb66f660e8c89f1570513d6ba5daf5afcbc4879",
+      "git_blob_at_current": "3bb66f660e8c89f1570513d6ba5daf5afcbc4879"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarHoursInput.vue": {
+      "git_blob_at_accepted": "5bf011c4ca07e1ac62c450e1eeba03f956828959",
+      "git_blob_at_current": "5bf011c4ca07e1ac62c450e1eeba03f956828959"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarIvrUsages.spec.js": {
+      "git_blob_at_accepted": "5f4c31a92aeeff98eb49186dccc1a7ebbaee81ab",
+      "git_blob_at_current": "5f4c31a92aeeff98eb49186dccc1a7ebbaee81ab"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarIvrUsages.vue": {
+      "git_blob_at_accepted": "9f67dbd948ba80718e8e386d3d083dbbd759e861",
+      "git_blob_at_current": "9f67dbd948ba80718e8e386d3d083dbbd759e861"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarLibrary.spec.js": {
+      "git_blob_at_accepted": "cebadf2d796b344bd2ba1882a54b828f445a80c6",
+      "git_blob_at_current": "cebadf2d796b344bd2ba1882a54b828f445a80c6"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarLibrary.vue": {
+      "git_blob_at_accepted": "056b4a8da7f2d6d9d43ab6ad1cf2187f3122b1a2",
+      "git_blob_at_current": "056b4a8da7f2d6d9d43ab6ad1cf2187f3122b1a2"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrCalendarFlow.spec.js": {
+      "git_blob_at_accepted": "b286630a0837afab48e6c1c7f58f5fc9b96e340f",
+      "git_blob_at_current": "b286630a0837afab48e6c1c7f58f5fc9b96e340f"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrCalendarReferencePicker.vue": {
+      "git_blob_at_accepted": "ed7d012d0fd635395a8502476dab94b350bcf484",
+      "git_blob_at_current": "ed7d012d0fd635395a8502476dab94b350bcf484"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.spec.js": {
+      "git_blob_at_accepted": "293910a92eab8ab591f7d444a7d5c7b6f6791f56",
+      "git_blob_at_current": "293910a92eab8ab591f7d444a7d5c7b6f6791f56"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.vue": {
+      "git_blob_at_accepted": "94e65a26f62e2cc3e0e8da981266ecd472b42844",
+      "git_blob_at_current": "94e65a26f62e2cc3e0e8da981266ecd472b42844"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarRemoval.spec.js": {
+      "git_blob_at_accepted": "3d3ca0afa2b35fbfcaa8b00d606d205155b277df",
+      "git_blob_at_current": "3d3ca0afa2b35fbfcaa8b00d606d205155b277df"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarRemoval.vue": {
+      "git_blob_at_accepted": "110871604a23bb0cae1ae5490b44b802dfca31b2",
+      "git_blob_at_current": "110871604a23bb0cae1ae5490b44b802dfca31b2"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useCalendarIvrUsages.js": {
+      "git_blob_at_accepted": "b083464a1c71b4e7ea5573e11382eae758c3abb5",
+      "git_blob_at_current": "b083464a1c71b4e7ea5573e11382eae758c3abb5"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useIvrCalendarReference.js": {
+      "git_blob_at_accepted": "a53636e09cacc6860c4230c0e951b721d492abf7",
+      "git_blob_at_current": "a53636e09cacc6860c4230c0e951b721d492abf7"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useIvrCalendarReference.spec.js": {
+      "git_blob_at_accepted": "f3fec3ebfd3fa8d5733f35dda1002d72b24c9d12",
+      "git_blob_at_current": "f3fec3ebfd3fa8d5733f35dda1002d72b24c9d12"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarBindings.js": {
+      "git_blob_at_accepted": "6346a05d4688be2bf43ed6c11ab090e09e151263",
+      "git_blob_at_current": "6346a05d4688be2bf43ed6c11ab090e09e151263"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarBindings.spec.js": {
+      "git_blob_at_accepted": "2ab770e81ccf20ccd60d9edfff10c63e84d6a592",
+      "git_blob_at_current": "2ab770e81ccf20ccd60d9edfff10c63e84d6a592"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarRemoval.js": {
+      "git_blob_at_accepted": "df09834cdd8fd61472a932a401135a150496c132",
+      "git_blob_at_current": "df09834cdd8fd61472a932a401135a150496c132"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarRemoval.spec.js": {
+      "git_blob_at_accepted": "77aff30ccdf87eeb576899d1c86418f4f446f415",
+      "git_blob_at_current": "77aff30ccdf87eeb576899d1c86418f4f446f415"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useUnitCalendarEditor.js": {
+      "git_blob_at_accepted": "74eed52084f37bf208350186494334b0a6ed72d4",
+      "git_blob_at_current": "74eed52084f37bf208350186494334b0a6ed72d4"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useUnitCalendarEditor.spec.js": {
+      "git_blob_at_accepted": "3a2c0609620cfbd55e0ad75c00bcec8e26686fcf",
+      "git_blob_at_current": "3a2c0609620cfbd55e0ad75c00bcec8e26686fcf"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/calendarApi.spec.js": {
+      "git_blob_at_accepted": "e1ba8084cae9d4823dfa1a889b31c979b17617fa",
+      "git_blob_at_current": "e1ba8084cae9d4823dfa1a889b31c979b17617fa"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/calendarForm.js": {
+      "git_blob_at_accepted": "d0a80b6d5e43d8b8197049d6e3322f2367c86a3d",
+      "git_blob_at_current": "d0a80b6d5e43d8b8197049d6e3322f2367c86a3d"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/calendarForm.spec.js": {
+      "git_blob_at_accepted": "cac3f46837d3954a3322fda6f316a7c8f3530f92",
+      "git_blob_at_current": "cac3f46837d3954a3322fda6f316a7c8f3530f92"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/ivrCalendar.js": {
+      "git_blob_at_accepted": "224b55ec758bf0e6fa76901b1eb03711a52791b5",
+      "git_blob_at_current": "224b55ec758bf0e6fa76901b1eb03711a52791b5"
+    },
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/ivrCalendar.spec.js": {
+      "git_blob_at_accepted": "761c0aa6c673a54b6b105122d285c248416045ce",
+      "git_blob_at_current": "761c0aa6c673a54b6b105122d285c248416045ce"
+    },
+    "app/services/jrc_contact_center/calendar_catalog.rb": {
+      "git_blob_at_accepted": "e1ae1676cdcdfec7ad27aef4d61dbffc3b50eace",
+      "git_blob_at_current": "e1ae1676cdcdfec7ad27aef4d61dbffc3b50eace"
+    },
+    "app/services/jrc_contact_center/calendar_catalog_state.rb": {
+      "git_blob_at_accepted": "706c01bb32a73be570e1bdd3d4c17d7a743df8f1",
+      "git_blob_at_current": "706c01bb32a73be570e1bdd3d4c17d7a743df8f1"
+    },
+    "app/services/jrc_contact_center/calendar_definition.rb": {
+      "git_blob_at_accepted": "3aba6e2d563aca8e9f4ade6ea5bae262fed993da",
+      "git_blob_at_current": "3aba6e2d563aca8e9f4ade6ea5bae262fed993da"
+    },
+    "app/services/jrc_contact_center/calendar_ivr_usages.rb": {
+      "git_blob_at_accepted": "ed5e444f586905aa98c74c1be3964ab34154ed0a",
+      "git_blob_at_current": "ed5e444f586905aa98c74c1be3964ab34154ed0a"
+    },
+    "app/services/jrc_contact_center/ivr_calendar_decision.rb": {
+      "git_blob_at_accepted": "8ebc9b9f4e28f524a9333c52f9d76525dd7ec154",
+      "git_blob_at_current": "8ebc9b9f4e28f524a9333c52f9d76525dd7ec154"
+    },
+    "app/services/jrc_contact_center/ivr_calendar_history.rb": {
+      "git_blob_at_accepted": "7a04b0e2d40ab5315537103883244e73bc562dba",
+      "git_blob_at_current": "7a04b0e2d40ab5315537103883244e73bc562dba"
+    },
+    "app/services/jrc_contact_center/ivr_calendar_references.rb": {
+      "git_blob_at_accepted": "a9afae5d706c421ecb708c6eddd10c30c7f4a530",
+      "git_blob_at_current": "a9afae5d706c421ecb708c6eddd10c30c7f4a530"
+    },
+    "app/services/jrc_contact_center/queue_calendar_removal_audit.rb": {
+      "git_blob_at_accepted": "e50f179b2d09d6c553343c4a7f1adbe352f97360",
+      "git_blob_at_current": "e50f179b2d09d6c553343c4a7f1adbe352f97360"
+    },
+    "app/services/jrc_contact_center/queue_calendar_removals.rb": {
+      "git_blob_at_accepted": "43e75a0ca65b09ac5fcd22e20e23a150833a2558",
+      "git_blob_at_current": "43e75a0ca65b09ac5fcd22e20e23a150833a2558"
+    },
+    "app/services/jrc_contact_center/queue_calendar_state.rb": {
+      "git_blob_at_accepted": "b94e37bb472aa0e1c7c9df20f6f16f2986670e83",
+      "git_blob_at_current": "b94e37bb472aa0e1c7c9df20f6f16f2986670e83"
+    },
+    "app/services/jrc_contact_center/queue_calendars.rb": {
+      "git_blob_at_accepted": "cdd00f9025c9c7e2f130f8b6425439254ea2785f",
+      "git_blob_at_current": "cdd00f9025c9c7e2f130f8b6425439254ea2785f"
+    },
+    "spec/requests/api/v1/accounts/jrc_contact_center/calendar_ivr_usages_spec.rb": {
+      "git_blob_at_accepted": "85be9c8ab853ecd281398c0085dbe7ddab4fc660",
+      "git_blob_at_current": "85be9c8ab853ecd281398c0085dbe7ddab4fc660"
+    },
+    "spec/requests/api/v1/accounts/jrc_contact_center/ivr_calendar_routing_spec.rb": {
+      "git_blob_at_accepted": "9dca416f370ee3bfe18d8a25ab18e48eda4db64d",
+      "git_blob_at_current": "9dca416f370ee3bfe18d8a25ab18e48eda4db64d"
+    },
+    "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendar_removals_spec.rb": {
+      "git_blob_at_accepted": "f9cfcc59c1b1efdd60b64080d3c39dac1cdb59ed",
+      "git_blob_at_current": "f9cfcc59c1b1efdd60b64080d3c39dac1cdb59ed"
+    },
+    "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendars_spec.rb": {
+      "git_blob_at_accepted": "db4f5608ebf5c25b05cdf2df37b0988f6c12e645",
+      "git_blob_at_current": "db4f5608ebf5c25b05cdf2df37b0988f6c12e645"
+    },
+    "spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb": {
+      "git_blob_at_accepted": "7b6fa090d70c444c5bbc947f090c2c48b2dcd8bc",
+      "git_blob_at_current": "7b6fa090d70c444c5bbc947f090c2c48b2dcd8bc"
+    },
+    "spec/services/jrc_contact_center/calendar_definition_spec.rb": {
+      "git_blob_at_accepted": "dca3559d3378ff9ca48555b190797710a8f3a6aa",
+      "git_blob_at_current": "dca3559d3378ff9ca48555b190797710a8f3a6aa"
+    }
+  },
+  "no_native_suite_reexecuted_for_this_read_only_reuse_review": true,
+  "literal_acceptance_not_yet_changed": true,
+  "artifact_id": 15198996699,
+  "artifact_sha256": "949211f5d1f3b7f4b1cf40649ddbfb15262889427d3f97096cca34d6aa160ae3",
+  "acceptance_scope": [
+    "D1-P0086-C01",
+    "D1-P0088-C01"
+  ],
+  "native_and_real_CSS_Chrome_rerun": false,
+  "current_run_does_not_supply_these_historical_results": true,
+  "PABX_application_or_other_calendar_clauses_accepted": false,
+  "all_554_literal_IDs_preserved": true,
+  "native_reports": {
+    "main_sha256": "22ebf847a37ce0180f695178b0c0859377d675ad914501e2c503944a153409da",
+    "passed_cases": [
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:1]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition uses the native interval calculator and explicit exception before holiday before weekly",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:2]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition allows an explicitly closed exception even on a holiday and never restores ordinary working hours",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:3]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition closes a configured holiday without inferring another date, locality or recurrence",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:4]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition keeps the admitted snapshot independent from mutable caller input, public values and returned interval arrays",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:5]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects a missing explicit timezone instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:6]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects an unknown timezone instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:7]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects a noncanonical holiday date instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:8]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects an impossible date instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:9]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects an invented holiday category instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:10]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects an invented recurrence formula instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:11]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects a missing weekday instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:12]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects overlapping ordinary intervals instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:13]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects overlapping exception intervals instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:14]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects an overnight pair instead of explicit dates instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:15]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects duplicate exception dates instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:16]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects duplicate holiday dates instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:17]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects false instead of a holiday collection instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:18]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects foreign authority fields instead of inventing a default or dropping malformed values",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:19]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition rejects a nonexistent daylight-saving interval instead of silently choosing an offset",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/services/jrc_contact_center/calendar_definition_spec.rb[1:20]",
+        "file_path": "./spec/services/jrc_contact_center/calendar_definition_spec.rb",
+        "full_description": "JrcContactCenter::CalendarDefinition preserves the native refusal to fabricate a deadline for an entirely unconfigured calendar",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:1]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit returns an empty authorized catalog without creating default calendars or publishing anything",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:2]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit persists a named calendar in the existing unit and records scoped native before and after evidence",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:3]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit recovers the same committed identity after a lost creation response without another row, revision or audit",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:4]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit updates only after the reviewed native revision and rejects a stale edit without losing the committed definition",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:5]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit does not grant another native unit through a body identifier or disclose its calendar",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:6]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit does not resolve a foreign account unit in the authenticated current-account route",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:7]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit reauthorizes a current profile and never treats administrator or recording rights as calendar configuration",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:8]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit computes a saved explicit exception with the real native calculator without another write or a PABX command",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:9]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit blocks reserved settings writes and hides the catalog from the unrelated generic unit payload",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:10]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit filters and counts before pagination and preserves the current native catalog when filters are removed",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:11]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit rejects malformed filters and nonpositive pagination without silently selecting default rows",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:12]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit preserves the stored catalog and its audit when an internal caller supplies zero_version",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:13]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit preserves the stored catalog and its audit when an internal caller supplies foreign_scope",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:14]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit preserves the stored catalog and its audit when an internal caller supplies extra_header",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:15]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit preserves the stored catalog and its audit when an internal caller supplies duplicate_identity",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:16]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit preserves the stored catalog and its audit when an internal caller supplies string_active",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:17]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit preserves the stored catalog and its audit when an internal caller supplies too_many_entries",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:18]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit does not remove or transfer a catalog silently when another internal caller changes the unit settings",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:19]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit rejects overlapping in the raw typed request instead of dropping it or saving a default",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:20]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit rejects false_holiday in the raw typed request instead of dropping it or saving a default",
+        "status": "passed"
+      },
+      {
+        "id": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb[1:21]",
+        "file_path": "./spec/requests/api/v1/accounts/jrc_contact_center/unit_calendars_spec.rb",
+        "full_description": "Call Center internal unit calendars retain native scope, revision and audit rejects authority in the raw typed request instead of dropping it or saving a default",
+        "status": "passed"
+      }
+    ]
+  },
+  "actual_browser_receipts": [
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-calendar-native.json",
+      "sha256": "7a5f46745abe050feeeb3e1adafc8c65be6d1b472fde5ab8f51987cba99a03e9",
+      "mode": "desktop-light",
+      "create_status": 201,
+      "update_status": 200,
+      "stale_revision_status": 409,
+      "denials": [
+        404,
+        404,
+        401
+      ],
+      "persisted_definition": {
+        "name": "SYNTHETIC desktop-light calendar reviewed local edit",
+        "weekly": {
+          "1": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "2": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "3": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "4": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "5": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "6": [],
+          "7": []
+        },
+        "holidays": [
+          {
+            "date": "2026-11-23",
+            "kind": "internal",
+            "name": "SYNTHETIC selected holiday 2026-11-23",
+            "type": "movable"
+          },
+          {
+            "date": "2026-11-24",
+            "kind": "internal",
+            "name": "SYNTHETIC selected holiday 2026-11-24",
+            "type": "movable"
+          }
+        ],
+        "timezone": "UTC",
+        "exceptions": [
+          {
+            "date": "2026-11-23",
+            "name": "SYNTHETIC explicit duty",
+            "intervals": [
+              [
+                "10:00",
+                "11:00"
+              ]
+            ]
+          }
+        ],
+        "description": ""
+      },
+      "native_preview": [
+        {
+          "date": "2026-11-23",
+          "timezone": "UTC",
+          "precedence": "exception",
+          "intervals": [
+            [
+              "10:00",
+              "11:00"
+            ]
+          ],
+          "working_seconds": 3600,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "203c6171-1848-4aea-a403-b635d5a8a1a6",
+          "active": false,
+          "unit_id": "2866",
+          "name": "SYNTHETIC desktop-light calendar reviewed local edit",
+          "revision": "6dbd044e6947c5def2b13dff8776be490de3ab1fbfe79a8d5481cb967bc3cbf0"
+        },
+        {
+          "date": "2026-11-24",
+          "timezone": "UTC",
+          "precedence": "holiday",
+          "intervals": [],
+          "working_seconds": 0,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "203c6171-1848-4aea-a403-b635d5a8a1a6",
+          "active": false,
+          "unit_id": "2866",
+          "name": "SYNTHETIC desktop-light calendar reviewed local edit",
+          "revision": "6dbd044e6947c5def2b13dff8776be490de3ab1fbfe79a8d5481cb967bc3cbf0"
+        },
+        {
+          "date": "2026-11-25",
+          "timezone": "UTC",
+          "precedence": "weekly",
+          "intervals": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "working_seconds": 28800,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "203c6171-1848-4aea-a403-b635d5a8a1a6",
+          "active": false,
+          "unit_id": "2866",
+          "name": "SYNTHETIC desktop-light calendar reviewed local edit",
+          "revision": "6dbd044e6947c5def2b13dff8776be490de3ab1fbfe79a8d5481cb967bc3cbf0"
+        }
+      ],
+      "real_CSS_theme_checked": true,
+      "provider_writes": []
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-calendar-native.json",
+      "sha256": "2e8eb55264e3384121ad2d0c488d49428203cf3f098b5f28b230f2e2edf07ac8",
+      "mode": "desktop-dark",
+      "create_status": 201,
+      "update_status": 200,
+      "stale_revision_status": 409,
+      "denials": [
+        404,
+        404,
+        401
+      ],
+      "persisted_definition": {
+        "name": "SYNTHETIC desktop-dark calendar reviewed local edit",
+        "weekly": {
+          "1": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "2": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "3": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "4": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "5": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "6": [],
+          "7": []
+        },
+        "holidays": [
+          {
+            "date": "2026-11-23",
+            "kind": "internal",
+            "name": "SYNTHETIC selected holiday 2026-11-23",
+            "type": "movable"
+          },
+          {
+            "date": "2026-11-24",
+            "kind": "internal",
+            "name": "SYNTHETIC selected holiday 2026-11-24",
+            "type": "movable"
+          }
+        ],
+        "timezone": "UTC",
+        "exceptions": [
+          {
+            "date": "2026-11-23",
+            "name": "SYNTHETIC explicit duty",
+            "intervals": [
+              [
+                "10:00",
+                "11:00"
+              ]
+            ]
+          }
+        ],
+        "description": ""
+      },
+      "native_preview": [
+        {
+          "date": "2026-11-23",
+          "timezone": "UTC",
+          "precedence": "exception",
+          "intervals": [
+            [
+              "10:00",
+              "11:00"
+            ]
+          ],
+          "working_seconds": 3600,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "550fafba-3d8c-4f6d-b50b-a42daf6a06fe",
+          "active": false,
+          "unit_id": "2868",
+          "name": "SYNTHETIC desktop-dark calendar reviewed local edit",
+          "revision": "ddaf77ed68675bd84650cf01b40856af206dd1daf61ac12660f1b3634356edb5"
+        },
+        {
+          "date": "2026-11-24",
+          "timezone": "UTC",
+          "precedence": "holiday",
+          "intervals": [],
+          "working_seconds": 0,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "550fafba-3d8c-4f6d-b50b-a42daf6a06fe",
+          "active": false,
+          "unit_id": "2868",
+          "name": "SYNTHETIC desktop-dark calendar reviewed local edit",
+          "revision": "ddaf77ed68675bd84650cf01b40856af206dd1daf61ac12660f1b3634356edb5"
+        },
+        {
+          "date": "2026-11-25",
+          "timezone": "UTC",
+          "precedence": "weekly",
+          "intervals": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "working_seconds": 28800,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "550fafba-3d8c-4f6d-b50b-a42daf6a06fe",
+          "active": false,
+          "unit_id": "2868",
+          "name": "SYNTHETIC desktop-dark calendar reviewed local edit",
+          "revision": "ddaf77ed68675bd84650cf01b40856af206dd1daf61ac12660f1b3634356edb5"
+        }
+      ],
+      "real_CSS_theme_checked": true,
+      "provider_writes": []
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-calendar-native.json",
+      "sha256": "aa83be79ac6603e810b2726d765d08c1f228d140ee67c0770c94699ba7872560",
+      "mode": "mobile-light",
+      "create_status": 201,
+      "update_status": 200,
+      "stale_revision_status": 409,
+      "denials": [
+        404,
+        404,
+        401
+      ],
+      "persisted_definition": {
+        "name": "SYNTHETIC mobile-light calendar reviewed local edit",
+        "weekly": {
+          "1": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "2": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "3": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "4": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "5": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "6": [],
+          "7": []
+        },
+        "holidays": [
+          {
+            "date": "2026-11-23",
+            "kind": "internal",
+            "name": "SYNTHETIC selected holiday 2026-11-23",
+            "type": "movable"
+          },
+          {
+            "date": "2026-11-24",
+            "kind": "internal",
+            "name": "SYNTHETIC selected holiday 2026-11-24",
+            "type": "movable"
+          }
+        ],
+        "timezone": "UTC",
+        "exceptions": [
+          {
+            "date": "2026-11-23",
+            "name": "SYNTHETIC explicit duty",
+            "intervals": [
+              [
+                "10:00",
+                "11:00"
+              ]
+            ]
+          }
+        ],
+        "description": ""
+      },
+      "native_preview": [
+        {
+          "date": "2026-11-23",
+          "timezone": "UTC",
+          "precedence": "exception",
+          "intervals": [
+            [
+              "10:00",
+              "11:00"
+            ]
+          ],
+          "working_seconds": 3600,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "a4e58de4-b961-4c22-9f7d-eefb37aeb694",
+          "active": false,
+          "unit_id": "2870",
+          "name": "SYNTHETIC mobile-light calendar reviewed local edit",
+          "revision": "b597ca1d2ee9d64125bb59b64e4a40a1e05c3d36b8b13d306e71385d20d57799"
+        },
+        {
+          "date": "2026-11-24",
+          "timezone": "UTC",
+          "precedence": "holiday",
+          "intervals": [],
+          "working_seconds": 0,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "a4e58de4-b961-4c22-9f7d-eefb37aeb694",
+          "active": false,
+          "unit_id": "2870",
+          "name": "SYNTHETIC mobile-light calendar reviewed local edit",
+          "revision": "b597ca1d2ee9d64125bb59b64e4a40a1e05c3d36b8b13d306e71385d20d57799"
+        },
+        {
+          "date": "2026-11-25",
+          "timezone": "UTC",
+          "precedence": "weekly",
+          "intervals": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "working_seconds": 28800,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "a4e58de4-b961-4c22-9f7d-eefb37aeb694",
+          "active": false,
+          "unit_id": "2870",
+          "name": "SYNTHETIC mobile-light calendar reviewed local edit",
+          "revision": "b597ca1d2ee9d64125bb59b64e4a40a1e05c3d36b8b13d306e71385d20d57799"
+        }
+      ],
+      "real_CSS_theme_checked": true,
+      "provider_writes": []
+    },
+    {
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-calendar-native.json",
+      "sha256": "8e790d8966efa8770178c47d7edca922b8f52a50b0c74ce98e01482703b5bc35",
+      "mode": "mobile-dark",
+      "create_status": 201,
+      "update_status": 200,
+      "stale_revision_status": 409,
+      "denials": [
+        404,
+        404,
+        401
+      ],
+      "persisted_definition": {
+        "name": "SYNTHETIC mobile-dark calendar reviewed local edit",
+        "weekly": {
+          "1": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "2": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "3": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "4": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "5": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "6": [],
+          "7": []
+        },
+        "holidays": [
+          {
+            "date": "2026-11-23",
+            "kind": "internal",
+            "name": "SYNTHETIC selected holiday 2026-11-23",
+            "type": "movable"
+          },
+          {
+            "date": "2026-11-24",
+            "kind": "internal",
+            "name": "SYNTHETIC selected holiday 2026-11-24",
+            "type": "movable"
+          }
+        ],
+        "timezone": "UTC",
+        "exceptions": [
+          {
+            "date": "2026-11-23",
+            "name": "SYNTHETIC explicit duty",
+            "intervals": [
+              [
+                "10:00",
+                "11:00"
+              ]
+            ]
+          }
+        ],
+        "description": ""
+      },
+      "native_preview": [
+        {
+          "date": "2026-11-23",
+          "timezone": "UTC",
+          "precedence": "exception",
+          "intervals": [
+            [
+              "10:00",
+              "11:00"
+            ]
+          ],
+          "working_seconds": 3600,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "6f668735-0c6e-44f3-a2ef-657ef07eadab",
+          "active": false,
+          "unit_id": "2872",
+          "name": "SYNTHETIC mobile-dark calendar reviewed local edit",
+          "revision": "0c2cf1986b1024e570ac03d5b94a045814e3775ff0adf27538d8a39db26e0960"
+        },
+        {
+          "date": "2026-11-24",
+          "timezone": "UTC",
+          "precedence": "holiday",
+          "intervals": [],
+          "working_seconds": 0,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "6f668735-0c6e-44f3-a2ef-657ef07eadab",
+          "active": false,
+          "unit_id": "2872",
+          "name": "SYNTHETIC mobile-dark calendar reviewed local edit",
+          "revision": "0c2cf1986b1024e570ac03d5b94a045814e3775ff0adf27538d8a39db26e0960"
+        },
+        {
+          "date": "2026-11-25",
+          "timezone": "UTC",
+          "precedence": "weekly",
+          "intervals": [
+            [
+              "08:00",
+              "12:00"
+            ],
+            [
+              "13:00",
+              "17:00"
+            ]
+          ],
+          "working_seconds": 28800,
+          "local_only": true,
+          "pabx_confirmed": false,
+          "calendar_id": "6f668735-0c6e-44f3-a2ef-657ef07eadab",
+          "active": false,
+          "unit_id": "2872",
+          "name": "SYNTHETIC mobile-dark calendar reviewed local edit",
+          "revision": "0c2cf1986b1024e570ac03d5b94a045814e3775ff0adf27538d8a39db26e0960"
+        }
+      ],
+      "real_CSS_theme_checked": true,
+      "provider_writes": []
+    }
+  ],
+  "visually_rechecked_original_Chrome_PNGs": [
+    {
+      "mode": "desktop-light",
+      "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-calendar-reviewed-exception.png",
+      "sha256": "fef15892f90c7aebe3b3ea909b97268cbb559e44e19e9fd79a5257b9c1d87ad5"
+    },
+    {
+      "mode": "desktop-dark",
+      "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-calendar-reviewed-exception.png",
+      "sha256": "aac5e430ee8bac242633abd3e6d0173ecac197bb4e5bc8568f75e2d5e972f1ef"
+    },
+    {
+      "mode": "mobile-light",
+      "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-calendar-reviewed-exception.png",
+      "sha256": "72d80eea9bf4d7b2c829d79725aebefd99e20fc31f1b640c9621d82c7546fb8b"
+    },
+    {
+      "mode": "mobile-dark",
+      "artifact_path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-calendar-reviewed-exception.png",
+      "sha256": "92e5be2b6d5f407cd0612a118b858c4020d4a1ff3693c90f8e3fbf4ff52cca55"
+    }
+  ]
+}

@@ -1302,5 +1302,12 @@
     "same_292_Chrome_cases_all_authority_assertions_preserved": true,
     "permissions_APIs_migrations_or_business_rules_changed": false,
     "parent_or_new_candidate_accepted": false
+  },
+  "native_exact_Activity_navigation_candidate": {
+    "document": "docs/jrc_contact_center/native_activity_direct_navigation_candidate_20261128.json",
+    "sha256": "a5c1a9cb1dbc7b6d16b4183e34f6b1d6a63b775a45c49b564d7f35d9ade2e094",
+    "literal_requirement": "D2-P0416-C03",
+    "native_and_browser_acceptance_pending": true,
+    "no_formal_status_promotion_for_the_new_flow": true
   }
 }

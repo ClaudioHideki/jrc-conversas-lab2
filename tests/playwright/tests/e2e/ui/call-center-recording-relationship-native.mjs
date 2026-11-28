@@ -109,12 +109,25 @@ export async function verifyNativeRecordingRelationship(parent, info, target) {
     expect(after.activities[0].source_manifest.activities.map(String)).toContain(receipt.activity_id);
     const link = dialog.locator('[data-recording-relationship-target]');
     await expect(link).toBeVisible();
+    const shown = page.waitForResponse(result => result.request().method() === 'GET' && new URL(result.url()).pathname === `/api/v1/accounts/${account}/crm/activities/${receipt.activity_id}`);
     await link.click();
+    expect((await shown).status()).toBe(200);
+    await expect(page.getByTestId('activity-title')).toHaveValue(title);
     await expect.poll(() => new URL(page.url()).searchParams.get('activityId')).toBe(receipt.activity_id);
     await expect(page.getByText(title, { exact: true })).toBeVisible();
     await page.reload();
     await expect(page.getByText(title, { exact: true })).toBeVisible();
+    await expect(page.getByTestId('activity-title')).toHaveValue(title);
     await capture('native-persisted-activity');
+    await page.evaluate(async headers => {
+      Object.assign(window.axios.defaults.headers.common, headers);
+      await Reflect.get(window, '__REFRESH_CC_NATIVE_ACTOR__')();
+    }, target.scoped);
+    await expect(page.getByTestId('activity-title')).toHaveCount(0);
+    await page.evaluate(async headers => {
+      Object.assign(window.axios.defaults.headers.common, headers);
+      await Reflect.get(window, '__REFRESH_CC_NATIVE_ACTOR__')();
+    }, target.operator);
     const replay = await page.request.post(origin + path, { headers: target.operator, data: { relationship_activity: posts[0] } });
     expect(replay.status()).toBe(201);
     expect(await replay.json()).toMatchObject({ activity_id: receipt.activity_id, replayed: true });
@@ -143,6 +156,7 @@ export async function verifyNativeRecordingRelationship(parent, info, target) {
       sha: process.env.GITHUB_SHA, project: info.project.name, synthetic: true, actual_dark_theme: dark,
       source, receipt, explicit_portfolio_selection: true, native_form_reused: true, native_pagination_verified: true,
       persisted_and_reloaded_native_activity: true, original_actor_nonadministrator: true,
+      native_activity_dialog_reloaded: true, native_activity_profile_withdrawal_cleared: true,
       replay_status: replay.status(), conflict_status: conflict.status(), denied_status: denied.status(),
       current_profile_withdrawal_cleared_private_draft: true, browser_POST_count: posts.length,
       native_before: before, native_after: final, contrast, screenshots, errors, prohibited,

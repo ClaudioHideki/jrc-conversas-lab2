@@ -4483,8 +4483,8 @@
     "whole_figure_or_Part1_accepted": false
   },
   "current_unique_requirement_counts": {
-    "parcial": 411,
-    "implementado": 85,
+    "parcial": 409,
+    "implementado": 87,
     "bloqueado": 24,
     "pendente": 33,
     "implementado_sem_aceite": 1
@@ -4715,6 +4715,19 @@
     "sha256": "0ab3c27c991ffbc7076df7eb3a9724e14f377ed5273f0665d20dd666de44c2b7",
     "new_Vue_prepared_not_executed": 5,
     "same_four_original_native_capture_Chrome_cases_extended": true,
+    "whole_figure_accepted": false
+  },
+  "historical_counts_before_weekly_exception_evidence_reuse": {
+    "parcial": 411,
+    "implementado": 85,
+    "bloqueado": 24,
+    "pendente": 33,
+    "implementado_sem_aceite": 1
+  },
+  "calendar_weekly_and_exception_acceptance": {
+    "document": "docs/jrc_contact_center/calendar_weekly_exception_literal_acceptance_20261128.json",
+    "source_sha": "62f8f4b1defc467c3f5a14fd4817e36385beaebf",
+    "native_reexecuted": false,
     "whole_figure_accepted": false
   }
 }

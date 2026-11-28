@@ -23,11 +23,15 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
     operator.update!(crm_enabled: true)
     business = account.jrc_crm_business_units.find(call.current_unit.settings.fetch('business_unit_id'))
     values = { account: account, owner: operator.user, business_unit: business, status: 'active' }
+    relationship_portfolios!(values, viewer, contact)
+  end
+
+  def self.relationship_portfolios!(values, viewer, contact)
     selected = JrcRelationship::Assignment.create!(**values, contact: contact)
     20.times { JrcRelationship::Assignment.create!(**values, company: contact.company) }
-    hidden = JrcRelationship::Assignment.create!(**values.merge(owner: viewer.user), contact: contact)
+    hidden = JrcRelationship::Assignment.create!(**values, owner: viewer.user, contact: contact)
     { assignment_id: selected.id.to_s, private_assignment_id: hidden.id.to_s, authorized_count: 21,
-      contact_id: contact.id.to_s, company_id: contact.company_id.to_s, business_unit_id: business.id.to_s }
+      contact_id: contact.id.to_s, company_id: contact.company_id.to_s, business_unit_id: values.fetch(:business_unit).id.to_s }
   end
 
   def self.commercial!(account, operator, viewer, contact)
@@ -83,5 +87,5 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
                   record.account_id == account_id, ids.include?(record.id), operator.agent?]
     raise 'Exact owned recording customer context identities required' unless identities.all?
   end
-  private_class_method :commercial!, :owned!, :owned_runtime?, :stage!, :deal!, :projects!, :relationship!
+  private_class_method :commercial!, :owned!, :owned_runtime?, :stage!, :deal!, :projects!, :relationship!, :relationship_portfolios!
 end
