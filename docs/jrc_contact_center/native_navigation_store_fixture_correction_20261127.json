@@ -1,0 +1,20 @@
+{
+  "source_parent": "67c1b6390e655ad45ac461a388ad9b47afcaeaf7",
+  "failed_run": 46090576076,
+  "failed_job": 140810271853,
+  "failed_global_Vue": {
+    "passed": 2316,
+    "failed": 9,
+    "total": 2325,
+    "pending": 0
+  },
+  "verified_artifact_sha256": "ccef9813cefb0d894dc05ef1b457e9feb42468a68959a9788a1f0839da7bf9a1",
+  "independent_bounded_diagnostic_sha256": "4955d286d1582ada8aee5349feabe6bb0dd6c52d47c4c85726c07338a797eba4",
+  "confirmed_cause": "Legacy layout.spec.js mounts ContactCenterLayout with native useMapGetter but without a Vuex plugin; all nine fail reading undefined store.getters before existing assertions.",
+  "small_correction": "Inject a real isolated Vuex plugin with the current synthetic actor, keep all nine test bodies/assertions and unmount after each case.",
+  "early_CI": "Existing nineteen navigation/cockpit cases plus these nine preserved cases, exactly 28, before long native regressions.",
+  "production_code_grants_permissions_or_guards_changed_for_this_fix": false,
+  "existing_nine_cases_or_assertions_reduced": false,
+  "native_or_Chrome_acceptance": false,
+  "whole_figure_or_Part1_accepted": false
+}

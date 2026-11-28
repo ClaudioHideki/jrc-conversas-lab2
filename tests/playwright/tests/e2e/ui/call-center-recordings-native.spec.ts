@@ -1,3 +1,4 @@
+import { verifyNativeRecordingQualityReport } from './call-center-recording-quality-report-native.mjs';
 import { test } from './cc-native-test.mjs';
 import fs from 'node:fs';
 import { verifyNativeQualityReview } from './call-center-quality-review-native.mjs';
@@ -30,7 +31,29 @@ test('native human Nico correction preserves immutable source, reviewed conflict
   );
 });
 
-test('native explicit customer linkage preserves source history, current authority and initial-link conflicts', async ({ page }, info) => {
+test('native explicit customer linkage preserves source history, current authority and initial-link conflicts', async ({
+  page,
+}, info) => {
   test.setTimeout(180000);
-  await verifyNativeRecordingCustomerLink(page, info, session.pause_targets[info.project.name].recordings);
+  await verifyNativeRecordingCustomerLink(
+    page,
+    info,
+    session.pause_targets[info.project.name].recordings
+  );
+});
+
+test('native whole-period sentiment filters reuse real recording scopes, pagination, details and current profiles', async ({
+  page,
+}, info) => {
+  test.setTimeout(180000);
+  const other = Object.entries(session.pause_targets).find(
+    ([name]) => name !== info.project.name
+  );
+  if (!other) throw new Error('Independent synthetic account required');
+  await verifyNativeRecordingQualityReport(
+    page,
+    info,
+    session.pause_targets[info.project.name].recordings,
+    other[1].recordings.operator
+  );
 });

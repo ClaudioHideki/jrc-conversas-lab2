@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, nextTick, reactive } from 'vue';
-import { flushPromises, mount } from '@vue/test-utils';
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import { createStore } from 'vuex';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import ContactCenterLayout from './ContactCenterLayout.vue';
 
-const mocks = vi.hoisted(() => ({ route: null }));
+const mocks = vi.hoisted(() => ({ route: null, store: null }));
 vi.mock('vue-router', () => ({ useRoute: () => mocks.route }));
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
@@ -16,9 +17,25 @@ const AccountView = defineComponent({
   template: '<div data-testid="account-view">{{ initialAccount }}</div>',
 });
 
+enableAutoUnmount(afterEach);
+
 describe('Contact Center account navigation', () => {
   beforeEach(() => {
     mocks.route = reactive({ params: { accountId: '1' } });
+    mocks.store = createStore({
+      state: () => ({
+        actor: {
+          id: 4,
+          type: 'User',
+          accounts: [1, 2].map(id => ({
+            id,
+            role: 'agent',
+            permissions: ['jrc_contact_center_view'],
+          })),
+        },
+      }),
+      getters: { getCurrentUser: state => state.actor },
+    });
     JrcContactCenterAPI.context.mockResolvedValue({
       data: { capabilities: {} },
     });
@@ -26,7 +43,10 @@ describe('Contact Center account navigation', () => {
 
   it('discards the previous account view state when switching accounts', async () => {
     const wrapper = mount(ContactCenterLayout, {
-      global: { stubs: { RouterLink: true, RouterView: AccountView } },
+      global: {
+        plugins: [mocks.store],
+        stubs: { RouterLink: true, RouterView: AccountView },
+      },
     });
     await flushPromises();
     expect(wrapper.get('[data-testid="account-view"]').text()).toBe('1');
@@ -44,7 +64,10 @@ describe('Contact Center account navigation', () => {
         })
     );
     const wrapper = mount(ContactCenterLayout, {
-      global: { stubs: { RouterLink: true, RouterView: true } },
+      global: {
+        plugins: [mocks.store],
+        stubs: { RouterLink: true, RouterView: true },
+      },
     });
     mocks.route.params.accountId = '2';
     await flushPromises();
@@ -58,7 +81,10 @@ describe('Contact Center account navigation', () => {
       new Error('access denied')
     );
     const wrapper = mount(ContactCenterLayout, {
-      global: { stubs: { RouterLink: true, RouterView: AccountView } },
+      global: {
+        plugins: [mocks.store],
+        stubs: { RouterLink: true, RouterView: AccountView },
+      },
     });
     await flushPromises();
     expect(wrapper.find('[data-testid="account-view"]').exists()).toBe(false);
@@ -78,7 +104,10 @@ describe('Contact Center account navigation', () => {
           })
       );
     const wrapper = mount(ContactCenterLayout, {
-      global: { stubs: { RouterLink: true, RouterView: AccountView } },
+      global: {
+        plugins: [mocks.store],
+        stubs: { RouterLink: true, RouterView: AccountView },
+      },
     });
     await flushPromises();
     expect(wrapper.get('[data-testid="account-view"]').text()).toBe('1');
@@ -96,7 +125,10 @@ describe('Contact Center account navigation', () => {
       },
     });
     const wrapper = mount(ContactCenterLayout, {
-      global: { stubs: { RouterLink: true, RouterView: true } },
+      global: {
+        plugins: [mocks.store],
+        stubs: { RouterLink: true, RouterView: true },
+      },
     });
     await flushPromises();
     ['AGENT', 'SUPERVISOR', 'CONTROL_DESK', 'MONITORING', 'SETTINGS'].forEach(
@@ -111,7 +143,10 @@ describe('Contact Center account navigation', () => {
 
   it('keeps ordinary agent navigation limited to the four attendance pages', async () => {
     const wrapper = mount(ContactCenterLayout, {
-      global: { stubs: { RouterLink: true, RouterView: true } },
+      global: {
+        plugins: [mocks.store],
+        stubs: { RouterLink: true, RouterView: true },
+      },
     });
     await flushPromises();
     const links = wrapper.findAllComponents({ name: 'RouterLink' });
@@ -134,6 +169,7 @@ describe('Contact Center account navigation', () => {
     });
     const wrapper = mount(ContactCenterLayout, {
       global: {
+        plugins: [mocks.store],
         stubs: {
           RouterLink: { template: '<a><slot /></a>' },
           RouterView: true,
@@ -155,6 +191,7 @@ describe('Contact Center account navigation', () => {
     });
     const wrapper = mount(ContactCenterLayout, {
       global: {
+        plugins: [mocks.store],
         stubs: {
           RouterLink: { template: '<a><slot /></a>' },
           RouterView: true,
@@ -172,6 +209,7 @@ describe('Contact Center account navigation', () => {
     });
     const wrapper = mount(ContactCenterLayout, {
       global: {
+        plugins: [mocks.store],
         stubs: {
           RouterLink: { template: '<a><slot /></a>' },
           RouterView: true,

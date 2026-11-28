@@ -250,14 +250,14 @@ class JrcVoiceQuality::SupabaseClient
     )
   end
 
-  def request(method, path, query: {}, body: nil, headers: {})
+  def request(method, path, query: {}, body: nil, headers: {}, timeout: REQUEST_TIMEOUT)
     response = HTTParty.public_send(
       method,
       "#{rest_url}#{path}",
       query: query,
       body: body&.to_json,
       headers: default_headers.merge(headers),
-      timeout: REQUEST_TIMEOUT
+      timeout: timeout
     )
 
     return parse_response(response) if response.success?

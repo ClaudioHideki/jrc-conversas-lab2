@@ -531,6 +531,11 @@ export default {
       : axios.post(`${base(accountId)}/routing_rules`, {
           routing_rule: routingRule,
         }),
+  recordingQualityReport: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/recordings/quality_report`, {
+      params,
+      timeout: 40000,
+    }),
   recordings: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/recordings`, { params }),
   recording: (accountId, id) =>

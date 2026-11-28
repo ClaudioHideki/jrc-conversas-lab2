@@ -1,0 +1,73 @@
+{
+  "source_parent": "67c1b6390e655ad45ac461a388ad9b47afcaeaf7",
+  "status": "prepared_candidate_requires_native_and_real_Chrome_acceptance",
+  "Word_original_images_actually_read": [
+    {
+      "figure": 19,
+      "sha256": "f9571418af5e9443cbb6a9c4e62658f4aab1d26cf1548756b9d3c7d104a0b96a"
+    }
+  ],
+  "functional_delivery": "Existing Gravações gains an authorized whole-period sentiment view, filters, percentages, quality score and original native detail navigation.",
+  "reused": [
+    "RecordedCalls",
+    "Pabx::Access",
+    "AccessScope",
+    "AuthorityTransaction",
+    "SupabaseClient",
+    "RecordingsPage",
+    "useScopedRecordings",
+    "RecordingDetailsDialog",
+    "Audited",
+    "native actor refresh and URL filters"
+  ],
+  "no_new_models_migrations_permissions_or_dependencies": true,
+  "prepared_not_results": {
+    "native_focused": 76,
+    "actual_PostgreSQL_contention": 2,
+    "new_distinct_native": 65,
+    "new_Vue": 20,
+    "new_Chrome": 4,
+    "additional_PNG": 20
+  },
+  "remaining_before_acceptance": [
+    "Native gates on final SHA",
+    "Actual Chrome with CSS in four modes",
+    "Independent artifact/report/PNG verification",
+    "Literal clause acceptance without promoting whole figure"
+  ],
+  "remaining_figure_19": [
+    "Native authorized customer, agent and team selectors beyond the reused period/unit/queue/result/direction/search filters",
+    "Evidence-backed contextual aggregate insights; no synthesis without an approved source",
+    "Provider processing/error states and temporal alignment cannot be inferred from absence",
+    "External Nico source availability, latency and real data homologation",
+    "Dedicated sidebar shortcut matching the reference image; the current native Gravações mode button is the implemented entry."
+  ],
+  "principles": [
+    "No visible-page denominator",
+    "No invented satisfaction metric or confidence",
+    "No negative-to-critical conversion",
+    "Original results and human review history preserved",
+    "No successful zero on unavailable provider",
+    "No grant from caller account/user/unit identifiers",
+    "All current authorization and source/cohort identity rechecked after I/O",
+    "Bounded complete query or explicit refusal, never a sample presented as total"
+  ],
+  "whole_figure_or_Part1_accepted": false,
+  "effective_hours": {
+    "measured_total": null,
+    "note": "No reliable effective-hour timer is available for prior checkpoints. Do not derive effort from wall-clock/CI waiting or fabricate hours."
+  },
+  "approved_decision_conflicts_identified": false,
+  "bounded_scale_validation_prepared_not_executed": {
+    "actual_PostgreSQL_rows": 5000,
+    "HTTP_page_rows": 20,
+    "provider_transport_substituted": true,
+    "production_throughput_or_external_latency_proven": false,
+    "native_model_validations_and_callbacks_preserved": true
+  },
+  "queue_criterion_F19_A_native_test_prepared": true,
+  "authenticated_actor_identity_pinned_across_membership_reload": true,
+  "existing_native_quality_source_identity_also_pinned": true,
+  "existing_quality_review_history_and_permissions_preserved": true,
+  "mandatory_scale_runs_once_in_main_not_repeated_in_preflight": true
+}

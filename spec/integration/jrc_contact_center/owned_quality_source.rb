@@ -8,6 +8,7 @@ module SyntheticRecordedCallQuality
   def self.install!
     SyntheticRecordedCallMedia.validate_environment!
     JrcVoiceQuality::SupabaseClient.prepend(Source)
+    JrcVoiceQuality::AnalysisMetricReader.prepend(MetricSource)
   end
 
   def self.analysis(account_id, call_id)
@@ -32,6 +33,33 @@ module SyntheticRecordedCallQuality
       'texto_transcrito' => 'SYNTHETIC original transcript never changed', 'created_at' => '2026-11-26T12:00:00Z',
       'payload_completo' => { 'assuntos_abordados' => ['SYNTHETIC service'], 'oportunidades_melhoria' => ['SYNTHETIC suggestion only'] }
     }
+  end
+
+  # Same explicitly synthetic original source as the existing detail dialog.
+  # Only provider I/O is substituted; full native scopes, SQL pagination and
+  # authority revalidation are exercised by the real report controller.
+  def self.metrics(account_id:, call_ids:, observed_before:)
+    SyntheticRecordedCallMedia.validate_environment!
+    SyntheticRecordedCallMedia.control!(Account.find(account_id))
+    valid = call_ids.is_a?(Array) && call_ids.length <= 5_000 && observed_before.is_a?(Time)
+    raise 'Exact owned metric request required' unless valid
+
+    call_ids.each_with_object({}) do |id, result|
+      row = analysis(account_id, id)
+      raise 'Owned metric cutoff required' if Time.iso8601(row.fetch('created_at')) > observed_before
+
+      result[id] = {
+        'account_id' => account_id, 'call_id' => id, 'analise_id' => row.fetch('id'),
+        'analise_criada_em' => row.fetch('created_at'), 'sentimento_cliente' => row.fetch('sentimento_cliente'),
+        'sentimento_atendente' => nil, 'nota_final' => row.fetch('nota_final')
+      }
+    end
+  end
+
+  module MetricSource
+    def call(account_id:, call_ids:, observed_before:)
+      SyntheticRecordedCallQuality.metrics(account_id: account_id, call_ids: call_ids, observed_before: observed_before)
+    end
   end
 
   module Source

@@ -3363,7 +3363,31 @@
       "DIRECTION_OUTBOUND": "Realizada",
       "DIRECTION_LOCAL": "Interna",
       "DIRECTION_API": "API",
-      "DIRECTION_UNKNOWN": "Não informado pela origem"
+      "DIRECTION_UNKNOWN": "Não informado pela origem",
+      "QUALITY_REPORT": {
+        "TITLE": "Análise de Sentimentos",
+        "NAV": "Visualização das gravações",
+        "ALL": "Todas as gravações do período",
+        "POSITIVE": "Positivo",
+        "NEUTRAL": "Neutro",
+        "NEGATIVE": "Negativo",
+        "UNCLASSIFIED": "Análise sem sentimento reconhecido",
+        "WITHOUT_ANALYSIS": "Sem análise retornada",
+        "DENOMINATOR": "{analyzed} análises originais mais recentes em {universe} gravações autorizadas. Percentuais calculados sobre as análises, antes da paginação e do filtro de sentimento. Consulta até {observed}.",
+        "SCORE": "Nota média de qualidade: {average} · {count} análises com nota válida de 0 a 100.",
+        "NO_SCORE": "Sem nota disponível",
+        "NO_PERCENT": "Sem base percentual",
+        "SENTIMENT": "Sentimento do cliente",
+        "QUALITY_SCORE": "Nota de qualidade",
+        "SOURCE_LIMITS": "Sentimento é estimativa de IA, não diagnóstico factual. Sentimento negativo não indica criticidade. Sem análise retornada não significa erro ou processamento pendente. Revisões humanas, gravação e transcrição continuam nos detalhes. Nico indisponível não significa ausência de análises.",
+        "RANGE_TOO_LARGE": "Há mais de 5.000 gravações neste período autorizado. Reduza as datas ou os filtros para consultar o resumo completo; nenhuma amostra parcial foi apresentada.",
+        "UNAVAILABLE": "O resumo de qualidade está indisponível. Nenhuma ausência de resposta foi contabilizada como zero. Você pode voltar à lista de gravações.",
+        "CHANGED": "Os dados ou suas permissões mudaram durante a consulta. Atualize para consultar os dados autorizados atuais.",
+        "INTRO": "Consulte as análises originais autorizadas, filtre as interações e abra as evidências nos detalhes.",
+        "DISTRIBUTION": "Distribuição das análises: {positive} positivas, {neutral} neutras, {negative} negativas e {unknown} sem sentimento reconhecido. Use os cartões para filtrar a lista.",
+        "ANALYZED": "Análises",
+        "DISTRIBUTION_TITLE": "Distribuição de Sentimentos"
+      }
     },
     "QUALITY_REVIEW": {
       "TITLE": "Corrigir Análise do Nico",

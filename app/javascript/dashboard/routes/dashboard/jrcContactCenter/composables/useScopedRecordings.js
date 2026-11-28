@@ -1,5 +1,6 @@
 import { onBeforeUnmount, ref, watch } from 'vue';
 import API from 'dashboard/api/jrcContactCenter';
+import { validRecordingQualitySummary } from './recordingQualitySummary';
 
 // Native recording rows are intersected on the server. IDs and filters never grant access.
 export const useScopedRecordings = ({
@@ -12,6 +13,10 @@ export const useScopedRecordings = ({
   const meta = ref({ page: 1, per_page: 20, total: 0, pages: 0 });
   const period = ref(null);
   const summary = ref(null);
+  const qualitySummary = ref(null);
+  const qualityMode = ref(false);
+  const sentiment = ref('');
+  const observedAt = ref('');
   const filters = ref({
     from: '',
     to: '',
@@ -54,6 +59,8 @@ export const useScopedRecordings = ({
     items.value = [];
     period.value = null;
     summary.value = null;
+    qualitySummary.value = null;
+    observedAt.value = '';
     capabilities.value = {};
   };
   const denied = failure => [401, 403, 404].includes(failure?.response?.status);
@@ -64,6 +71,8 @@ export const useScopedRecordings = ({
     items.value = [];
     period.value = null;
     summary.value = null;
+    qualitySummary.value = null;
+    observedAt.value = '';
     error.value = '';
     loading.value = true;
     const account = String(accountId.value);
@@ -79,11 +88,21 @@ export const useScopedRecordings = ({
         return;
       }
       capabilities.value = context.data.capabilities;
-      const response = await API.recordings(account, {
-        ...filters.value,
-        page: page.value,
-        per_page: 20,
-      });
+      if (
+        qualityMode.value &&
+        context.data.capabilities.recordings_listen !== true
+      ) {
+        withdraw();
+        error.value = 'DENIED';
+        return;
+      }
+      const criteria = { ...filters.value, page: page.value, per_page: 20 };
+      const response = qualityMode.value
+        ? await API.recordingQualityReport(account, {
+            ...criteria,
+            sentiment: sentiment.value,
+          })
+        : await API.recordings(account, criteria);
       if (version !== generation) return;
       const data = response.data;
       if (
@@ -112,6 +131,12 @@ export const useScopedRecordings = ({
         if (!valid)
           throw new TypeError('Invalid native recording period totals');
       }
+      if (qualityMode.value) {
+        if (!validRecordingQualitySummary(data, data.items, data.meta.total))
+          throw new TypeError('Invalid native quality period totals');
+        qualitySummary.value = data.quality_summary;
+        observedAt.value = data.observed_at;
+      }
       summary.value = totals ?? null;
       items.value = data.items;
       meta.value = data.meta;
@@ -122,6 +147,14 @@ export const useScopedRecordings = ({
       const invalidRange =
         failure?.response?.data?.error === 'invalid_recording_range';
       if (denied(failure)) error.value = 'DENIED';
+      else if (
+        failure?.response?.data?.error === 'quality_summary_range_too_large'
+      )
+        error.value = 'QUALITY_RANGE_TOO_LARGE';
+      else if (failure?.response?.status === 503 && qualityMode.value)
+        error.value = 'QUALITY_UNAVAILABLE';
+      else if (failure?.response?.status === 409 && qualityMode.value)
+        error.value = 'QUALITY_CHANGED';
       else error.value = invalidRange ? 'INVALID_RANGE' : 'ERROR';
     } finally {
       if (version === generation) loading.value = false;
@@ -265,13 +298,22 @@ export const useScopedRecordings = ({
     'status',
     'direction',
   ];
-  const persist = async (criteria, targetPage) => {
+  const persist = async (
+    criteria,
+    targetPage,
+    mode = qualityMode.value,
+    segment = sentiment.value
+  ) => {
     const query = { ...routeQuery.value };
     ownKeys.forEach(key => {
       const name = `recordings_${key}`;
       if (criteria[key]) query[name] = criteria[key];
       else delete query[name];
     });
+    if (mode) query.recordings_mode = 'quality';
+    else delete query.recordings_mode;
+    if (mode && segment) query.recordings_sentiment = segment;
+    else delete query.recordings_sentiment;
     if (targetPage > 1) query.recordings_page = String(targetPage);
     else delete query.recordings_page;
     if (JSON.stringify(query) === JSON.stringify(routeQuery.value))
@@ -279,6 +321,8 @@ export const useScopedRecordings = ({
     return replaceQuery(query);
   };
   const apply = () => persist(filters.value, 1);
+  const changeMode = mode => persist(filters.value, 1, mode === true, '');
+  const filterSentiment = segment => persist(filters.value, 1, true, segment);
   const clearFilters = () =>
     persist(
       {
@@ -290,7 +334,9 @@ export const useScopedRecordings = ({
         status: '',
         direction: '',
       },
-      1
+      1,
+      qualityMode.value,
+      ''
     );
   const changePage = value => {
     if (
@@ -312,6 +358,23 @@ export const useScopedRecordings = ({
       generation += 1;
       withdraw();
       try {
+        const mode = routeQuery.value.recordings_mode ?? '';
+        const segment = routeQuery.value.recordings_sentiment ?? '';
+        if (
+          !['', 'quality'].includes(mode) ||
+          ![
+            '',
+            'positivo',
+            'neutro',
+            'negativo',
+            'unclassified',
+            'without_analysis',
+          ].includes(segment) ||
+          (!mode && segment)
+        )
+          throw new Error('Invalid native quality query');
+        qualityMode.value = mode === 'quality';
+        sentiment.value = segment;
         const next = {};
         ownKeys.forEach(key => {
           const value = routeQuery.value[`recordings_${key}`] ?? '';
@@ -344,6 +407,12 @@ export const useScopedRecordings = ({
     meta,
     period,
     summary,
+    qualitySummary,
+    qualityMode,
+    sentiment,
+    observedAt,
+    changeMode,
+    filterSentiment,
     filters,
     page,
     capabilities,

@@ -89,4 +89,16 @@ RSpec.describe JrcContactCenter::QualityReviewSource, :pabx do
     expect(reader.call(record.id) { |_current, _call, snapshot| snapshot.sha256 }).to match(/\A[0-9a-f]{64}\z/)
     expect { described_class.new(account: account, member: member, action: :administrator) }.to raise_error(ArgumentError)
   end
+
+  %i[recordings_listen quality_review].each do |action|
+    it "keeps the original authenticated actor bound during native #{action} source reads after membership reassignment" do
+      reader = described_class.new(account: account, member: member, action: action)
+      allow(provider).to receive(:find_analysis) do
+        reassign_native_quality_member!
+        analysis
+      end
+      expect { reader.call(record.id) { raise 'Different actor source callback' } }.to raise_error(Pundit::NotAuthorizedError)
+    end
+  end
+
 end

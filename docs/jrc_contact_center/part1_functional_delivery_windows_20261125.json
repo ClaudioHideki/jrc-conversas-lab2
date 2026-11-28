@@ -534,5 +534,42 @@
     "same_292_Chrome_cases_all_authority_assertions_preserved": true,
     "permissions_APIs_migrations_or_business_rules_changed": false,
     "parent_or_new_candidate_accepted": false
+  },
+  "next_native_sentiment_user_delivery": {
+    "source_parent": "67c1b6390e655ad45ac461a388ad9b47afcaeaf7",
+    "figures": [
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "candidate": "docs/jrc_contact_center/native_recording_sentiment_report_candidate_20261127.json",
+    "functional_output": [
+      "Whole-period authorized sentiment distribution and quantity/percentages",
+      "Native filters, segment selection, pagination and original five-tab detail dialog",
+      "Separate quality scores, unknown classifications and absent analyses",
+      "Current authority after remote I/O, explicit unavailable/source-change states and original read audits"
+    ],
+    "bounded_scale_cases_prepared": {
+      "real_PostgreSQL_cohort": 5000,
+      "page_rows": 20,
+      "external_provider_replaced_in_tests": true
+    },
+    "native_or_Chrome_acceptance": false,
+    "whole_figure_or_Part1_accepted": false,
+    "remaining_external": [
+      "Real Nico source availability/latency and provider states",
+      "PABX operations/capabilities/ACK contract remains separate"
+    ],
+    "remaining_internal": [
+      "Customer/agent/team filter selectors with existing native authority",
+      "Contextual aggregate insights backed by existing source evidence",
+      "Remaining per-clause Word acceptance and visual comparison"
+    ],
+    "no_new_catalogs_permissions_or_infrastructure": true,
+    "cadence_preserved": "Report each 24 effective working hours with usable functions, literal Word IDs, source/evidence, remaining effort and external dependencies; continue between checkpoints.",
+    "effective_hours_not_invented": true
   }
 }

@@ -37,4 +37,22 @@ RSpec.describe SyntheticRecordedCallQuality do
     )
     expect { JrcContactCenter::SyntheticQualityReviewEvidence.require_original!([row], snapshot) }.to raise_error(RuntimeError, /revision sequence/)
   end
+
+  it 'refuses the new aggregate provider boundary outside the same owned environment before reading native accounts' do
+    expect(Account).not_to receive(:find)
+    with_modified_env(GITHUB_ACTIONS: 'false') do
+      expect do
+        SyntheticRecordedCallQuality.metrics(account_id: 1, call_ids: ['SYNTHETIC-not-owned'], observed_before: Time.current)
+      end.to raise_error(RuntimeError, /Owned recording media boundary/)
+    end
+  end
+
+  it 'preserves the metric reader class when installation is refused outside the alternate owned server' do
+    before = JrcVoiceQuality::AnalysisMetricReader.ancestors
+    with_modified_env(GITHUB_ACTIONS: 'false') do
+      expect { described_class.install! }.to raise_error(RuntimeError, /Owned recording media boundary/)
+    end
+    expect(JrcVoiceQuality::AnalysisMetricReader.ancestors).to eq(before)
+  end
+
 end

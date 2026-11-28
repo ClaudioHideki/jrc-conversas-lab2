@@ -12,6 +12,7 @@ class JrcContactCenter::QualityReviewSource
 
     @account = account
     @member = member
+    @actor_id = member&.user_id
     @action = action
   end
 
@@ -34,6 +35,9 @@ class JrcContactCenter::QualityReviewSource
 
   def with_current_source(record_id)
     JrcContactCenter::AuthorityTransaction.call(account: @account, member: @member) do
+      valid = @member && @member.account_id == @account.id && @member.user_id == @actor_id
+      raise Pundit::NotAuthorizedError unless valid
+
       context = { account: @account, account_user: @member, user: @member.user.reload }
       policy = JrcContactCenter::ModulePolicy.new(context, :contact_center)
       raise Pundit::NotAuthorizedError unless policy.public_send("#{@action}?")

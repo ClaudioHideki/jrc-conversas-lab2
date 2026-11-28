@@ -5,6 +5,8 @@ import { useI18n } from 'vue-i18n';
 import { useMapGetter } from 'dashboard/composables/store';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import RecordingDetailsDialog from '../components/RecordingDetailsDialog.vue';
+import RecordingQualitySummary from '../components/RecordingQualitySummary.vue';
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import AcwRuleTarget from '../components/AcwRuleTarget.vue';
 import { useScopedRecordings } from '../composables/useScopedRecordings';
 
@@ -19,10 +21,8 @@ const actorScope = computed(() => {
   );
   return JSON.stringify([
     user.value?.id,
-    member?.role,
-    member?.custom_role_id,
-    member?.contact_center_eligible,
-    [...(member?.permissions || [])].sort(),
+    user.value?.type,
+    accountMembershipAccess(member),
   ]);
 });
 const state = useScopedRecordings({
@@ -36,6 +36,10 @@ const {
   meta,
   period,
   summary,
+  qualitySummary,
+  qualityMode,
+  sentiment,
+  observedAt,
   filters,
   page,
   capabilities,
@@ -78,6 +82,13 @@ const labels = computed(() => ({
   PREVIOUS: t('JRC_CONTACT_CENTER.RECORDINGS.PREVIOUS'),
   NEXT: t('JRC_CONTACT_CENTER.RECORDINGS.NEXT'),
   NO_MEASUREMENT: t('JRC_CONTACT_CENTER.RECORDINGS.NO_MEASUREMENT'),
+  QUALITY_RANGE_TOO_LARGE: t(
+    'JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.RANGE_TOO_LARGE'
+  ),
+  QUALITY_UNAVAILABLE: t(
+    'JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.UNAVAILABLE'
+  ),
+  QUALITY_CHANGED: t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.CHANGED'),
 }));
 const copy = key => labels.value[key];
 const resultFilters = computed(() => [
@@ -128,6 +139,15 @@ const resultFilters = computed(() => [
     ],
   },
 ]);
+const qualityLabels = computed(() => ({
+  positivo: t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.POSITIVE'),
+  neutro: t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.NEUTRAL'),
+  negativo: t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.NEGATIVE'),
+  unclassified: t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.UNCLASSIFIED'),
+  without_analysis: t(
+    'JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.WITHOUT_ANALYSIS'
+  ),
+}));
 const periodDuration = computed(() => {
   const seconds = summary.value?.duration_seconds;
   if (seconds === null || seconds === undefined)
@@ -152,19 +172,47 @@ const duration = value =>
     class="min-w-0 space-y-4 p-4 text-n-slate-12 sm:p-6"
     data-scoped-recordings
   >
-    <header class="flex flex-wrap items-start justify-between gap-3">
+    <header
+      class="flex flex-wrap items-start justify-between gap-3"
+      :class="
+        qualityMode
+          ? 'rounded-2xl bg-gradient-to-r from-violet-700 to-indigo-700 p-5 text-white'
+          : ''
+      "
+      data-recording-header
+    >
       <div class="min-w-0">
         <h1 class="flex items-center gap-2 text-xl font-semibold">
-          <Icon icon="i-lucide-mic" class="size-6 text-n-violet-11" />{{
-            copy('TITLE')
+          <Icon
+            icon="i-lucide-mic"
+            class="size-6"
+            :class="qualityMode ? 'text-white' : 'text-n-violet-11'"
+          />{{
+            qualityMode
+              ? t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.TITLE')
+              : copy('TITLE')
           }}
         </h1>
-        <p class="mt-1 text-sm text-n-slate-11">{{ copy('INTRO') }}</p>
+        <p
+          class="mt-1 text-sm"
+          :class="qualityMode ? 'text-white/90' : 'text-n-slate-11'"
+        >
+          {{
+            qualityMode
+              ? t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.INTRO')
+              : copy('INTRO')
+          }}
+        </p>
       </div>
       <button
         type="button"
         :disabled="loading"
-        class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
+        class="rounded-lg border px-3 py-2"
+        :class="
+          qualityMode
+            ? 'border-white/60 text-white'
+            : 'border-n-blue-6 text-n-blue-11'
+        "
         @click="state.load"
       >
         {{ copy('REFRESH') }}
@@ -175,6 +223,33 @@ const duration = value =>
     >
       {{ copy('SCOPE') }}
     </p>
+    <div
+      v-if="capabilities.recordings_listen"
+      role="group"
+      class="flex flex-wrap gap-2"
+      :aria-label="t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.NAV')"
+    >
+      <button
+        type="button"
+        :aria-pressed="!qualityMode"
+        :disabled="loading"
+        class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
+        data-recordings-mode="recordings"
+        @click="state.changeMode(false)"
+      >
+        {{ copy('TITLE') }}
+      </button>
+      <button
+        type="button"
+        :aria-pressed="qualityMode"
+        :disabled="loading"
+        class="rounded-lg border border-n-violet-6 px-3 py-2 text-n-violet-11"
+        data-recordings-mode="quality"
+        @click="state.changeMode(true)"
+      >
+        {{ t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.TITLE') }}
+      </button>
+    </div>
     <form
       class="grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-4 sm:grid-cols-2 xl:grid-cols-3"
       @submit.prevent="state.apply"
@@ -267,7 +342,7 @@ const duration = value =>
       </div>
     </form>
     <dl
-      v-if="summary && period && !loading && !error"
+      v-if="summary && period && !loading && !error && !qualityMode"
       class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3"
       data-recordings-period-summary
     >
@@ -314,6 +389,13 @@ const duration = value =>
         </dd>
       </div>
     </dl>
+    <RecordingQualitySummary
+      v-if="qualitySummary && !loading && !error"
+      :summary="qualitySummary"
+      :sentiment="sentiment"
+      :observed-at="observedAt"
+      @filter="state.filterSentiment"
+    />
     <p v-if="loading" role="status">{{ copy('LOADING') }}</p>
     <p v-else-if="error" role="alert" class="text-n-ruby-11">
       {{ copy(error) }}
@@ -400,6 +482,39 @@ const duration = value =>
               >
                 {{ copy('DETAILS') }}
               </button>
+              <dl
+                v-if="qualityMode && row.quality"
+                class="mt-2 break-words text-sm"
+                :data-recording-quality="row.id"
+              >
+                <dt>
+                  {{
+                    t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.SENTIMENT')
+                  }}
+                </dt>
+                <dd>
+                  {{
+                    qualityLabels[
+                      row.quality.available
+                        ? row.quality.sentiment
+                        : 'without_analysis'
+                    ]
+                  }}
+                </dd>
+                <dt>
+                  {{
+                    t(
+                      'JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.QUALITY_SCORE'
+                    )
+                  }}
+                </dt>
+                <dd>
+                  {{
+                    row.quality.quality_score ??
+                    t('JRC_CONTACT_CENTER.RECORDINGS.QUALITY_REPORT.NO_SCORE')
+                  }}
+                </dd>
+              </dl>
             </td>
           </tr>
         </tbody>
