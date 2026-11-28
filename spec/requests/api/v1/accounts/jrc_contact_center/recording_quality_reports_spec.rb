@@ -6,6 +6,12 @@ require 'rails_helper'
 # metric read is substituted, never authority, native SQL or persisted audits.
 RSpec.describe 'Control Desk complete scoped original quality report', :pabx, type: :request do
   include_context 'with native authorized quality review source'
+  include ContactCenterQualityScaleStatistics
+
+  around do |example|
+    owned_quality_scale_database! if example.metadata[:cc_owned_quality_scale]
+    example.run
+  end
 
   let(:headers) { actor.create_new_auth_token }
   let(:path) { "/api/v1/accounts/#{account.id}/jrc_contact_center/recordings/quality_report" }
@@ -36,6 +42,7 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
   # alone is substituted. This is read-scale QA, not provider throughput proof.
   def scale_cohort(size)
     size.times { |index| another_record("scale-#{index}") }
+    prepare_owned_scale_statistics
   end
 
   # Failure-only SQL timings and application locations; never SQL text,
@@ -53,10 +60,12 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
       reader = JrcContactCenter::RecordedCalls.new(account: account, member: member)
       relation = reader.filtered({ page: 2 }).reorder(:id).limit(JrcContactCenter::RecordingQualityReport::MAX_RECORDS + 1)
       relation = relation.select(:id, :external_unique_id, :updated_at)
-      ApplicationRecord.connection.select_value("EXPLAIN (FORMAT JSON) #{relation.to_sql}")
+      sql = relation.to_sql
+      @scale_query_sha256 = Digest::SHA256.hexdigest(sql)
+      ApplicationRecord.connection.select_value("EXPLAIN (FORMAT JSON) #{sql}")
     end
     parsed = raw.is_a?(String) ? JSON.parse(raw) : raw
-    safe_scale_plan_node(parsed.first.fetch('Plan'))
+    safe_scale_plan_node(parsed.first.fetch('Plan')).merge('sql_sha256' => @scale_query_sha256)
   rescue StandardError => e
     { diagnostic_error_class: e.class.name }
   end
@@ -81,6 +90,7 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     ActiveSupport::Notifications.subscribed(listener, 'sql.active_record') do
       get path, headers: headers, params: { page: 2 }
     end
+    record_owned_scale_statistics
     { status: response.status, error: response.parsed_body['error'], statement_timeout: timeout, query_plan: query_plan,
       slow_queries: queries.max_by(8) { |query| query.fetch(:duration_ms) } }
   end

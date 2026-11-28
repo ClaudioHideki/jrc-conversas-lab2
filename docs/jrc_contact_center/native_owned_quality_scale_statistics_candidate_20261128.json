@@ -1,0 +1,46 @@
+{
+  "source_parent": "5a16f393c7c43fb3094bada0e46964fa4b9edfe0",
+  "failed_run": 46118066934,
+  "failed_job": 140896223107,
+  "artifact": 15253068473,
+  "artifact_sha256": "f6dfe474e955209c1dff3b81158471c095dc6fbf8fd21db287d1bd7b47a4136c",
+  "main_report_sha256": "0b1148dbe10065c89233efe77b87e5c8a3096f4eea81bf6db0ffd126cac9f199",
+  "main_summary": {
+    "examples": 3525,
+    "passed": 3524,
+    "failures": 1,
+    "pending": 0,
+    "errors_outside_examples": 0
+  },
+  "confirmed_plan": "The Limit, recording scan, call scan and personal call-leg scan estimate one row; nested semi-join filters compare both external IDs and call-session IDs outside their index conditions. The fixture actually requests5000 native rows.",
+  "hypothesis_to_validate": "The full-suite uncommitted bulk fixture has optimizer statistics that do not describe the newly constructed cohort. A guarded ANALYZE of exactly its three tables should make the existing unchanged14s query representative.",
+  "not_claimed": "Production performance, all PostgreSQL planner states, stale-statistics tolerance and provider throughput are not established by this test.",
+  "minimal_correction": "Only prepare statistics after the real native model/callback fixture, with before/after identity hashes and the exact same scoped SQL hash. Keep the exact original5000-row case body and every assertion.",
+  "guards": [
+    "test environment",
+    "GitHub-hosted runner",
+    "PostgreSQL loopback",
+    "exact main synthetic database",
+    "own loopback Redis15",
+    "guard before fixture hooks for the tagged scale case"
+  ],
+  "preserved": [
+    "all98workflow steps",
+    "all3525main cases",
+    "all20strict filter cases",
+    "all original case expectations",
+    "14s statement timeout",
+    "native identity, module and corporate permissions",
+    "all migrations and historical data",
+    "product runtime code at5a16f393"
+  ],
+  "extra_evidence": "call-center-quality-scale-statistics.json; before/after plans contain no SQL or bound values; fixture rows exported as counts and SHA256 only.",
+  "official_references": [
+    "https://www.postgresql.org/docs/16/sql-analyze.html",
+    "https://www.postgresql.org/docs/16/planner-stats.html"
+  ],
+  "only_owned_fixture_statistics_preparation": true,
+  "runtime_code_changed": false,
+  "all_original_scale_assertions_and_98_steps_preserved": true,
+  "native_or_Chrome_accepted": false
+}
