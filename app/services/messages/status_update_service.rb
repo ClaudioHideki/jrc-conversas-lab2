@@ -9,6 +9,7 @@ class Messages::StatusUpdateService
 
   def perform
     tracked = message.content_attributes.to_h['jrc_broker_outbound'].is_a?(Hash) ||
+              (message.source_id.to_s.start_with?('WAID:') && message.outgoing? && message.sender_type == 'User' && message.inbox.channel_type == 'Channel::Api') ||
               JrcBrokerWebhookObligation.exists?(message_id: message.id)
     return perform_update unless tracked
 

@@ -32,13 +32,17 @@ class JrcBroker::ProjectionReceipt
       check!(@digest.match?(/\A[0-9a-f]{64}\z/) && @message.outgoing? && !@message.private?, 'message_scope')
       check!(@message.conversation_id == @input.fetch('rails_conversation_id') && @message.conversation.display_id == @input.fetch('remote_conversation_id'), 'conversation')
       check!(@message.inbox.channel_type == 'Channel::Api' && @message.conversation.inbox_id == @message.inbox_id, 'inbox')
-      validate_scope!
       validate_peer!
-      receipt = @input.fetch('kind') == 'DIRECT_EVOLUTION_RECEIPT_V1' ? direct_receipt! : mirror_receipt!
+      receipt = if @input.fetch('kind') == JrcBroker::UnboundProviderReceipt::KIND
+                  JrcBroker::UnboundProviderReceipt.new(@message, @input, @digest, @peer).verify!
+                else
+                  validate_scope!
+                  @input.fetch('kind') == 'DIRECT_EVOLUTION_RECEIPT_V1' ? direct_receipt! : mirror_receipt!
+                end
       prior = self.class.current(@message, @attrs)
       check!(!@attrs.key?(POINTER) || prior, 'prior_audit')
       if prior
-        identity = %w[kind canonical_message_id provider_key_sha256 peer_sha256 channel_id job_id]
+        identity = %w[kind canonical_message_id provider_key_sha256 peer_sha256 channel_id job_id physical_instance_id generation]
         check!(prior.slice(*identity) == receipt.slice(*identity), 'receipt_identity')
         return :already_confirmed if RANK.fetch(prior.fetch('state')) >= RANK.fetch(receipt.fetch('state'))
       end

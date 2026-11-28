@@ -20,6 +20,21 @@ beforeEach(() => {
 });
 
 describe('WhatsApp failure explanation', () => {
+  it('displays the verified direct channel receipt and retains the earlier diagnostic without a retry', () => {
+    useMessageContext().contentAttributes.value = {
+      jrcDeliveryProjection: {
+        kind: 'DIRECT_EVOLUTION_UNBOUND_V1',
+        state: 'DELIVERED',
+      },
+    };
+    const wrapper = mount(MessageError, {
+      props: { error: 'SYNTHETIC_LEGACY_DIAGNOSTIC' },
+    });
+    expect(wrapper.text()).toContain('Delivered on WhatsApp');
+    expect(wrapper.text()).toContain('SYNTHETIC_LEGACY_DIAGNOSTIC');
+    expect(wrapper.text()).not.toContain('Failed to send');
+    expect(wrapper.find('button').exists()).toBe(false);
+  });
   it.each([
     ['MEDIA_DOWNLOAD_FAILED', 'READ', 'Read on WhatsApp'],
     ['MEDIA_NOT_FOUND', 'DELIVERED', 'Delivered on WhatsApp'],

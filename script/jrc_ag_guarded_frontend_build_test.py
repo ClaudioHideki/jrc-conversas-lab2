@@ -56,7 +56,11 @@ class BuildAdmissionTest(unittest.TestCase):
                     authorize({**candidate, key: value}, self.sha)
 
     def test_receipt_projection_requires_exact_manual_candidate_and_sha(self):
-        ref = 'refs/heads/codex/projecao-recibos-20261128'
+        for ref in ['refs/heads/codex/projecao-recibos-20261128', 'refs/heads/codex/recibo-direto-sem-vinculo-20261128']:
+            with self.subTest(ref=ref):
+                self.check_receipt_projection_manual_only(ref)
+
+    def check_receipt_projection_manual_only(self, ref):
         candidate = {**self.env, 'GITHUB_REF': ref}
         with patch('jrc_ag_guarded_frontend_build.sys.platform', 'linux'):
             authorize(candidate, self.sha)

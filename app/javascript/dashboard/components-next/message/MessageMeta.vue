@@ -42,7 +42,19 @@ const readableTime = computed(() =>
 const showStatusIndicator = computed(() => {
   if (isPrivate.value) return false;
   // Don't show status for failed messages, we already show error message
-  if (status.value === MESSAGE_STATUS.FAILED) return false;
+  if (
+    status.value === MESSAGE_STATUS.FAILED &&
+    !(
+      isAPIInbox.value &&
+      !contentAttributes.value?.externalError &&
+      contentAttributes.value?.jrcDeliveryProjection?.kind ===
+        'DIRECT_EVOLUTION_UNBOUND_V1' &&
+      ['DELIVERED', 'READ'].includes(
+        contentAttributes.value.jrcDeliveryProjection.state
+      )
+    )
+  )
+    return false;
   // Don't show status for deleted messages
   if (contentAttributes.value?.deleted) return false;
 
@@ -129,7 +141,9 @@ const statusToShow = computed(() => {
   const projection = contentAttributes.value?.jrcDeliveryProjection;
   if (
     isAPIInbox.value &&
-    projection?.kind === 'DIRECT_EVOLUTION_RECEIPT_V1' &&
+    ['DIRECT_EVOLUTION_RECEIPT_V1', 'DIRECT_EVOLUTION_UNBOUND_V1'].includes(
+      projection?.kind
+    ) &&
     ['DELIVERED', 'READ'].includes(projection.state)
   )
     return projection.state.toLowerCase();

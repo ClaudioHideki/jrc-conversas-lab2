@@ -37,7 +37,7 @@ class Api::V1::Accounts::Conversations::MessagesController < Api::V1::Accounts::
 
   def retry
     return if message.blank?
-    if JrcBrokerWebhookObligation.exists?(message_id: message.id)
+    if JrcBrokerWebhookObligation.exists?(message_id: message.id) || JrcBroker::ProjectionReceipt.current(message, message.content_attributes.to_h)
       return render json: { error: 'JRC_BROKER_RETRY_REQUIRES_RECONCILIATION' }, status: :conflict
     end
 

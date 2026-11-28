@@ -37,6 +37,21 @@ beforeEach(() => {
 });
 
 describe('Broker outbound delivery evidence', () => {
+  it.each(['failed', 'sent'])(
+    'shows a verified unbound channel receipt on a native %s original',
+    native => {
+      useMessageContext().status.value = native;
+      useMessageContext().contentAttributes.value = {
+        jrcDeliveryProjection: {
+          kind: 'DIRECT_EVOLUTION_UNBOUND_V1',
+          state: 'READ',
+        },
+      };
+      expect(
+        shallowMount(MessageMeta).findComponent(MessageStatus).props('status')
+      ).toBe('read');
+    }
+  );
   it.each(['DELIVERED', 'READ'])(
     'shows a committed direct provider %s without a Broker canonical ID',
     state => {

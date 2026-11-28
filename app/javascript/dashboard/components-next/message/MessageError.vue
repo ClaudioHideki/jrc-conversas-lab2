@@ -54,6 +54,13 @@ const mirrorChannelLabel = computed(() => {
   };
   return states[proof.state] || t('CHAT_LIST.BROKER_UNKNOWN');
 });
+const directConfirmed = computed(() => {
+  const projection = contentAttributes?.value?.jrcDeliveryProjection;
+  return (
+    projection?.kind === 'DIRECT_EVOLUTION_UNBOUND_V1' &&
+    ['DELIVERED', 'READ'].includes(projection.state)
+  );
+});
 const rejectionProven = computed(() => {
   const proof = contentAttributes?.value?.jrcBrokerDelivery;
   return (
@@ -94,6 +101,7 @@ const policyCode = computed(() =>
 
 const canRetry = computed(() => {
   if (
+    directConfirmed.value ||
     mirrorMedia.value ||
     attempt.value ||
     brokerOutbound.value ||
@@ -122,6 +130,17 @@ const canRetry = computed(() => {
     >
       <span class="text-n-slate-11">{{ mirrorChannelLabel }}</span>
       <span>{{ t('CHAT_LIST.MIRROR_ATTACHMENT_ERROR') }}</span>
+    </span>
+    <span
+      v-else-if="directConfirmed"
+      role="status"
+      class="text-n-slate-11 select-text"
+    >
+      {{
+        contentAttributes.jrcDeliveryProjection.state === 'READ'
+          ? t('CHAT_LIST.CHANNEL_RECEIPT_READ')
+          : t('CHAT_LIST.CHANNEL_RECEIPT_DELIVERED')
+      }}
     </span>
     <span v-else-if="attempt" role="status" class="select-text">
       {{ attemptLabel }}
