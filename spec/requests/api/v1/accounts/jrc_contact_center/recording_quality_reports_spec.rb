@@ -46,7 +46,7 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
       error = point.raised_exception
       next unless error.is_a?(ArgumentError) || error.is_a?(JrcContactCenter::OperationError)
 
-      raised << { type: error.class.name, file: point.path.delete_prefix("#{Rails.root}/"), line: point.lineno }
+      raised << { type: error.class.name, file: point.path.delete_prefix(Rails.root.to_s), line: point.lineno }
     end
     observer.enable { get path, headers: headers, params: { page: 2 } }
     { status: response.status, error: response.parsed_body['error'], raised: raised.last(12) }

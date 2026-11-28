@@ -1,0 +1,12 @@
+{
+  "source_parent": "e083bedaa445ec4e3a90556b063d5fe98b58f05e",
+  "failed_run": 46106421553,
+  "artifact": 15247399721,
+  "artifact_sha256": "3e0be28052583f8c4839f88700d7dce7fde254bb71f9f355922654cc1ce54654",
+  "reported_offense": "Rails/FilePath",
+  "only_correction": "Use Rails.root.to_s as a path prefix, not an interpolated file path.",
+  "unchanged_all_case_assertions_and_trace_bounds": true,
+  "no_functional_or_workflow_change": true,
+  "native_scale_not_executed_in_that_run": true,
+  "native_or_Chrome_accepted": false
+}
