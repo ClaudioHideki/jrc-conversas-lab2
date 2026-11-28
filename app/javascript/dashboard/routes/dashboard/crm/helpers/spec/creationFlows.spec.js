@@ -84,6 +84,7 @@ it('DRAFT-01 restores all deal fields and selected products after closing with X
   await input(wrapper, 'Probabilidade').setValue(70);
   wrapper.findComponent({ name: 'CompanyPicker' }).vm.$emit('update:modelValue', 33);
   wrapper.findComponent({ name: 'ContactPicker' }).vm.$emit('update:modelValue', 44);
+  await wrapper.get('#deal-tab-products').trigger('click');
   const productSelect = wrapper.findAll('select').find(row => row.text().includes('Selecionar produto'));
   await productSelect.setValue(12);
   await button(wrapper, '+ Adicionar').trigger('click');
@@ -104,12 +105,14 @@ it('DRAFT-02 clears only after a successful atomic save and preserves on an API 
   await flushPromises();
   await input(wrapper, 'Título do negócio').setValue('Não perder');
   dealsAPI.create.mockRejectedValueOnce({ response: { data: { errors: ['Falha'] } } });
+  await wrapper.get('#deal-tab-next-action').trigger('click');
   await wrapper.get('form').trigger('submit');
   await flushPromises();
   await wrapper.get('button[aria-label="Fechar"]').trigger('click');
   expect(readDraft(key('crm:new_deal')).form.title).toBe('Não perder');
   await button(wrapper, 'New deal').trigger('click');
   await flushPromises();
+  await wrapper.get('#deal-tab-next-action').trigger('click');
   await wrapper.get('form').trigger('submit');
   await flushPromises();
   expect(dealsAPI.create).toHaveBeenLastCalledWith(expect.objectContaining({
@@ -223,20 +226,26 @@ it('DEAL-03 submits inline contact to the official master endpoint and returns i
 });
 
 
-it('opens the existing opportunity form over the current page without following its detail query', async () => {
+it('uses the current page for global creation and opens the newly created deal after saving', async () => {
   route.name = 'jrc_cockpit';
   route.query = { dealId: '999', page: '3', search: 'preservar' };
   const wrapper = await page(DealsIndex, false, { creationOnly: true });
   expect(wrapper.find('form[role="dialog"]').exists()).toBe(true);
   expect(wrapper.find('table').exists()).toBe(false);
   expect(input(wrapper, 'Título do negócio').element.value).toBe('');
+  expect(useRouter().push).not.toHaveBeenCalled();
   await input(wrapper, 'Título do negócio').setValue('Oportunidade no contexto atual');
+  await wrapper.get('#deal-tab-next-action').trigger('click');
   await wrapper.get('form').trigger('submit');
   await flushPromises();
   expect(dealsAPI.create).toHaveBeenCalledWith(expect.objectContaining({
     deal: expect.objectContaining({ title: 'Oportunidade no contexto atual', pipeline_id: 10, stage_id: 11 }),
   }));
-  expect(useRouter().push).not.toHaveBeenCalled();
+  expect(useRouter().push).toHaveBeenCalledWith({
+    name: 'crm_deals',
+    params: { accountId: '1' },
+    query: { dealId: 20 },
+  });
   expect(useRouter().replace).not.toHaveBeenCalled();
   expect(route.query).toEqual({ dealId: '999', page: '3', search: 'preservar' });
   expect(wrapper.emitted('close')).toHaveLength(1);
