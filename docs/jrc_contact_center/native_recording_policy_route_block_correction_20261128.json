@@ -1,0 +1,17 @@
+{
+  "parent": "ac57cb9bddf9ed220bcf993340f31e49e6225a32",
+  "run": 46151378881,
+  "artifact": 15266186560,
+  "artifact_sha256": "57373d130789b61c443dd1d3d31c6c55ae6e3a80561283a75e9e108083aec37d",
+  "native_UI_cases_passed": 59,
+  "existing_route_block_offense": {
+    "cop": "Metrics/BlockLength",
+    "actual": 31,
+    "allowed": 30,
+    "first_line": 1
+  },
+  "correction": "Move the one new resource declaration to the already-existing bounded institutional scope with identical API/account/controller namespace. No route declaration, URL, action, helper, order dependency or permission is changed.",
+  "all_prior_route_bytes_and_declarations_preserved": true,
+  "lint_rules_or_configuration_modified": false,
+  "native_or_Chrome_accepted": false
+}

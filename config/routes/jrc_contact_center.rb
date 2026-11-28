@@ -14,7 +14,6 @@ namespace :api, defaults: { format: 'json' } do
           post :reprocess, on: :member
         end
         resources :units, only: %i[index show create update]
-        resources :unit_recording_policy_drafts, only: %i[show update]
         resources :queues, only: %i[index show create update]
         resources :queue_memberships, only: %i[index show create update]
         resources :call_sessions, only: %i[index show] do
@@ -71,6 +70,7 @@ namespace :api, defaults: { format: 'json' } do
   namespace :v1 do
     resources :accounts, only: [] do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
+        resources :unit_recording_policy_drafts, only: %i[show update]
         resources :agent_state_histories, only: [:index]
         resources :audio_asset_moves, only: [:create]
         resources :audio_archives, only: [:create]
