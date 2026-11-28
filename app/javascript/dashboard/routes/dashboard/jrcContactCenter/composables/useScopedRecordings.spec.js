@@ -703,3 +703,93 @@ describe('native authorized period summary', () => {
     }
   );
 });
+
+// Reuses the applied native list query. These are Vue boundary checks, not a
+// replacement for native CSV authorization and actual Chrome downloads.
+describe('applied native recording metadata export criteria', () => {
+  it('freezes the server period and excludes pagination and unrelated module query values', async () => {
+    const { state } = fixture({
+      recordings_page: '2',
+      recordings_q: 'SYNTHETIC applied',
+      recordings_unit_id: '11',
+    });
+    await flushPromises();
+    expect(state.appliedReportCriteria.value).toEqual({
+      from: '2026-11-20',
+      to: '2026-11-26',
+      q: 'SYNTHETIC applied',
+      unit_id: '11',
+      queue_id: '',
+      status: '',
+      direction: '',
+    });
+    expect(state.appliedReportCriteria.value).not.toHaveProperty('page');
+    expect(state.appliedReportCriteria.value).not.toHaveProperty('per_page');
+    expect(state.appliedReportCriteria.value).not.toHaveProperty(
+      'preserved_other_module'
+    );
+  });
+
+  it('keeps unsaved filter edits out of an export until a successful applied search', async () => {
+    const { state } = fixture({ recordings_q: 'SYNTHETIC initial' });
+    await flushPromises();
+    state.filters.value.q = 'SYNTHETIC reviewed';
+    expect(state.appliedReportCriteria.value.q).toBe('SYNTHETIC initial');
+    await state.apply();
+    await flushPromises();
+    expect(state.appliedReportCriteria.value.q).toBe('SYNTHETIC reviewed');
+    expect(API.recordings).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ q: 'SYNTHETIC reviewed' })
+    );
+  });
+
+  it('does not invent export dates from an incomplete native period', async () => {
+    API.recordings.mockResolvedValue({
+      data: { ...page().data, period: { timezone: 'UTC' } },
+    });
+    const { state } = fixture();
+    await flushPromises();
+    expect(state.items.value).toEqual([row]);
+    expect(state.appliedReportCriteria.value).toBeNull();
+  });
+
+  it('withdraws the applied export query while reloading and after current access is denied', async () => {
+    const { state } = fixture();
+    await flushPromises();
+    expect(state.appliedReportCriteria.value).not.toBeNull();
+    API.recordings.mockRejectedValueOnce({ response: { status: 403 } });
+    const pending = state.load();
+    expect(state.appliedReportCriteria.value).toBeNull();
+    await pending;
+    expect(state.appliedReportCriteria.value).toBeNull();
+    expect(state.items.value).toEqual([]);
+    expect(state.error.value).toBe('DENIED');
+  });
+
+  it('does not restore old-profile export criteria from a delayed list response', async () => {
+    let finish;
+    API.recordings
+      .mockReturnValueOnce(
+        new Promise(resolve => {
+          finish = resolve;
+        })
+      )
+      .mockResolvedValueOnce({
+        data: {
+          ...page().data,
+          period: { from: '2026-11-21', to: '2026-11-27', timezone: 'UTC' },
+        },
+      });
+    const { state, actorScope } = fixture();
+    await flushPromises();
+    actorScope.value = 'SYNTHETIC current profile';
+    expect(state.appliedReportCriteria.value).toBeNull();
+    await flushPromises();
+    expect(state.appliedReportCriteria.value.from).toBe('2026-11-21');
+    finish(page());
+    await flushPromises();
+    expect(state.appliedReportCriteria.value.from).toBe('2026-11-21');
+    expect(state.appliedReportCriteria.value.to).toBe('2026-11-27');
+  });
+});

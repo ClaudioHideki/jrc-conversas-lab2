@@ -98,6 +98,7 @@ namespace :api, defaults: { format: 'json' } do
   namespace :v1 do
     resources :accounts, only: [] do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
+        get 'reports/recordings/export', to: 'reports#recordings_export'
         resources :recordings, only: %i[index show] do
           get :quality_report, on: :collection, to: 'recording_quality_reports#index'
           get :playback, on: :member

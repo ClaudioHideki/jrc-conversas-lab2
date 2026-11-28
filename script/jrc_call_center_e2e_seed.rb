@@ -195,7 +195,7 @@ session[:recording_policy_targets].each_value do |target|
   owned_unit = JrcContactCenter::Unit.where(account: owned_account).find(target.fetch(:allowed_unit_id))
   20.times do |index|
     JrcContactCenter::Queue.create!(account: owned_account, unit: owned_unit, code: "SYNTHETIC-POLICY-#{index}",
-                                  name: "SYNTHETIC policy queue #{index.to_s.rjust(2, '0')}")
+                                    name: "SYNTHETIC policy queue #{index.to_s.rjust(2, '0')}")
   end
 end
 # Auth material is ephemeral, mode 0600, excluded from uploaded evidence.

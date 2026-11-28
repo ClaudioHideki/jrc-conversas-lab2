@@ -1,3 +1,4 @@
+import { verifyNativeRecordingReportExport } from './call-center-recording-report-export-native.mjs';
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -200,6 +201,7 @@ export async function verifyNativeRecordingQualityReport(
     await expect(summary).toHaveCount(0);
     await expect(page.locator('[data-recording-row]')).toHaveCount(20);
     expect(new URL(page.url()).searchParams.get('recordings_mode')).toBeNull();
+    const recordingCSV = await verifyNativeRecordingReportExport(page, info, target, foreignHeaders);
     const raw = execFileSync(
       'bundle',
       [
@@ -231,6 +233,17 @@ export async function verifyNativeRecordingQualityReport(
           !JSON.stringify(row.changes).includes('sentimento_cliente')
       )
     ).toBe(true);
+    const exportAudits = witness.operations.filter(row => row.changes.operation === 'export');
+    expect(exportAudits).toHaveLength(2);
+    for (const result of [recordingCSV.full, recordingCSV.filtered]) {
+      const audit = exportAudits.find(row => row.changes.sha256 === result.sha256);
+      expect(audit).toBeTruthy();
+      expect(audit.auditable_type).toBe('Account');
+      expect(String(audit.user_id)).toBe(recordingCSV.actor_id);
+      expect(audit.changes.format).toBe('csv');
+      expect(audit.changes.record_count).toBe(result.count);
+      expect([...audit.changes.record_ids].sort()).toEqual([...result.record_ids].sort());
+    }
     expect(errors).toEqual([]);
     expect(prohibited).toEqual([]);
     fs.writeFileSync(
@@ -253,6 +266,7 @@ export async function verifyNativeRecordingQualityReport(
           native_sidebar_shortcut_and_return_verified: true,
           native_sidebar_reuses_same_route: true,
           native_read_audit_ids: nativeReads.map(row => row.id),
+          recording_metadata_csv: { ...recordingCSV, native_export_audit_ids: exportAudits.map(row => row.id) },
           foreign_account_status: 401,
           inaccessible_unit_status: 404,
           whole_figure_or_Part1_accepted: false,

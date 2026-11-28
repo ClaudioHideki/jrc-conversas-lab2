@@ -559,6 +559,12 @@ export default {
       : axios.post(`${base(accountId)}/routing_rules`, {
           routing_rule: routingRule,
         }),
+  exportRecordingsReport: (accountId, params, signal) =>
+    axios.get(`${base(accountId)}/reports/recordings/export`, {
+      params,
+      signal,
+      responseType: 'blob',
+    }),
   recordingQualityReport: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/recordings/quality_report`, {
       params,

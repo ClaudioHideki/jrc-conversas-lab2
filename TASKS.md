@@ -1169,3 +1169,12 @@ O rascunho não publica configuração no PABX, não altera gravações e não e
 - [x] Reproduzir a falha do inventário final 83/87 com os relatórios reais; a correção exige todos os 87 casos e rejeita oito adulterações, além do controle positivo e da reprodução negativa antiga. Não equivale a uma CI completa aprovada.
 
 - [ ] Conciliar os aceites transversais: os mesmos 554 IDs possuem 689 ocorrências nas figuras e nas diretrizes; 18 IDs já tinham estados diferentes entre famílias na origem. Nenhum estado foi alterado ou contado novamente neste pacote.
+
+
+### Control Desk — entrega funcional agrupada em preparo
+
+- Cadência: registrar uma entrega utilizável em até 24 horas efetivas de trabalho, sem contar espera passiva de CI como esforço de desenvolvimento. Não prometer conclusão por calendário nem inventar horas já gastas.
+- Figura 17: exportação CSV dos metadados da pesquisa aplicada, com escopos nativos, direito de relatórios, limite técnico 1000, integridade, auditoria e cancelamento após troca de perfil. Não exporta áudio e não cria um catálogo paralelo.
+- Agrupar a correção medida de alinhamento do seed com esse incremento. Preservar todos os dados do seed, gates anteriores e 304 cenários Chrome; reutilizar a mesma massa nativa de 5000 chamadas para testar o bloqueio de limite.
+- Testes novos preparados: 22 Rails e 24 Vue; execução nativa/Chrome e aceite ainda pendentes. Testes direcionados antes da regressão. Nenhuma publicação, merge, deploy, comando PABX ou alteração de usuários reais.
+- Documento: `docs/jrc_contact_center/native_recording_report_export_candidate_20261128.json`. O requisito composto D2-P0348-C05 permanece parcial; compartilhamento e dependências externas continuam separados.

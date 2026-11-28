@@ -1,0 +1,66 @@
+{
+  "parent": "ea54347ef52b928df8faf1d57afd96f5f4b7b333",
+  "Word_sources": {
+    "JRC_Conversas_Call_Center_Parte_1_Especificacao_DEV_Com_Imagens.docx": "5db370d9b7598a720d32f7f60eba4e22b4b61878327bd4459176ff729fe7a2c8",
+    "JRC_Conversas_Call_Center_Parte_1_Detalhamento_Funcional_23_Imagens.docx": "8f9300cf1940012f71be1a97903a192f7b5a18667e6da6664b9f972866e7e88b"
+  },
+  "figure": 17,
+  "literal_clause": "D2-P0348-C05",
+  "literal_status_remains_partial": "The clause also includes sharing; this increment supplies the missing metadata report only. No whole figure or Part1 acceptance.",
+  "user_outcome": "Download an authorized CSV of the last successfully applied normal recording query, including all bounded rows rather than only the current20-row page.",
+  "reused_native_implementation": [
+    "JrcContactCenter::RecordedCalls (both native recording scopes and existing filters)",
+    "JrcContactCenter::AuthorityTransaction and ModulePolicy reports?/recordings_view?",
+    "JrcServiceDesk::OperationalCsv (spreadsheet formula escaping)",
+    "Existing ReportsController, recording page, native Button and downloadCsvFile helper",
+    "Existing exact synthetic recording source/nonce/database boundary and native read-audit witness",
+    "Existing owned5000-record quality example; no duplicate scale cohort"
+  ],
+  "new_endpoint": "GET /api/v1/accounts/:account_id/jrc_contact_center/reports/recordings/export",
+  "no_new_models_migrations_dependencies_or_permissions": true,
+  "no_automatic_runtime_grants_or_provider_requests": true,
+  "QA_only_explicit_recording_agent_report_right_granted_and_restored": true,
+  "technical_row_limit": 1000,
+  "technical_limit_reference": "Same bounded1000-row pattern as existing ConfigurationAuditsController export; not a commercial or legal retention rule.",
+  "expected_new_native_examples": 22,
+  "expected_new_Vue_examples": 24,
+  "expected_main_native_examples": 3632,
+  "expected_main_Vue_examples": 2438,
+  "expected_recording_focused_Vue": 415,
+  "all_previous_recording_focused391_cases_preserved": true,
+  "Chrome_cases_unchanged": 304,
+  "extended_existing_Chrome_modes": 4,
+  "new_Chrome_PNG": 12,
+  "expected_PNG_total": 1028,
+  "sensitive_data_omitted": [
+    "No audio bytes, storage paths, signed URLs, credentials, transcript, analysis or private company records are exported.",
+    "Read audit contains record IDs, row count and content digest; never full CSV contents.",
+    "Native test assertions select only non-sensitive metadata headers, never full authentication responses."
+  ],
+  "behavior": [
+    "Only the normal recording query is exported; the sentiment mode has no CSV action in this increment.",
+    "Keep the applied query separate from unsubmitted filter edits; freeze the server-applied dates.",
+    "Revalidate current native permissions and native corporate and personal scopes at every export.",
+    "Require account and SHA256 identity before saving; reject partial, invalid and stale profile/account responses.",
+    "Fail closed for unavailable history, tenant mismatch, malformed filters, foreign account/unit and over-limit results.",
+    "GET requests do not create business records, manipulate ACW or call the PABX."
+  ],
+  "grouped_seed_recovery": {
+    "failed_run": 46154651056,
+    "artifact": 15267776914,
+    "artifact_sha256": "c30bc4857beac37e0f26c18421ac58ec85ac0173fe37d0a4b33a8f5750313f8d",
+    "new_Ruby_offenses": 2,
+    "first_correction_direction_was_wrong": true,
+    "measured_first_argument_column": 36,
+    "measured_fixed_following_keyword_column": 36,
+    "all_fixture_values_and_counts_unchanged": true,
+    "native_lint_of_seed_moved_into_additional_strict_preflight": true
+  },
+  "new_runtime_native_or_browser_acceptance": false,
+  "percentage_or_complete_figure_acceptance": false,
+  "remaining": [
+    "All new native, Vue and real Chrome results are still pending.",
+    "Sharing, binary bulk download, legal hold enforcement and actual provider recording/retention policy remain separate.",
+    "PABX commands/publication/ACK and external Nico/scanner/channel homologation are not claimed."
+  ]
+}

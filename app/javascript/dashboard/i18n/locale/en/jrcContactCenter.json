@@ -3644,6 +3644,15 @@
       "UNKNOWN_RESULT": "Não foi possível confirmar o resultado. Recarregue antes de tentar salvar novamente.",
       "QUEUE_ID": "Fila",
       "REMOVE": "Remover seleção"
+    },
+    "RECORDING_EXPORT": {
+      "BUTTON": "Exportar relatório CSV",
+      "APPLIED_FILTERS": "Usa os filtros da última pesquisa aplicada, com os dados autorizados no momento da exportação. Até 1.000 registros; não inclui arquivos de áudio.",
+      "DENIED": "Você não tem mais permissão para exportar esta consulta.",
+      "LIMIT": "A consulta ultrapassa 1.000 registros. Refine o período ou os filtros e pesquise novamente. Nenhum relatório parcial foi gerado.",
+      "INVALID_RANGE": "Revise o período da pesquisa antes de exportar.",
+      "INTEGRITY": "Não foi possível confirmar a identidade e a integridade do relatório. Atualize a pesquisa antes de tentar novamente.",
+      "ERROR": "Não foi possível exportar o relatório. Os critérios da pesquisa foram preservados para uma nova tentativa."
     }
   }
 }

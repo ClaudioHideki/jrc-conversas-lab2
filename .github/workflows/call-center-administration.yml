@@ -108,6 +108,9 @@ jobs:
       - name: Frozen frontend dependencies
         id: frontend_dependencies
         run: pnpm install --frozen-lockfile
+      - name: Native recording metadata CSV and exact seed source lint
+        run: |
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/reports_controller.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_report_exports_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb spec/integration/jrc_contact_center/owned_recording_report_access.rb script/jrc_call_center_recording_report_access.rb script/jrc_call_center_e2e_seed.rb --format json --out /tmp/call-center-recording-export-lint.json
       - name: Frontend lint of changed sources
         id: frontend_lint
         run: |
@@ -222,7 +225,7 @@ jobs:
                    'no_native_media_or_application_acceptance_claimed': True}
           Path('/tmp/call-center-owned-media-failure.json').write_text(json.dumps(proof, indent=2) + '\n')
           PY
-          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcRelationship/RelationshipActivityForm.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingRelationshipAction.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/recordingQualitySummary.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.spec.js \
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingReportExport.spec.js app/javascript/dashboard/api/specs/jrcContactCenterRecordingExport.spec.js app/javascript/dashboard/routes/dashboard/jrcRelationship/RelationshipActivityForm.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingRelationshipAction.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/recordingQualitySummary.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useScopedRecordings.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ScopedNativeRecordingPlayer.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleTarget.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAccessHistory.spec.js \
             app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTranscript.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCustomerLink.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCustomerRecords.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualityReviewHistory.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingEndingActions.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingAnalysis.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default app/javascript/dashboard/routes/dashboard/inbox/EndingTaskState.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingManualTasks.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTaskCreate.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/SupervisorPage.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/LinkedContactMaster.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContactDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingTicketAction.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingLinkedTickets.spec.js app/javascript/dashboard/routes/dashboard/serviceDesk/composables/useRecordingTicketContext.spec.js app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/recordingTicketSource.spec.js app/javascript/dashboard/routes/dashboard/serviceDesk/views/spec/RecordingTicketForm.spec.js app/javascript/dashboard/api/specs/serviceDeskOperationsRecording.spec.js --reporter=json --outputFile=/tmp/call-center-recordings-preflight-vitest.json
@@ -230,10 +233,10 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-recordings-preflight-vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 391
+          assert report['numTotalTests'] == report['numPassedTests'] == 415
           assert report['numFailedTests'] == report['numPendingTests'] == 0
-          assert len(report['testResults']) == 29 and all(row['status'] == 'passed' for row in report['testResults'])
-          expected = {'useScopedRecordings.spec.js': 33, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 18, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 14, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 14, 'RecordingCustomerLink.spec.js': 19, 'RecordingCustomerRecords.spec.js': 13, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 12}
+          assert len(report['testResults']) == 31 and all(row['status'] == 'passed' for row in report['testResults'])
+          expected = {'RecordingReportExport.spec.js': 17, 'jrcContactCenterRecordingExport.spec.js': 2, 'useScopedRecordings.spec.js': 38, 'ScopedNativeRecordingPlayer.spec.js': 11, 'AcwRuleTarget.spec.js': 10, 'RecordingDetailsDialog.spec.js': 18, 'RecordingAccessHistory.spec.js': 13, 'QualityReviewDialog.spec.js': 14, 'RecordingTranscript.spec.js': 10, 'RecordingCallContext.spec.js': 14, 'RecordingCustomerLink.spec.js': 19, 'RecordingCustomerRecords.spec.js': 13, 'QualityReviewHistory.spec.js': 10, 'RecordingEndingActions.spec.js': 11, 'RecordingAnalysis.spec.js': 12}
           expected.update({'EndingTaskState.spec.js': 19, 'RecordingManualTasks.spec.js': 14, 'RecordingTaskCreate.spec.js': 9, 'SupervisorPage.spec.js': 26, 'LinkedContactMaster.spec.js': 10, 'ContactDetailsDialog.spec.js': 3, 'Contact360Panel.spec.js': 7})
           expected.update({'RecordingLinkedTickets.spec.js': 14, 'RecordingTicketAction.spec.js': 12, 'useRecordingTicketContext.spec.js': 13, 'recordingTicketSource.spec.js': 13, 'RecordingTicketForm.spec.js': 7, 'serviceDeskOperationsRecording.spec.js': 12})
           expected.update({'recordingQualitySummary.spec.js': 20})
@@ -400,6 +403,18 @@ jobs:
           assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
           assert all(row['status'] == 'passed' for row in report['examples'])
           assert Counter(row['file_path'].removeprefix('./') for row in report['examples']) == expected
+          PY
+      - name: Native recording metadata CSV permissions query integrity and failure controls
+        run: |
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recording_report_exports_spec.rb --format progress --format json --out /tmp/call-center-recording-export-rspec.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-recording-export-rspec.json').read_text())
+          assert report['summary']['example_count'] == 22 and len(report['examples']) == 22
+          assert all(report['summary'][key] == 0 for key in ['failure_count', 'pending_count', 'errors_outside_of_examples_count'])
+          assert len({row['id'] for row in report['examples']}) == 22 and all(row['status'] == 'passed' for row in report['examples'])
+          assert all(row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/recording_report_exports_spec.rb' for row in report['examples'])
           PY
       - name: Native recording Relationship creation, identity and preserved attendance regressions
         id: recording_relationship_native
@@ -1651,7 +1666,7 @@ jobs:
             app/javascript/dashboard/routes/dashboard/webphone app/javascript/dashboard/routes/dashboard/settings/customRoles \
             app/javascript/dashboard/components/widgets/BackButton.spec.js \
             app/javascript/dashboard/api/specs/teams.spec.js app/javascript/dashboard/store/modules/specs/teamMembers app/javascript/dashboard/store/modules/specs/teams \
-            app/javascript/dashboard/api/specs/jrcContactCenterHistoryContract.spec.js app/javascript/dashboard/api/specs/nativeCallSourceIdentity.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingDestinationHistory.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingDestinationRequests.spec.js \
+            app/javascript/dashboard/api/specs/jrcContactCenterRecordingExport.spec.js app/javascript/dashboard/api/specs/jrcContactCenterHistoryContract.spec.js app/javascript/dashboard/api/specs/nativeCallSourceIdentity.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingDestinationHistory.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingDestinationRequests.spec.js \
             app/javascript/dashboard/routes/dashboard/inbox/usePendingEndingRun.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js app/javascript/dashboard/routes/dashboard/inbox/useEndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/EndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/PendingQualificationReasons.spec.js app/javascript/dashboard/routes/dashboard/inbox/useAttendanceClosing.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationDraftForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.spec.js app/javascript/dashboard/routes/dashboard/inbox/InboxVoicePanel.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             app/javascript/dashboard/routes/dashboard/serviceDesk/composables/useRecordingTicketContext.spec.js app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/recordingTicketSource.spec.js app/javascript/dashboard/routes/dashboard/serviceDesk/views/spec/RecordingTicketForm.spec.js app/javascript/dashboard/api/specs/serviceDeskOperationsRecording.spec.js \

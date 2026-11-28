@@ -95,7 +95,8 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
       slow_queries: queries.max_by(8) { |query| query.fetch(:duration_ms) } }
   end
 
-  before do
+  before do |example|
+    role.update!(permissions: role.permissions + ['jrc_contact_center_reports']) if example.metadata[:cc_owned_quality_scale]
     allow(JrcVoiceQuality::AnalysisMetricReader).to receive(:new).and_return(metric_reader)
     allow(metric_reader).to receive(:call) { |**arguments| metric_rows.slice(*arguments.fetch(:call_ids)) }
     metric_rows[record.external_unique_id] = metric_row(record.external_unique_id)
@@ -141,6 +142,20 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     expect(response.parsed_body.fetch('items').length).to eq(20)
     expect(response.parsed_body.fetch('meta')).to include('page' => 2, 'total' => 5_000, 'pages' => 250)
     expect(response.parsed_body.fetch('quality_summary')).to include('universe' => 5_000, 'analyzed' => 1, 'without_analysis' => 4_999)
+
+    # Reuse the existing native5000-row cohort and its prepared statistics.
+    # A separate real HTTP session preserves the original quality response.
+    export = ActionDispatch::Integration::Session.new(Rails.application)
+    export.get "/api/v1/accounts/#{account.id}/jrc_contact_center/reports/recordings/export", headers: headers
+    export_audited = Audited.audit_class.where(auditable: account, action: 'read').where("audited_changes ->> 'operation' = 'export'").exists?
+    expect(export.response).to have_http_status(:unprocessable_entity)
+    expect([export.response.parsed_body['error'], export.response.headers['X-Content-SHA256'], export_audited])
+      .to eq(['recording_export_limit_exceeded', nil, false])
+    proof = { sha: ENV.fetch('GITHUB_SHA'), account_id: account.id.to_s, synthetic: true,
+              existing_native_cohort: 5000, production_export_limit: 1000, status: export.response.status,
+              partial_CSV_or_success_audit: false, additional_CSV_scale_records_created: 0, browser_limit_proof: false,
+              native_fixture_identity: scale_fixture_identity }
+    File.write('/tmp/call-center-recording-export-scale.json', JSON.generate(proof))
   end
 
   it 'recalculates both the actual table and sentiment percentages for each authorized native queue' do

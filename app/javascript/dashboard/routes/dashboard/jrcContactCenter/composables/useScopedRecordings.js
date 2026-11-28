@@ -12,6 +12,7 @@ export const useScopedRecordings = ({
   const items = ref([]);
   const meta = ref({ page: 1, per_page: 20, total: 0, pages: 0 });
   const period = ref(null);
+  const appliedReportCriteria = ref(null);
   const summary = ref(null);
   const qualitySummary = ref(null);
   const qualityMode = ref(false);
@@ -58,6 +59,7 @@ export const useScopedRecordings = ({
     close();
     items.value = [];
     period.value = null;
+    appliedReportCriteria.value = null;
     summary.value = null;
     qualitySummary.value = null;
     observedAt.value = '';
@@ -70,6 +72,7 @@ export const useScopedRecordings = ({
     close();
     items.value = [];
     period.value = null;
+    appliedReportCriteria.value = null;
     summary.value = null;
     qualitySummary.value = null;
     observedAt.value = '';
@@ -141,6 +144,20 @@ export const useScopedRecordings = ({
       items.value = data.items;
       meta.value = data.meta;
       period.value = data.period;
+      if (
+        !qualityMode.value &&
+        /^\d{4}-\d{2}-\d{2}$/.test(data.period.from) &&
+        /^\d{4}-\d{2}-\d{2}$/.test(data.period.to)
+      ) {
+        const query = { ...criteria };
+        delete query.page;
+        delete query.per_page;
+        appliedReportCriteria.value = {
+          ...query,
+          from: data.period.from,
+          to: data.period.to,
+        };
+      }
     } catch (failure) {
       if (version !== generation) return;
       if (denied(failure)) withdraw();
@@ -406,6 +423,7 @@ export const useScopedRecordings = ({
     items,
     meta,
     period,
+    appliedReportCriteria,
     summary,
     qualitySummary,
     qualityMode,

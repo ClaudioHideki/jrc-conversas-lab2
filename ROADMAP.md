@@ -293,3 +293,12 @@ Agrupar entregas utilizáveis, preservando os dois Word e os 554 requisitos: con
 A próxima entrega reúne o fechamento da integração de gravações com atividades nativas do Relacionamento, o acesso filtrado à Central de Aprovações e o rascunho local da política de gravação por unidade. Reutiliza os serviços, permissões, persistência, revisão e auditoria existentes; não cria um cadastro paralelo nem publica comandos no PABX.
 
 Registrar uma entrega a cada 24 horas efetivas de trabalho, com funcionalidades utilizáveis, IDs dos requisitos aceitos, evidências nativas e visuais e esforço remanescente. Checkpoints e quantidade de testes não representam, por si, conclusão da figura ou da Parte 1. Avançar nos grupos internos independentes enquanto a CI estiver em execução, sem sobrepor CIs.
+
+
+### Control Desk — entrega funcional agrupada em preparo
+
+- Cadência: registrar uma entrega utilizável em até 24 horas efetivas de trabalho, sem contar espera passiva de CI como esforço de desenvolvimento. Não prometer conclusão por calendário nem inventar horas já gastas.
+- Figura 17: exportação CSV dos metadados da pesquisa aplicada, com escopos nativos, direito de relatórios, limite técnico 1000, integridade, auditoria e cancelamento após troca de perfil. Não exporta áudio e não cria um catálogo paralelo.
+- Agrupar a correção medida de alinhamento do seed com esse incremento. Preservar todos os dados do seed, gates anteriores e 304 cenários Chrome; reutilizar a mesma massa nativa de 5000 chamadas para testar o bloqueio de limite.
+- Testes novos preparados: 22 Rails e 24 Vue; execução nativa/Chrome e aceite ainda pendentes. Testes direcionados antes da regressão. Nenhuma publicação, merge, deploy, comando PABX ou alteração de usuários reais.
+- Documento: `docs/jrc_contact_center/native_recording_report_export_candidate_20261128.json`. O requisito composto D2-P0348-C05 permanece parcial; compartilhamento e dependências externas continuam separados.

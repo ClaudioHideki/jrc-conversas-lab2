@@ -6,6 +6,7 @@ import { useMapGetter } from 'dashboard/composables/store';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import RecordingDetailsDialog from '../components/RecordingDetailsDialog.vue';
 import RecordingQualitySummary from '../components/RecordingQualitySummary.vue';
+import RecordingReportExport from '../components/RecordingReportExport.vue';
 import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import AcwRuleTarget from '../components/AcwRuleTarget.vue';
 import { useScopedRecordings } from '../composables/useScopedRecordings';
@@ -35,6 +36,7 @@ const {
   items,
   meta,
   period,
+  appliedReportCriteria,
   summary,
   qualitySummary,
   qualityMode,
@@ -547,6 +549,18 @@ const duration = value =>
         </button>
       </nav>
     </template>
+    <RecordingReportExport
+      :account-id="accountId"
+      :actor-scope="actorScope"
+      :criteria="appliedReportCriteria"
+      :authorized="
+        capabilities.reports === true &&
+        capabilities.recordings_view === true &&
+        !qualityMode
+      "
+      :disabled="loading || Boolean(error)"
+      @denied="state.load"
+    />
     <p
       v-if="mediaError && !selected"
       role="alert"
