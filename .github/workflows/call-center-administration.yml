@@ -320,6 +320,10 @@ jobs:
       - name: Native customer lists timeline and fixture ownership before broad regressions
         id: customer_records_preflight
         run: |
+          # One focused reproduction of the actual failed scale case, before
+          # unrelated preflights. The mandatory full regression remains intact.
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb --example 'proves the complete five-thousand-row native cohort' --format progress --format json --out /tmp/call-center-quality-scale-diagnostic.json
+          ruby -rjson -e 's=JSON.parse(File.read("/tmp/call-center-quality-scale-diagnostic.json")).fetch("summary"); abort s.inspect unless s.fetch("example_count")==1 && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero?'
           bundle exec rspec spec/services/jrc_contact_center/synthetic_recording_customer_records_seed_spec.rb spec/requests/api/v1/accounts/customers/contact_records_spec.rb spec/services/jrc_customers/timeline_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/recording_customer_links_spec.rb spec/services/jrc_contact_center/recording_customer_link_audit_spec.rb --format progress --format json --out /tmp/call-center-customer-records-preflight.json
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCustomerRecords.spec.js app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecordingCallContext.spec.js app/javascript/dashboard/api/specs/nativeCallSourceIdentity.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContextRecordPanels.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.spec.js --maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile=/tmp/call-center-customer-records-vitest.json
           python3 -B - <<'PY'

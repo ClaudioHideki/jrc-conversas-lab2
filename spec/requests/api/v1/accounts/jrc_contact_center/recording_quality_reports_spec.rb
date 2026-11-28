@@ -38,6 +38,20 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     size.times { |index| another_record("scale-#{index}") }
   end
 
+  # Failure-only details: class and source location, never rows, source text,
+  # credentials, SQL, user headers or exception payloads.
+  def scale_request_diagnostic
+    raised = []
+    observer = TracePoint.new(:raise) do |point|
+      error = point.raised_exception
+      next unless error.is_a?(ArgumentError) || error.is_a?(JrcContactCenter::OperationError)
+
+      raised << { type: error.class.name, file: point.path.delete_prefix("#{Rails.root}/"), line: point.lineno }
+    end
+    observer.enable { get path, headers: headers, params: { page: 2 } }
+    { status: response.status, error: response.parsed_body['error'], raised: raised.last(12) }
+  end
+
   before do
     allow(JrcVoiceQuality::AnalysisMetricReader).to receive(:new).and_return(metric_reader)
     allow(metric_reader).to receive(:call) { |**arguments| metric_rows.slice(*arguments.fetch(:call_ids)) }
@@ -79,8 +93,8 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
   it 'proves the complete five-thousand-row native cohort without replacing the denominator with a twenty-row page',
      :cc_owned_quality_scale do
     scale_cohort(4_999)
-    get path, headers: headers, params: { page: 2 }
-    expect(response).to have_http_status(:ok)
+    diagnostic = scale_request_diagnostic
+    expect(response).to have_http_status(:ok), diagnostic.to_json
     expect(response.parsed_body.fetch('items').length).to eq(20)
     expect(response.parsed_body.fetch('meta')).to include('page' => 2, 'total' => 5_000, 'pages' => 250)
     expect(response.parsed_body.fetch('quality_summary')).to include('universe' => 5_000, 'analyzed' => 1, 'without_analysis' => 4_999)

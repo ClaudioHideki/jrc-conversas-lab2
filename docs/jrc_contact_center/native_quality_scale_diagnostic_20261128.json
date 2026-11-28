@@ -1,0 +1,18 @@
+{
+  "source_parent": "85748a8060e220c09e6794527e60afc8a8b104ff",
+  "failed_run": 46102826458,
+  "failed_job": 140848905422,
+  "failed_artifact": 15247212825,
+  "failed_artifact_sha256": "d0e7fde50ee6af103f7ecb8ed1888436ad6103b7ee78088de24043774a2de2a4",
+  "failed_native_case": "complete five-thousand-row native cohort",
+  "observed_response": 422,
+  "expected_response_preserved": 200,
+  "purpose": "One bounded native reproduction with failure-only error code and source locations, before broad regressions.",
+  "all_previous_cases_assertions_and_gates_retained": true,
+  "diagnostic_may_duplicate_one_scale_case_if_it_passes_then_full_suite_runs": true,
+  "diagnostic_must_be_removed_after_the_cause_is_proved_and_corrected": true,
+  "do_not_count_diagnostic_as_a_new_distinct_case": true,
+  "no_functional_code_permission_database_provider_or_runtime_change": true,
+  "new_side_navigation_and_pause_policy_work_remain_private_not_in_this_checkpoint": true,
+  "native_or_Chrome_accepted": false
+}
