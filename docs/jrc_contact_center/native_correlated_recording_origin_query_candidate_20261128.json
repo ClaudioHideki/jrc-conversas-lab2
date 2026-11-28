@@ -1,0 +1,37 @@
+{
+  "parent": "e55f681e8e885f4cfa597738c6163940b8d33186",
+  "failed_run": 46115194454,
+  "failed_job": 140887325562,
+  "artifact": 15252750202,
+  "artifact_sha256": "ee3ede61a43c770ce3463b63e9783c4130efb31e20dfb21eed3ae1d5ccfc115e",
+  "verified_native_main": {
+    "examples": 3525,
+    "passed": 3524,
+    "failures": 1,
+    "pending": 0,
+    "errors_outside_examples": 0
+  },
+  "verified_strict_filter_preflight": {
+    "examples": 20,
+    "failures": 0,
+    "pending": 0,
+    "errors_outside_examples": 0
+  },
+  "confirmed_failure": "The first native 5000-row collection took 12288.04ms; its fresh second read reached the unchanged 14s statement timeout at RecordingQualityReport.identity line 50.",
+  "previous_DISTINCT_correction_not_accepted_as_a_fix": true,
+  "actual_runtime_performance_correction_attempt": 2,
+  "candidate": "A correlated EXISTS of the complete native authorized call relation replaces IN of its identifier projection. The account/provider/external ID correlation can use the existing native identity index; actual query planning and performance still require execution.",
+  "preserved": [
+    "Pabx::Access personal SIP history and tenant constraints",
+    "AccessScope.call_sessions complete current account/corporate/personal scope",
+    "has_recording",
+    "native unit/queue/result/date/search filtering",
+    "fresh two-pass quality authorization and cohort fingerprint",
+    "14s statement timeout",
+    "all original 5000-row assertions and main tests"
+  ],
+  "new_migrations_indexes_permissions_models_source_ID_caches_or_limit_increases": false,
+  "failure_only_diagnostic": "EXPLAIN without ANALYZE of the exact native relation, inside native AuthorityTransaction; export only planner structure, existing index names, estimates and literal-redacted predicates. No SQL or bind values.",
+  "grouped_UI_delivery": "Existing native Organizar Pastas popup entry, with old folder and Chrome cases retained.",
+  "native_or_Chrome_accepted": false
+}

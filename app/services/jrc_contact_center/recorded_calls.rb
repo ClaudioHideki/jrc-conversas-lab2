@@ -18,7 +18,10 @@ class JrcContactCenter::RecordedCalls
   def records
     authorize!(:view)
     native = Pabx::Access.new(account: @account, user: @member.user).records
-    native.where(has_recording: true, external_unique_id: calls.select(:external_session_id).distinct)
+    matching = calls.where(
+      JrcContactCenter::CallSession.arel_table[:external_session_id].eq(native.klass.arel_table[:external_unique_id])
+    )
+    native.where(has_recording: true).where(matching.arel.exists)
   end
 
   def calls

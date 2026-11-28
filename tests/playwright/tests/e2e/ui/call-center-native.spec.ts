@@ -1,3 +1,4 @@
+import { reviewFolderOrganizationEntry } from './call-center-folder-organization-entry-native.mjs';
 import { reviewDirectAudioCaptureEntry } from './call-center-direct-audio-capture-entry-native.mjs';
 import { verifyNativePabxReadiness } from './call-center-pabx-readiness-native.mjs';
 import { verifyNativeAuditQueryFailure, preserveNativeAuditQueryRecovery } from './call-center-audit-error-reference-native.mjs';
@@ -4279,6 +4280,7 @@ test('institutional audio folders native unit organization persists, paginates a
     .getByRole('button', { name: 'Aplicar filtros', exact: true })
     .click();
   await expect(library.locator('[data-audio-folder]')).toHaveCount(1);
+  await reviewFolderOrganizationEntry(page, expect, target);
   await library
     .locator(`[data-edit-audio-folder="${target.audio_folder_id}"]`)
     .click();

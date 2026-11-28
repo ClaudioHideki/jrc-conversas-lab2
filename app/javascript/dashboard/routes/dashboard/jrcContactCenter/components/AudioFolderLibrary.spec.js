@@ -169,6 +169,15 @@ describe('unit scoped institutional folder UI', () => {
       },
     });
     expect(API.saveAudioFolder).not.toHaveBeenCalled();
+    await wrapper.get('[data-organize-audio-folders]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(true);
+    expect(wrapper.get('[data-audio-folder-name]').element.value).toBe(
+      'SYNTHETIC root'
+    );
+    expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+    expect(API.audioFolder).toHaveBeenLastCalledWith('1', '9');
+    expect(API.saveAudioFolder).not.toHaveBeenCalled();
   });
 
   it('loads native unit filters and preserves query pagination without requesting another account', async () => {
@@ -306,6 +315,9 @@ describe('unit scoped institutional folder UI', () => {
     await flushPromises();
     expect(API.audioFolders).not.toHaveBeenCalled();
     expect(wrapper.get('[data-new-audio-folder]').element.disabled).toBe(true);
+    expect(wrapper.get('[data-organize-audio-folders]').element.disabled).toBe(
+      true
+    );
   });
 
   it('ignores an old response after switching account and operational unit', async () => {

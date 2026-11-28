@@ -1,0 +1,28 @@
+{
+  "source_parent": "e55f681e8e885f4cfa597738c6163940b8d33186",
+  "figures": [
+    5,
+    6,
+    16
+  ],
+  "literal_requirement": "D2-P0154-C01",
+  "user_outcome": "Select an existing authorized folder and open its native reviewed name, description and parent editor through Organizar Pastas.",
+  "reused": [
+    "AudioFolderLibrary.open",
+    "native revision review and conflict handling",
+    "current unit coverage and configure permission",
+    "existing folder API and persistence",
+    "existing per-folder Editar and Nova Pasta"
+  ],
+  "scope": "The global action edits the currently selected folder. At root it stays disabled with selection guidance; Nova Pasta remains the existing creation action.",
+  "new_models_permissions_API_migrations_dependencies_or_provider_operations": false,
+  "existing_Vue_cases_extended": 2,
+  "existing_native_Chrome_folder_cases_extended": 4,
+  "new_Chrome_or_native_case_count": 0,
+  "native_or_Chrome_accepted": false,
+  "complete_literal_clause_or_figure_accepted": false,
+  "external_dependencies_not_accepted": [
+    "Nico synthesis",
+    "PABX publication and applied configuration"
+  ]
+}

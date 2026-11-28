@@ -2472,7 +2472,9 @@
       "SEARCH_PARENT": "Pesquisar pasta de destino",
       "PARENT_ERROR": "Não foi possível consultar as pastas de destino. Ajuste a busca para tentar novamente.",
       "PARENT": "Pasta de destino na mesma unidade",
-      "REVIEW": "Revisei a unidade, o nome e o destino desta pasta."
+      "REVIEW": "Revisei a unidade, o nome e o destino desta pasta.",
+      "ORGANIZE": "Organizar Pastas",
+      "ORGANIZE_HINT": "Selecione uma pasta para editar seu nome, descrição ou pasta superior."
     },
     "AUDIO_CAPTURE": {
       "SOURCE_METHOD": "Origem da mensagem institucional",

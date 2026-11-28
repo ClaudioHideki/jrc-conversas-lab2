@@ -26,6 +26,8 @@ const labels = computed(() => ({
   FILTER: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.FILTER'),
   CLEAR: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.CLEAR'),
   NEW: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.NEW'),
+  ORGANIZE: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.ORGANIZE'),
+  ORGANIZE_HINT: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.ORGANIZE_HINT'),
   NO_UNIT: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.NO_UNIT'),
   PATH: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.PATH'),
   ROOT: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.ROOT'),
@@ -348,7 +350,21 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="min-w-0 space-y-4" data-audio-folder-library>
-    <h3 class="text-lg font-semibold text-n-slate-12">{{ label('TITLE') }}</h3>
+    <header class="flex min-w-0 flex-wrap items-center justify-between gap-2">
+      <h3 class="text-lg font-semibold text-n-slate-12">
+        {{ label('TITLE') }}
+      </h3>
+      <button
+        type="button"
+        data-organize-audio-folders
+        :disabled="!canManage || !currentFolder || loading || opening || saving"
+        :title="label('ORGANIZE_HINT')"
+        class="max-w-full rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11 disabled:opacity-40"
+        @click="open(currentFolder)"
+      >
+        {{ label('ORGANIZE') }}
+      </button>
+    </header>
     <p
       role="status"
       data-audio-library-limits

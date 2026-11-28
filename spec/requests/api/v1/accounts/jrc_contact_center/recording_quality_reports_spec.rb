@@ -48,7 +48,30 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
       source: sites.map { |site| { file: site.path.delete_prefix(Rails.root.to_s), line: site.lineno } } }
   end
 
+  def scale_query_plan
+    raw = JrcContactCenter::AuthorityTransaction.call(account: account, member: member) do
+      reader = JrcContactCenter::RecordedCalls.new(account: account, member: member)
+      relation = reader.filtered({ page: 2 }).reorder(:id).limit(JrcContactCenter::RecordingQualityReport::MAX_RECORDS + 1)
+      relation = relation.select(:id, :external_unique_id, :updated_at)
+      ApplicationRecord.connection.select_value("EXPLAIN (FORMAT JSON) #{relation.to_sql}")
+    end
+    parsed = raw.is_a?(String) ? JSON.parse(raw) : raw
+    safe_scale_plan_node(parsed.first.fetch('Plan'))
+  rescue StandardError => e
+    { diagnostic_error_class: e.class.name }
+  end
+
+  # Only source structure and estimates. Never SQL, bindings or literal values.
+  def safe_scale_plan_node(node)
+    visible = node.slice('Node Type', 'Parent Relationship', 'Relation Name', 'Alias', 'Join Type', 'Strategy', 'Index Name',
+                         'Plan Rows', 'Total Cost', 'Startup Cost', 'Index Cond', 'Hash Cond', 'Join Filter', 'Filter')
+    visible.transform_values! { |value| value.is_a?(String) ? value.gsub(/'(?:[^']|'')*'|\b[0-9]+(?:\.[0-9]+)?\b/, '?') : value }
+    visible['Plans'] = node.fetch('Plans', []).map { |child| safe_scale_plan_node(child) }
+    visible
+  end
+
   def scale_request_diagnostic
+    query_plan = scale_query_plan
     queries = []
     listener = lambda do |_name, started, finished, _id, payload|
       duration = (finished - started) * 1_000
@@ -58,7 +81,7 @@ RSpec.describe 'Control Desk complete scoped original quality report', :pabx, ty
     ActiveSupport::Notifications.subscribed(listener, 'sql.active_record') do
       get path, headers: headers, params: { page: 2 }
     end
-    { status: response.status, error: response.parsed_body['error'], statement_timeout: timeout,
+    { status: response.status, error: response.parsed_body['error'], statement_timeout: timeout, query_plan: query_plan,
       slow_queries: queries.max_by(8) { |query| query.fetch(:duration_ms) } }
   end
 
