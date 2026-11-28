@@ -18,6 +18,7 @@ import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
 import ManagementRequestsPanel from './ManagementRequestsPanel.vue';
 import ManualAttendancePanel from './ManualAttendancePanel.vue';
+import RelationshipActivityForm from './RelationshipActivityForm.vue';
 import {
   buttonClass,
   inputClass,
@@ -630,31 +631,13 @@ const money = value => formatMoney(value, props.metadata?.formatting);
       >
         {{ t('RELATIONSHIP.NO_CONTACT') }}
       </p>
-      <form
+      <RelationshipActivityForm
         v-if="metadata.can_manage && channels?.can_crm"
-        class="mt-4 flex flex-wrap items-end gap-2"
-        @submit.prevent="activity"
-      >
-        <label class="min-w-52 flex-1 text-sm"
-          >{{ t('RELATIONSHIP.NEW_ACTIVITY')
-          }}<input
-            v-model="activityTitle"
-            :class="inputClass"
-            required /></label
-        ><label class="text-sm"
-          >{{ t('RELATIONSHIP.FIELDS.due_at')
-          }}<input
-            v-model="dueAt"
-            type="datetime-local"
-            :class="inputClass" /></label
-        ><button
-          type="submit"
-          :class="buttonClass"
-          :disabled="busy"
-        >
-          {{ t('RELATIONSHIP.SAVE') }}
-        </button>
-      </form>
+        v-model:title="activityTitle"
+        v-model:due-at="dueAt"
+        :disabled="busy"
+        @submit="activity"
+      />
       <ManagementRequestsPanel
         :metadata="metadata"
         :assignment-id="assignmentId"

@@ -1,0 +1,65 @@
+{
+  "initial_reuse_audit_parent": "5a16f393c7c43fb3094bada0e46964fa4b9edfe0",
+  "explicit_validation_workflow_parent": "b375434074eebbe563253ed45ca8229146949ec1",
+  "figures": [21, 22],
+  "state": "private implementation; native and browser validation pending",
+  "user_delivery": [
+    "Open Registrar no Relacionamento from an explicitly linked, currently authorized recording context.",
+    "Choose an existing authorized native portfolio, including pagination and multiple operational portfolios.",
+    "Review the existing shared Relationship activity form with title, deadline and current account timezone.",
+    "Create a native call activity and action using JrcRelationship::Workflow, with source linkage, native audits and a readable CRM destination link.",
+    "Retain the same request identity after uncertain results and revalidate all current source and destination authority on an explicit retry."
+  ],
+  "literal_requirement_mapping": {
+    "D2-P0405-C04": "Add the missing Relationship shortcut by sharing the existing native CustomerPanel activity form and workflow. Native Service Desk intake remains intact.",
+    "D2-P0407-C01": "Existing Contact, master Company, portfolio, Action and CRM Activity remain the only native records; no parallel customer or portfolio model.",
+    "D2-P0407-C03": "Personal PABX, Call Center, corporate customer, current module, CRM and portfolio scopes are intersected and rechecked after actual lock waits.",
+    "D2-P0416-C03": "The confirmed native receipt links to the existing CRM activity route after current ResourceScope authorization. The whole historical list is not claimed complete.",
+    "D2-P0418-C01": "Account-serialized native source keys, exact payload fingerprint and rollback preserve one native activity/action for an explicit request."
+  },
+  "native_reuse": [
+    "QualityReviewSource.with_record and RecordedCalls retain native personal recording authority without Nico I/O.",
+    "ContactDirectory and CustomerContext require the actual stored contact/company linkage; phone similarity and transcripts are not identity proof.",
+    "Relationship Context, ModulePolicy, AssignmentPolicy, LocalAccess and SnapshotAccess retain existing account, customer, portfolio, unit and source authority.",
+    "Workflow.activity! owns validation, routing, capacity, activity creation and native audits.",
+    "Release the initial source mutex before acquiring the native portfolio row lock, then reauthorize source and destination after that wait. Keep the native portfolio lock order instead of retaining the source mutex across a destination wait.",
+    "ResourceScope and destinationHistoryRoute own native destination visibility and navigation.",
+    "date-fns-tz already used by the product converts the native account timezone to explicit UTC. No new dependency."
+  ],
+  "native_compatibility_correction": "The existing CrmMasterLink infers the current company for a contact activity. Preserve Assignment XOR and all historical exact identities while accepting only that same-account contact's exact current company. Reject another contact, company, account or contact added to a company-only portfolio.",
+  "important_limits": [
+    "No customer, company, portfolio, permission or profile is created or granted by the runtime adapter.",
+    "Call ACW, ending automation state, review completion and existing Projects/Service Desk objects are not completed or modified.",
+    "No recording URL, credential, analysis text or transcript is copied into the new activity metadata.",
+    "The stored caller/company pair must still match the currently authorized directory. A stale company link requires an authorized source review; it is not silently redirected.",
+    "Every retry remains subject to current authority; a previous successful request cannot confer continued read access.",
+    "The full linked Relationship history in the recording popup and whole figures 21/22 remain subject to the existing matrix, without automatic acceptance."
+  ],
+  "validation_prepared_not_results": {
+    "new_authenticated_request_examples": 34,
+    "new_native_model_identity_examples": 6,
+    "new_real_PostgreSQL_concurrency_and_rollback_examples": 3,
+    "preserved_native_attendance_regressions": 11,
+    "new_Vue_cases": 24,
+    "new_Chrome_modes": ["desktop-light", "desktop-dark", "mobile-light", "mobile-dark"],
+    "new_Chrome_screenshots": 12,
+    "existing_98_workflow_steps_preserved": true,
+    "new_directed_steps": 3,
+    "one_own_CI_at_a_time": true,
+    "no_heavy_Windows_execution": true
+  },
+  "external_dependencies_separate": {
+    "PABX_configuration_commands_and_ACKs": "external contract/homologation pending; not invoked or fabricated",
+    "Nico_and_recording_provider": "only the declared existing synthetic media/analysis QA boundary; no external homologation claimed",
+    "internal_Relationship_registration": "uses native source authority and persisted workflow, without requiring a Nico provider read"
+  },
+  "delivery_cadence": "Report usable outcomes, literal acceptance and remaining work per 24 effective working hours; no fabricated elapsed effort or percentage from test counts.",
+  "original_Word_SHA256": [
+    "5db370d9b7598a720d32f7f60eba4e22b4b61878327bd4459176ff729fe7a2c8",
+    "8f9300cf1940012f71be1a97903a192f7b5a18667e6da6664b9f972866e7e88b"
+  ],
+  "migrations_or_new_permissions": false,
+  "native_or_Chrome_accepted": false,
+  "whole_figure_or_Part1_accepted": false,
+  "merge_image_or_deploy": false
+}

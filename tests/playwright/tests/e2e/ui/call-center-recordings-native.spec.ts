@@ -1,3 +1,4 @@
+import { verifyNativeRecordingRelationship } from './call-center-recording-relationship-native.mjs';
 import { verifyNativeRecordingQualityReport } from './call-center-recording-quality-report-native.mjs';
 import { test } from './cc-native-test.mjs';
 import fs from 'node:fs';
@@ -56,4 +57,9 @@ test('native whole-period sentiment filters reuse real recording scopes, paginat
     session.pause_targets[info.project.name].recordings,
     other[1].recordings.operator
   );
+});
+
+test('native reviewed recording creates one authorized Relationship activity through the reused form and workflow', async ({ page }, info) => {
+  test.setTimeout(180000);
+  await verifyNativeRecordingRelationship(page, info, session.pause_targets[info.project.name].recordings);
 });

@@ -1,0 +1,21 @@
+{
+  "source_parent": "b375434074eebbe563253ed45ca8229146949ec1",
+  "actual_failed_run": 46123134567,
+  "actual_failed_job": 140911760119,
+  "verified_artifact": 15256785072,
+  "artifact_sha256": "d18d7fa7b4c02df6cba9321ac98f215e9d4914b128a3b67ae2e71dc10e93e7df",
+  "actual_new_offenses": 1,
+  "cop": "Metrics/ParameterLists",
+  "source": "app/services/jrc_voice_quality/supabase_client.rb:253",
+  "cause": "The bounded analysis timeout added a sixth private transport argument; focused lint had not yet included this inherited HTTP helper.",
+  "minimal_correction": "Group native HTTP options in the existing private transport and prepare them in one helper. Preserve query, JSON body, merged default/custom headers and default/explicit timeout. Unknown keywords still raise ArgumentError before HTTP.",
+  "public_methods_scope_validation_endpoints_error_handling_and_no_retry_preserved": true,
+  "no_cop_exclusion_or_global_config_change": true,
+  "focused_native_regressions_prepared_not_results": 3,
+  "HTTP_only_is_substituted_no_external_Supabase_homologation": true,
+  "quality_preflight_preserved_plus_three_transport_cases": 79,
+  "quality_lint_preserved_plus_actual_transport_and_regression_spec": 16,
+  "global_incremental_lint": "Same step, baseline, command, cop rules and comparisons; moved unchanged before database preparation and long regressions to fail earlier.",
+  "native_or_Chrome_accepted": false,
+  "merge_image_or_deploy": false
+}

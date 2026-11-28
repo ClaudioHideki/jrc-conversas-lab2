@@ -46,6 +46,23 @@ const calendarIdentity = value => {
 };
 
 export default {
+  recordingRelationshipActivities: (accountId, id, page = 1, options = {}) =>
+    axios.get(
+      `${base(accountId)}/recordings/${recordIdentity(id)}/relationship_activities`,
+      {
+        params: { page },
+        signal: options.signal,
+        timeout: 20000,
+      }
+    ),
+  createRecordingRelationshipActivity: (accountId, id, input) =>
+    axios.post(
+      `${base(accountId)}/recordings/${recordIdentity(id)}/relationship_activities`,
+      {
+        relationship_activity: input,
+      },
+      { timeout: 20000 }
+    ),
   recordingCustomerLink: (accountId, id, options = {}) =>
     axios.get(
       `${base(accountId)}/recordings/${recordIdentity(id)}/customer_link`,

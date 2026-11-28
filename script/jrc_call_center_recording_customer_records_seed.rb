@@ -11,6 +11,23 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
     call = JrcContactCenter::CallSession.find_by!(account: account, external_session_id: record.external_unique_id)
     contact = account.contacts.find(call.contact_id)
     commercial!(account, operator, viewer, contact).merge(projects!(account, operator, contact))
+      .merge(relationship_context: relationship!(account, operator, viewer, contact, call))
+  end
+
+  # Additional explicit synthetic rights apply only after the existing owned!
+  # guard. No account policy, real user or private project is changed.
+  def self.relationship!(account, operator, viewer, contact, call)
+    account.enable_features!('jrc_relationship')
+    rights = %w[jrc_relationship_view jrc_relationship_manage]
+    operator.custom_role.update!(permissions: (operator.custom_role.permissions + rights).uniq)
+    operator.update!(crm_enabled: true)
+    business = account.jrc_crm_business_units.find(call.current_unit.settings.fetch('business_unit_id'))
+    values = { account: account, owner: operator.user, business_unit: business, status: 'active' }
+    selected = JrcRelationship::Assignment.create!(**values, contact: contact)
+    20.times { JrcRelationship::Assignment.create!(**values, company: contact.company) }
+    hidden = JrcRelationship::Assignment.create!(**values.merge(owner: viewer.user), contact: contact)
+    { assignment_id: selected.id.to_s, private_assignment_id: hidden.id.to_s, authorized_count: 21,
+      contact_id: contact.id.to_s, company_id: contact.company_id.to_s, business_unit_id: business.id.to_s }
   end
 
   def self.commercial!(account, operator, viewer, contact)
@@ -66,5 +83,5 @@ class JrcContactCenter::SyntheticRecordingCustomerRecordsSeed
                   record.account_id == account_id, ids.include?(record.id), operator.agent?]
     raise 'Exact owned recording customer context identities required' unless identities.all?
   end
-  private_class_method :commercial!, :owned!, :owned_runtime?, :stage!, :deal!, :projects!
+  private_class_method :commercial!, :owned!, :owned_runtime?, :stage!, :deal!, :projects!, :relationship!
 end

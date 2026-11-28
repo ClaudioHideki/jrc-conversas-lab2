@@ -108,6 +108,7 @@ namespace :api, defaults: { format: 'json' } do
           end
           resource :ending_context, only: [:show], controller: 'recording_ending_contexts'
           resources :tasks, only: %i[index create], controller: 'recording_tasks'
+          resources :relationship_activities, only: %i[index create], controller: 'recording_relationship_activities'
           resource :ticket_intake, only: [:show], controller: 'recording_ticket_intakes'
           resource :customer_link, only: %i[show create], controller: 'recording_customer_links'
           resources :tickets, only: [:index], controller: 'recording_tickets'

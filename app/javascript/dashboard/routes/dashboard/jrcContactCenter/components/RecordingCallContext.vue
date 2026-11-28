@@ -18,6 +18,9 @@ const props = defineProps({
   recordingId: { type: [String, Number], default: null },
   operationalContextAllowed: { type: Boolean, default: false },
 });
+const RecordingRelationshipAction = defineAsyncComponent(
+  () => import('./RecordingRelationshipAction.vue')
+);
 const RecordingCustomerRecords = defineAsyncComponent(
   () => import('./RecordingCustomerRecords.vue')
 );
@@ -192,6 +195,16 @@ onBeforeUnmount(() => {
       <RecordingTicketAction
         v-if="linked && recordingId"
         :key="`${accountId}-${recordingId}-${callSessionId}`"
+        :account-id="accountId"
+        :recording-id="recordingId"
+        :call-session-id="callSessionId"
+        :call-id="callId"
+        :contact-id="call.contact_id"
+        :enabled="operationalContextAllowed"
+      />
+      <RecordingRelationshipAction
+        v-if="linked && recordingId"
+        :key="`relationship-${accountId}-${recordingId}-${callSessionId}`"
         :account-id="accountId"
         :recording-id="recordingId"
         :call-session-id="callSessionId"

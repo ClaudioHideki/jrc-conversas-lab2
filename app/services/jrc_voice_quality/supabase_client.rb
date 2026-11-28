@@ -250,15 +250,15 @@ class JrcVoiceQuality::SupabaseClient
     )
   end
 
-  def request(method, path, query: {}, body: nil, headers: {}, timeout: REQUEST_TIMEOUT)
-    response = HTTParty.public_send(
-      method,
-      "#{rest_url}#{path}",
-      query: query,
-      body: body&.to_json,
-      headers: default_headers.merge(headers),
-      timeout: timeout
-    )
+  def request_options(values)
+    raise ArgumentError, 'Unknown Supabase request options' unless (values.keys - %i[query body headers timeout]).empty?
+
+    { query: values.fetch(:query, {}), body: values[:body]&.to_json,
+      headers: default_headers.merge(values.fetch(:headers, {})), timeout: values.fetch(:timeout, REQUEST_TIMEOUT) }
+  end
+
+  def request(method, path, **options)
+    response = HTTParty.public_send(method, "#{rest_url}#{path}", **request_options(options))
 
     return parse_response(response) if response.success?
 

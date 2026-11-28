@@ -40,6 +40,7 @@ const render = (props = {}) =>
     global: {
       stubs: {
         LinkedContactMaster: true,
+        RecordingRelationshipAction: true,
         RecordingTicketAction: {
           name: 'RecordingTicketAction',
           props: [

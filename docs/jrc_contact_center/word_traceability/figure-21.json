@@ -703,7 +703,12 @@
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
       ],
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [],
+      "recording_relationship_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/native_recording_relationship_candidate_20261128.json",
+        "state": "implemented privately; native and browser validation pending",
+        "native_source_authorities_reused": true
+      }
     },
     {
       "id": "D2-P0406-C01",
@@ -883,6 +888,11 @@
         ],
         "prepared_real_Chrome": "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs",
         "native_permissions_reused_without_automatic_grants": true
+      },
+      "recording_relationship_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/native_recording_relationship_candidate_20261128.json",
+        "state": "implemented privately; native and browser validation pending",
+        "native_source_authorities_reused": true
       }
     },
     {
@@ -1001,6 +1011,11 @@
         ],
         "prepared_real_Chrome": "tests/playwright/tests/e2e/ui/call-center-recording-context-native.mjs",
         "native_permissions_reused_without_automatic_grants": true
+      },
+      "recording_relationship_candidate_not_acceptance": {
+        "document": "docs/jrc_contact_center/native_recording_relationship_candidate_20261128.json",
+        "state": "implemented privately; native and browser validation pending",
+        "native_source_authorities_reused": true
       }
     },
     {

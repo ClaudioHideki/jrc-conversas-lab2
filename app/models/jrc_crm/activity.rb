@@ -111,6 +111,16 @@ module JrcCrm
       JrcCrm::BackofficeRequest.where(account_id: account_id).find_by(id: metadata['backoffice_request_id'])
     end
 
+    # Match the native master linker when a contact portfolio's person also
+    # belongs to a company. The prior exact tuple (including historical nil)
+    # remains valid; unrelated companies and changed contacts remain invalid.
+    def relationship_identity_matches?(identity)
+      return false unless identity && identity.contact_id == contact_id
+      return true if identity.company_id == company_id
+
+      identity.company_id.nil? && identity.contact_id.present? && contact&.account_id == account_id && contact.company_id == company_id
+    end
+
     def associations_belong_to_account
       errors.add(:user, 'must belong to account') if user && !account.users.exists?(user.id)
       errors.add(:deal, 'must belong to account') if deal && deal.account_id != account_id
@@ -118,7 +128,7 @@ module JrcCrm
       errors.add(:company, 'must belong to account') if company && company.account_id != account_id
       if metadata&.dig('relationship_assignment_id').present?
         identity = JrcRelationship::Assignment.where(account_id: account_id).find_by(id: metadata['relationship_assignment_id'])
-        errors.add(:base, 'Relationship identity mismatch') unless identity && identity.company_id == company_id && identity.contact_id == contact_id
+        errors.add(:base, 'Relationship identity mismatch') unless relationship_identity_matches?(identity)
       end
       if metadata&.dig('backoffice_request_id').present?
         order = backoffice_source&.sales_order

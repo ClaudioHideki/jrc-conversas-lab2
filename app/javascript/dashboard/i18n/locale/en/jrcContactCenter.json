@@ -3596,6 +3596,24 @@
       "AVAILABILITY": "Disponibilidade da equipe",
       "HISTORY": "Histórico",
       "DENIED": "Nenhuma seção está disponível com suas permissões atuais."
+    },
+    "RECORDING_RELATIONSHIP": {
+      "OPEN": "Registrar no Relacionamento",
+      "HINT": "Selecione uma carteira autorizada e preencha a atividade nativa. O registro mantém o vínculo com a chamada e não encerra o ACW, a análise ou outras pendências.",
+      "PORTFOLIO": "Carteira do Relacionamento",
+      "CALL": "Chamada vinculada: {id}",
+      "PAGINATION": "Páginas das carteiras",
+      "EMPTY": "Nenhuma carteira visível para este cliente e unidade. Nenhuma carteira será criada automaticamente.",
+      "DENIED": "O acesso a esta chamada, cliente ou carteira não está disponível com suas permissões atuais.",
+      "ERROR": "Não foi possível consultar as carteiras. Tente novamente.",
+      "INVALID": "Confira a carteira, o título e a data com horário antes de salvar.",
+      "UNKNOWN": "O resultado ainda não pôde ser confirmado. Retente com as mesmas informações e consulte o histórico antes de iniciar outro registro.",
+      "RETRY_SAME": "Retentar a mesma solicitação",
+      "SUCCESS": "Atividade #{id} registrada no Relacionamento",
+      "OPEN_ACTIVITY": "Abrir atividade no CRM",
+      "PAGINATION_VALUE": "Página {page} de {pages}",
+      "CHOICE": "{label} — carteira #{id}",
+      "TIME_ZONE": "Fuso horário: {zone}"
     }
   }
 }

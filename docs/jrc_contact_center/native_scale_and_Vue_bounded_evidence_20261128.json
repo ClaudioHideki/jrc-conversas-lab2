@@ -1,0 +1,500 @@
+{
+  "source_sha": "b375434074eebbe563253ed45ca8229146949ec1",
+  "run": 46123134567,
+  "job": 140911760119,
+  "artifact": 15256785072,
+  "artifact_sha256": "d18d7fa7b4c02df6cba9321ac98f215e9d4914b128a3b67ae2e71dc10e93e7df",
+  "main": {
+    "summary": {
+      "duration": 866.500047339,
+      "example_count": 3525,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "report": {
+      "path": "tmp/call-center-rspec.json",
+      "sha256": "6cc02949137d2fc241950a27bf5d325b46fae71ced602b5d1118ffb5f0f6f616"
+    }
+  },
+  "original_scale_case": {
+    "id": "./spec/requests/api/v1/accounts/jrc_contact_center/recording_quality_reports_spec.rb[1:3]",
+    "status": "passed",
+    "duration_including_real_native_fixture": 58.350748877
+  },
+  "statistics": {
+    "receipt": {
+      "path": "tmp/call-center-quality-scale-statistics.json",
+      "sha256": "11bad5ee408a685abb76643ba48649c6f53b4d7236fdbf27447112e20dc0773f"
+    },
+    "query_unchanged": true,
+    "row_identities_before_and_after_equal": true,
+    "rows_per_native_table": {
+      "telephony_call_records": 5000,
+      "jrc_contact_center_call_sessions": 5000,
+      "jrc_contact_center_call_legs": 5000
+    },
+    "statement_timeout": "14s",
+    "estimated_limit_rows_before": 1,
+    "estimated_limit_rows_after": 1250,
+    "actual_total": 5000,
+    "actual_page": 20
+  },
+  "main_Vue": {
+    "total": 2367,
+    "failed": 0,
+    "pending": 0,
+    "report": {
+      "path": "tmp/call-center-vitest.json",
+      "sha256": "9815e20edaca0e0f86256438203165ff0fbe529f59060a87664872ad0f391049"
+    }
+  },
+  "remaining_gate_failure": {
+    "report": {
+      "path": "tmp/call-center-rubocop.json",
+      "sha256": "d04aa7087d762840636281eaac28ffa6f7b6430cce7d3b9a6eaa308992f716dd"
+    },
+    "new_offenses": [
+      {
+        "path": "app/services/jrc_voice_quality/supabase_client.rb",
+        "new_offenses": [
+          {
+            "severity": "convention",
+            "message": "Avoid parameter lists longer than 5 parameters. [6/5]",
+            "cop_name": "Metrics/ParameterLists",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 253,
+              "start_column": 14,
+              "last_line": 253,
+              "last_column": 88,
+              "length": 75,
+              "line": 253,
+              "column": 14
+            }
+          }
+        ],
+        "improved_metrics": [
+          {
+            "context": [
+              "Metrics/ClassLength",
+              "JrcVoiceQuality::SupabaseClient"
+            ],
+            "before": [
+              309.0
+            ],
+            "after": [
+              302.0
+            ]
+          },
+          {
+            "context": [
+              "Metrics/AbcSize",
+              "save_analysis!"
+            ],
+            "before": [
+              1.0,
+              71.0,
+              1.0,
+              71.01
+            ],
+            "after": [
+              1.0,
+              39.0,
+              1.0,
+              39.03
+            ]
+          },
+          {
+            "context": [
+              "Metrics/MethodLength",
+              "save_analysis!"
+            ],
+            "before": [
+              56.0
+            ],
+            "after": [
+              34.0
+            ]
+          }
+        ],
+        "baseline": [
+          {
+            "severity": "convention",
+            "message": "Class has too many lines. [309/175]",
+            "cop_name": "Metrics/ClassLength",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 1,
+              "start_column": 1,
+              "last_line": 357,
+              "last_column": 3,
+              "length": 10393,
+              "line": 1,
+              "column": 1
+            }
+          },
+          {
+            "severity": "warning",
+            "message": "Unused method argument - `account_id`.",
+            "cop_name": "Lint/UnusedMethodArgument",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 40,
+              "start_column": 33,
+              "last_line": 40,
+              "last_column": 42,
+              "length": 10,
+              "line": 40,
+              "column": 33
+            }
+          },
+          {
+            "severity": "warning",
+            "message": "Unused method argument - `account_id`.",
+            "cop_name": "Lint/UnusedMethodArgument",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 61,
+              "start_column": 21,
+              "last_line": 61,
+              "last_column": 30,
+              "length": 10,
+              "line": 61,
+              "column": 21
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Method has too many lines. [46/19]",
+            "cop_name": "Metrics/MethodLength",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 81,
+              "start_column": 3,
+              "last_line": 136,
+              "last_column": 3,
+              "length": 1202,
+              "line": 81,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Use 2 (not 0) spaces for indentation.",
+            "cop_name": "Layout/IndentationWidth",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 82,
+              "start_column": 3,
+              "last_line": 82,
+              "last_column": 2,
+              "length": 0,
+              "line": 82,
+              "column": 3
+            }
+          },
+          {
+            "severity": "warning",
+            "message": "`end` at 136, 0 is not aligned with `def` at 81, 2.",
+            "cop_name": "Layout/DefEndAlignment",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 136,
+              "start_column": 1,
+              "last_line": 136,
+              "last_column": 3,
+              "length": 3,
+              "line": 136,
+              "column": 1
+            }
+          },
+          {
+            "severity": "warning",
+            "message": "Unused method argument - `account_id`.",
+            "cop_name": "Lint/UnusedMethodArgument",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 138,
+              "start_column": 27,
+              "last_line": 138,
+              "last_column": 36,
+              "length": 10,
+              "line": 138,
+              "column": 27
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Assignment Branch Condition size for save_analysis! is too high. [<1, 71, 1> 71.01/26]",
+            "cop_name": "Metrics/AbcSize",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 153,
+              "start_column": 3,
+              "last_line": 211,
+              "last_column": 5,
+              "length": 3188,
+              "line": 153,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Method has too many lines. [56/19]",
+            "cop_name": "Metrics/MethodLength",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 153,
+              "start_column": 3,
+              "last_line": 211,
+              "last_column": 5,
+              "length": 3188,
+              "line": 153,
+              "column": 3
+            }
+          },
+          {
+            "severity": "warning",
+            "message": "Unused method argument - `account_id`.",
+            "cop_name": "Lint/UnusedMethodArgument",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 153,
+              "start_column": 22,
+              "last_line": 153,
+              "last_column": 31,
+              "length": 10,
+              "line": 153,
+              "column": 22
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Method has too many lines. [22/19]",
+            "cop_name": "Metrics/MethodLength",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 254,
+              "start_column": 3,
+              "last_line": 279,
+              "last_column": 5,
+              "length": 757,
+              "line": 254,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Method has too many lines. [26/19]",
+            "cop_name": "Metrics/MethodLength",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 313,
+              "start_column": 3,
+              "last_line": 341,
+              "last_column": 5,
+              "length": 1104,
+              "line": 313,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Use 2 (not 0) spaces for indenting an expression spanning multiple lines.",
+            "cop_name": "Layout/MultilineOperationIndentation",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 324,
+              "start_column": 9,
+              "last_line": 324,
+              "last_column": 56,
+              "length": 48,
+              "line": 324,
+              "column": 9
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Use 2 (not 0) spaces for indenting an expression spanning multiple lines.",
+            "cop_name": "Layout/MultilineOperationIndentation",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 325,
+              "start_column": 9,
+              "last_line": 325,
+              "last_column": 29,
+              "length": 21,
+              "line": 325,
+              "column": 9
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Final newline missing.",
+            "cop_name": "Layout/TrailingEmptyLines",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 357,
+              "start_column": 4,
+              "last_line": 357,
+              "last_column": 3,
+              "length": 0,
+              "line": 357,
+              "column": 4
+            }
+          }
+        ],
+        "candidate": [
+          {
+            "severity": "convention",
+            "message": "Class has too many lines. [302/175]",
+            "cop_name": "Metrics/ClassLength",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 1,
+              "start_column": 1,
+              "last_line": 356,
+              "last_column": 3,
+              "length": 11205,
+              "line": 1,
+              "column": 1
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Assignment Branch Condition size for save_analysis! is too high. [<1, 39, 1> 39.03/26]",
+            "cop_name": "Metrics/AbcSize",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 133,
+              "start_column": 3,
+              "last_line": 169,
+              "last_column": 5,
+              "length": 1703,
+              "line": 133,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Method has too many lines. [34/19]",
+            "cop_name": "Metrics/MethodLength",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 133,
+              "start_column": 3,
+              "last_line": 169,
+              "last_column": 5,
+              "length": 1703,
+              "line": 133,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Method has too many lines. [22/19]",
+            "cop_name": "Metrics/MethodLength",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 253,
+              "start_column": 3,
+              "last_line": 278,
+              "last_column": 5,
+              "length": 763,
+              "line": 253,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Avoid parameter lists longer than 5 parameters. [6/5]",
+            "cop_name": "Metrics/ParameterLists",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 253,
+              "start_column": 14,
+              "last_line": 253,
+              "last_column": 88,
+              "length": 75,
+              "line": 253,
+              "column": 14
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Method has too many lines. [26/19]",
+            "cop_name": "Metrics/MethodLength",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 312,
+              "start_column": 3,
+              "last_line": 340,
+              "last_column": 5,
+              "length": 1104,
+              "line": 312,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Use 2 (not 0) spaces for indenting an expression spanning multiple lines.",
+            "cop_name": "Layout/MultilineOperationIndentation",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 323,
+              "start_column": 9,
+              "last_line": 323,
+              "last_column": 56,
+              "length": 48,
+              "line": 323,
+              "column": 9
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Use 2 (not 0) spaces for indenting an expression spanning multiple lines.",
+            "cop_name": "Layout/MultilineOperationIndentation",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 324,
+              "start_column": 9,
+              "last_line": 324,
+              "last_column": 29,
+              "length": 21,
+              "line": 324,
+              "column": 9
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "assets_and_Chrome_not_run": true,
+  "whole_candidate_or_Part1_accepted": false,
+  "no_production_performance_or_external_homologation_claim": true
+}
