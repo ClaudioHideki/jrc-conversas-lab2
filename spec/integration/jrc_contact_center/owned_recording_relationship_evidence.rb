@@ -29,6 +29,7 @@ class JrcContactCenter::SyntheticRecordingRelationshipEvidence
       request_sha256: action.metadata.fetch('control_desk_request_sha256')
     )
   end
+
   def self.activity_details(activity)
     { id: activity.id.to_s, title: activity.title, status: activity.status, activity_type: activity.activity_type,
       user_id: activity.user_id.to_s, company_id: activity.company_id&.to_s, contact_id: activity.contact_id&.to_s,

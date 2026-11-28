@@ -1,0 +1,28 @@
+{
+  "source_parent": "3a23cd135ad5412b04094ee99b5d460311a3796e",
+  "failed_run": 46132880651,
+  "failed_job": 140941725763,
+  "sanitized_log_sha256": "1def8aaf084740ce5f5f7e53f2b66bc06f9cb3beb3e8dc5aa04387990df91a17",
+  "actual_preflight": {
+    "files": 21,
+    "offenses": 10,
+    "runtime_engine_methods_and_scope_lint_passed": true
+  },
+  "correction": "Use the native model class in the root describe and its verified vacant conventional activity_spec.rb path. Keep the same six cases in a normally worded context, restore described_class and align the unchanged arguments. Add the required blank line in the read-only witness.",
+  "reviewed_rename": {
+    "source_parent": "3a23cd135ad5412b04094ee99b5d460311a3796e",
+    "old": "spec/models/jrc_crm/relationship_activity_identity_spec.rb",
+    "old_sha256": "31f2f261ea7fa6a443e8748769f4c1603a7b6b6a7e3819372a6690a04a3fc721",
+    "new": "spec/models/jrc_crm/activity_spec.rb",
+    "new_sha256": "c29fc5bae406b236ec547ee9f90eb209267d5b436e6d33f9e4329e6a14fed836",
+    "all_six_case_names_and_assertions_retained": true,
+    "target_confirmed_absent_in_full_native_tree": true,
+    "original_checkout_not_modified": true,
+    "workflow_exact_path_replacements": 5
+  },
+  "all_five_workflow_paths_only_updated": true,
+  "all_native_RSpec_case_counts_and_assertions_preserved": true,
+  "original_checkout_or_pending_files_touched": false,
+  "no_lint_rule_threshold_exclusion_or_gate_changed": true,
+  "native_or_Chrome_accepted": false
+}
